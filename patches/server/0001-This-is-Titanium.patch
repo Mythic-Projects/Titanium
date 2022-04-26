@@ -1,0 +1,46 @@
+From ab92cf21fcafc5a3c32fad41e2ba893486cd99be Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Wed, 27 Apr 2022 00:10:14 +0200
+Subject: [PATCH] This is Titanium
+
+
+diff --git a/pom.xml b/pom.xml
+index 2dee42e5..3ad50453 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -2,7 +2,7 @@
+          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+     <modelVersion>4.0.0</modelVersion>
+ 
+-    <artifactId>sportpaper</artifactId>
++    <artifactId>titanium</artifactId>
+     <packaging>jar</packaging>
+     <version>1.8.8-R0.1-SNAPSHOT</version>
+ 
+@@ -20,9 +20,9 @@
+     </properties>
+ 
+     <parent>
+-        <groupId>app.ashcon</groupId>
+-        <artifactId>sportpaper-parent</artifactId>
+-        <version>1.8-SNAPSHOT</version>
++        <groupId>net.titanvale</groupId>
++        <artifactId>titanium-parent</artifactId>
++        <version>1.8.8-SNAPSHOT</version>
+         <relativePath>../pom.xml</relativePath>
+     </parent>
+ 
+@@ -38,8 +38,8 @@
+             <version>3.0.3</version>
+         </dependency>
+         <dependency>
+-            <groupId>app.ashcon</groupId>
+-            <artifactId>sportpaper-api</artifactId>
++            <groupId>net.titanvale</groupId>
++            <artifactId>titanium-api</artifactId>
+             <version>${project.version}</version>
+             <type>jar</type>
+             <scope>compile</scope>
+-- 
+2.32.0.windows.2
+

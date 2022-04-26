@@ -1,0 +1,30 @@
+From 92b411072117eeae5ce2f3b77cbc39ddaffed5e3 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Wed, 27 Apr 2022 00:10:03 +0200
+Subject: [PATCH] This is Titanium
+
+
+diff --git a/pom.xml b/pom.xml
+index 76533897..87992a63 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -4,12 +4,12 @@
+     <modelVersion>4.0.0</modelVersion>
+ 
+     <parent>
+-        <groupId>app.ashcon</groupId>
+-        <artifactId>sportpaper-parent</artifactId>
+-        <version>1.8-SNAPSHOT</version>
++        <groupId>net.titanvale</groupId>
++        <artifactId>titanium-parent</artifactId>
++        <version>1.8.8-SNAPSHOT</version>
+     </parent>
+ 
+-    <artifactId>sportpaper-api</artifactId>
++    <artifactId>titanium-api</artifactId>
+     <version>1.8.8-R0.1-SNAPSHOT</version>
+     <packaging>jar</packaging>
+ 
+-- 
+2.32.0.windows.2
+
