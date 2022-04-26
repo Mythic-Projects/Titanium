@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+
+# get base dir regardless of execution location
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+    DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+SOURCE=$([[ "$SOURCE" = /* ]] && echo "$SOURCE" || echo "$PWD/${SOURCE#./}")
+basedir=$(dirname "$SOURCE")
+
+. "$basedir/scripts/init.sh"
+
+paperstash() {
+    STASHED=$(git stash)
+}
+
+paperunstash() {
+    if [[ "$STASHED" != "No local changes to save" ]] ; then
+        git stash pop
+    fi
+}
+
+buildpaperclipjar() {
+    cp -f base/SportPaper/scripts/basepaperclip.sh base/SportPaper/base/Paper/paperclip.sh
+    cd base/SportPaper/base/Paper
+    #./paperclip.sh
+    cd "$basedir"
+}
+
+case "$1" in
+    "setup" | "s" | "upstream")
+        cd "$basedir"
+        scripts/upstream.sh
+    ;;
+    "build" | "b")
+        log_info "Preparing to build Titanium"
+        cd "$basedir"
+        scripts/upstream.sh
+        scripts/apply.sh "$basedir"
+        mvn clean install
+        buildpaperclipjar
+    ;;
+    "rb" | "rbp" | "rebuild")
+    (
+        set -e
+        cd "$basedir"
+        scripts/rebuildpatches.sh "$basedir"
+    )
+    ;;
+    "p" | "patch" | "apply")
+    (
+        set -e
+        cd "$basedir"
+        scripts/apply.sh "$basedir"
+        log_info "    Run './titanium jar' to create a runnable JAR."
+    )
+    ;;
+    "j" | "jar")
+    (
+        set -e
+        mvn clean install
+        buildpaperclipjar
+    )
+    ;;
+    *)
+        echo "Titanium build tool."
+        echo ""
+        echo " Commands:"
+        echo "  * setup        | Setup the build environment"
+        echo "  * build        | Setup the build environment, apply patches, and create a runnable JAR"
+        echo "  * p, patch     | Apply patches"
+        echo "  * rb, rebuild  | Rebuild patches"
+        echo "  * j, jar       | Create a runnable JAR"
+    ;;
+esac
+
+unset -f paperstash
+unset -f paperunstash

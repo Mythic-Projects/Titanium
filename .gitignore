@@ -1,0 +1,6 @@
+/.idea/
+/base/mc-dev/
+/Titanium-API/
+/Titanium-Server/
+*.iml
+*.DS_Store
