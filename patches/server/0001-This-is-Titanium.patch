@@ -1,11 +1,12 @@
-From ab92cf21fcafc5a3c32fad41e2ba893486cd99be Mon Sep 17 00:00:00 2001
+From 1e10bfbad34377e99693fe1b82de47f9a4d1f30f Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 27 Apr 2022 00:10:14 +0200
 Subject: [PATCH] This is Titanium
 
+This is Titanium 2
 
 diff --git a/pom.xml b/pom.xml
-index 2dee42e5..3ad50453 100644
+index 2dee42e5..f5fecad9 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -2,7 +2,7 @@
@@ -41,6 +42,31 @@ index 2dee42e5..3ad50453 100644
              <version>${project.version}</version>
              <type>jar</type>
              <scope>compile</scope>
+@@ -125,9 +125,9 @@
+ 										<execution>
+ 												<id>ex-sport</id>
+ 												<configuration>
+-														<format>git-SportPaper-%s</format>
++														<format>git-Titanium-%s</format>
+ 														<scmDirectory>../</scmDirectory>
+-														<descriptionProperty>sportpaper.desc</descriptionProperty>
++														<descriptionProperty>titanium.desc</descriptionProperty>
+ 												</configuration>
+ 												<phase>initialize</phase>
+ 												<goals>
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 87bb6542..2fedc462 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -1189,7 +1189,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+     }
+ 
+     public String getServerModName() {
+-        return "SportPaper"; // SportPaper - SportPaper > // PaperSpigot - PaperSpigot > // Spigot - Spigot > // CraftBukkit - cb > vanilla!
++        return "SportPaper"; // Titanium - Titanium > // SportPaper - SportPaper > // PaperSpigot - PaperSpigot > // Spigot - Spigot > // CraftBukkit - cb > vanilla!
+     }
+ 
+     public CrashReport b(CrashReport crashreport) {
 -- 
 2.32.0.windows.2
 
