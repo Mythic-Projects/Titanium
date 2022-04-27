@@ -61,7 +61,12 @@ case "$1" in
     (
         set -e
         mvn clean install
-        buildpaperclipjar
+
+        case "$2" in
+          "paperclip" | "pc")
+            buildpaperclipjar
+          ;;
+        esac
     )
     ;;
     *)
