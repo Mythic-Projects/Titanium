@@ -1,0 +1,69 @@
+From 3d0481defbac7b4ed0cdb9e144df4eac37717bf5 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Wed, 27 Apr 2022 22:20:00 +0200
+Subject: [PATCH] Use Object2ObjectOpenHashMap to Player List and update
+ fastutil
+
+
+diff --git a/pom.xml b/pom.xml
+index 012ecd1c..91916e15 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -30,7 +30,7 @@
+         <dependency>
+             <groupId>it.unimi.dsi</groupId>
+             <artifactId>fastutil</artifactId>
+-            <version>8.1.0</version>
++            <version>8.5.8</version>
+         </dependency>
+         <dependency>
+             <groupId>net.sf.trove4j</groupId>
+diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
+index 5a5c8a25..b12fa3b8 100644
+--- a/src/main/java/net/minecraft/server/PlayerList.java
++++ b/src/main/java/net/minecraft/server/PlayerList.java
+@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
+ import com.google.common.collect.Sets;
+ import com.mojang.authlib.GameProfile;
+ import io.netty.buffer.Unpooled;
++import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+ import java.io.File;
+ import java.net.SocketAddress;
+ import java.text.SimpleDateFormat;
+@@ -52,7 +53,7 @@ public abstract class PlayerList {
+     private static final SimpleDateFormat g = new SimpleDateFormat("yyyy-MM-dd \'at\' HH:mm:ss z");
+     private final MinecraftServer server;
+     public final List<EntityPlayer> players = new java.util.concurrent.CopyOnWriteArrayList(); // CraftBukkit - ArrayList -> CopyOnWriteArrayList: Iterator safety
+-    private final Map<UUID, EntityPlayer> j = Maps.newHashMap();
++    private final Map<UUID, EntityPlayer> j = new Object2ObjectOpenHashMap<>();
+     private final GameProfileBanList k;
+     private final IpBanList l;
+     private final OpList operators;
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 52b2d106..878ac62a 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -1,5 +1,6 @@
+ package org.bukkit.craftbukkit;
+ 
++import it.unimi.dsi.fastutil.objects.ObjectLists;
+ import java.awt.image.BufferedImage;
+ import java.io.File;
+ import java.io.FileInputStream;
+@@ -175,12 +176,7 @@ public final class CraftServer implements Server {
+     public CraftServer(MinecraftServer console, PlayerList playerList) {
+         this.console = console;
+         this.playerList = (DedicatedPlayerList) playerList;
+-        this.playerView = Collections.unmodifiableList(Lists.transform(playerList.players, new Function<EntityPlayer, CraftPlayer>() {
+-            @Override
+-            public CraftPlayer apply(EntityPlayer player) {
+-                return player.getBukkitEntity();
+-            }
+-        }));
++        this.playerView = Collections.unmodifiableList(Lists.transform(playerList.players, EntityPlayer::getBukkitEntity));
+         this.serverVersion = CraftServer.class.getPackage().getImplementationVersion();
+         online.value = console.getPropertyManager().getBoolean("online-mode", true);
+ 
+-- 
+2.32.0.windows.2
+
