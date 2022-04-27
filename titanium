@@ -23,10 +23,10 @@ paperunstash() {
 }
 
 buildpaperclipjar() {
-    cp -f base/SportPaper/scripts/basepaperclip.sh base/SportPaper/base/Paper/paperclip.sh
+    cp -f scripts/basepaperclip.sh base/SportPaper/base/Paper/paperclip.sh
     cd base/SportPaper/base/Paper
-    #./paperclip.sh
-    cd "$basedir"
+    ./paperclip.sh
+    basedir
 }
 
 case "$1" in
