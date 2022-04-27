@@ -1,0 +1,23 @@
+From f251f4cabdf1b1a290f6d05a3a2b4e9e8572f6d7 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 9 Apr 2021 15:56:09 +0200
+Subject: [PATCH] Implement [Nacho-0012] Don't load chunks for physics
+
+
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index 6c181c7c..55434414 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -579,7 +579,8 @@ public abstract class World implements IBlockAccess {
+ 
+     public void d(BlockPosition blockposition, final Block block) {
+         if (!this.isClientSide) {
+-            IBlockData iblockdata = this.getType(blockposition);
++            IBlockData iblockdata = this.getTypeIfLoaded(blockposition); // Nacho-0012 :: Don't load chunks for physics
++            if (iblockdata == null) return; // Nacho-0012 :: Don't load chunks for physics
+ 
+             try {
+                 // CraftBukkit start
+-- 
+2.32.0.windows.2
+
