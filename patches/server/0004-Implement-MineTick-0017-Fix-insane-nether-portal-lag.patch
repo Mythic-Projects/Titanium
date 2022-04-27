@@ -1,0 +1,48 @@
+From 45e62aa11571763928d59f6e9fbadd64b502270f Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 9 Apr 2021 13:59:12 +0200
+Subject: [PATCH] Implement [MineTick-0017] - Fix insane nether portal lag
+
+
+diff --git a/src/main/java/net/minecraft/server/PortalTravelAgent.java b/src/main/java/net/minecraft/server/PortalTravelAgent.java
+index 72f3735b..42b04abc 100644
+--- a/src/main/java/net/minecraft/server/PortalTravelAgent.java
++++ b/src/main/java/net/minecraft/server/PortalTravelAgent.java
+@@ -94,7 +94,13 @@ public class PortalTravelAgent {
+ 
+     public boolean b(Entity entity, float f) {
+         // CraftBukkit start - Modularize portal search process and entity teleportation
+-        BlockPosition found = this.findPortal(entity.locX, entity.locY, entity.locZ, 128);
++        // MinetickMod start
++        BlockPosition found = this.findPortal(entity.locX, entity.locY, entity.locZ, 10);
++        if (found == null) {
++            found = this.findPortal(entity.locX, entity.locY, entity.locZ, 128);
++        }
++        // MinetickMod end
++
+         if (found == null) {
+             return false;
+         }
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftTravelAgent.java b/src/main/java/org/bukkit/craftbukkit/CraftTravelAgent.java
+index cae65cf8..6b671a50 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftTravelAgent.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftTravelAgent.java
+@@ -44,7 +44,14 @@ public class CraftTravelAgent extends PortalTravelAgent implements TravelAgent {
+     @Override
+     public Location findPortal(Location location) {
+         PortalTravelAgent pta = ((CraftWorld) location.getWorld()).getHandle().getTravelAgent();
+-        BlockPosition found = pta.findPortal(location.getX(), location.getY(), location.getZ(), this.getSearchRadius());
++
++        // MinetickMod start
++        BlockPosition found = pta.findPortal(location.getX(), location.getY(), location.getZ(), 10);
++        if (found == null) {
++            found = pta.findPortal(location.getX(), location.getY(), location.getZ(), this.getSearchRadius());
++        }
++        // MinetickMod end
++
+         return found != null ? new Location(location.getWorld(), found.getX(), found.getY(), found.getZ(), location.getYaw(), location.getPitch()) : null;
+     }
+ 
+-- 
+2.32.0.windows.2
+
