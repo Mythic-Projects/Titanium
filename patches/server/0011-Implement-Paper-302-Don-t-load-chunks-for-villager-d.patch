@@ -1,0 +1,28 @@
+From 504d79490d52f3d56e3657a579cd14fb3a1e6e24 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 9 Apr 2021 16:00:40 +0200
+Subject: [PATCH] Implement [Paper-302] - Don't load chunks for villager door
+ check by Aikar
+
+
+diff --git a/src/main/java/net/minecraft/server/Village.java b/src/main/java/net/minecraft/server/Village.java
+index e67aa042..072f466a 100644
+--- a/src/main/java/net/minecraft/server/Village.java
++++ b/src/main/java/net/minecraft/server/Village.java
+@@ -318,7 +318,12 @@ public class Village {
+     }
+ 
+     private boolean f(BlockPosition blockposition) {
+-        Block block = this.a.getType(blockposition).getBlock();
++        // Paper start
++        IBlockData iblockdata = this.a.getTypeIfLoaded(blockposition);
++        if (iblockdata == null)
++            return false;
++        Block block = iblockdata.getBlock();
++        // Paper end
+ 
+         return block instanceof BlockDoor ? block.getMaterial() == Material.WOOD : false;
+     }
+-- 
+2.32.0.windows.2
+
