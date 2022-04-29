@@ -1,0 +1,473 @@
+From c7aa5b542622d8942c2416ea95cadf08d2a03657 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 29 Apr 2022 19:16:15 +0200
+Subject: [PATCH] Create SpigotConfig & SpigotWorldConfig
+
+
+diff --git a/pom.xml b/pom.xml
+index 64e85e34..8c40bc87 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -90,6 +90,11 @@
+             <artifactId>okaeri-configs-yaml-bukkit</artifactId>
+             <version>4.0.0-beta18</version>
+         </dependency>
++        <dependency>
++            <groupId>eu.okaeri</groupId>
++            <artifactId>okaeri-configs-validator-okaeri</artifactId>
++            <version>4.0.0-beta18</version>
++        </dependency>
+         <!-- testing -->
+         <dependency>
+             <groupId>junit</groupId>
+diff --git a/src/main/java/net/minecraft/titanium/BukkitConfig.java b/src/main/java/net/minecraft/titanium/config/BukkitConfig.java
+similarity index 89%
+rename from src/main/java/net/minecraft/titanium/BukkitConfig.java
+rename to src/main/java/net/minecraft/titanium/config/BukkitConfig.java
+index 9af77afb..51fabfb1 100644
+--- a/src/main/java/net/minecraft/titanium/BukkitConfig.java
++++ b/src/main/java/net/minecraft/titanium/config/BukkitConfig.java
+@@ -1,11 +1,19 @@
+-package net.minecraft.titanium;
++package net.minecraft.titanium.config;
+ 
+ import eu.okaeri.configs.OkaeriConfig;
+ import eu.okaeri.configs.annotation.Comment;
++import eu.okaeri.configs.annotation.Exclude;
++import eu.okaeri.configs.annotation.NameModifier;
++import eu.okaeri.configs.annotation.NameStrategy;
++import eu.okaeri.configs.annotation.Names;
+ import org.bukkit.Warning;
+ 
++@Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
+ public class BukkitConfig extends OkaeriConfig{
+ 
++    @Exclude
++    private static BukkitConfig INSTANCE;
++
+     public Settings settings = new Settings();
+ 
+     public static class Settings extends OkaeriConfig {
+@@ -94,4 +102,8 @@ public class BukkitConfig extends OkaeriConfig{
+ 
+     }
+ 
++    public static BukkitConfig get() {
++        return INSTANCE;
++    }
++
+ }
+diff --git a/src/main/java/net/minecraft/titanium/config/SpigotConfig.java b/src/main/java/net/minecraft/titanium/config/SpigotConfig.java
+new file mode 100644
+index 00000000..2d306b5b
+--- /dev/null
++++ b/src/main/java/net/minecraft/titanium/config/SpigotConfig.java
+@@ -0,0 +1,171 @@
++package net.minecraft.titanium.config;
++
++import com.google.common.collect.ImmutableSet;
++import eu.okaeri.configs.OkaeriConfig;
++import eu.okaeri.configs.annotation.Comment;
++import eu.okaeri.configs.annotation.CustomKey;
++import eu.okaeri.configs.annotation.Exclude;
++import eu.okaeri.configs.annotation.NameModifier;
++import eu.okaeri.configs.annotation.NameStrategy;
++import eu.okaeri.configs.annotation.Names;
++import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
++import java.util.Map;
++import java.util.Set;
++
++@Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
++public class SpigotConfig extends OkaeriConfig {
++
++    @Exclude
++    private static SpigotConfig INSTANCE;
++
++    public Settings settings = new Settings();
++
++    public static class Settings extends OkaeriConfig {
++
++        @Comment("Whether to run in debugger mode.")
++        public boolean debug = false;
++
++        @Comment("Whether to write the user cache to disk only before shutdown.")
++        public boolean saveUserCacheOnStopOnly = false;
++
++        // TODO Start watchdog
++        @Comment("Number of seconds to abort and print a thread dump when the server is unresponsive.")
++        public int timeoutTime = 60;
++
++        @Comment("Whether to run the restart-script on server-crash.")
++        public boolean restartOnCrash = false;
++
++        @Comment("Path to a restart script to turn the server back on.")
++        public String restartScript = "./start.sh";
++
++        @Comment("Whether to bind to the network only after all plugins are loaded.")
++        public boolean lateBind = false;
++
++        @Comment("Whether the server is running behind a bungee cord proxy")
++        public boolean bungeecord = false;
++
++        @Comment("Maximum number of players to publish in ping messages.")
++        public int sampleCount = 12;
++
++        @Comment("Number of ticks before shuffling the tick-order of players to prevent relog gaming to be first to get items.")
++        public int playerShuffle = 0;
++
++        @Comment("Whether to blacklist certain items that creative players can spawn.")
++        public boolean filterCreativeItems = true;
++
++        @Comment("Maximum number of entries in the usercache.json file.")
++        public int userCacheSize = 1000;
++
++        @Comment("Maximum number of entries in the integer cache, which is used extensively during world generation.")
++        public int cacheLimit = 1024;
++
++        @Comment("Magic number used as a threshold for invalid move events.")
++        public double movedWronglyThreshold = 0.0625;
++
++        @Comment("Maximum number of blocks per second a player can move before the event is cancelled.")
++        public double movedTooQuicklyThreshold = 100.0;
++
++        @Comment("Whether to fetch the UUID of old skulls that only contain a username.")
++        public boolean fetchSkulls = true;
++
++        @Comment("Number of networking threads to allocate.")
++        public int nettyThreads = 4;
++
++        @Comment("Maximum attribute values for various modifiers.")
++        public Attribute attribute = new Attribute();
++
++        public static class Attribute extends OkaeriConfig {
++
++            @CustomKey("maxHealth.max")
++            public double maxHealthMax = 2048;
++            @CustomKey("movementSpeed.max")
++            public double movementSpeedMax = 2048;
++            @CustomKey("attackDamage.max")
++            public double attackDamageMax = 2048;
++
++        }
++
++    }
++
++    @Comment("Various messages sent to clients for errors.")
++    public Messages messages = new Messages();
++
++    // TODO Support colors
++    public static class Messages extends OkaeriConfig {
++
++        public String restart = "Server is restarting!";
++        public String whitelist = "You are not on the whitelist!";
++        public String unknownCommand = "Unknown command. Type /help for help.";
++        public String internalError = "&cAn internal error occurred while attempting to perform this command";
++        public String serverFull = "The server is full!";
++        public String outdatedClient = "Outdated client! Please use {0}";
++        public String outdatedServer = "Outdated server! Server is on {0}";
++
++    }
++
++    public Commands commands = new Commands();
++
++    public static class Commands extends OkaeriConfig {
++
++        @Comment("Whether player commands should be logged.")
++        public boolean log = true;
++
++        @Comment("Whether command block commands should be logged to console.")
++        public boolean silentCommandblockConsole = false;
++
++        @Comment("Disables the bukkit variants of the following commands and defaults to the vanilla variants.")
++        public Set<String> replaceCommands = ImmutableSet.<String>builder()
++                .add("setblock")
++                .add("summon")
++                .add("testforblock")
++                .add("tellraw")
++                .build();
++
++        @Comment("Change the verbosity of tab complete events.")
++        @Comment("Disable all tab completion with -1.")
++        @Comment("Enable server commands to be queryable with 0.")
++        @Comment("Require n letters to be typed before completing with n.")
++        public int tabComplete = 0;
++
++    }
++
++    @Comment("Various settings related to server timings and debugging.")
++    public Timings timings = new Timings();
++
++    // TODO Set timings settings
++    public static class Timings extends OkaeriConfig {
++
++        public boolean enabled = true;
++        public boolean verbose = true;
++        public boolean serverNamePrivacy = false;
++
++        public Set<String> hiddenConfigEntries = ImmutableSet.<String>builder()
++                .add("database")
++                .add("bungeecord-addresses")
++                .build();
++
++        public int historyInterval = 300;
++        public int historyLength = 3600;
++
++    }
++
++    public Stats stats = new Stats();
++
++    public static class Stats extends OkaeriConfig {
++
++        @Comment("Whether to disable saving of player statistics and achievements.")
++        public boolean disableSaving = true;
++
++        @Comment("Map of statistics and the values they should be forced.")
++        // TODO Log warning if openInventory is set to 1
++        public Map<String, Integer> forcedStats = new Object2IntOpenHashMap<>();
++
++    }
++
++    public SpigotWorldConfig worldSettings = new SpigotWorldConfig();
++
++    public static SpigotConfig get() {
++        return INSTANCE;
++    }
++
++}
+diff --git a/src/main/java/net/minecraft/titanium/config/SpigotWorldConfig.java b/src/main/java/net/minecraft/titanium/config/SpigotWorldConfig.java
+new file mode 100644
+index 00000000..1826c9a0
+--- /dev/null
++++ b/src/main/java/net/minecraft/titanium/config/SpigotWorldConfig.java
+@@ -0,0 +1,177 @@
++package net.minecraft.titanium.config;
++
++import com.google.common.collect.ImmutableSet;
++import eu.okaeri.configs.OkaeriConfig;
++import eu.okaeri.configs.annotation.Comment;
++import eu.okaeri.configs.annotation.NameModifier;
++import eu.okaeri.configs.annotation.NameStrategy;
++import eu.okaeri.configs.annotation.Names;
++import java.util.Set;
++
++@Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
++public class SpigotWorldConfig extends OkaeriConfig {
++
++    @Comment("Whether to log the per-world settings in console.")
++    public boolean verbose = true;
++
++    @Comment("Radius of chunks around players that mobs will naturally spawn.")
++    public int mobSpawnRange = 4;
++
++    public AntiXray antiXray = new AntiXray();
++
++    // TODO Create xray instancee
++    public static class AntiXray extends OkaeriConfig {
++
++        @Comment("Whether to enable the anti-xray module.")
++        public boolean enabled = true;
++
++        @Comment("Controls which anti-xray modes to use.")
++        @Comment("Mode 1 will hide all ores with stone.")
++        @Comment("Mode 2 will create fake, clien-side ores around the world, which can impact client lag and network latency.")
++        public int engineMode = 1;
++
++        @Comment("IDs of blocks that should be hidden in mode 1.")
++        public Set<Integer> hideBlocks = ImmutableSet.<Integer>builder()
++                .add(14, 15, 16, 21, 48, 49, 54, 56, 73, 74, 82, 129, 130)
++                .build();
++
++        @Comment("IDs of blocks that should be replaced in mode 2.")
++        public Set<Integer> replaceBlocks = ImmutableSet.<Integer>builder()
++                .add(1, 5)
++                .build();
++
++    }
++
++    @Comment("Whether to remove AI from mobs that originate from mob spawners.")
++    public boolean nerfSpawnerMobs = false;
++
++    @Comment("Speed at which certain crops will grow.")
++    @Comment("Changing these values will not affect performance.")
++    public Growth growth = new Growth();
++
++    // TODO Validation
++    public static class Growth extends OkaeriConfig {
++        public int cactusModifier = 100;
++        public int caneModifier = 100;
++        public int melonModifier = 100;
++        public int pumpkinModifier = 100;
++        public int wheatModifier = 100;
++        public int mushroomModifier = 100;
++        public int saplingModifier = 100;
++        public int netherWartModifier = 100;
++    }
++
++    @Comment("Radius in blocks around players that mobs are marked as active and are ticked.")
++    public EntityActivationRange entityActivationRange = new EntityActivationRange();
++
++    public static class EntityActivationRange extends OkaeriConfig {
++        public int animals = 32;
++        public int monsters = 32;
++        public int ambient = 16;
++    }
++
++    @Comment("Radius in blocks around players that the client will see.")
++    @Comment("Only affects client-side performance.")
++    public EntityTrackingRange entityTrackingRange = new EntityTrackingRange();
++
++    public static class EntityTrackingRange extends OkaeriConfig {
++        public int players = 48;
++        public int animals = 48;
++        public int monsters = 48;
++        public int misc = 32;
++        public int other = 64;
++    }
++
++    @Comment("Number of ticks between each of the following events.")
++    public TicksPer ticksPer = new TicksPer();
++
++    public static class TicksPer extends OkaeriConfig {
++        public int hopperTransfer = 8;
++        public int hopperCheck = 8;
++    }
++
++    @Comment("Maximum throughput of items in a hopper per tick cycle.")
++    public int hopperAmount = 1;
++
++    @Comment("Whether to randomly sample chunks and validate lighting integrity.")
++    public boolean randomLightUpdates = false;
++
++    @Comment("Whether to save generic structure information.")
++    @Comment("Only affects certain gameplay features such as witches spawning in huts.")
++    public boolean saveStructureInfo = true;
++
++    @Comment("Maximum number of chunks to send per packet.")
++    public int maxBulkChunks = 10;
++
++    @Comment("Maximum number of other entities and entity can collide with per tick.")
++    public int maxEntityCollisions = 8;
++
++    @Comment("Radius around dragons that players will hear the death sound.")
++    public int dragonDeathSoundRadius = 0;
++
++    @Comment("Radius around withers that players will hear the spawn sound.")
++    public int witherSpawnSoundRadius = 0;
++
++    @Comment("Random seed used to generate and place villages.")
++    public int seedVillage = 10387312;
++
++    @Comment("Random seed used to generate and place nether strongholds.")
++    public int seedFeature = 14357617;
++
++    @Comment("Number of hunger points to subtract upon each event.")
++    public Hunger hunger = new Hunger();
++
++    public static class Hunger extends OkaeriConfig {
++        public float walkExhaustion = 0.2F;
++        public float sprintExhaustion = 0.8F;
++        public float combatExhaustion = 0.3F;
++        public float regenExhaustion = 3F;
++    }
++
++    @Comment("Maximum number of primed tnt entities per tick.")
++    public int maxTntPerTick = 100;
++
++    @Comment("Maximum number of milliseconds for entity movements tasks to have before getting skipped.")
++    @Comment("Use 1000 to disable this feature, as recommended by paper.")
++    public MaxTickTime maxTickTime = new MaxTickTime();
++
++    public static class MaxTickTime extends OkaeriConfig {
++        public int tile = 50;
++        public int entity = 50;
++    }
++
++    @Comment("Set the tick update interval for hanging entities.")
++    public int hangingTickFrequency = 100;
++
++    @Comment("Number of ticks before items on the ground will despawn.")
++    public int itemDespawnRate = 6000;
++
++    @Comment("Radius in blocks for certain entities to merge together.")
++    public MergeRadius mergeRadius = new MergeRadius();
++
++    public static class MergeRadius extends OkaeriConfig {
++        public double item = 2.5;
++        public double exp = 3.0;
++    }
++
++    @Comment("Whether to allow zombie pigmen from spawning inside nether portals.")
++    public boolean enableZombiePigmenPortalSpawn = true;
++
++    @Comment("Number of chunks to load around each player.")
++    @Comment("Must be within 1 and 15.")
++    public int viewDistance = 10;
++
++    @Comment("Radius around withers that players will hear the spawn sound.")
++    public boolean zombieAggressiveTowardsVillager = true;
++
++    @Comment("Number of chunks to be updated for growth per tick.")
++    public int chunksPerTick = 650;
++
++    @Comment("Prevent the tick list from increasing over time.")
++    @Comment("Use with caution, because world growth is stunted.")
++    public boolean clearTickList = false;
++
++    @Comment("Number of ticks before despawning arrows on the ground.")
++    public int arrowDespawnRate = 1200;
++
++}
+diff --git a/src/main/java/net/minecraft/titanium/TitaniumConfig.java b/src/main/java/net/minecraft/titanium/config/TitaniumConfig.java
+similarity index 91%
+rename from src/main/java/net/minecraft/titanium/TitaniumConfig.java
+rename to src/main/java/net/minecraft/titanium/config/TitaniumConfig.java
+index 4ec1163c..dad12599 100644
+--- a/src/main/java/net/minecraft/titanium/TitaniumConfig.java
++++ b/src/main/java/net/minecraft/titanium/config/TitaniumConfig.java
+@@ -1,4 +1,4 @@
+-package net.minecraft.titanium;
++package net.minecraft.titanium.config;
+ 
+ import eu.okaeri.configs.OkaeriConfig;
+ import eu.okaeri.configs.annotation.Exclude;
+@@ -19,6 +19,8 @@ public class TitaniumConfig extends OkaeriConfig {
+ 
+     public BukkitConfig bukkit = new BukkitConfig();
+ 
++    public SpigotConfig spigot = new SpigotConfig();
++
+     @Override
+     public OkaeriConfig load() throws OkaeriException {
+         super.load();
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index c8934c6d..8a5efefe 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -2,7 +2,6 @@ package org.bukkit.craftbukkit;
+ 
+ import eu.okaeri.configs.ConfigManager;
+ import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
+-import it.unimi.dsi.fastutil.objects.ObjectLists;
+ import java.awt.image.BufferedImage;
+ import java.io.File;
+ import java.io.FileInputStream;
+@@ -31,7 +30,7 @@ import javax.imageio.ImageIO;
+ import net.minecraft.server.*;
+ 
+ import app.ashcon.sportpaper.server.WorldGenSettingsManager;
+-import net.minecraft.titanium.TitaniumConfig;
++import net.minecraft.titanium.config.TitaniumConfig;
+ import org.bukkit.BanList;
+ import org.bukkit.Bukkit;
+ import org.bukkit.ChatColor;
+@@ -114,7 +113,6 @@ import com.avaje.ebean.config.ServerConfig;
+ import com.avaje.ebean.config.dbplatform.SQLitePlatform;
+ import com.avaje.ebeaninternal.server.lib.sql.TransactionIsolation;
+ import com.google.common.base.Charsets;
+-import com.google.common.base.Function;
+ import com.google.common.collect.ImmutableList;
+ import com.google.common.collect.Lists;
+ import com.google.common.collect.MapMaker;
+-- 
+2.32.0.windows.2
+
