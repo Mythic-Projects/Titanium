@@ -1,0 +1,237 @@
+From b537cce1b00419f37cd4f075303e4f4d5b9530f1 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 29 Apr 2022 17:26:55 +0200
+Subject: [PATCH] Create TitaniumConfig and BukkitConfig
+
+
+diff --git a/pom.xml b/pom.xml
+index 91916e15..64e85e34 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -85,6 +85,11 @@
+             <type>jar</type>
+             <scope>compile</scope>
+         </dependency>
++        <dependency>
++            <groupId>eu.okaeri</groupId>
++            <artifactId>okaeri-configs-yaml-bukkit</artifactId>
++            <version>4.0.0-beta18</version>
++        </dependency>
+         <!-- testing -->
+         <dependency>
+             <groupId>junit</groupId>
+diff --git a/src/main/java/net/minecraft/titanium/BukkitConfig.java b/src/main/java/net/minecraft/titanium/BukkitConfig.java
+new file mode 100644
+index 00000000..9af77afb
+--- /dev/null
++++ b/src/main/java/net/minecraft/titanium/BukkitConfig.java
+@@ -0,0 +1,97 @@
++package net.minecraft.titanium;
++
++import eu.okaeri.configs.OkaeriConfig;
++import eu.okaeri.configs.annotation.Comment;
++import org.bukkit.Warning;
++
++public class BukkitConfig extends OkaeriConfig{
++
++    public Settings settings = new Settings();
++
++    public static class Settings extends OkaeriConfig {
++
++        @Comment("Whether the end world is loaded.")
++        public boolean allowEnd = true;
++
++        @Comment("Should a warning message be sent to console when the server is lagging or behind.")
++        public boolean warnOnOverload = true;
++
++        @Comment("On restart, plugins in this folder will be moved and updated.")
++        public String updateFolder = "update";
++
++        // TODO write comment
++        public String permissionFile = "permissions.yml";
++
++        @Comment("Enable the /timings command to track the execution time of events by plugins.")
++        public boolean pluginProfiling = false;
++
++        @Comment("Delay in milliseconds for a client to reconnect.")
++        @Comment("Disabled if less than or equal to 0.")
++        public int connectionThrottle = 4000;
++
++        @Comment("Whether to publish the plugin list in pings.")
++        public boolean queryPlugins = false;
++
++        @Comment("Should a warning message be sent to console when a deprecated event is used by a plugin.")
++        // TODO Write serdes for this to use WarningState#value
++        public Warning.WarningState deprecatedVerbose = Warning.WarningState.DEFAULT;
++
++        @Comment("Message sent to clients before shutdown.")
++        public String shutdownMessage = "Server close!";
++
++        @Comment("Whether to not check if the login location is safe.")
++        public boolean useExactLoginLocation = false;
++
++        @Comment("Directory for where world files are stored.")
++        public String worldContainer = ".";
++
++    }
++
++    public ChunkGC chunkGC = new ChunkGC();
++
++    public static class ChunkGC extends OkaeriConfig {
++
++        @Comment("Ticks between each chunk garbage collection event.")
++        @Comment("Disabled if set to 0.")
++        public int periodInTicks = 600;
++
++        @Comment("Number of chunks that must have been loaded since the last chunk garbage collection event before another event is queued.")
++        @Comment("Disabled if set to 0.")
++        public int loadThreshold = 0;
++
++    }
++
++    public SpawnLimits spawnLimits = new SpawnLimits();
++
++    public static class SpawnLimits extends OkaeriConfig {
++
++        @Comment("Maximum number of naturally spawned monsters per-world.")
++        public int monsters = 80;
++        @Comment("Maximum number of naturally spawned animals per-world.")
++        public int animals = 15;
++        @Comment("Maximum number of naturally spawned water animals per-world.")
++        public int waterAnimals = 5;
++        @Comment("Maximum number of naturally spawned ambient entities per-world")
++        public int ambient = 15;
++
++    }
++
++    public TicksPer ticksPer = new TicksPer();
++
++    public static class TicksPer extends OkaeriConfig {
++
++        @Comment("Number of ticks before considering a natural animal spawn event.")
++        @Comment("Below 0 will reset to server default.")
++        public int animalSpawns = 400;
++
++        @Comment("Number of ticks before considering a natural monster spawn event.")
++        @Comment("Below 0 will reset to server default.")
++        public int monstersSpawn = 1;
++
++        @Comment("Number of ticks before all worlds are auto-saved.")
++        @Comment("Below 0 will reset to server default, so set to a high value if you want to disable.")
++        public int autosave = 6000;
++
++    }
++
++}
+diff --git a/src/main/java/net/minecraft/titanium/TitaniumConfig.java b/src/main/java/net/minecraft/titanium/TitaniumConfig.java
+new file mode 100644
+index 00000000..4ec1163c
+--- /dev/null
++++ b/src/main/java/net/minecraft/titanium/TitaniumConfig.java
+@@ -0,0 +1,35 @@
++package net.minecraft.titanium;
++
++import eu.okaeri.configs.OkaeriConfig;
++import eu.okaeri.configs.annotation.Exclude;
++import eu.okaeri.configs.annotation.Header;
++import eu.okaeri.configs.annotation.NameModifier;
++import eu.okaeri.configs.annotation.NameStrategy;
++import eu.okaeri.configs.annotation.Names;
++import eu.okaeri.configs.exception.OkaeriException;
++
++@Header("This is the main configuration file for Titanium.")
++@Header("It's collect all the settings from bukkit.yml, spigot.yml etc.")
++@Header("Command aliases also go in this file, just put what you would normally put in commands.yml under a commands: tag")
++@Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
++public class TitaniumConfig extends OkaeriConfig {
++
++    @Exclude
++    private static TitaniumConfig INSTANCE;
++
++    public BukkitConfig bukkit = new BukkitConfig();
++
++    @Override
++    public OkaeriConfig load() throws OkaeriException {
++        super.load();
++
++        INSTANCE = this;
++
++        return this;
++    }
++
++    public static TitaniumConfig get() {
++        return INSTANCE;
++    }
++
++}
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 43c62b9a..c8934c6d 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -1,5 +1,7 @@
+ package org.bukkit.craftbukkit;
+ 
++import eu.okaeri.configs.ConfigManager;
++import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
+ import it.unimi.dsi.fastutil.objects.ObjectLists;
+ import java.awt.image.BufferedImage;
+ import java.io.File;
+@@ -29,6 +31,7 @@ import javax.imageio.ImageIO;
+ import net.minecraft.server.*;
+ 
+ import app.ashcon.sportpaper.server.WorldGenSettingsManager;
++import net.minecraft.titanium.TitaniumConfig;
+ import org.bukkit.BanList;
+ import org.bukkit.Bukkit;
+ import org.bukkit.ChatColor;
+@@ -144,6 +147,7 @@ public final class CraftServer implements Server {
+     private final EntityMetadataStore entityMetadata = new EntityMetadataStore();
+     private final PlayerMetadataStore playerMetadata = new PlayerMetadataStore();
+     private final WorldMetadataStore worldMetadata = new WorldMetadataStore();
++    private TitaniumConfig serverConfig; // Titanium
+     private int monsterSpawn = -1;
+     private int animalSpawn = -1;
+     private int waterAnimalSpawn = -1;
+@@ -197,7 +201,16 @@ public final class CraftServer implements Server {
+             getLogger().info("Console input is disabled due to --noconsole command argument");
+         }
+ 
+-        SharedConfig.init((File) console.options.valueOf("sportpaper-settings")); // SportPaper
++        SharedConfig.init((File) console.options.valueOf("titanium-settings")); // SportPaper
++
++        // Titanium start
++        serverConfig = ConfigManager.create(TitaniumConfig.class, (it) -> {
++            it.withConfigurer(new YamlBukkitConfigurer());
++            it.withBindFile("titanium-config.yml"); // TODO Change to console.options.valueOf("titanium-settings") after migrating everything
++            it.saveDefaults();
++            it.load(true);
++        });
++        // Titanium end
+ 
+         overrideAllCommandBlockCommands = SharedConfig.config.getStringList("commands.command-block-overrides").contains("*");
+         ((SimplePluginManager) pluginManager).useTimings(BukkitConfig.pluginProfiling);
+diff --git a/src/main/java/org/bukkit/craftbukkit/Main.java b/src/main/java/org/bukkit/craftbukkit/Main.java
+index d1ce7a86..c528cc7d 100644
+--- a/src/main/java/org/bukkit/craftbukkit/Main.java
++++ b/src/main/java/org/bukkit/craftbukkit/Main.java
+@@ -149,13 +149,13 @@ public class Main {
+ 
+                 acceptsAll(asList("demo"), "Demo mode");
+ 
+-                // SportPaper start
+-                acceptsAll(asList("SP", "sportpaper-settings"), "File for sportpaper settings")
++                // SportPaper start // Titanium start
++                acceptsAll(asList("SP", "titanium-settings"), "File for titanium settings")
+                         .withRequiredArg()
+                         .ofType(File.class)
+-                        .defaultsTo(new File("sportpaper.yml"))
++                        .defaultsTo(new File("titanium.yml"))
+                         .describedAs("Yml file");
+-                // SportPaper end
++                // SportPaper end // Titanium end
+ 
+                 // Paper start
+                 acceptsAll(asList("server-name"), "Name of the server")
+-- 
+2.32.0.windows.2
+

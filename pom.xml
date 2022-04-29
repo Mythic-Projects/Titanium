@@ -22,6 +22,10 @@
             <id>ashcon-snapshots</id>
             <url>https://repo.ashcon.app/nexus/content/repositories/snapshots</url>
         </repository>
+        <repository>
+            <id>okaeri-repo</id>
+            <url>https://storehouse.okaeri.eu/repository/maven-public/</url>
+        </repository>
     </repositories>
     <distributionManagement>
         <repository>
