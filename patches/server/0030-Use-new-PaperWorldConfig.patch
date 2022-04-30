@@ -1,0 +1,1229 @@
+From 74a379bfe12eae67353c2f68a9fe120ea7dfd3f6 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sat, 30 Apr 2022 15:24:11 +0200
+Subject: [PATCH] Use new PaperWorldConfig
+
+
+diff --git a/src/main/java/net/minecraft/server/BiomeBase.java b/src/main/java/net/minecraft/server/BiomeBase.java
+index 28da1365..bca2c0d3 100644
+--- a/src/main/java/net/minecraft/server/BiomeBase.java
++++ b/src/main/java/net/minecraft/server/BiomeBase.java
+@@ -278,7 +278,7 @@ public abstract class BiomeBase {
+         BlockPosition.MutableBlockPosition blockposition_mutableblockposition = new BlockPosition.MutableBlockPosition();
+ 
+         for (int l1 = 255; l1 >= 0; --l1) {
+-            if (l1 <= (world.paperSpigotConfig.generateFlatBedrock ? 0 : random.nextInt(5))) { // PaperSpigot - Configurable flat bedrock
++            if (l1 <= (world.paperConfigTitanium.generatorSettings.flatBedrock ? 0 : random.nextInt(5))) { // PaperSpigot - Configurable flat bedrock
+                 chunksnapshot.a(k1, l1, j1, Blocks.BEDROCK.getBlockData());
+             } else {
+                 IBlockData iblockdata2 = chunksnapshot.a(k1, l1, j1);
+diff --git a/src/main/java/net/minecraft/server/BiomeMesa.java b/src/main/java/net/minecraft/server/BiomeMesa.java
+index 65cd706a..e9ec299f 100644
+--- a/src/main/java/net/minecraft/server/BiomeMesa.java
++++ b/src/main/java/net/minecraft/server/BiomeMesa.java
+@@ -94,7 +94,7 @@ public class BiomeMesa extends BiomeBase {
+                 chunksnapshot.a(l, l1, k, Blocks.STONE.getBlockData());
+             }
+ 
+-            if (l1 <= (world.paperSpigotConfig.generateFlatBedrock ? 0 : random.nextInt(5))) { // PaperSpigot - Configurable flat bedrock
++            if (l1 <= (world.paperConfigTitanium.generatorSettings.flatBedrock ? 0 : random.nextInt(5))) { // PaperSpigot - Configurable flat bedrock
+                 chunksnapshot.a(l, l1, k, Blocks.BEDROCK.getBlockData());
+             } else {
+                 IBlockData iblockdata2 = chunksnapshot.a(l, l1, k);
+diff --git a/src/main/java/net/minecraft/server/Block.java b/src/main/java/net/minecraft/server/Block.java
+index 874af8a3..cf649e7a 100644
+--- a/src/main/java/net/minecraft/server/Block.java
++++ b/src/main/java/net/minecraft/server/Block.java
+@@ -582,7 +582,7 @@ public class Block {
+ 
+     public void a(World world, EntityHuman entityhuman, BlockPosition blockposition, IBlockData iblockdata, TileEntity tileentity) {
+         entityhuman.b(StatisticList.MINE_BLOCK_COUNT[getId(this)]);
+-        entityhuman.applyExhaustion(world.paperSpigotConfig.blockBreakExhaustion); // PaperSpigot - Configurable block break exhaustion
++        entityhuman.applyExhaustion(world.paperConfigTitanium.playerExhaustion.blockBreak); // PaperSpigot - Configurable block break exhaustion
+         if (this.I() && EnchantmentManager.hasSilkTouchEnchantment(entityhuman)) {
+             ItemStack itemstack = this.i(iblockdata);
+ 
+diff --git a/src/main/java/net/minecraft/server/BlockCactus.java b/src/main/java/net/minecraft/server/BlockCactus.java
+index cbc2ffcd..142ae5c4 100644
+--- a/src/main/java/net/minecraft/server/BlockCactus.java
++++ b/src/main/java/net/minecraft/server/BlockCactus.java
+@@ -26,7 +26,7 @@ public class BlockCactus extends Block {
+                 ;
+             }
+ 
+-            if (i < world.paperSpigotConfig.cactusMaxHeight) { // PaperSpigot - Configurable max growth height for cactus blocks) {
++            if (i < world.paperConfigTitanium.maxGrowthHeight.cactus) { // PaperSpigot - Configurable max growth height for cactus blocks) {
+                 int j = ((Integer) iblockdata.get(BlockCactus.AGE)).intValue();
+ 
+                 if (j >= (byte) range(3, (world.growthOdds /  world.spigotConfigTitanium.growth.cactusModifier * 15) + 0.5F, 15)) { // Spigot
+diff --git a/src/main/java/net/minecraft/server/BlockChest.java b/src/main/java/net/minecraft/server/BlockChest.java
+index 26160dbe..393e6401 100644
+--- a/src/main/java/net/minecraft/server/BlockChest.java
++++ b/src/main/java/net/minecraft/server/BlockChest.java
+@@ -417,7 +417,7 @@ public class BlockChest extends BlockContainer {
+ 
+     private boolean p(World world, BlockPosition blockposition) {
+         // PaperSpigot start - Option to disable chest's cat detection (Performance++)
+-        if (world.paperSpigotConfig.disableChestCatDetection) {
++        if (world.paperConfigTitanium.gameMechanics.disableChestCatDetections) {
+             return false;
+         }
+         // PaperSpigot end
+diff --git a/src/main/java/net/minecraft/server/BlockDiodeAbstract.java b/src/main/java/net/minecraft/server/BlockDiodeAbstract.java
+index eaf9154c..c17f7482 100644
+--- a/src/main/java/net/minecraft/server/BlockDiodeAbstract.java
++++ b/src/main/java/net/minecraft/server/BlockDiodeAbstract.java
+@@ -73,7 +73,7 @@ public abstract class BlockDiodeAbstract extends BlockDirectional {
+             this.b(world, blockposition, iblockdata, 0);
+             world.setAir(blockposition);
+             // PaperSpigot start - Fix cannons
+-            if (world.paperSpigotConfig.fixCannons) {
++            if (world.paperConfigTitanium.fixCannons) {
+                 world.applyPhysics(blockposition.shift(EnumDirection.EAST), this);
+                 world.applyPhysics(blockposition.shift(EnumDirection.WEST), this);
+                 world.applyPhysics(blockposition.shift(EnumDirection.SOUTH), this);
+@@ -181,7 +181,7 @@ public abstract class BlockDiodeAbstract extends BlockDirectional {
+     public void postBreak(World world, BlockPosition blockposition, IBlockData iblockdata) {
+         if (this.N) {
+             // PaperSpigot start - Fix cannons
+-            if (world.paperSpigotConfig.fixCannons) {
++            if (world.paperConfigTitanium.fixCannons) {
+                 world.applyPhysics(blockposition.shift(EnumDirection.EAST), this);
+                 world.applyPhysics(blockposition.shift(EnumDirection.WEST), this);
+                 world.applyPhysics(blockposition.shift(EnumDirection.NORTH), this);
+diff --git a/src/main/java/net/minecraft/server/BlockFlowing.java b/src/main/java/net/minecraft/server/BlockFlowing.java
+index 2953e979..d7af2895 100644
+--- a/src/main/java/net/minecraft/server/BlockFlowing.java
++++ b/src/main/java/net/minecraft/server/BlockFlowing.java
+@@ -74,7 +74,7 @@ public class BlockFlowing extends BlockFluids {
+                 }
+             }
+ 
+-            if (!world.paperSpigotConfig.fastDrainLava && this.material == Material.LAVA && i < 8 && i1 < 8 && i1 > i && random.nextInt(4) != 0) { // PaperSpigot
++            if (!world.paperConfigTitanium.fastDrain.lava && this.material == Material.LAVA && i < 8 && i1 < 8 && i1 > i && random.nextInt(4) != 0) { // PaperSpigot
+                 j *= 4;
+             }
+ 
+@@ -287,14 +287,14 @@ public class BlockFlowing extends BlockFluids {
+      */
+     public int getFlowSpeed(World world, BlockPosition blockposition) {
+         if (this.getMaterial() == Material.LAVA) {
+-            return world.worldProvider.o() ? world.paperSpigotConfig.lavaFlowSpeedNether : world.paperSpigotConfig.lavaFlowSpeedNormal;
++            return world.worldProvider.o() ? world.paperConfigTitanium.lavaFlowSpeed.nether : world.paperConfigTitanium.lavaFlowSpeed.normal;
+         }
+         if (this.getMaterial() == Material.WATER && (
+                 world.getType(blockposition.north(1)).getBlock().getMaterial() == Material.LAVA ||
+                         world.getType(blockposition.south(1)).getBlock().getMaterial() == Material.LAVA ||
+                         world.getType(blockposition.west(1)).getBlock().getMaterial() == Material.LAVA ||
+                         world.getType(blockposition.east(1)).getBlock().getMaterial() == Material.LAVA)) {
+-            return world.paperSpigotConfig.waterOverLavaFlowSpeed;
++            return world.paperConfigTitanium.waterOverLavaFlowSpeed;
+         }
+         return super.a(world);
+     }
+@@ -314,7 +314,7 @@ public class BlockFlowing extends BlockFluids {
+         boolean result = false;
+         int data = getData(world, position);
+         if (this.material == Material.WATER) {
+-            if (world.paperSpigotConfig.fastDrainWater) {
++            if (world.paperConfigTitanium.fastDrain.water) {
+                 result = true;
+                 if (getData(world, position.down()) < 0) {
+                     result = false;
+@@ -329,7 +329,7 @@ public class BlockFlowing extends BlockFluids {
+                 }
+             }
+         } else if (this.material == Material.LAVA) {
+-            if (world.paperSpigotConfig.fastDrainLava) {
++            if (world.paperConfigTitanium.fastDrain.lava) {
+                 result = true;
+                 if (getData(world, position.down()) < 0 || world.getType(position.up()).getBlock().getMaterial() != Material.AIR) {
+                     result = false;
+diff --git a/src/main/java/net/minecraft/server/BlockGrass.java b/src/main/java/net/minecraft/server/BlockGrass.java
+index d68f1a2d..8ef1ae7c 100644
+--- a/src/main/java/net/minecraft/server/BlockGrass.java
++++ b/src/main/java/net/minecraft/server/BlockGrass.java
+@@ -28,7 +28,7 @@ public class BlockGrass extends Block implements IBlockFragilePlantElement {
+     }
+ 
+     public void b(World world, BlockPosition blockposition, IBlockData iblockdata, Random random) {
+-        if (world.paperSpigotConfig.grassUpdateRate != 1 && (world.paperSpigotConfig.grassUpdateRate < 1 || (MinecraftServer.currentTick + blockposition.hashCode()) % world.paperSpigotConfig.grassUpdateRate != 0)) { return; } // Paper
++        if (world.paperConfigTitanium.grassSpreadTickRate != 1 && (world.paperConfigTitanium.grassSpreadTickRate < 1 || (MinecraftServer.currentTick + blockposition.hashCode()) % world.paperConfigTitanium.grassSpreadTickRate != 0)) { return; } // Paper
+         if (!world.isClientSide) {
+             int lightLevel = -1; // Paper
+             if (world.getLightLevel(blockposition.up()) < 4 && (lightLevel = world.getType(blockposition.up()).getBlock().p()) > 2) {
+diff --git a/src/main/java/net/minecraft/server/BlockRedstoneTorch.java b/src/main/java/net/minecraft/server/BlockRedstoneTorch.java
+index b105b6a6..d0c95850 100644
+--- a/src/main/java/net/minecraft/server/BlockRedstoneTorch.java
++++ b/src/main/java/net/minecraft/server/BlockRedstoneTorch.java
+@@ -53,7 +53,7 @@ public class BlockRedstoneTorch extends BlockTorch {
+     public void onPlace(World world, BlockPosition blockposition, IBlockData iblockdata) {
+         if (this.isOn) {
+             // PaperSpigot start - Fix cannons
+-            if (world.paperSpigotConfig.fixCannons) {
++            if (world.paperConfigTitanium.fixCannons) {
+                 world.applyPhysics(blockposition.shift(EnumDirection.DOWN), this);
+                 world.applyPhysics(blockposition.shift(EnumDirection.UP), this);
+                 world.applyPhysics(blockposition.shift(EnumDirection.WEST), this);
+@@ -78,7 +78,7 @@ public class BlockRedstoneTorch extends BlockTorch {
+     public void remove(World world, BlockPosition blockposition, IBlockData iblockdata) {
+         if (this.isOn) {
+             // PaperSpigot start - Fix cannons
+-            if (world.paperSpigotConfig.fixCannons) {
++            if (world.paperConfigTitanium.fixCannons) {
+                 world.applyPhysics(blockposition.shift(EnumDirection.DOWN), this);
+                 world.applyPhysics(blockposition.shift(EnumDirection.UP), this);
+                 world.applyPhysics(blockposition.shift(EnumDirection.WEST), this);
+diff --git a/src/main/java/net/minecraft/server/BlockRedstoneWire.java b/src/main/java/net/minecraft/server/BlockRedstoneWire.java
+index 532188e2..0d2abde6 100644
+--- a/src/main/java/net/minecraft/server/BlockRedstoneWire.java
++++ b/src/main/java/net/minecraft/server/BlockRedstoneWire.java
+@@ -143,7 +143,7 @@ public class BlockRedstoneWire extends Block {
+ 
+             this.R.add(blockposition);
+             // PaperSpigot start - Fix cannons
+-            if (world.paperSpigotConfig.fixCannons) {
++            if (world.paperConfigTitanium.fixCannons) {
+                 this.R.add(blockposition.shift(EnumDirection.WEST));
+                 this.R.add(blockposition.shift(EnumDirection.EAST));
+                 this.R.add(blockposition.shift(EnumDirection.DOWN));
+@@ -170,7 +170,7 @@ public class BlockRedstoneWire extends Block {
+         if (world.getType(blockposition).getBlock() == this) {
+             world.applyPhysics(blockposition, this);
+             // PaperSpigot start - Fix cannons
+-            if (world.paperSpigotConfig.fixCannons) {
++            if (world.paperConfigTitanium.fixCannons) {
+                 world.applyPhysics(blockposition.shift(EnumDirection.WEST), this);
+                 world.applyPhysics(blockposition.shift(EnumDirection.EAST), this);
+                 world.applyPhysics(blockposition.shift(EnumDirection.NORTH), this);
+diff --git a/src/main/java/net/minecraft/server/BlockReed.java b/src/main/java/net/minecraft/server/BlockReed.java
+index 3acd9dfb..c5f004b5 100644
+--- a/src/main/java/net/minecraft/server/BlockReed.java
++++ b/src/main/java/net/minecraft/server/BlockReed.java
+@@ -25,7 +25,7 @@ public class BlockReed extends Block {
+                     ;
+                 }
+ 
+-                if (i < world.paperSpigotConfig.reedMaxHeight) { // PaperSpigot - Configurable max growth height for reed blocks) {
++                if (i < world.paperConfigTitanium.maxGrowthHeight.reeds) { // PaperSpigot - Configurable max growth height for reed blocks) {
+                     int j = ((Integer) iblockdata.get(BlockReed.AGE)).intValue();
+ 
+                     if (j >= (byte) range(3, (world.growthOdds / world.spigotConfigTitanium.growth.caneModifier * 15) + 0.5F, 15)) { // Spigot
+diff --git a/src/main/java/net/minecraft/server/BlockTNT.java b/src/main/java/net/minecraft/server/BlockTNT.java
+index 9fc46d83..c633bd7a 100644
+--- a/src/main/java/net/minecraft/server/BlockTNT.java
++++ b/src/main/java/net/minecraft/server/BlockTNT.java
+@@ -35,7 +35,7 @@ public class BlockTNT extends Block {
+             org.bukkit.Location loc = explosion.source instanceof EntityTNTPrimed ? ((EntityTNTPrimed) explosion.source).sourceLoc : new org.bukkit.Location(world.getWorld(), blockposition.getX(), blockposition.getY(), blockposition.getZ()); // PaperSpigot
+             // PaperSpigot start - Fix cannons
+             double y = blockposition.getY();
+-            if (!world.paperSpigotConfig.fixCannons) y += 0.5;
++            if (!world.paperConfigTitanium.fixCannons) y += 0.5;
+             EntityTNTPrimed entitytntprimed = new EntityTNTPrimed(loc, world, (double) ((float) blockposition.getX() + 0.5F), y, (double) ((float) blockposition.getZ() + 0.5F), explosion.getSource()); // PaperSpigot - add loc
+             // PaperSpigot end
+ 
+@@ -69,7 +69,7 @@ public class BlockTNT extends Block {
+                 org.bukkit.Location loc = new org.bukkit.Location(world.getWorld(), blockposition.getX(), blockposition.getY(), blockposition.getZ()); // PaperSpigot
+                 // PaperSpigot start - Fix cannons
+                 double y = blockposition.getY();
+-                if (!world.paperSpigotConfig.fixCannons) y += 0.5;
++                if (!world.paperConfigTitanium.fixCannons) y += 0.5;
+                 EntityTNTPrimed entitytntprimed = new EntityTNTPrimed(loc, world, (double) ((float) blockposition.getX() + 0.5F), y, (double) ((float) blockposition.getZ() + 0.5F), entityliving); // PaperSpigot - add loc
+                 // PaperSpigot end
+ 
+diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
+index 9107b388..a3c1d08a 100644
+--- a/src/main/java/net/minecraft/server/Chunk.java
++++ b/src/main/java/net/minecraft/server/Chunk.java
+@@ -64,7 +64,7 @@ public class Chunk {
+     private int emptySectionBits;
+ 
+     public PacketPlayOutMapChunk.ChunkMap getChunkMap(boolean groundUpContinuous, int primaryBitMask) {
+-        if (!world.paperSpigotConfig.cacheChunkMaps || !groundUpContinuous || (primaryBitMask != 0 && primaryBitMask != '\uffff')) {
++        if (!world.paperConfigTitanium.cacheChunkMaps || !groundUpContinuous || (primaryBitMask != 0 && primaryBitMask != '\uffff')) {
+             return PacketPlayOutMapChunk.a(this, groundUpContinuous, !world.worldProvider.o(), primaryBitMask);
+         }
+ 
+@@ -872,7 +872,7 @@ public class Chunk {
+             this.tileEntities.put(blockposition, tileentity);
+             // CraftBukkit start
+             // PaperSpigot start - Remove invalid mob spawner tile entities
+-        } else if (this.world.paperSpigotConfig.removeInvalidMobSpawnerTEs && tileentity instanceof TileEntityMobSpawner &&
++        } else if (this.world.paperConfigTitanium.removeInvalidMobSpawnerTileEntities && tileentity instanceof TileEntityMobSpawner &&
+                 org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(getType(blockposition)) != org.bukkit.Material.MOB_SPAWNER) {
+             this.tileEntities.remove(blockposition);
+             // PaperSpigot end
+@@ -886,7 +886,7 @@ public class Chunk {
+             e.printStackTrace();
+             ServerInternalException.reportInternalException(e);
+ 
+-            if (this.world.paperSpigotConfig.removeCorruptTEs) {
++            if (this.world.paperConfigTitanium.removeInvalidMobSpawnerTileEntities) {
+                 this.removeTileEntity(tileentity.getPosition());
+                 this.markDirty();
+                 org.bukkit.Bukkit.getLogger().info("Removing corrupt tile entity");
+@@ -1069,7 +1069,7 @@ public class Chunk {
+         }
+ 
+         // This !flag section should say if s(isModified) or t(hasEntities), then check auto save
+-        return ((this.q || this.r) && this.world.getTime() >= this.lastSaved + world.paperSpigotConfig.autoSavePeriod); // Paper - Make world configurable and incremental
++        return ((this.q || this.r) && this.world.getTime() >= this.lastSaved + world.paperConfigTitanium.autoSaveInterval); // Paper - Make world configurable and incremental
+     }
+ 
+     public Random a(long i) {
+@@ -1187,7 +1187,7 @@ public class Chunk {
+      * PaperSpigot - Recheck gaps asynchronously.
+      */
+     public void recheckGaps(final boolean isClientSide) {
+-        if (!world.paperSpigotConfig.useAsyncLighting) {
++        if (!world.paperConfigTitanium.useAsyncLightning) {
+             this.h(isClientSide);
+             return;
+         }
+@@ -1490,7 +1490,7 @@ public class Chunk {
+     }
+ 
+     public long w() {
+-        return world.paperSpigotConfig.useInhabitedTime ? this.u : 0; // Paper
++        return world.paperConfigTitanium.useChunkInhabitedTimer ? this.u : 0; // Paper
+     }
+ 
+     public void c(long i) {
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderFlat.java b/src/main/java/net/minecraft/server/ChunkProviderFlat.java
+index b939f47a..381a9f8d 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderFlat.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderFlat.java
+@@ -25,7 +25,7 @@ public class ChunkProviderFlat implements IChunkProvider {
+         if (flag) {
+             Map map = this.d.b();
+ 
+-            if (map.containsKey("village") && world.paperSpigotConfig.generateVillage) { // PaperSpigot
++            if (map.containsKey("village") && world.paperConfigTitanium.generatorSettings.village) { // PaperSpigot
+                 Map map1 = (Map) map.get("village");
+ 
+                 if (!map1.containsKey("size")) {
+@@ -35,19 +35,19 @@ public class ChunkProviderFlat implements IChunkProvider {
+                 this.e.add(new WorldGenVillage(map1));
+             }
+ 
+-            if (map.containsKey("biome_1") && world.paperSpigotConfig.generateTemple) { // PaperSpigot
++            if (map.containsKey("biome_1") && world.paperConfigTitanium.generatorSettings.temple) { // PaperSpigot
+                 this.e.add(new WorldGenLargeFeature((Map) map.get("biome_1")));
+             }
+ 
+-            if (map.containsKey("mineshaft") && world.paperSpigotConfig.generateMineshaft) { // PaperSpigot
++            if (map.containsKey("mineshaft") && world.paperConfigTitanium.generatorSettings.mineshaft) { // PaperSpigot
+                 this.e.add(new WorldGenMineshaft((Map) map.get("mineshaft")));
+             }
+ 
+-            if (map.containsKey("stronghold") && world.paperSpigotConfig.generateStronghold) { // PaperSpigot
++            if (map.containsKey("stronghold") && world.paperConfigTitanium.generatorSettings.stronghold) { // PaperSpigot
+                 this.e.add(new WorldGenStronghold((Map) map.get("stronghold")));
+             }
+ 
+-            if (map.containsKey("oceanmonument") && world.paperSpigotConfig.generateMonument) { // PaperSpigot
++            if (map.containsKey("oceanmonument") && world.paperConfigTitanium.generatorSettings.monument) { // PaperSpigot
+                 this.e.add(new WorldGenMonument((Map) map.get("oceanmonument")));
+             }
+         }
+@@ -60,7 +60,7 @@ public class ChunkProviderFlat implements IChunkProvider {
+             this.i = new WorldGenLakes(Blocks.LAVA);
+         }
+ 
+-        this.g = world.paperSpigotConfig.generateDungeon && this.d.b().containsKey("dungeon");  // PaperSpigot
++        this.g = world.paperConfigTitanium.generatorSettings.dungeon && this.d.b().containsKey("dungeon");  // PaperSpigot
+         int j = 0;
+         int k = 0;
+         boolean flag1 = true;
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderGenerate.java b/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
+index ad464d32..1c08afa5 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
+@@ -156,31 +156,31 @@ public class ChunkProviderGenerate implements IChunkProvider {
+         this.a(i, j, chunksnapshot);
+         this.B = this.m.getWorldChunkManager().getBiomeBlock(this.B, i * 16, j * 16, 16, 16);
+         this.a(i, j, chunksnapshot, this.B);
+-        if (this.r.r && this.m.paperSpigotConfig.generateCaves) { // PaperSpigot
++        if (this.r.r && this.m.paperConfigTitanium.generatorSettings.caves) { // PaperSpigot
+             this.u.a(this, this.m, i, j, chunksnapshot);
+         }
+ 
+-        if (this.r.z && this.m.paperSpigotConfig.generateCanyon) { // PaperSpigot
++        if (this.r.z && this.m.paperConfigTitanium.generatorSettings.canyon) { // PaperSpigot
+             this.z.a(this, this.m, i, j, chunksnapshot);
+         }
+ 
+-        if (this.r.w && this.n && this.m.paperSpigotConfig.generateMineshaft) { // PaperSpigot
++        if (this.r.w && this.n && this.m.paperConfigTitanium.generatorSettings.mineshaft) { // PaperSpigot
+             this.x.a(this, this.m, i, j, chunksnapshot);
+         }
+ 
+-        if (this.r.v && this.n && this.m.paperSpigotConfig.generateVillage) { // PaperSpigot
++        if (this.r.v && this.n && this.m.paperConfigTitanium.generatorSettings.village) { // PaperSpigot
+             this.w.a(this, this.m, i, j, chunksnapshot);
+         }
+ 
+-        if (this.r.u && this.n && this.m.paperSpigotConfig.generateStronghold) { // PaperSpigot
++        if (this.r.u && this.n && this.m.paperConfigTitanium.generatorSettings.stronghold) { // PaperSpigot
+             this.v.a(this, this.m, i, j, chunksnapshot);
+         }
+ 
+-        if (this.r.x && this.n && this.m.paperSpigotConfig.generateTemple) { // PaperSpigot
++        if (this.r.x && this.n && this.m.paperConfigTitanium.generatorSettings.temple) { // PaperSpigot
+             this.y.a(this, this.m, i, j, chunksnapshot);
+         }
+ 
+-        if (this.r.y && this.n && this.m.paperSpigotConfig.generateMonument) { // PaperSpigot
++        if (this.r.y && this.n && this.m.paperConfigTitanium.generatorSettings.monument) { // PaperSpigot
+             this.A.a(this, this.m, i, j, chunksnapshot);
+         }
+ 
+@@ -319,23 +319,23 @@ public class ChunkProviderGenerate implements IChunkProvider {
+         boolean flag = false;
+         ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(i, j);
+ 
+-        if (this.r.w && this.n && this.m.paperSpigotConfig.generateMineshaft) { // PaperSpigot
++        if (this.r.w && this.n && this.m.paperConfigTitanium.generatorSettings.mineshaft) { // PaperSpigot
+             this.x.a(this.m, this.h, chunkcoordintpair);
+         }
+ 
+-        if (this.r.v && this.n && this.m.paperSpigotConfig.generateVillage) { // PaperSpigot
++        if (this.r.v && this.n && this.m.paperConfigTitanium.generatorSettings.mineshaft) { // PaperSpigot
+             flag = this.w.a(this.m, this.h, chunkcoordintpair);
+         }
+ 
+-        if (this.r.u && this.n && this.m.paperSpigotConfig.generateStronghold) { // PaperSpigot
++        if (this.r.u && this.n && this.m.paperConfigTitanium.generatorSettings.stronghold) { // PaperSpigot
+             this.v.a(this.m, this.h, chunkcoordintpair);
+         }
+ 
+-        if (this.r.x && this.n && this.m.paperSpigotConfig.generateTemple) { // PaperSpigot
++        if (this.r.x && this.n && this.m.paperConfigTitanium.generatorSettings.temple) { // PaperSpigot
+             this.y.a(this.m, this.h, chunkcoordintpair);
+         }
+ 
+-        if (this.r.y && this.n && this.m.paperSpigotConfig.generateMonument) { // PaperSpigot
++        if (this.r.y && this.n && this.m.paperConfigTitanium.generatorSettings.monument) { // PaperSpigot
+             this.A.a(this.m, this.h, chunkcoordintpair);
+         }
+ 
+@@ -359,7 +359,7 @@ public class ChunkProviderGenerate implements IChunkProvider {
+             }
+         }
+ 
+-        if (this.r.s && this.m.paperSpigotConfig.generateDungeon) { // PaperSpigot
++        if (this.r.s && this.m.paperConfigTitanium.generatorSettings.dungeon) { // PaperSpigot
+             for (k1 = 0; k1 < this.r.t; ++k1) {
+                 l1 = this.h.nextInt(16) + 8;
+                 i2 = this.h.nextInt(256);
+@@ -444,23 +444,23 @@ public class ChunkProviderGenerate implements IChunkProvider {
+     }
+ 
+     public void recreateStructures(Chunk chunk, int i, int j) {
+-        if (this.r.w && this.n && this.m.paperSpigotConfig.generateMineshaft) { // PaperSpigot
++        if (this.r.w && this.n && this.m.paperConfigTitanium.generatorSettings.mineshaft) { // PaperSpigot
+             this.x.a(this, this.m, i, j, (ChunkSnapshot) null);
+         }
+ 
+-        if (this.r.v && this.n && this.m.paperSpigotConfig.generateVillage) { // PaperSpigot
++        if (this.r.v && this.n && this.m.paperConfigTitanium.generatorSettings.village) { // PaperSpigot
+             this.w.a(this, this.m, i, j, (ChunkSnapshot) null);
+         }
+ 
+-        if (this.r.u && this.n && this.m.paperSpigotConfig.generateStronghold) { // PaperSpigot
++        if (this.r.u && this.n && this.m.paperConfigTitanium.generatorSettings.stronghold) { // PaperSpigot
+             this.v.a(this, this.m, i, j, (ChunkSnapshot) null);
+         }
+ 
+-        if (this.r.x && this.n && this.m.paperSpigotConfig.generateTemple) { // PaperSpigot
++        if (this.r.x && this.n && this.m.paperConfigTitanium.generatorSettings.temple) { // PaperSpigot
+             this.y.a(this, this.m, i, j, (ChunkSnapshot) null);
+         }
+ 
+-        if (this.r.y && this.n && this.m.paperSpigotConfig.generateMonument) { // PaperSpigot
++        if (this.r.y && this.n && this.m.paperConfigTitanium.generatorSettings.monument) { // PaperSpigot
+             this.A.a(this, this.m, i, j, (ChunkSnapshot) null);
+         }
+ 
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderHell.java b/src/main/java/net/minecraft/server/ChunkProviderHell.java
+index 0156892a..51538b7c 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderHell.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderHell.java
+@@ -143,8 +143,8 @@ public class ChunkProviderHell implements IChunkProvider {
+ 
+                 for (int l1 = 127; l1 >= 0; --l1) {
+                     // PaperSpigot start - Configurable flat bedrock worldgen
+-                    if (l1 < 127 - (h.paperSpigotConfig.generateFlatBedrock ? 0 : this.j.nextInt(5)) &&
+-                            l1 > (h.paperSpigotConfig.generateFlatBedrock ? 0 : this.j.nextInt(5))) {
++                    if (l1 < 127 - (h.paperConfigTitanium.generatorSettings.flatBedrock ? 0 : this.j.nextInt(5)) &&
++                            l1 > (h.paperConfigTitanium.generatorSettings.flatBedrock ? 0 : this.j.nextInt(5))) {
+                     // PaperSpigot end
+                         IBlockData iblockdata2 = chunksnapshot.a(i1, l1, l);
+ 
+@@ -201,8 +201,8 @@ public class ChunkProviderHell implements IChunkProvider {
+ 
+         this.a(i, j, chunksnapshot);
+         this.b(i, j, chunksnapshot);
+-        if (this.h.paperSpigotConfig.generateCaves) this.C.a(this, this.h, i, j, chunksnapshot); // PaperSpigot
+-        if (this.i && this.h.paperSpigotConfig.generateFortress) { // PaperSpigot
++        if (this.h.paperConfigTitanium.generatorSettings.caves) this.C.a(this, this.h, i, j, chunksnapshot); // PaperSpigot
++        if (this.i && this.h.paperConfigTitanium.generatorSettings.fortress) { // PaperSpigot
+             this.B.a(this, this.h, i, j, chunksnapshot);
+         }
+ 
+@@ -387,7 +387,7 @@ public class ChunkProviderHell implements IChunkProvider {
+     }
+ 
+     public void recreateStructures(Chunk chunk, int i, int j) {
+-        if (this.h.paperSpigotConfig.generateFortress) this.B.a(this, this.h, i, j, (ChunkSnapshot) null); // PaperSpigot
++        if (this.h.paperConfigTitanium.generatorSettings.fortress) this.B.a(this, this.h, i, j, (ChunkSnapshot) null); // PaperSpigot
+     }
+ 
+     public Chunk getChunkAt(BlockPosition blockposition) {
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+index 02674615..32bd3431 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+@@ -78,7 +78,7 @@ public class ChunkProviderServer implements IChunkProvider {
+     public void queueUnload(int i, int j) {
+         // PaperSpigot start - Asynchronous lighting updates
+         Chunk chunk = chunks.get(LongHash.toLong(i, j));
+-        if (chunk != null && chunk.world.paperSpigotConfig.useAsyncLighting && (chunk.pendingLightUpdates.get() > 0 || chunk.world.getTime() - chunk.lightUpdateTime < 20)) {
++        if (chunk != null && chunk.world.paperConfigTitanium.useAsyncLightning && (chunk.pendingLightUpdates.get() > 0 || chunk.world.getTime() - chunk.lightUpdateTime < 20)) {
+             return;
+         }
+         // PaperSpigot end
+@@ -376,7 +376,7 @@ public class ChunkProviderServer implements IChunkProvider {
+                 this.saveChunk(chunk);
+                 chunk.f(false);
+                 ++i;
+-                if (!flag && i >= world.paperSpigotConfig.maxAutoSaveChunksPerTick) { // Spigot - // Paper - Incremental Auto Save - cap max per tick
++                if (!flag && i >= world.paperConfigTitanium.maxAutoSaveChunksPerTick) { // Spigot - // Paper - Incremental Auto Save - cap max per tick
+                     return false;
+                 }
+             }
+diff --git a/src/main/java/net/minecraft/server/DispenserRegistry.java b/src/main/java/net/minecraft/server/DispenserRegistry.java
+index 9577483d..8997d541 100644
+--- a/src/main/java/net/minecraft/server/DispenserRegistry.java
++++ b/src/main/java/net/minecraft/server/DispenserRegistry.java
+@@ -526,7 +526,7 @@ public class DispenserRegistry {
+ 
+                 // PaperSpigot start - Fix cannons
+                 double y = blockposition.getY();
+-                if (!world.paperSpigotConfig.fixCannons) y += 0.5;
++                if (!world.paperConfigTitanium.fixCannons) y += 0.5;
+                 EntityTNTPrimed entitytntprimed = new EntityTNTPrimed(block.getLocation(), world, blockposition.getX() + 0.5, blockposition.getY(), blockposition.getZ() + 0.5, (EntityLiving) null);
+                 BlockDispenseEntityEvent event = new BlockDispenseEntityEvent(block, craftItem.clone(), new org.bukkit.util.Vector(blockposition.getX() + 0.5, y, blockposition.getZ() + 0.5), entitytntprimed.getBukkitEntity());
+ 
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index 1ce6c55e..8a4fc05c 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -286,7 +286,7 @@ public abstract class Entity implements ICommandListener {
+      * PaperSpigot - Checks if the feature is enabled and the entity is above the nether world bedrock height
+      */
+     private boolean paperNetherCheck() {
+-        return this.world.paperSpigotConfig.netherVoidTopDamage && this.world.getWorld().getEnvironment() == org.bukkit.World.Environment.NETHER && this.locY >= 128.0D;
++        return this.world.paperConfigTitanium.netherCeilingVoidDamage && this.world.getWorld().getEnvironment() == org.bukkit.World.Environment.NETHER && this.locY >= 128.0D;
+     }
+ 
+     public void K() {
+diff --git a/src/main/java/net/minecraft/server/EntityBoat.java b/src/main/java/net/minecraft/server/EntityBoat.java
+index 3a6bbe4a..e860038e 100644
+--- a/src/main/java/net/minecraft/server/EntityBoat.java
++++ b/src/main/java/net/minecraft/server/EntityBoat.java
+@@ -486,7 +486,7 @@ public class EntityBoat extends Entity {
+      * PaperSpigot - Handles boat drops depending on the user's config setting
+      */
+     public void breakNaturally() {
+-        if (this.world.paperSpigotConfig.boatsDropBoats) {
++        if (this.world.paperConfigTitanium.gameMechanics.boatsDropBoats) {
+             this.a(Items.BOAT, 1, 0.0F);
+         } else {
+             for (int k = 0; k < 3; ++k) {
+diff --git a/src/main/java/net/minecraft/server/EntityEnderPearl.java b/src/main/java/net/minecraft/server/EntityEnderPearl.java
+index 319c0bc6..80f2c116 100644
+--- a/src/main/java/net/minecraft/server/EntityEnderPearl.java
++++ b/src/main/java/net/minecraft/server/EntityEnderPearl.java
+@@ -12,13 +12,13 @@ public class EntityEnderPearl extends EntityProjectile {
+ 
+     public EntityEnderPearl(World world) {
+         super(world);
+-        this.loadChunks = world.paperSpigotConfig.loadUnloadedEnderPearls; // PaperSpigot
++        this.loadChunks = world.paperConfigTitanium.loadChunks.enderpearls; // PaperSpigot
+     }
+ 
+     public EntityEnderPearl(World world, EntityLiving entityliving) {
+         super(world, entityliving);
+         this.c = entityliving;
+-        this.loadChunks = world.paperSpigotConfig.loadUnloadedEnderPearls; // PaperSpigot
++        this.loadChunks = world.paperConfigTitanium.loadChunks.enderpearls; // PaperSpigot
+     }
+ 
+     protected void a(MovingObjectPosition movingobjectposition) {
+@@ -33,7 +33,7 @@ public class EntityEnderPearl extends EntityProjectile {
+         }
+ 
+         // PaperSpigot start - Remove entities in unloaded chunks
+-        if (this.inUnloadedChunk && world.paperSpigotConfig.removeUnloadedEnderPearls) {
++        if (this.inUnloadedChunk && world.paperConfigTitanium.removeUnloaded.enderpearls) {
+             this.die();
+         }
+         // PaperSpigot end
+diff --git a/src/main/java/net/minecraft/server/EntityFallingBlock.java b/src/main/java/net/minecraft/server/EntityFallingBlock.java
+index e4c74c18..f5892c45 100644
+--- a/src/main/java/net/minecraft/server/EntityFallingBlock.java
++++ b/src/main/java/net/minecraft/server/EntityFallingBlock.java
+@@ -27,7 +27,7 @@ public class EntityFallingBlock extends Entity {
+     public EntityFallingBlock(org.bukkit.Location loc, World world) {
+         super(world);
+         sourceLoc = loc;
+-        this.loadChunks = world.paperSpigotConfig.loadUnloadedFallingBlocks; // PaperSpigot
++        this.loadChunks = world.paperConfigTitanium.loadChunks.fallingBlocks; // PaperSpigot
+     }
+ 
+     public EntityFallingBlock(World world, double d0, double d1, double d2, IBlockData iblockdata) {
+@@ -48,7 +48,7 @@ public class EntityFallingBlock extends Entity {
+         this.lastX = d0;
+         this.lastY = d1;
+         this.lastZ = d2;
+-        this.loadChunks = world.paperSpigotConfig.loadUnloadedFallingBlocks; // PaperSpigot
++        this.loadChunks = world.paperConfigTitanium.loadChunks.fallingBlocks; // PaperSpigot
+     }
+ 
+     protected boolean s_() {
+@@ -87,13 +87,13 @@ public class EntityFallingBlock extends Entity {
+             this.move(this.motX, this.motY, this.motZ);
+ 
+             // PaperSpigot start - Remove entities in unloaded chunks
+-            if (this.inUnloadedChunk && world.paperSpigotConfig.removeUnloadedFallingBlocks) {
++            if (this.inUnloadedChunk && world.paperConfigTitanium.removeUnloaded.fallingBlocks) {
+                 this.die();
+             }
+             // PaperSpigot end
+ 
+             // PaperSpigot start - Drop falling blocks above the specified height
+-            if (this.world.paperSpigotConfig.fallingBlockHeightNerf != 0 && this.locY > this.world.paperSpigotConfig.fallingBlockHeightNerf) {
++            if (this.world.paperConfigTitanium.fallingBlockHeightNerf != 0 && this.locY > this.world.paperConfigTitanium.fallingBlockHeightNerf) {
+                 if (this.dropItem) {
+                     this.a(new ItemStack(block, 1, block.getDropData(this.block)), 0.0F);
+                 }
+@@ -288,7 +288,7 @@ public class EntityFallingBlock extends Entity {
+     // PaperSpigot start - Fix cannons
+     @Override
+     public double f(double d0, double d1, double d2) {
+-        if (!world.paperSpigotConfig.fixCannons) return super.f(d0, d1, d2);
++        if (!world.paperConfigTitanium.fixCannons) return super.f(d0, d1, d2);
+ 
+         double d3 = this.locX - d0;
+         double d4 = this.locY + this.getHeadHeight() - d1;
+@@ -299,7 +299,7 @@ public class EntityFallingBlock extends Entity {
+ 
+     @Override
+     public float getHeadHeight() {
+-        return world.paperSpigotConfig.fixCannons ? this.length / 2 : super.getHeadHeight();
++        return world.paperConfigTitanium.fixCannons ? this.length / 2 : super.getHeadHeight();
+     }
+     // PaperSpigot end
+ }
+diff --git a/src/main/java/net/minecraft/server/EntityFishingHook.java b/src/main/java/net/minecraft/server/EntityFishingHook.java
+index 38025152..19ddba56 100644
+--- a/src/main/java/net/minecraft/server/EntityFishingHook.java
++++ b/src/main/java/net/minecraft/server/EntityFishingHook.java
+@@ -350,7 +350,7 @@ public class EntityFishingHook extends Entity {
+                                 this.ax = MathHelper.nextInt(this.random, 20, 80);
+                             }
+                         } else {
+-                            this.aw = MathHelper.nextInt(this.random, this.world.paperSpigotConfig.fishingMinTicks, this.world.paperSpigotConfig.fishingMaxTicks); // PaperSpigot - Configurable fishing tick range
++                            this.aw = MathHelper.nextInt(this.random, this.world.paperConfigTitanium.fishingTimeRange.minimumTicks, this.world.paperConfigTitanium.fishingTimeRange.maximumTicks); // PaperSpigot - Configurable fishing tick range
+                             this.aw -= EnchantmentManager.h(this.owner) * 20 * 5;
+                         }
+                     }
+diff --git a/src/main/java/net/minecraft/server/EntityHorse.java b/src/main/java/net/minecraft/server/EntityHorse.java
+index 53aaa654..0328a63a 100644
+--- a/src/main/java/net/minecraft/server/EntityHorse.java
++++ b/src/main/java/net/minecraft/server/EntityHorse.java
+@@ -180,7 +180,7 @@ public class EntityHorse extends EntityAnimal implements IInventoryListener {
+ 
+     public boolean cb() {
+         // PaperSpigot start - Configurable undead horse leashing
+-        if (this.world.paperSpigotConfig.allowUndeadHorseLeashing) {
++        if (this.world.paperConfigTitanium.allowUndeadHorseLeashing) {
+             return super.cb();
+         }
+         // PaperSpigot end
+diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
+index 3c789b96..9bbff5bb 100644
+--- a/src/main/java/net/minecraft/server/EntityHuman.java
++++ b/src/main/java/net/minecraft/server/EntityHuman.java
+@@ -901,7 +901,7 @@ public abstract class EntityHuman extends EntityLiving {
+         // CraftBukkit end
+         if (!this.isInvulnerable(damagesource)) {
+             if (!damagesource.ignoresArmor() && this.isBlocking() && f > 0.0F) {
+-                f = (1.0F + f) * this.world.paperSpigotConfig.playerBlockingDamageMultiplier; // PaperSpigot - Configurable damage multiplier for blocking;
++                f = (1.0F + f) * this.world.paperConfigTitanium.playerBlockingDamageMultiplier; // PaperSpigot - Configurable damage multiplier for blocking;
+             }
+ 
+             f = this.applyArmorModifier(damagesource, f);
+@@ -1013,7 +1013,7 @@ public abstract class EntityHuman extends EntityLiving {
+                 }
+ 
+                 if (f > 0.0F || f1 > 0.0F) {
+-                    boolean flag = !world.paperSpigotConfig.disablePlayerCrits && this.fallDistance > 0.0F && !this.onGround && !this.k_() && !this.V() && !this.hasEffect(MobEffectList.BLINDNESS) && this.vehicle == null && entity instanceof EntityLiving; // PaperSpigot
++                    boolean flag = !world.paperConfigTitanium.gameMechanics.disablePlayerCrits && this.fallDistance > 0.0F && !this.onGround && !this.k_() && !this.V() && !this.hasEffect(MobEffectList.BLINDNESS) && this.vehicle == null && entity instanceof EntityLiving; // PaperSpigot
+ 
+                     if (flag && f > 0.0F) {
+                         f *= 1.5F;
+@@ -1427,13 +1427,13 @@ public abstract class EntityHuman extends EntityLiving {
+                 i = Math.round(MathHelper.sqrt(d0 * d0 + d1 * d1 + d2 * d2) * 100.0F);
+                 if (i > 0) {
+                     this.a(StatisticList.p, i);
+-                    this.applyExhaustion(world.paperSpigotConfig.playerSwimmingExhaustion * (float) i * 0.01F); // PaperSpigot - Configurable swimming exhaustion
++                    this.applyExhaustion(world.paperConfigTitanium.playerExhaustion.swimming * (float) i * 0.01F); // PaperSpigot - Configurable swimming exhaustion
+                 }
+             } else if (this.V()) {
+                 i = Math.round(MathHelper.sqrt(d0 * d0 + d2 * d2) * 100.0F);
+                 if (i > 0) {
+                     this.a(StatisticList.l, i);
+-                    this.applyExhaustion(world.paperSpigotConfig.playerSwimmingExhaustion * (float) i * 0.01F); // PaperSpigot - Configurable swimming (diving) exhaustion
++                    this.applyExhaustion(world.paperConfigTitanium.playerExhaustion.swimming * (float) i * 0.01F); // PaperSpigot - Configurable swimming (diving) exhaustion
+                 }
+             } else if (this.k_()) {
+                 if (d1 > 0.0D) {
+diff --git a/src/main/java/net/minecraft/server/EntityInsentient.java b/src/main/java/net/minecraft/server/EntityInsentient.java
+index 5f4bc422..21bcdf89 100644
+--- a/src/main/java/net/minecraft/server/EntityInsentient.java
++++ b/src/main/java/net/minecraft/server/EntityInsentient.java
+@@ -445,13 +445,13 @@ public abstract class EntityInsentient extends EntityLiving {
+                 double d2 = entityhuman.locZ - this.locZ;
+                 double d3 = d0 * d0 + d1 * d1 + d2 * d2;
+ 
+-                if (d3 > this.world.paperSpigotConfig.hardDespawnDistance) { // CraftBukkit - remove isTypeNotPersistent() check // PaperSpigot - custom despawn distances
++                if (d3 > this.world.paperConfigTitanium.despawnRanges.hard) { // CraftBukkit - remove isTypeNotPersistent() check // PaperSpigot - custom despawn distances
+                     this.die();
+                 }
+ 
+-                if (this.ticksFarFromPlayer > 600 && this.random.nextInt(800) == 0 && d3 > this.world.paperSpigotConfig.softDespawnDistance) { // CraftBukkit - remove isTypeNotPersistent() check // PaperSpigot - custom despawn distance
++                if (this.ticksFarFromPlayer > 600 && this.random.nextInt(800) == 0 && d3 > this.world.paperConfigTitanium.despawnRanges.soft) { // CraftBukkit - remove isTypeNotPersistent() check // PaperSpigot - custom despawn distance
+                     this.die();
+-                } else if (d3 < this.world.paperSpigotConfig.softDespawnDistance) { // PaperSpigot - custom despawn distances
++                } else if (d3 < this.world.paperConfigTitanium.despawnRanges.soft) { // PaperSpigot - custom despawn distances
+                     this.ticksFarFromPlayer = 0;
+                 }
+             }
+diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
+index 53f42843..930fe084 100644
+--- a/src/main/java/net/minecraft/server/EntityLiving.java
++++ b/src/main/java/net/minecraft/server/EntityLiving.java
+@@ -825,7 +825,7 @@ public abstract class EntityLiving extends Entity {
+ 
+                 // PaperSpigot start - Disable explosion knockback
+                 boolean knockbackCancelled = false;
+-                if (flag && !(knockbackCancelled = world.paperSpigotConfig.disableExplosionKnockback && damagesource.isExplosion() && this instanceof EntityHuman)) {
++                if (flag && !(knockbackCancelled = world.paperConfigTitanium.disableExplosionKnockback && damagesource.isExplosion() && this instanceof EntityHuman)) {
+                 // PaperSpigot end
+                     this.world.broadcastEntityEffect(this, (byte) 2);
+                     if (damagesource != DamageSource.DROWN) {
+diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
+index d1c31323..6cd001b0 100644
+--- a/src/main/java/net/minecraft/server/EntityPlayer.java
++++ b/src/main/java/net/minecraft/server/EntityPlayer.java
+@@ -210,7 +210,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+         // PaperSpigot start - Configurable container update tick rate
+         if (--containerUpdateDelay <= 0) {
+             this.activeContainer.b();
+-            containerUpdateDelay = world.paperSpigotConfig.containerUpdateTickRate;
++            containerUpdateDelay = world.paperConfigTitanium.containerUpdateTickRate;
+         }
+         // PaperSpigot end
+         if (!this.world.isClientSide && !this.activeContainer.a((EntityHuman) this)) {
+@@ -531,7 +531,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+         boolean endPortal = this.dimension == 1 && i == 1;
+         if (endPortal) {
+             this.b((Statistic) AchievementList.D);
+-            if (!world.paperSpigotConfig.disableEndCredits) {
++            if (!world.paperConfigTitanium.gameMechanics.disableEndCredits) {
+                 this.world.kill(this);
+                 this.viewingCredits = true;
+                 this.playerConnection.sendPacket(new PacketPlayOutGameStateChange(4, 0.0F));
+@@ -557,7 +557,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+         }
+ 
+         // PaperSpigot start - Allow configurable end portal credits
+-        if (!endPortal || world.paperSpigotConfig.disableEndCredits) {
++        if (!endPortal || world.paperConfigTitanium.gameMechanics.disableEndCredits) {
+             // CraftBukkit start
+             TeleportCause cause = (endPortal || (this.dimension == 1 || i == 1)) ? TeleportCause.END_PORTAL : TeleportCause.NETHER_PORTAL;
+             this.server.getPlayerList().changeDimension(this, i, cause);
+diff --git a/src/main/java/net/minecraft/server/EntitySlime.java b/src/main/java/net/minecraft/server/EntitySlime.java
+index c927832b..d2126b16 100644
+--- a/src/main/java/net/minecraft/server/EntitySlime.java
++++ b/src/main/java/net/minecraft/server/EntitySlime.java
+@@ -235,7 +235,7 @@ public class EntitySlime extends EntityInsentient implements IMonster {
+                 }
+ 
+                 // PaperSpigot - Toggle to make all chunks spawn chunks
+-                boolean isSlimeChunk = world.paperSpigotConfig.allChunksAreSlimeChunks || chunk.a(987234911L).nextInt(10) == 0;
++                boolean isSlimeChunk = world.paperConfigTitanium.allChunksAreSlimeChunks || chunk.a(987234911L).nextInt(10) == 0;
+                 if (this.random.nextInt(10) == 0 && isSlimeChunk && this.locY < 40.0D) {
+                     return super.bR();
+                 }
+diff --git a/src/main/java/net/minecraft/server/EntitySquid.java b/src/main/java/net/minecraft/server/EntitySquid.java
+index aaaece35..9f9719a9 100644
+--- a/src/main/java/net/minecraft/server/EntitySquid.java
++++ b/src/main/java/net/minecraft/server/EntitySquid.java
+@@ -142,7 +142,7 @@ public class EntitySquid extends EntityWaterAnimal {
+ 
+     public boolean bR() {
+         // PaperSpigot - Configurable squid spawn range
+-        return this.locY > this.world.paperSpigotConfig.squidMinSpawnHeight && this.locY < (double) this.world.paperSpigotConfig.squidMaxSpawnHeight && super.bR();
++        return this.locY > this.world.paperConfigTitanium.squidSpawnHeight.minimum && this.locY < (double) this.world.paperConfigTitanium.squidSpawnHeight.maximum && super.bR();
+     }
+ 
+     public void b(float f, float f1, float f2) {
+diff --git a/src/main/java/net/minecraft/server/EntityTNTPrimed.java b/src/main/java/net/minecraft/server/EntityTNTPrimed.java
+index acbb6318..508cea4f 100644
+--- a/src/main/java/net/minecraft/server/EntityTNTPrimed.java
++++ b/src/main/java/net/minecraft/server/EntityTNTPrimed.java
+@@ -21,7 +21,7 @@ public class EntityTNTPrimed extends Entity {
+     // PaperSpigot end
+         this.k = true;
+         this.setSize(0.98F, 0.98F);
+-        this.loadChunks = world.paperSpigotConfig.loadUnloadedTNTEntities; // PaperSpigot
++        this.loadChunks = world.paperConfigTitanium.loadChunks.tntEntities; // PaperSpigot
+     }
+ 
+     public EntityTNTPrimed(org.bukkit.Location loc, World world, double d0, double d1, double d2, EntityLiving entityliving) {
+@@ -37,7 +37,7 @@ public class EntityTNTPrimed extends Entity {
+         this.lastY = d1;
+         this.lastZ = d2;
+         this.source = entityliving;
+-        if (world.paperSpigotConfig.fixCannons) this.motX = this.motZ = 0.0F; // PaperSpigot - Fix cannons
++        if (world.paperConfigTitanium.fixCannons) this.motX = this.motZ = 0.0F; // PaperSpigot - Fix cannons
+     }
+ 
+     protected void h() {}
+@@ -59,13 +59,13 @@ public class EntityTNTPrimed extends Entity {
+         this.move(this.motX, this.motY, this.motZ);
+ 
+         // PaperSpigot start - Drop TNT entities above the specified height
+-        if (this.world.paperSpigotConfig.tntEntityHeightNerf != 0 && this.locY > this.world.paperSpigotConfig.tntEntityHeightNerf) {
++        if (this.world.paperConfigTitanium.tntEntityHeightNerf != 0 && this.locY > this.world.paperConfigTitanium.tntEntityHeightNerf) {
+             this.die();
+         }
+         // PaperSpigot end
+ 
+         // PaperSpigot start - Remove entities in unloaded chunks
+-        if (this.inUnloadedChunk && world.paperSpigotConfig.removeUnloadedTNTEntities) {
++        if (this.inUnloadedChunk && world.paperConfigTitanium.removeUnloaded.tntEntities) {
+             this.die();
+             this.fuseTicks = 2;
+         }
+@@ -102,7 +102,7 @@ public class EntityTNTPrimed extends Entity {
+         // PaperSpigot start - Force load chunks during TNT explosions
+         ChunkProviderServer chunkProviderServer = ((ChunkProviderServer) world.chunkProvider);
+         boolean forceChunkLoad = chunkProviderServer.forceChunkLoad;
+-        if (world.paperSpigotConfig.loadUnloadedTNTEntities) {
++        if (world.paperConfigTitanium.loadChunks.tntEntities) {
+             chunkProviderServer.forceChunkLoad = true;
+         }
+         // PaperSpigot end
+@@ -114,7 +114,7 @@ public class EntityTNTPrimed extends Entity {
+         // CraftBukkit end
+ 
+         // PaperSpigot start - Force load chunks during TNT explosions
+-        if (world.paperSpigotConfig.loadUnloadedTNTEntities) {
++        if (world.paperConfigTitanium.loadChunks.tntEntities) {
+             chunkProviderServer.forceChunkLoad = forceChunkLoad;
+         }
+         // PaperSpigot end
+@@ -150,7 +150,7 @@ public class EntityTNTPrimed extends Entity {
+     // PaperSpigot start - Fix cannons
+     @Override
+     public double f(double d0, double d1, double d2) {
+-        if (!world.paperSpigotConfig.fixCannons) return super.f(d0, d1, d2);
++        if (!world.paperConfigTitanium.fixCannons) return super.f(d0, d1, d2);
+ 
+         double d3 = this.locX - d0;
+         double d4 = this.locY + this.getHeadHeight() - d1;
+@@ -161,12 +161,12 @@ public class EntityTNTPrimed extends Entity {
+ 
+     @Override
+     public boolean aL() {
+-        return !world.paperSpigotConfig.fixCannons && super.aL();
++        return !world.paperConfigTitanium.fixCannons && super.aL();
+     }
+ 
+     @Override
+     public float getHeadHeight() {
+-        return world.paperSpigotConfig.fixCannons ? this.length / 2 : 0.0F;
++        return world.paperConfigTitanium.fixCannons ? this.length / 2 : 0.0F;
+     }
+ 
+     /**
+@@ -174,7 +174,7 @@ public class EntityTNTPrimed extends Entity {
+      */
+     @Override
+     public boolean W() {
+-        if (!world.paperSpigotConfig.fixCannons) return super.W();
++        if (!world.paperConfigTitanium.fixCannons) return super.W();
+ 
+         // Preserve velocity while calling the super method
+         double oldMotX = this.motX;
+diff --git a/src/main/java/net/minecraft/server/Explosion.java b/src/main/java/net/minecraft/server/Explosion.java
+index 6f5e53a4..6d123a0b 100644
+--- a/src/main/java/net/minecraft/server/Explosion.java
++++ b/src/main/java/net/minecraft/server/Explosion.java
+@@ -145,7 +145,7 @@ public class Explosion {
+                             continue;
+                         }
+                         // CraftBukkit end
+-                        double d14 = entity instanceof EntityHuman && world.paperSpigotConfig.disableExplosionKnockback ? 0 : EnchantmentProtection.a(entity, d13); // PaperSpigot
++                        double d14 = entity instanceof EntityHuman && world.paperConfigTitanium.disableExplosionKnockback ? 0 : EnchantmentProtection.a(entity, d13); // PaperSpigot
+ 
+                         // PaperSpigot start - Fix cannons
+                         /*
+@@ -175,7 +175,7 @@ public class Explosion {
+                         // SportPaper end
+                         // PaperSpigot end
+ 
+-                        if (entity instanceof EntityHuman && !((EntityHuman) entity).abilities.isInvulnerable && !world.paperSpigotConfig.disableExplosionKnockback) { // PaperSpigot
++                        if (entity instanceof EntityHuman && !((EntityHuman) entity).abilities.isInvulnerable && !world.paperConfigTitanium.disableExplosionKnockback) { // PaperSpigot
+                             double vecX = d14 == 0 ? x : x / d14;
+                             double vecY = d14 == 0 ? y : y / d14;
+                             double vecZ = d14 == 0 ? z : z / d14;
+@@ -191,7 +191,7 @@ public class Explosion {
+ 
+     public void a(boolean flag) {
+         // PaperSpigot start - Configurable TNT explosion volume.
+-        float volume = source instanceof EntityTNTPrimed ? world.paperSpigotConfig.tntExplosionVolume : 4.0F;
++        float volume = source instanceof EntityTNTPrimed ? world.paperConfigTitanium.tntExplosionVolume : 4.0F;
+         this.world.makeSound(this.posX, this.posY, this.posZ, "random.explode", volume, (1.0F + (this.world.random.nextFloat() - this.world.random.nextFloat()) * 0.2F) * 0.7F);
+         // PaperSpigot end
+         if (this.size >= 2.0F && this.b) {
+@@ -326,7 +326,7 @@ public class Explosion {
+ 
+     // PaperSpigot start - Optimize explosions
+     private float getBlockDensity(Vec3D vec3d, AxisAlignedBB aabb) {
+-        if (!this.world.paperSpigotConfig.optimizeExplosions) {
++        if (!this.world.paperConfigTitanium.optimizeExplosions) {
+             return this.world.a(vec3d, aabb);
+         }
+ 
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 2b14d4ed..ba744422 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -852,7 +852,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+             // Also pass flag to only save modified chunks
+             server.playerCommandState = true;
+             for (World world : worlds) {
+-                if (world.paperSpigotConfig.autoSavePeriod > 0) world.getWorld().save(false); // Paper - Incremental / Configurable Auto Saving
++                if (world.paperConfigTitanium.autoSaveInterval > 0) world.getWorld().save(false); // Paper - Incremental / Configurable Auto Saving
+             }
+             server.playerCommandState = false;
+             // this.saveChunks(true);
+diff --git a/src/main/java/net/minecraft/server/MobSpawnerAbstract.java b/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
+index a0380d26..f11db7bd 100644
+--- a/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
++++ b/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
+@@ -61,7 +61,7 @@ public abstract class MobSpawnerAbstract {
+     public void c() {
+         // PaperSpigot start - Configurable mob spawner tick rate
+         if (spawnDelay > 0 && --tickDelay > 0) return;
+-        tickDelay = this.a().paperSpigotConfig.mobSpawnerTickRate;
++        tickDelay = this.a().paperConfigTitanium.mobSpawnerTickRate;
+         // PaperSpigot end
+         if (this.g()) {
+             BlockPosition blockposition = this.b();
+diff --git a/src/main/java/net/minecraft/server/TileEntityHopper.java b/src/main/java/net/minecraft/server/TileEntityHopper.java
+index 4e6f6823..5b4e5617 100644
+--- a/src/main/java/net/minecraft/server/TileEntityHopper.java
++++ b/src/main/java/net/minecraft/server/TileEntityHopper.java
+@@ -200,7 +200,7 @@ public class TileEntityHopper extends TileEntityContainer implements IHopper, IU
+                 }
+             }
+             // PaperSpigot start
+-            if (world.paperSpigotConfig.useHopperCheck && !this.n()) {
++            if (world.paperConfigTitanium.useHopperCheck && !this.n()) {
+                 this.d(world.spigotConfigTitanium.ticksPer.hopperCheck);
+             }
+             // PaperSpigot end
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index 3af23cbf..37bd8c0a 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -251,7 +251,7 @@ public abstract class World implements IBlockAccess {
+         }); 
+         this.getServer().addWorld(this.world); 
+         // CraftBukkit end
+-        this.keepSpawnInMemory = this.paperSpigotConfig.keepSpawnInMemory; // PaperSpigot
++        this.keepSpawnInMemory = this.paperConfigTitanium.keepSpawnLoaded; // PaperSpigot
+         timings = new co.aikar.timings.WorldTimingsHandler(this); // Spigot - code below can generate new world and access timings
+         this.entityLimiter = new org.spigotmc.TickLimiter(spigotConfigTitanium.maxTickTime.entity);
+         this.tileLimiter = new org.spigotmc.TickLimiter(spigotConfigTitanium.maxTickTime.tile);
+@@ -1310,7 +1310,7 @@ public abstract class World implements IBlockAccess {
+                             {
+                                 // PaperSpigot start - FallingBlocks and TNT collide with specific non-collidable blocks
+                                 Block b = block.getBlock();
+-                                if (entity.world.paperSpigotConfig.fallingBlocksCollideWithSigns && (entity instanceof EntityTNTPrimed || entity instanceof EntityFallingBlock) && (b instanceof BlockSign || b instanceof BlockFenceGate || b instanceof BlockTorch || b instanceof BlockButtonAbstract || b instanceof BlockLever || b instanceof BlockTripwireHook || b instanceof BlockTripwire || b instanceof BlockChest || b instanceof BlockSlowSand || b instanceof BlockBed || b instanceof BlockEnderChest || b instanceof BlockEnchantmentTable || b instanceof BlockBrewingStand)) {
++                                if (entity.world.paperConfigTitanium.fallingBlocksCollideWithSigns && (entity instanceof EntityTNTPrimed || entity instanceof EntityFallingBlock) && (b instanceof BlockSign || b instanceof BlockFenceGate || b instanceof BlockTorch || b instanceof BlockButtonAbstract || b instanceof BlockLever || b instanceof BlockTripwireHook || b instanceof BlockTripwire || b instanceof BlockChest || b instanceof BlockSlowSand || b instanceof BlockBed || b instanceof BlockEnderChest || b instanceof BlockEnchantmentTable || b instanceof BlockBrewingStand)) {
+                                     AxisAlignedBB aabb = AxisAlignedBB.a(x, y, z, x + 1.0, y + 1.0, z + 1.0);
+                                     if (axisalignedbb.b(aabb)) arraylist.add(aabb);
+                                 } else {
+@@ -1326,7 +1326,7 @@ public abstract class World implements IBlockAccess {
+         // Spigot end
+ 
+         if (entity instanceof EntityItem) return arraylist; // PaperSpigot - Optimize item movement
+-        if (entity instanceof EntityArmorStand && !entity.world.paperSpigotConfig.armorStandEntityLookups) return arraylist; // Paper
++        if (entity instanceof EntityArmorStand && !entity.world.paperConfigTitanium.armorStandsDoCollisionEntityLookups) return arraylist; // Paper
+ 
+         double d0 = 0.25D;
+         List list = this.getEntities(entity, axisalignedbb.grow(d0, d0, d0));
+@@ -1724,9 +1724,9 @@ public abstract class World implements IBlockAccess {
+             entity.ticksLived++;
+             entity.inactiveTick();
+             // PaperSpigot start - Remove entities in unloaded chunks
+-            if (!this.isChunkLoaded(i, j, true) && ((entity instanceof EntityEnderPearl && this.paperSpigotConfig.removeUnloadedEnderPearls) ||
+-                    (entity instanceof EntityFallingBlock && this.paperSpigotConfig.removeUnloadedFallingBlocks) ||
+-                    (entity instanceof EntityTNTPrimed && this.paperSpigotConfig.removeUnloadedTNTEntities))) {
++            if (!this.isChunkLoaded(i, j, true) && ((entity instanceof EntityEnderPearl && this.paperConfigTitanium.removeUnloaded.enderpearls) ||
++                    (entity instanceof EntityFallingBlock && this.paperConfigTitanium.removeUnloaded.fallingBlocks) ||
++                    (entity instanceof EntityTNTPrimed && this.paperConfigTitanium.removeUnloaded.tntEntities))) {
+                 entity.inUnloadedChunk = true;
+                 entity.die();
+             }
+@@ -2419,7 +2419,7 @@ public abstract class World implements IBlockAccess {
+ 
+     protected void a(int i, int j, Chunk chunk) {
+         this.methodProfiler.c("moodSound");
+-        if (!this.paperSpigotConfig.disableMoodSounds && this.L == 0 && !this.isClientSide) { // PaperSpigot - Disable mood sounds
++        if (!this.paperConfigTitanium.disableMoodSounds && this.L == 0 && !this.isClientSide) { // PaperSpigot - Disable mood sounds
+             this.m = this.m * 3 + 1013904223;
+             int k = this.m >> 2;
+             int l = k & 15;
+@@ -2691,7 +2691,7 @@ public abstract class World implements IBlockAccess {
+             }
+ 
+             // PaperSpigot start - Asynchronous light updates
+-            if (chunk.world.paperSpigotConfig.useAsyncLighting) {
++            if (chunk.world.paperConfigTitanium.useAsyncLightning) {
+                 chunk.pendingLightUpdates.decrementAndGet();
+                 if (neighbors != null) {
+                     for (Chunk neighbor : neighbors) {
+@@ -2716,7 +2716,7 @@ public abstract class World implements IBlockAccess {
+             return false;
+         }
+ 
+-        if (!chunk.world.paperSpigotConfig.useAsyncLighting) {
++        if (!chunk.world.paperConfigTitanium.useAsyncLightning) {
+             return this.c(enumskyblock, position, chunk, null);
+         }
+ 
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index 9faad44d..f17873ef 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -68,7 +68,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+         this.manager = new PlayerChunkMap(this, spigotConfigTitanium.viewDistance); // Spigot
+         this.worldProvider.a(this);
+         this.chunkProvider = this.k();
+-        this.Q = ((org.bukkit.craftbukkit.CraftTravelAgent) new org.bukkit.craftbukkit.CraftTravelAgent(this).setSearchRadius(paperSpigotConfig.portalSearchRadius)); // CraftBukkit // Paper - configurable search radius
++        this.Q = ((org.bukkit.craftbukkit.CraftTravelAgent) new org.bukkit.craftbukkit.CraftTravelAgent(this).setSearchRadius(paperConfigTitanium.portalSearchRadius)); // CraftBukkit // Paper - configurable search radius
+         this.B();
+         this.C();
+         this.getWorldBorder().a(minecraftserver.aI());
+@@ -431,7 +431,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+                 int i1;
+                 BlockPosition blockposition;
+ 
+-                if (!this.paperSpigotConfig.disableThunder && this.random.nextInt(100000) == 0 && this.S() && this.R()) { // PaperSpigot - Disable thunder
++                if (!this.paperConfigTitanium.disableThunder && this.random.nextInt(100000) == 0 && this.S() && this.R()) { // PaperSpigot - Disable thunder
+                     this.m = this.m * 3 + 1013904223;
+                     i1 = this.m >> 2;
+                     blockposition = this.a(new BlockPosition(k + (i1 & 15), 0, l + (i1 >> 8 & 15)));
+@@ -441,7 +441,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+                 }
+ 
+                 this.methodProfiler.c("iceandsnow");
+-                if (!this.paperSpigotConfig.disableIceAndSnow && this.random.nextInt(16) == 0) { // PaperSpigot - Disable ice and snow
++                if (!this.paperConfigTitanium.disableIceAndSnow && this.random.nextInt(16) == 0) { // PaperSpigot - Disable ice and snow
+                     this.m = this.m * 3 + 1013904223;
+                     i1 = this.m >> 2;
+                     blockposition = this.q(new BlockPosition(k + (i1 & 15), 0, l + (i1 >> 8 & 15)));
+@@ -633,8 +633,8 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+                     }
+                     // CraftBukkit end
+                 */
+-                if (i > paperSpigotConfig.tickNextTickCap) {
+-                    i = paperSpigotConfig.tickNextTickCap;
++                if (i > paperConfigTitanium.tickNextTickListCap) {
++                    i = paperConfigTitanium.tickNextTickListCap;
+                 }
+                 // PaperSpigot end
+ 
+@@ -656,7 +656,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+                 timings.scheduledBlocksCleanup.stopTiming(); // Spigot
+ 
+                 // PaperSpigot start - Allow redstone ticks to bypass the tickNextTickListCap
+-                if (paperSpigotConfig.tickNextTickListCapIgnoresRedstone) {
++                if (paperConfigTitanium.tickNextTickListCapIgnoresRedstone) {
+                     Iterator<NextTickListEntry> iterator = this.M.iterator();
+                     while (iterator.hasNext()) {
+                         NextTickListEntry next = iterator.next();
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index a1669ad0..e5afa7fa 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -23,9 +23,16 @@ import org.spigotmc.TicksPerSecondCommand;
+ @Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
+ public class TitaniumConfig extends OkaeriConfig {
+ 
++    // For tests to work properly
++    @Exclude
++    private static TitaniumConfig DEFAULT_INSTANCE = new TitaniumConfig();
++
+     @Exclude
+     private static TitaniumConfig INSTANCE;
+ 
++    @Exclude
++    private static boolean DISABLE_LOGGING = true;
++
+     @Exclude
+     public static Map<String, Command> COMMANDS = new HashMap<>();
+ 
+@@ -43,9 +50,9 @@ public class TitaniumConfig extends OkaeriConfig {
+         super.load();
+ 
+         INSTANCE = this;
++        DISABLE_LOGGING = false;
+ 
+-        spigot.loadProperties();
+-        paper.loadProperties();
++        this.loadProperties();
+ 
+         COMMANDS.put("restart", new RestartCommand("restart"));
+         COMMANDS.put("tps", new TicksPerSecondCommand("tps"));
+@@ -53,6 +60,12 @@ public class TitaniumConfig extends OkaeriConfig {
+         return this;
+     }
+ 
++    private void loadProperties() {
++        bukkit.loadProperties();
++        spigot.loadProperties();
++        paper.loadProperties();
++    }
++
+     public void registerCommands() {
+         COMMANDS.forEach((key, commands) ->
+                 MinecraftServer.getServer().server
+@@ -61,6 +74,9 @@ public class TitaniumConfig extends OkaeriConfig {
+     }
+ 
+     public static TitaniumConfig get() {
++        if (INSTANCE == null) {
++            return DEFAULT_INSTANCE;
++        }
+         return INSTANCE;
+     }
+ 
+@@ -76,7 +92,7 @@ public class TitaniumConfig extends OkaeriConfig {
+     }
+ 
+     static void log(boolean verbose, String log) {
+-        if (Bukkit.getLogger() == null) {
++        if (Bukkit.getLogger() == null || DISABLE_LOGGING) {
+             return;
+         }
+ 
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 00ed729b..e7b5327f 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -1162,14 +1162,17 @@ public final class CraftServer implements Server {
+     }
+ 
+     public ChunkGenerator getGenerator(String world) {
+-        ConfigurationSection section = BukkitConfig.getConfigurationSection("worlds"); //TODO Move this somewhere
++        String name = serverConfig.bukkit.get("worlds." + world + ".generator", String.class);
+         ChunkGenerator result = null;
+ 
++        /* Titanium start
++        ConfigurationSection section = BukkitConfig.getConfigurationSection("worlds");
++
+         if (section != null) {
+             section = section.getConfigurationSection(world);
+ 
+             if (section != null) {
+-                String name = section.getString("generator");
++                String name = section.getString("generator");*/
+ 
+                 if ((name != null) && (!name.equals(""))) {
+                     String[] split = name.split(":", 2);
+@@ -1191,8 +1194,9 @@ public final class CraftServer implements Server {
+                         }
+                     }
+                 }
+-            }
++        /*    }
+         }
++        Titanium end */
+ 
+         return result;
+     }
+@@ -1583,7 +1587,7 @@ public final class CraftServer implements Server {
+         try {
+             // send location info if present
+             // completions = getCommandMap().tabComplete(player, message.substring(1));
+-            if (blockPosition == null || !((CraftWorld) player.getWorld()).getHandle().paperSpigotConfig.allowBlockLocationTabCompletion) {
++            if (blockPosition == null || !((CraftWorld) player.getWorld()).getHandle().paperConfigTitanium.allowBlockLocationTabCompletion) {
+                 completions = getCommandMap().tabComplete(player, message.substring(1));
+             } else {
+                 completions = getCommandMap().tabComplete(player, message.substring(1), new Location(player.getWorld(), blockPosition.getX(), blockPosition.getY(), blockPosition.getZ()));
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftEntity.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftEntity.java
+index 8b2cdcfe..ad6b5959 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftEntity.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftEntity.java
+@@ -216,7 +216,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
+ 
+     public void setVelocity(Vector vel) {
+         // Paper start - warn server owners when plugins try to set super high velocities
+-        if (TitaniumConfig.get().paper.warnWhenSettingExcessiveVelocity+) {
++        if (TitaniumConfig.get().paper.warnWhenSettingExcessiveVelocity) {
+             if(vel.getX() > 4 || vel.getX() < -4 || vel.getY() > 4 || vel.getY() < -4 || vel.getZ() > 4 || vel.getZ() < -4) {
+                 getServer().getLogger().warning("Excessive velocity set detected: tried to set velocity of entity #"+getEntityId()+" to ("+vel.getX()+","+vel.getY()+","+vel.getZ()+").");
+                 Thread.dumpStack();
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+index ff4236cc..de54d41b 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+@@ -859,7 +859,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+         if (fromWorld == toWorld) {
+             entity.playerConnection.teleport(to);
+         } else {
+-            server.getHandle().moveToWorld(entity, toWorld.dimension, true, to, !toWorld.paperSpigotConfig.disableTeleportationSuffocationCheck);
++            server.getHandle().moveToWorld(entity, toWorld.dimension, true, to, !toWorld.paperConfigTitanium.disableTeleportationSuffocationCheck);
+         }
+         return true;
+     }
+diff --git a/src/main/java/org/github/paperspigot/SharedConfig.java b/src/main/java/org/github/paperspigot/SharedConfig.java
+index 22134067..a6a40fdf 100644
+--- a/src/main/java/org/github/paperspigot/SharedConfig.java
++++ b/src/main/java/org/github/paperspigot/SharedConfig.java
+@@ -45,11 +45,13 @@ public class SharedConfig {
+ 
+         commands = new HashMap<String, Command>();
+ 
++        /* Titanium  start
+         BukkitConfig.init();
+         SpigotConfig.init();
+         PaperSpigotConfig.init();
+         SpigotWorldConfig.init();
+         PaperSpigotWorldConfig.init();
++        Titanium  end */
+     }
+ 
+     public static void registerCommands() {
+-- 
+2.32.0.windows.2
+

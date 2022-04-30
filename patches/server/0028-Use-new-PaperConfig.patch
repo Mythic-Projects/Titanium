@@ -1,0 +1,652 @@
+From 733b0edf9fd1545397ddcc9291bdd3060faf17aa Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sat, 30 Apr 2022 13:34:22 +0200
+Subject: [PATCH] Use new PaperConfig
+
+
+diff --git a/src/main/java/app/ashcon/sportpaper/server/KnockbackModificationCommand.java b/src/main/java/app/ashcon/sportpaper/server/KnockbackModificationCommand.java
+index 142f4268..4dc4a626 100644
+--- a/src/main/java/app/ashcon/sportpaper/server/KnockbackModificationCommand.java
++++ b/src/main/java/app/ashcon/sportpaper/server/KnockbackModificationCommand.java
+@@ -1,11 +1,12 @@
+ package app.ashcon.sportpaper.server;
+ 
+ import com.google.common.collect.ImmutableList;
++import net.titanium.config.PaperConfig;
++import net.titanium.config.TitaniumConfig;
+ import org.bukkit.ChatColor;
+ import org.bukkit.command.Command;
+ import org.bukkit.command.CommandSender;
+ import org.bukkit.util.StringUtil;
+-import org.github.paperspigot.PaperSpigotConfig;
+ 
+ import java.util.ArrayList;
+ import java.util.List;
+@@ -46,70 +47,72 @@ public class KnockbackModificationCommand extends Command {
+ 
+ 
+         try {
++            PaperConfig.Knockback knockbackConfig = TitaniumConfig.get().paper.knockback;
+             switch (args[0].toLowerCase()) {
+                 case "friction": {
+-                    double oldVal = PaperSpigotConfig.knockbackFriction;
++                    double oldVal = knockbackConfig.friction;
+                     double newVal = parseValue(args);
+-                    PaperSpigotConfig.knockbackFriction = newVal;
++                    knockbackConfig.friction = newVal;
+                     updated(sender, "friction", oldVal, newVal);
+                     break;
+                 }
+                 case "horizontal": {
+-                    double oldVal = PaperSpigotConfig.knockbackHorizontal;
++                    double oldVal =knockbackConfig.horizontal;
+                     double newVal = parseValue(args);
+-                    PaperSpigotConfig.knockbackHorizontal = newVal;
++                    knockbackConfig.horizontal = newVal;
+                     updated(sender, "horizontal knockback", oldVal, newVal);
+                     break;
+                 }
+                 case "vertical": {
+-                    double oldVal = PaperSpigotConfig.knockbackVertical;
++                    double oldVal = knockbackConfig.vertical;
+                     double newVal = parseValue(args);
+-                    PaperSpigotConfig.knockbackVertical = newVal;
++                    knockbackConfig.vertical = newVal;
+                     updated(sender, "vertical knockback", oldVal, newVal);
+                     break;
+                 }
+                 case "vertical-limit": {
+-                    double oldVal = PaperSpigotConfig.knockbackVerticalLimit;
++                    double oldVal = knockbackConfig.verticalLimit;
+                     double newVal = parseValue(args);
+-                    PaperSpigotConfig.knockbackVerticalLimit = newVal;
++                    knockbackConfig.verticalLimit = newVal;
+                     updated(sender, "vertical limit", oldVal, newVal);
+                     break;
+                 }
+                 case "extra-horizontal": {
+-                    double oldVal = PaperSpigotConfig.knockbackExtraHorizontal;
++                    double oldVal = knockbackConfig.extraHorizontal;
+                     double newVal = parseValue(args);
+-                    PaperSpigotConfig.knockbackExtraHorizontal = newVal;
++                    knockbackConfig.extraHorizontal = newVal;
+                     updated(sender, "horizontal (extra)", oldVal, newVal);
+                     break;
+                 }
+                 case "extra-vertical": {
+-                    double oldVal = PaperSpigotConfig.knockbackExtraVertical;
++                    double oldVal = knockbackConfig.extraVertical;
+                     double newVal = parseValue(args);
+-                    PaperSpigotConfig.knockbackExtraVertical = newVal;
++                    knockbackConfig.extraVertical = newVal;
+                     updated(sender, "vertical (extra)", oldVal, newVal);
+                     break;
+                 }
+                 case "reset":
+-                    PaperSpigotConfig.knockbackFriction = knockbackFriction;
+-                    PaperSpigotConfig.knockbackHorizontal = knockbackHorizontal;
+-                    PaperSpigotConfig.knockbackVertical = knockbackVertical;
+-                    PaperSpigotConfig.knockbackVerticalLimit = knockbackVerticalLimit;
+-                    PaperSpigotConfig.knockbackExtraHorizontal = knockbackExtraHorizontal;
+-                    PaperSpigotConfig.knockbackExtraVertical = knockbackExtraVertical;
++                    knockbackConfig.friction = knockbackFriction;
++                    knockbackConfig.horizontal = knockbackHorizontal;
++                    knockbackConfig.vertical = knockbackVertical;
++                    knockbackConfig.verticalLimit = knockbackVerticalLimit;
++                    knockbackConfig.extraHorizontal = knockbackExtraHorizontal;
++                    knockbackConfig.extraVertical = knockbackExtraVertical;
+                     sender.sendMessage(ChatColor.GREEN + "Knockback config reset to values from file.");
+                     break;
+                 case "show":
+                     sender.sendMessage(ChatColor.GOLD + "Knockback Configuration");
+-                    sendValue(sender, "Friction", PaperSpigotConfig.knockbackFriction);
+-                    sendValue(sender, "Horizontal Knockback", PaperSpigotConfig.knockbackHorizontal);
+-                    sendValue(sender, "Vertical Knockback", PaperSpigotConfig.knockbackVertical);
+-                    sendValue(sender, "Vertical Limit", PaperSpigotConfig.knockbackVerticalLimit);
+-                    sendValue(sender, "Horizontal (Extra)", PaperSpigotConfig.knockbackExtraHorizontal);
+-                    sendValue(sender, "Vertical (Extra)", PaperSpigotConfig.knockbackExtraVertical);
++                    sendValue(sender, "Friction", knockbackConfig.friction);
++                    sendValue(sender, "Horizontal Knockback", knockbackConfig.horizontal);
++                    sendValue(sender, "Vertical Knockback", knockbackConfig.vertical);
++                    sendValue(sender, "Vertical Limit", knockbackConfig.verticalLimit);
++                    sendValue(sender, "Horizontal (Extra)", knockbackConfig.extraHorizontal);
++                    sendValue(sender, "Vertical (Extra)", knockbackConfig.extraVertical);
+                     break;
+                 default:
+                     sender.sendMessage(ChatColor.RED + "Usage: " + usageMessage);
+             }
++            TitaniumConfig.saveConfig();
+         } catch (RuntimeException ex) {
+             sender.sendMessage(ChatColor.RED + ex.getMessage());
+         }
+diff --git a/src/main/java/net/minecraft/server/EntityArrow.java b/src/main/java/net/minecraft/server/EntityArrow.java
+index dd903aa7..51643c03 100644
+--- a/src/main/java/net/minecraft/server/EntityArrow.java
++++ b/src/main/java/net/minecraft/server/EntityArrow.java
+@@ -3,10 +3,10 @@ package net.minecraft.server;
+ import java.util.List;
+ 
+ // CraftBukkit start
++import net.titanium.config.TitaniumConfig;
+ import org.bukkit.entity.LivingEntity;
+ import org.bukkit.event.entity.EntityCombustByEntityEvent;
+ import org.bukkit.event.player.PlayerPickupItemEvent;
+-import org.github.paperspigot.PaperSpigotConfig;
+ import org.github.paperspigot.event.entity.ProjectileCollideEvent;
+ // CraftBukkit end
+ 
+@@ -97,7 +97,7 @@ public class EntityArrow extends Entity implements IProjectile {
+         this.motX = (double) (-MathHelper.sin(this.yaw / 180.0F * 3.1415927F) * MathHelper.cos(this.pitch / 180.0F * 3.1415927F));
+         this.motZ = (double) (MathHelper.cos(this.yaw / 180.0F * 3.1415927F) * MathHelper.cos(this.pitch / 180.0F * 3.1415927F));
+         this.motY = (double) (-MathHelper.sin(this.pitch / 180.0F * 3.1415927F));
+-        this.shoot(this.motX, this.motY, this.motZ, f * 1.5F, PaperSpigotConfig.includeRandomnessInArrowTrajectory ? 1.0F : 0); // SportPaper
++        this.shoot(this.motX, this.motY, this.motZ, f * 1.5F, TitaniumConfig.get().paper.settings.includeRandomnessInArrowTrajectory ? 1.0F : 0); // SportPaper
+     }
+ 
+     protected void h() {
+@@ -247,7 +247,7 @@ public class EntityArrow extends Entity implements IProjectile {
+                     f2 = MathHelper.sqrt(this.motX * this.motX + this.motY * this.motY + this.motZ * this.motZ);
+                     int k = MathHelper.f((double) f2 * this.damage);
+ 
+-                    if (this.isCritical() && PaperSpigotConfig.includeRandomnessInArrowDamage) { // SportPaper
++                    if (this.isCritical() && TitaniumConfig.get().paper.settings.includeRandomnessInArrowDamage) { // SportPaper
+                         k += this.random.nextInt(k / 2 + 2);
+                     }
+ 
+diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
+index 0e68599d..43251fb7 100644
+--- a/src/main/java/net/minecraft/server/EntityHuman.java
++++ b/src/main/java/net/minecraft/server/EntityHuman.java
+@@ -9,6 +9,7 @@ import java.util.List;
+ import java.util.UUID;
+ 
+ // CraftBukkit start
++import net.titanium.config.TitaniumConfig;
+ import org.bukkit.craftbukkit.entity.CraftHumanEntity;
+ import org.bukkit.craftbukkit.entity.CraftItem;
+ import org.bukkit.craftbukkit.inventory.CraftItemStack;
+@@ -1044,9 +1045,9 @@ public abstract class EntityHuman extends EntityLiving {
+                             // SportPaper start - Customizable knockback
+                             entity.g(
+                                 (double) (-MathHelper.sin(this.yaw * 3.1415927F / 180.0F) * (float) i *
+-                                    PaperSpigotConfig.knockbackExtraHorizontal), PaperSpigotConfig.knockbackExtraVertical,
++                                    TitaniumConfig.get().paper.knockback.extraHorizontal), TitaniumConfig.get().paper.knockback.extraVertical,
+                                 (double) (MathHelper.cos(this.yaw * 3.1415927F / 180.0F) * (float) i *
+-                                    PaperSpigotConfig.knockbackExtraHorizontal));
++                                        TitaniumConfig.get().paper.knockback.extraHorizontal));
+                             // SportPaper end
+                             this.motX *= 0.6D;
+                             this.motZ *= 0.6D;
+diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
+index f311373f..71630303 100644
+--- a/src/main/java/net/minecraft/server/EntityLiving.java
++++ b/src/main/java/net/minecraft/server/EntityLiving.java
+@@ -14,6 +14,7 @@ import java.util.UUID;
+ import java.util.ArrayList;
+ import com.google.common.base.Function;
+ import com.google.common.collect.Lists;
++import net.titanium.config.TitaniumConfig;
+ import org.bukkit.craftbukkit.attribute.CraftAttributeMap;
+ import org.bukkit.craftbukkit.entity.CraftLivingEntity;
+ import org.bukkit.craftbukkit.event.CraftEventFactory;
+@@ -940,10 +941,10 @@ public abstract class EntityLiving extends Entity {
+             double magnitude = MathHelper.sqrt(d0 * d0 + d1 * d1);
+ 
+             double knockbackReduction = this.getBukkitEntity().getKnockbackReduction();
+-            double friction = PaperSpigotConfig.knockbackFriction - knockbackReduction;
++            double friction = TitaniumConfig.get().paper.knockback.friction - knockbackReduction;
+ 
+-            double horizontalKnockback = PaperSpigotConfig.knockbackHorizontal * (1d - knockbackReduction);
+-            double verticalKnockback = PaperSpigotConfig.knockbackVertical * (1d - knockbackReduction);
++            double horizontalKnockback = TitaniumConfig.get().paper.knockback.horizontal * (1d - knockbackReduction);
++            double verticalKnockback = TitaniumConfig.get().paper.knockback.vertical * (1d - knockbackReduction);
+ 
+             // Paper - preserve old velocity
+             double oldMotX = this.motX;
+@@ -958,8 +959,8 @@ public abstract class EntityLiving extends Entity {
+             this.motY += verticalKnockback;
+             this.motZ -= d1 / magnitude * horizontalKnockback;
+ 
+-            if (this.motY > PaperSpigotConfig.knockbackVerticalLimit) {
+-                this.motY = PaperSpigotConfig.knockbackVerticalLimit;
++            if (this.motY > TitaniumConfig.get().paper.knockback.verticalLimit) {
++                this.motY = TitaniumConfig.get().paper.knockback.verticalLimit;
+             }
+             // SportPaper end
+ 
+diff --git a/src/main/java/net/minecraft/server/EntityZombie.java b/src/main/java/net/minecraft/server/EntityZombie.java
+index dd21d542..7f676d9a 100644
+--- a/src/main/java/net/minecraft/server/EntityZombie.java
++++ b/src/main/java/net/minecraft/server/EntityZombie.java
+@@ -5,6 +5,7 @@ import java.util.List;
+ import java.util.UUID;
+ 
+ //CraftBukkit start
++import net.titanium.config.TitaniumConfig;
+ import org.bukkit.event.entity.CreatureSpawnEvent;
+ import org.bukkit.event.entity.EntityCombustByEntityEvent;
+ import org.bukkit.event.entity.EntityCombustEvent;
+@@ -16,7 +17,7 @@ public class EntityZombie extends EntityMonster {
+ 
+     protected static final IAttribute a = (new AttributeRanged((IAttribute) null, "zombie.spawnReinforcements", 0.0D, 0.0D, 1.0D)).a("Spawn Reinforcements Chance");
+     private static final UUID b = UUID.fromString("B9766B59-9566-4402-BC1F-2EE2A276D836");
+-    private static final AttributeModifier c = new AttributeModifier(EntityZombie.b, "Baby speed boost", org.github.paperspigot.PaperSpigotConfig.babyZombieMovementSpeed, 1); // PaperSpigot - Configurable baby zombie movement speed
++    private static final AttributeModifier c = new AttributeModifier(EntityZombie.b, "Baby speed boost", TitaniumConfig.get().paper.settings.babyZombieMovementSpeed, 1); // PaperSpigot - Configurable baby zombie movement speed
+     private final PathfinderGoalBreakDoor bm = new PathfinderGoalBreakDoor(this);
+     private int bn;
+     private boolean bo = false;
+diff --git a/src/main/java/net/minecraft/server/ItemBucket.java b/src/main/java/net/minecraft/server/ItemBucket.java
+index 2e24129f..266f3859 100644
+--- a/src/main/java/net/minecraft/server/ItemBucket.java
++++ b/src/main/java/net/minecraft/server/ItemBucket.java
+@@ -1,14 +1,13 @@
+ package net.minecraft.server;
+ 
+ // CraftBukkit start
++import net.titanium.config.TitaniumConfig;
+ import org.bukkit.craftbukkit.event.CraftEventFactory;
+ import org.bukkit.craftbukkit.inventory.CraftItemStack;
+ import org.bukkit.event.player.PlayerBucketEmptyEvent;
+ import org.bukkit.event.player.PlayerBucketFillEvent;
+ // CraftBukkit end
+ 
+-import org.github.paperspigot.PaperSpigotConfig; // PaperSpigot
+-
+ public class ItemBucket extends Item {
+ 
+     private Block a;
+@@ -100,8 +99,8 @@ public class ItemBucket extends Item {
+                         if (this.a(world, blockposition1) && !entityhuman.abilities.canInstantlyBuild) {
+                             entityhuman.b(StatisticList.USE_ITEM_COUNT[Item.getId(this)]);
+                             // PaperSpigot start - Stackable Buckets
+-                            if ((this == Items.LAVA_BUCKET && PaperSpigotConfig.stackableLavaBuckets) ||
+-                                    (this == Items.WATER_BUCKET && PaperSpigotConfig.stackableWaterBuckets)) {
++                            if ((this == Items.LAVA_BUCKET && TitaniumConfig.get().paper.stackableBuckets.lava) ||
++                                    (this == Items.WATER_BUCKET && TitaniumConfig.get().paper.stackableBuckets.water)) {
+                                 if (--itemstack.count <= 0) {
+                                     return CraftItemStack.asNMSCopy(event.getItemStack());
+                                 }
+diff --git a/src/main/java/net/minecraft/server/ItemMilkBucket.java b/src/main/java/net/minecraft/server/ItemMilkBucket.java
+index 8e3d77e0..b8f5c403 100644
+--- a/src/main/java/net/minecraft/server/ItemMilkBucket.java
++++ b/src/main/java/net/minecraft/server/ItemMilkBucket.java
+@@ -1,6 +1,6 @@
+ package net.minecraft.server;
+ 
+-import org.github.paperspigot.PaperSpigotConfig; // PaperSpigot
++import net.titanium.config.TitaniumConfig;
+ 
+ public class ItemMilkBucket extends Item {
+ 
+@@ -20,7 +20,7 @@ public class ItemMilkBucket extends Item {
+ 
+         entityhuman.b(StatisticList.USE_ITEM_COUNT[Item.getId(this)]);
+         // PaperSpigot start - Stackable Buckets
+-        if (PaperSpigotConfig.stackableMilkBuckets) {
++        if (TitaniumConfig.get().paper.stackableBuckets.milk) {
+             if (itemstack.count <= 0) {
+                 return new ItemStack(Items.BUCKET);
+             } else if (!entityhuman.inventory.pickup(new ItemStack(Items.BUCKET))) {
+diff --git a/src/main/java/net/minecraft/server/ItemStack.java b/src/main/java/net/minecraft/server/ItemStack.java
+index c54050bf..49d68638 100644
+--- a/src/main/java/net/minecraft/server/ItemStack.java
++++ b/src/main/java/net/minecraft/server/ItemStack.java
+@@ -9,6 +9,7 @@ import java.util.Random;
+ import java.util.List;
+ import java.util.Map;
+ 
++import net.titanium.config.TitaniumConfig;
+ import org.bukkit.Location;
+ import org.bukkit.TreeType;
+ import org.bukkit.block.BlockState;
+@@ -19,8 +20,6 @@ import org.bukkit.entity.Player;
+ import org.bukkit.event.world.StructureGrowEvent;
+ // CraftBukkit end
+ 
+-import org.github.paperspigot.PaperSpigotConfig; // PaperSpigot
+-
+ public final class ItemStack {
+ 
+     public static final DecimalFormat a = new DecimalFormat("#.###");
+@@ -334,7 +333,7 @@ public final class ItemStack {
+         int id = CraftMagicNumbers.getId(this.getItem());
+         if (CraftMagicNumbers.getBlock(id) != Blocks.AIR) {
+             // If vanilla doesn't use data on it don't allow any
+-            if ((PaperSpigotConfig.dataValueAllowedItems == null || !PaperSpigotConfig.dataValueAllowedItems.contains(id)) &&
++            if ((TitaniumConfig.get().paper.dataValueAllowedItems == null || !TitaniumConfig.get().paper.dataValueAllowedItems.contains(id)) &&
+                     (!(this.usesData() || this.getItem().usesDurability()))) {
+             // PaperSpigot end
+                 i = 0;
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 4056b8a9..2b14d4ed 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -839,7 +839,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+             SpigotTimings.worldSaveTimer.startTiming(); // Spigot
+             this.methodProfiler.a("save");
+             serverAutoSave = (autosavePeriod > 0 && this.ticks % autosavePeriod == 0); // Paper
+-            int playerSaveInterval = PaperSpigotConfig.playerAutoSaveRate;
++            int playerSaveInterval = TitaniumConfig.get().paper.settings.playerAutoSaveRate;
+             if (playerSaveInterval < 0) {
+                 playerSaveInterval = autosavePeriod;
+             }
+diff --git a/src/main/java/net/minecraft/server/MobEffectAttackDamage.java b/src/main/java/net/minecraft/server/MobEffectAttackDamage.java
+index 175503bd..3a8a3940 100644
+--- a/src/main/java/net/minecraft/server/MobEffectAttackDamage.java
++++ b/src/main/java/net/minecraft/server/MobEffectAttackDamage.java
+@@ -1,5 +1,7 @@
+ package net.minecraft.server;
+ 
++import net.titanium.config.TitaniumConfig;
++
+ public class MobEffectAttackDamage extends MobEffectList {
+ 
+     protected MobEffectAttackDamage(int i, MinecraftKey minecraftkey, boolean flag, int j) {
+@@ -8,6 +10,6 @@ public class MobEffectAttackDamage extends MobEffectList {
+ 
+     public double a(int i, AttributeModifier attributemodifier) {
+         // PaperSpigot - Configurable modifiers for strength and weakness effects
+-        return this.id == MobEffectList.WEAKNESS.id ? (double) (org.github.paperspigot.PaperSpigotConfig.weaknessEffectModifier * (float) (i + 1)) : org.github.paperspigot.PaperSpigotConfig.strengthEffectModifier * (double) (i + 1);
++        return this.id == MobEffectList.WEAKNESS.id ? (double) (TitaniumConfig.get().paper.effectModifiers.weakness * (float) (i + 1)) : TitaniumConfig.get().paper.effectModifiers.strength * (double) (i + 1);
+     }
+ }
+diff --git a/src/main/java/net/minecraft/server/PersistentScoreboard.java b/src/main/java/net/minecraft/server/PersistentScoreboard.java
+index a962804e..34d0b476 100644
+--- a/src/main/java/net/minecraft/server/PersistentScoreboard.java
++++ b/src/main/java/net/minecraft/server/PersistentScoreboard.java
+@@ -2,6 +2,7 @@ package net.minecraft.server;
+ 
+ import java.util.Collection;
+ import java.util.Iterator;
++import net.titanium.config.TitaniumConfig;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
+@@ -174,7 +175,7 @@ public class PersistentScoreboard extends PersistentBase {
+ 
+         while (iterator.hasNext()) {
+             ScoreboardTeam scoreboardteam = (ScoreboardTeam) iterator.next();
+-            if (!org.github.paperspigot.PaperSpigotConfig.saveEmptyScoreboardTeams && scoreboardteam.getPlayerNameSet().isEmpty()) continue; // Paper
++            if (!TitaniumConfig.get().paper.settings.saveEmptyScoreboardTeams && scoreboardteam.getPlayerNameSet().isEmpty()) continue; // Paper
+             NBTTagCompound nbttagcompound = new NBTTagCompound();
+ 
+             nbttagcompound.setString("Name", scoreboardteam.getName());
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index 44275fe0..2e4701d3 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -691,7 +691,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+         WorldServer worldserver = this.minecraftServer.getWorldServer(this.player.dimension);
+         boolean throttled = false;
+         // PaperSpigot - Allow disabling the player interaction limiter
+-        if (org.github.paperspigot.PaperSpigotConfig.interactLimitEnabled && lastPlace != -1 && packetplayinblockplace.timestamp - lastPlace < 30 && packets++ >= 4) {
++        if (TitaniumConfig.get().paper.settings.limitPlayerInteractions && lastPlace != -1 && packetplayinblockplace.timestamp - lastPlace < 30 && packets++ >= 4) {
+             throttled = true;
+         } else if ( packetplayinblockplace.timestamp - lastPlace >= 30 || lastPlace == -1 )
+         {
+@@ -1822,9 +1822,9 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+                             itemstack = this.player.activeContainer.clickItem(packetplayinwindowclick.b(), packetplayinwindowclick.c(), packetplayinwindowclick.f(), this.player);
+                             // PaperSpigot start - Stackable Buckets
+                             if (itemstack != null &&
+-                                    ((itemstack.getItem() == Items.LAVA_BUCKET && PaperSpigotConfig.stackableLavaBuckets) ||
+-                                            (itemstack.getItem() == Items.WATER_BUCKET && PaperSpigotConfig.stackableWaterBuckets) ||
+-                                            (itemstack.getItem() == Items.MILK_BUCKET && PaperSpigotConfig.stackableMilkBuckets))) {
++                                    ((itemstack.getItem() == Items.LAVA_BUCKET && TitaniumConfig.get().paper.stackableBuckets.lava) ||
++                                            (itemstack.getItem() == Items.WATER_BUCKET && TitaniumConfig.get().paper.stackableBuckets.water) ||
++                                            (itemstack.getItem() == Items.MILK_BUCKET && TitaniumConfig.get().paper.stackableBuckets.milk))) {
+                                 if (action == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+                                     this.player.updateInventory(this.player.activeContainer);
+                                 } else {
+@@ -2109,7 +2109,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+     public void a(PacketPlayInTabComplete packetplayintabcomplete) {
+         PlayerConnectionUtils.ensureMainThread(packetplayintabcomplete, this, this.player.u());
+         // CraftBukkit start
+-        if (tabSpamLimiter.addAndGet(PaperSpigotConfig.tabSpamIncrement) > PaperSpigotConfig.tabSpamLimit && !this.minecraftServer.getPlayerList().isOp(this.player.getProfile())) { // Paper start - split and make configurable
++        if (tabSpamLimiter.addAndGet(TitaniumConfig.get().paper.settings.spamLimiter.tabSpamIncrement) > TitaniumConfig.get().paper.settings.spamLimiter.tabSpamLimit && !this.minecraftServer.getPlayerList().isOp(this.player.getProfile())) { // Paper start - split and make configurable
+             this.disconnect("disconnect.spam");
+             return;
+         }
+diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
+index b14cc2e3..f08ef9f9 100644
+--- a/src/main/java/net/minecraft/server/PlayerList.java
++++ b/src/main/java/net/minecraft/server/PlayerList.java
+@@ -40,7 +40,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
+ import org.bukkit.event.player.PlayerRespawnEvent;
+ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
+ import org.bukkit.util.Vector;
+-import org.github.paperspigot.PaperSpigotConfig;
+ import org.spigotmc.event.player.PlayerSpawnLocationEvent;
+ // CraftBukkit end
+ 
+@@ -1113,7 +1112,7 @@ public abstract class PlayerList {
+             EntityPlayer entityplayer = this.players.get(i);
+             if (interval == null || now - entityplayer.lastSave >= interval) {
+                 this.savePlayerFile(entityplayer);
+-                if (interval != null && ++numSaved <= PaperSpigotConfig.maxPlayerAutoSavePerTick) { break; } // Paper
++                if (interval != null && ++numSaved <= TitaniumConfig.get().paper.settings.maxPlayersAutoSavePerTick) { break; } // Paper
+             }
+         }
+ 
+diff --git a/src/main/java/net/minecraft/server/RegionFileCache.java b/src/main/java/net/minecraft/server/RegionFileCache.java
+index b78477e0..1c1ba380 100644
+--- a/src/main/java/net/minecraft/server/RegionFileCache.java
++++ b/src/main/java/net/minecraft/server/RegionFileCache.java
+@@ -1,7 +1,7 @@
+ package net.minecraft.server;
+ 
+ import com.google.common.collect.Maps;
+-import org.github.paperspigot.PaperSpigotConfig;
++import net.titanium.config.TitaniumConfig;
+ import org.github.paperspigot.exception.ServerInternalException;
+ 
+ import java.io.DataInputStream;
+@@ -14,7 +14,7 @@ import java.util.Map;
+ 
+ public class RegionFileCache {
+ 
+-    public static final Map<File, RegionFile> a = new LinkedHashMap(PaperSpigotConfig.regionFileCacheSize, 0.75f, true); // Spigot - private -> public, Paper - HashMap -> LinkedHashMap
++    public static final Map<File, RegionFile> a = new LinkedHashMap(TitaniumConfig.get().paper.settings.regionFileCacheSize, 0.75f, true); // Spigot - private -> public, Paper - HashMap -> LinkedHashMap
+ 
+     // PaperSpigot start
+     public static synchronized RegionFile a(File file, int i, int j) {
+@@ -34,7 +34,7 @@ public class RegionFileCache {
+                 file1.mkdirs();
+             }
+ 
+-            if (RegionFileCache.a.size() >= PaperSpigotConfig.regionFileCacheSize) { // Paper
++            if (RegionFileCache.a.size() >= TitaniumConfig.get().paper.settings.regionFileCacheSize) { // Paper
+                 trimCache(); // Paper
+             }
+ 
+@@ -48,7 +48,7 @@ public class RegionFileCache {
+     // Paper Start
+     private static synchronized void trimCache() {
+         Iterator<Map.Entry<File, RegionFile>> itr = RegionFileCache.a.entrySet().iterator();
+-        int count = RegionFileCache.a.size() - PaperSpigotConfig.regionFileCacheSize;
++        int count = RegionFileCache.a.size() - TitaniumConfig.get().paper.settings.regionFileCacheSize;
+         while (count-- >= 0 && itr.hasNext()) {
+             try {
+                 itr.next().getValue().c();
+diff --git a/src/main/java/net/minecraft/server/WorldNBTStorage.java b/src/main/java/net/minecraft/server/WorldNBTStorage.java
+index 4eee95ae..f4e4c915 100644
+--- a/src/main/java/net/minecraft/server/WorldNBTStorage.java
++++ b/src/main/java/net/minecraft/server/WorldNBTStorage.java
+@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
+ import java.io.IOException;
+ import java.io.InputStream;
+ import java.io.OutputStream;
++import net.titanium.config.TitaniumConfig;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
+@@ -17,7 +18,6 @@ import java.util.UUID;
+ import org.bukkit.craftbukkit.entity.CraftPlayer;
+ import org.bukkit.craftbukkit.world.CraftFormatManager;
+ import org.bukkit.craftbukkit.world.IWorldFormat;
+-import org.github.paperspigot.PaperSpigotConfig;
+ import org.github.paperspigot.exception.ServerInternalException;
+ // CraftBukkit end
+ 
+@@ -130,7 +130,7 @@ public class WorldNBTStorage implements IDataManager, IPlayerFileData {
+     }
+ 
+     public void save(EntityHuman entityhuman) {
+-        if(!PaperSpigotConfig.savePlayerData) return; // Paper - Make player data saving configurable
++        if(!TitaniumConfig.get().paper.settings.savePlayerData) return; // Paper - Make player data saving configurable
+         try {
+             NBTTagCompound nbttagcompound = new NBTTagCompound();
+ 
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index 355d1686..ae97003b 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -13,6 +13,7 @@ import java.util.Random;
+ import java.util.Set;
+ import java.util.TreeSet;
+ import java.util.UUID;
++import net.titanium.config.TitaniumConfig;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
+@@ -688,7 +689,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+ 
+                         if (iblockdata.getBlock().getMaterial() != Material.AIR && Block.a(iblockdata.getBlock(), nextticklistentry.a())) {
+                             try {
+-                                stopPhysicsEvent = !PaperSpigotConfig.firePhysicsEventForRedstone && (iblockdata.getBlock() instanceof BlockDiodeAbstract || iblockdata.getBlock() instanceof BlockRedstoneTorch); // Paper
++                                stopPhysicsEvent = !TitaniumConfig.get().paper.firePhysicsEventForRedstone && (iblockdata.getBlock() instanceof BlockDiodeAbstract || iblockdata.getBlock() instanceof BlockRedstoneTorch); // Paper
+                                 iblockdata.getBlock().b((World) this, nextticklistentry.a, iblockdata, this.random);
+                             } catch (Throwable throwable) {
+                                 CrashReport crashreport = CrashReport.a(throwable, "Exception while ticking a block");
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index 29d0e421..a1669ad0 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -64,6 +64,13 @@ public class TitaniumConfig extends OkaeriConfig {
+         return INSTANCE;
+     }
+ 
++    public static void saveConfig() {
++        if (INSTANCE == null) {
++            return;
++        }
++        INSTANCE.save();
++    }
++
+     static String color(String input) {
+         return ChatColor.translateAlternateColorCodes('&', input);
+     }
+diff --git a/src/main/java/net/titanium/config/TitaniumConfigSection.java b/src/main/java/net/titanium/config/TitaniumConfigSection.java
+index afd2cb55..3e7b2476 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfigSection.java
++++ b/src/main/java/net/titanium/config/TitaniumConfigSection.java
+@@ -20,15 +20,8 @@ public abstract class TitaniumConfigSection extends OkaeriConfig {
+ 
+         Class<?> clazz = this.getClass();
+         for (Field field : clazz.getDeclaredFields()) {
+-            try {
+-                if (field.getType().equals(String.class)) {
+-                    field.set(this, TitaniumConfig.color((String) field.get(this)));
+-                } else if (field.getType().equals(List.class)) {
+-                    List<String> list = (List<String>) field.get(this);
+-                    list.replaceAll(TitaniumConfig::color);
+-                }
+-            } catch (Exception ex) {
+-                Bukkit.getLogger().log(Level.SEVERE, "Failed to color property " + field.getName(), ex);
++            if (colorField(field)) {
++                continue;
+             }
+ 
+             if (field.getAnnotation(Exclude.class) != null) {
+@@ -46,4 +39,20 @@ public abstract class TitaniumConfigSection extends OkaeriConfig {
+         }
+     }
+ 
++    private boolean colorField(Field field) {
++        try {
++            if (field.getType().equals(String.class)) {
++                field.set(this, TitaniumConfig.color((String) field.get(this)));
++                return true;
++            } else if (field.getType().equals(List.class)) {
++                List<String> list = (List<String>) field.get(this);
++                list.replaceAll(TitaniumConfig::color);
++                return true;
++            }
++        } catch (Exception ex) {
++            Bukkit.getLogger().log(Level.SEVERE, "Failed to color property " + field.getName(), ex);
++        }
++        return false;
++    }
++
+ }
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 42da5531..00ed729b 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -241,7 +241,7 @@ public final class CraftServer implements Server {
+     }
+ 
+     private void pluginFailedToLoad(Plugin plugin) {
+-        if(PaperSpigotConfig.requireAllPlugins) {
++        if(TitaniumConfig.get().paper.settings.requireAllPlugins) {
+             throw new RuntimeException("Required plugin " + plugin.getDescription().getFullName() + " failed to load (server will shutdown)");
+         }
+     }
+@@ -583,12 +583,7 @@ public final class CraftServer implements Server {
+ 
+     @Override
+     public @Nullable Duration getEmptyServerSuspendDelay() {
+-        try {
+-            return Duration.parse(PaperSpigotConfig.emptyServerSuspendDelay);
+-        } catch(Exception e) {
+-            getLogger().log(Level.SEVERE, "Invalid configuration value", e);
+-            return null;
+-        }
++        return TitaniumConfig.get().paper.settings.emptyServerSuspend;
+     }
+ 
+     @Override
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+index 2c66dbee..c8504990 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+@@ -16,6 +16,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
+ import net.minecraft.server.*;
+ 
+ import app.ashcon.sportpaper.api.text.PersonalizedComponent;
++import net.titanium.config.TitaniumConfig;
+ import org.apache.commons.lang.Validate;
+ import org.bukkit.BlockChangeDelegate;
+ import org.bukkit.Bukkit;
+@@ -125,7 +126,7 @@ public class CraftWorld implements World {
+     }
+ 
+     public boolean checkTicking() {
+-        boolean shouldTick = PaperSpigotConfig.tickEmptyWorlds || hasPlayers();
++        boolean shouldTick = TitaniumConfig.get().paper.settings.tickEmptyWorlds || hasPlayers();
+         if(ticking) {
+             if(!shouldTick) { // Empty
+                 ticking = false;
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftEntity.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftEntity.java
+index 2c1b591a..8b2cdcfe 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftEntity.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftEntity.java
+@@ -9,6 +9,7 @@ import java.util.UUID;
+ 
+ import net.minecraft.server.*;
+ 
++import net.titanium.config.TitaniumConfig;
+ import org.bukkit.Chunk;
+ import org.bukkit.EntityEffect;
+ import org.bukkit.Location;
+@@ -215,7 +216,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
+ 
+     public void setVelocity(Vector vel) {
+         // Paper start - warn server owners when plugins try to set super high velocities
+-        if (PaperSpigotConfig.warnForExcessiveVelocity) {
++        if (TitaniumConfig.get().paper.warnWhenSettingExcessiveVelocity+) {
+             if(vel.getX() > 4 || vel.getX() < -4 || vel.getY() > 4 || vel.getY() < -4 || vel.getZ() > 4 || vel.getZ() < -4) {
+                 getServer().getLogger().warning("Excessive velocity set detected: tried to set velocity of entity #"+getEntityId()+" to ("+vel.getX()+","+vel.getY()+","+vel.getZ()+").");
+                 Thread.dumpStack();
+-- 
+2.32.0.windows.2
+
