@@ -1,0 +1,282 @@
+From 83c0e8514bc5b22560d708d822e5ffd76f59446c Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sat, 30 Apr 2022 21:53:14 +0200
+Subject: [PATCH] Some chunk gen executors etc.
+
+
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+index 32bd3431..46c525df 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+@@ -4,6 +4,7 @@ import java.io.IOException;
+ import java.util.Iterator;
+ import java.util.List;
+ 
++import net.titanium.chunk.gen.ChunkGenExecutor;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
+@@ -160,7 +161,7 @@ public class ChunkProviderServer implements IChunkProvider {
+                 chunk = ChunkIOExecutor.syncChunkLoad(world, loader, this, i, j);
+             }
+         } else if (chunk == null) {
+-            chunk = originalGetChunkAt(i, j);
++            chunk = originalGetChunkAt(i, j, runnable);
+         }
+ 
+         unloadQueue.remove(LongHash.toLong(i, j)); // SportPaper
+@@ -171,20 +172,29 @@ public class ChunkProviderServer implements IChunkProvider {
+ 
+         return chunk;
+     }
++
+     public Chunk originalGetChunkAt(int i, int j) {
++        return originalGetChunkAt(i, j, null);
++    }
++
++    public Chunk originalGetChunkAt(int i, int j, Runnable runnable) {
+         Chunk chunk = (Chunk) this.chunks.get(LongHash.toLong(i, j));
+         boolean newChunk = false;
+         // CraftBukkit end
+ 
+         if (chunk == null) {
+-            world.timings.syncChunkLoadTimer.startTiming(); // Spigot
+             chunk = this.loadChunk(i, j);
+             if (chunk == null) {
+                 if (this.chunkProvider == null) {
+                     chunk = this.emptyChunk;
+                 } else {
+                     try {
+-                        chunk = this.chunkProvider.getOrCreateChunk(i, j);
++                        if (runnable != null && false) {
++                            ChunkGenExecutor.queueChunkGen(world, this.chunkProvider, this, i, j, runnable);
++                            return null;
++                        } else {
++                            chunk = ChunkGenExecutor.syncChunkGen(world, this.chunkProvider, this, i, j);
++                        }
+                     } catch (Throwable throwable) {
+                         CrashReport crashreport = CrashReport.a(throwable, "Exception generating new chunk");
+                         CrashReportSystemDetails crashreportsystemdetails = crashreport.a("Chunk to be generated");
+@@ -197,42 +207,14 @@ public class ChunkProviderServer implements IChunkProvider {
+                 }
+                 newChunk = true; // CraftBukkit
+             }
++        }
+ 
+-            this.chunks.put(LongHash.toLong(i, j), chunk);
+-            
+-            chunk.addEntities();
+-            
+-            // CraftBukkit start
+-            Server server = world.getServer();
+-            if (server != null) {
+-                /*
+-                 * If it's a new world, the first few chunks are generated inside
+-                 * the World constructor. We can't reliably alter that, so we have
+-                 * no way of creating a CraftWorld/CraftServer at that point.
+-                 */
+-                server.getPluginManager().callEvent(new org.bukkit.event.world.ChunkLoadEvent(chunk.bukkitChunk, newChunk));
+-            }
+-
+-            // Update neighbor counts
+-            for (int x = -2; x < 3; x++) {
+-                for (int z = -2; z < 3; z++) {
+-                    if (x == 0 && z == 0) {
+-                        continue;
+-                    }
++        this.unloadQueue.remove(LongHash.toLong(i, j)); // SportPaper
+ 
+-                    Chunk neighbor = this.getChunkIfLoaded(chunk.locX + x, chunk.locZ + z);
+-                    if (neighbor != null) {
+-                        neighbor.setNeighborLoaded(-x, -z);
+-                        chunk.setNeighborLoaded(x, z);
+-                    }
+-                }
+-            }
+-            // CraftBukkit end
+-            chunk.loadNearby(this, this, i, j);
+-            world.timings.syncChunkLoadTimer.stopTiming(); // Spigot
++        if (runnable != null) {
++            runnable.run();
+         }
+ 
+-        this.unloadQueue.remove(LongHash.toLong(i, j)); // SportPaper
+         return chunk;
+     }
+ 
+diff --git a/src/main/java/net/titanium/chunk/gen/ChunkGenExecutor.java b/src/main/java/net/titanium/chunk/gen/ChunkGenExecutor.java
+new file mode 100644
+index 00000000..2bff0a5f
+--- /dev/null
++++ b/src/main/java/net/titanium/chunk/gen/ChunkGenExecutor.java
+@@ -0,0 +1,41 @@
++package net.titanium.chunk.gen;
++
++import net.minecraft.server.BiomeBase;
++import net.minecraft.server.Chunk;
++import net.minecraft.server.ChunkProviderServer;
++import net.minecraft.server.ChunkRegionLoader;
++import net.minecraft.server.IChunkProvider;
++import net.minecraft.server.MCUtil;
++import net.minecraft.server.World;
++import net.titanium.config.TitaniumConfig;
++import org.bukkit.craftbukkit.block.CraftBlock;
++import org.bukkit.craftbukkit.util.AsynchronousExecutor;
++
++public class ChunkGenExecutor {
++    static final int BASE_THREADS = TitaniumConfig.get().chunk.io.baseThreads;
++    static final int PLAYERS_PER_THREAD = TitaniumConfig.get().chunk.io.playersPerThread;
++
++    private static final AsynchronousExecutor<QueuedGenChunk, Chunk, Runnable, RuntimeException> instance = new AsynchronousExecutor<QueuedGenChunk, Chunk, Runnable, RuntimeException>(new ChunkGenProvider(), BASE_THREADS);
++
++    public static Chunk syncChunkGen(World world, IChunkProvider chunkGenerator, ChunkProviderServer provider, int x, int z) {
++        return MCUtil.ensureMain("Async Chunk Gen", () -> instance.getSkipQueue(new QueuedGenChunk(x, z, chunkGenerator, world, provider))); // Paper
++    }
++
++    public static void queueChunkGen(World world, IChunkProvider chunkGenerator, ChunkProviderServer provider, int x, int z, Runnable runnable) {
++        instance.add(new QueuedGenChunk(x, z, chunkGenerator, world, provider), runnable);
++    }
++
++    // Abuses the fact that hashCode and equals for QueuedChunk only use world and coords
++    public static void dropQueuedChunkGen(World world, int x, int z, Runnable runnable) {
++        instance.drop(new QueuedGenChunk(x, z, null, world, null), runnable);
++    }
++
++    public static void adjustPoolSize(int players) {
++        int size = Math.max(BASE_THREADS, (int) Math.ceil(players / PLAYERS_PER_THREAD));
++        instance.setActiveThreads(size);
++    }
++
++    public static void tick() {
++        instance.finishActive();
++    }
++}
+diff --git a/src/main/java/net/titanium/chunk/gen/ChunkGenProvider.java b/src/main/java/net/titanium/chunk/gen/ChunkGenProvider.java
+new file mode 100644
+index 00000000..1f457c33
+--- /dev/null
++++ b/src/main/java/net/titanium/chunk/gen/ChunkGenProvider.java
+@@ -0,0 +1,76 @@
++package net.titanium.chunk.gen;
++
++import java.io.IOException;
++import java.util.concurrent.atomic.AtomicInteger;
++import net.minecraft.server.Chunk;
++import net.minecraft.server.ChunkCoordIntPair;
++import net.minecraft.server.ChunkProviderGenerate;
++import net.minecraft.server.ChunkProviderServer;
++import net.minecraft.server.ChunkRegionLoader;
++import net.minecraft.server.IChunkProvider;
++import net.minecraft.server.MCUtil;
++import net.minecraft.server.NBTTagCompound;
++import org.bukkit.Server;
++import org.bukkit.craftbukkit.generator.NormalChunkGenerator;
++import org.bukkit.craftbukkit.util.AsynchronousExecutor;
++import org.bukkit.craftbukkit.util.LongHash;
++
++class ChunkGenProvider implements AsynchronousExecutor.CallBackProvider<QueuedGenChunk, Chunk, Runnable, RuntimeException> {
++
++    private final AtomicInteger threadNumber = new AtomicInteger(1);
++
++    // async stuff
++    public Chunk callStage1(QueuedGenChunk queuedChunk) throws RuntimeException {
++        IChunkProvider chunkGenerator = queuedChunk.chunkGenerator;
++        return chunkGenerator.getOrCreateChunk(queuedChunk.x, queuedChunk.z);
++    }
++
++    // sync stuff
++    public void callStage2(QueuedGenChunk queuedChunk, Chunk chunk) throws RuntimeException {
++        if (chunk == null || queuedChunk.provider.chunks.containsKey(ChunkCoordIntPair.a(queuedChunk.x, queuedChunk.z))) {
++            queuedChunk.provider.originalGetChunkAt(queuedChunk.x, queuedChunk.z);
++            return;
++        }
++
++        chunk.world.timings.syncChunkLoadTimer.startTiming(); // Spigot
++
++        queuedChunk.provider.chunks.put(LongHash.toLong(queuedChunk.x, queuedChunk.z), chunk);
++
++        chunk.addEntities();
++
++        Server server = queuedChunk.provider.world.getServer();
++        if (server != null) {
++            server.getPluginManager().callEvent(new org.bukkit.event.world.ChunkLoadEvent(chunk.bukkitChunk, true));
++        }
++
++        // Update neighbor counts
++        for (int x = -2; x < 3; x++) {
++            for (int z = -2; z < 3; z++) {
++                if (x == 0 && z == 0) {
++                    continue;
++                }
++
++                Chunk neighbor = queuedChunk.provider.getChunkIfLoaded(chunk.locX + x, chunk.locZ + z);
++                if (neighbor != null) {
++                    neighbor.setNeighborLoaded(-x, -z);
++                    chunk.setNeighborLoaded(x, z);
++                }
++            }
++        }
++
++        chunk.loadNearby(queuedChunk.provider, queuedChunk.provider, queuedChunk.x, queuedChunk.z);
++
++        chunk.world.timings.syncChunkLoadTimer.stopTiming(); // Spigot
++    }
++
++    public void callStage3(QueuedGenChunk queuedChunk, Chunk chunk, Runnable runnable) throws RuntimeException {
++        runnable.run();
++    }
++
++    public Thread newThread(Runnable runnable) {
++        Thread thread = new Thread(runnable, "Chunk Gen Executor Thread-" + threadNumber.getAndIncrement());
++        thread.setDaemon(true);
++        return thread;
++    }
++
++}
+diff --git a/src/main/java/net/titanium/chunk/gen/QueuedGenChunk.java b/src/main/java/net/titanium/chunk/gen/QueuedGenChunk.java
+new file mode 100644
+index 00000000..d26b6406
+--- /dev/null
++++ b/src/main/java/net/titanium/chunk/gen/QueuedGenChunk.java
+@@ -0,0 +1,38 @@
++package net.titanium.chunk.gen;
++
++import net.minecraft.server.ChunkProviderServer;
++import net.minecraft.server.ChunkRegionLoader;
++import net.minecraft.server.IChunkProvider;
++import net.minecraft.server.NBTTagCompound;
++import net.minecraft.server.World;
++
++class QueuedGenChunk {
++    final int x;
++    final int z;
++    final IChunkProvider chunkGenerator;
++    final World world;
++    final ChunkProviderServer provider;
++
++    public QueuedGenChunk(int x, int z,  IChunkProvider chunkGenerator, World world, ChunkProviderServer provider) {
++        this.x = x;
++        this.z = z;
++        this.chunkGenerator = chunkGenerator;
++        this.world = world;
++        this.provider = provider;
++    }
++
++    @Override
++    public int hashCode() {
++        return (x * 31 + z * 29) ^ world.hashCode();
++    }
++
++    @Override
++    public boolean equals(Object object) {
++        if (object instanceof QueuedGenChunk) {
++            QueuedGenChunk other = (QueuedGenChunk) object;
++            return x == other.x && z == other.z && world == other.world;
++        }
++
++        return false;
++    }
++}
+-- 
+2.32.0.windows.2
+
