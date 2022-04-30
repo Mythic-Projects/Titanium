@@ -24,10 +24,12 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Nacho-0008] Update netty 4.1.50 (We updated it to 4.1.75)
 [Nacho-????] Prevent most NBT related overflow exploits
 
+[IonSpigot-0023] Implement PandaWire
+
 [MineTick-0017] - Fix insane nether portal lag
 [MineTick-0023] - Fix chunk coordinates miscalculations
 
-[Migot-0009] Prevent creature spawning in unloaded chunks
+[Migot-0009] Prevent creature spawning in unloaded chunks]
 
 [Akarin-0007] - Avoid double I/O operation on load player file
 ```
