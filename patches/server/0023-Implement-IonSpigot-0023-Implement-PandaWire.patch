@@ -565,7 +565,7 @@ index 00000000..015ff85b
 +    public static class Redstone extends TitaniumConfigSection {
 +
 +        @Comment("Faster redstone implementation (see: https://www.spigotmc.org/resources/pandawire-1-8-8-1-15-2.41991/).")
-+        @Comment("It can have big impact on server performance, but also it can break a lot of mechanic.")
++        @Comment("It can have big impact on server performance, but also it can break a lot of mechanics.")
 +        @Comment("Use with caution!")
 +        public PandaWire pandaWire = new PandaWire();
 +
