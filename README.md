@@ -14,7 +14,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0144] Improve Minecraft Hopper Performance
 [Paper-0302] Don't load chunks for villager door check by Aikar
 [Paper-0313] Optimized world time updates by Aikar
-[Paper-0347] Don't go below 0 for pickupDelay,breaks picking up items by Aikar
+[Paper-0347] Don't go below 0 for pickupDelay, breaks picking up items by Aikar
 
 [FlamePaper-0003] Fix chunk memory leak
 [FlamePaper-0005] Fix multiple memory leaks
