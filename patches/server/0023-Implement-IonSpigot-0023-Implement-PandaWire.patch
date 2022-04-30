@@ -1,7 +1,7 @@
-From 62832c6a04650277b15b26f5f205033409f19629 Mon Sep 17 00:00:00 2001
+From dd240390b38147b45740646284eb4739aefa661a Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sat, 30 Apr 2022 18:22:33 +0200
-Subject: [PATCH] Implement PandaWire
+Subject: [PATCH] Implement [IonSpigot-0023] Implement PandaWire
 
 
 diff --git a/src/main/java/me/suicidalkids/ion/blocks/redstone/PandaRedstoneWire.java b/src/main/java/me/suicidalkids/ion/blocks/redstone/PandaRedstoneWire.java
