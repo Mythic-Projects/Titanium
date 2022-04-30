@@ -1,0 +1,1555 @@
+From 09733060d04227cedbf5e14bfc3c896f74842663 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sat, 30 Apr 2022 11:00:09 +0200
+Subject: [PATCH] Load properties
+
+
+diff --git a/src/main/java/net/minecraft/titanium/config/PaperConfig.java b/src/main/java/net/minecraft/titanium/config/PaperConfig.java
+deleted file mode 100644
+index 9910ebe4..00000000
+--- a/src/main/java/net/minecraft/titanium/config/PaperConfig.java
++++ /dev/null
+@@ -1,96 +0,0 @@
+-package net.minecraft.titanium.config;
+-
+-import eu.okaeri.configs.OkaeriConfig;
+-import eu.okaeri.configs.annotation.Comment;
+-import eu.okaeri.configs.annotation.NameModifier;
+-import eu.okaeri.configs.annotation.NameStrategy;
+-import eu.okaeri.configs.annotation.Names;
+-import java.time.Duration;
+-import java.util.HashSet;
+-import java.util.Set;
+-
+-@Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
+-public class PaperConfig extends OkaeriConfig {
+-
+-    public Settings settings = new Settings();
+-
+-    public static class Settings extends OkaeriConfig {
+-
+-        @Comment("Whether interaction packets should be limited from clients.")
+-        public boolean limitPlayerInteractions = true;
+-
+-        @Comment("Size of the region file cache.")
+-        public int regionFileCacheSize = 256;
+-
+-        @Comment("Speed at which baby zombies can move.")
+-        public double babyZombieMovementSpeed = 0.5;
+-
+-        @Comment("Whether to save empty scoreboard teams.")
+-        public boolean saveEmptyScoreboardTeams = false;
+-
+-        @Comment("Whether to save player data to disk.")
+-        public boolean savePlayerData = true;
+-
+-        @Comment("Whether to actively tick worlds with no players.")
+-        public boolean tickEmptyWorlds = true;
+-
+-        @Comment("Whether to abort server startup if at least one plugin fails to load.")
+-        public boolean requireAllPlugins = false;
+-
+-        public SpamLimiter spamLimiter = new SpamLimiter();
+-
+-        public static class SpamLimiter extends OkaeriConfig {
+-
+-            @Comment("Value to increment for each tab complete event.")
+-            public int tabSpamIncrement = 10;
+-            @Comment("Maximum number of increment values before disconnecting the player.")
+-            public int tabSpamLimit = 500;
+-
+-        }
+-
+-        @Comment("Duration to wait before suspending an server with no players online.")
+-        public Duration emptyServerSuspend = Duration.ofMinutes(1);
+-
+-        @Comment("Whether arrow projectiles should have a random factor.")
+-        public boolean includeRandomnessInArrowTrajectory = false;
+-
+-        @Comment("Whether arrow projectiles should add a random amount of damage (like in vanilla minecraft)")
+-        public boolean includeRandomnessInArrowDamage = true;
+-
+-        @Comment("Number of ticks between player data saves to disk.")
+-        public int playerAutoSaveRate = -1;
+-
+-        @Comment("Maximum number of player data to save per tick.")
+-        public int maxPlayersAutoSavePerTick = 10;
+-
+-    }
+-
+-    @Comment("Whether to fire a physics event for redstone activation.")
+-    public boolean firePhysicsEventForRedstone = false;
+-
+-    @Comment("Percentage improvement to player damage with certain potions.")
+-    public EffectModifiers effectModifiers = new EffectModifiers();
+-
+-    public static class EffectModifiers extends OkaeriConfig {
+-        public double strength = 1.3;
+-        public double weakness = -0.3;
+-    }
+-
+-    @Comment("Whether to allow certain buckets to stack as items.")
+-    public StackableBuckets stackableBuckets = new StackableBuckets();
+-
+-    public static class StackableBuckets extends OkaeriConfig {
+-        public boolean lava = false;
+-        public boolean water = false;
+-        public boolean milk = false;
+-    }
+-
+-    @Comment("Send a warning to console when players are moving at excessive speeds.")
+-    public boolean warnWhenSettingExcessiveVelocity = true;
+-
+-    @Comment("List of items that are allowed to keep invalid data values.")
+-    public Set<Integer> dataValueAllowedItems = new HashSet<>();
+-
+-    public PaperWorldConfig worldSettings = new PaperWorldConfig();
+-
+-}
+diff --git a/src/main/java/net/minecraft/titanium/config/SpigotConfig.java b/src/main/java/net/minecraft/titanium/config/SpigotConfig.java
+deleted file mode 100644
+index 2d306b5b..00000000
+--- a/src/main/java/net/minecraft/titanium/config/SpigotConfig.java
++++ /dev/null
+@@ -1,171 +0,0 @@
+-package net.minecraft.titanium.config;
+-
+-import com.google.common.collect.ImmutableSet;
+-import eu.okaeri.configs.OkaeriConfig;
+-import eu.okaeri.configs.annotation.Comment;
+-import eu.okaeri.configs.annotation.CustomKey;
+-import eu.okaeri.configs.annotation.Exclude;
+-import eu.okaeri.configs.annotation.NameModifier;
+-import eu.okaeri.configs.annotation.NameStrategy;
+-import eu.okaeri.configs.annotation.Names;
+-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+-import java.util.Map;
+-import java.util.Set;
+-
+-@Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
+-public class SpigotConfig extends OkaeriConfig {
+-
+-    @Exclude
+-    private static SpigotConfig INSTANCE;
+-
+-    public Settings settings = new Settings();
+-
+-    public static class Settings extends OkaeriConfig {
+-
+-        @Comment("Whether to run in debugger mode.")
+-        public boolean debug = false;
+-
+-        @Comment("Whether to write the user cache to disk only before shutdown.")
+-        public boolean saveUserCacheOnStopOnly = false;
+-
+-        // TODO Start watchdog
+-        @Comment("Number of seconds to abort and print a thread dump when the server is unresponsive.")
+-        public int timeoutTime = 60;
+-
+-        @Comment("Whether to run the restart-script on server-crash.")
+-        public boolean restartOnCrash = false;
+-
+-        @Comment("Path to a restart script to turn the server back on.")
+-        public String restartScript = "./start.sh";
+-
+-        @Comment("Whether to bind to the network only after all plugins are loaded.")
+-        public boolean lateBind = false;
+-
+-        @Comment("Whether the server is running behind a bungee cord proxy")
+-        public boolean bungeecord = false;
+-
+-        @Comment("Maximum number of players to publish in ping messages.")
+-        public int sampleCount = 12;
+-
+-        @Comment("Number of ticks before shuffling the tick-order of players to prevent relog gaming to be first to get items.")
+-        public int playerShuffle = 0;
+-
+-        @Comment("Whether to blacklist certain items that creative players can spawn.")
+-        public boolean filterCreativeItems = true;
+-
+-        @Comment("Maximum number of entries in the usercache.json file.")
+-        public int userCacheSize = 1000;
+-
+-        @Comment("Maximum number of entries in the integer cache, which is used extensively during world generation.")
+-        public int cacheLimit = 1024;
+-
+-        @Comment("Magic number used as a threshold for invalid move events.")
+-        public double movedWronglyThreshold = 0.0625;
+-
+-        @Comment("Maximum number of blocks per second a player can move before the event is cancelled.")
+-        public double movedTooQuicklyThreshold = 100.0;
+-
+-        @Comment("Whether to fetch the UUID of old skulls that only contain a username.")
+-        public boolean fetchSkulls = true;
+-
+-        @Comment("Number of networking threads to allocate.")
+-        public int nettyThreads = 4;
+-
+-        @Comment("Maximum attribute values for various modifiers.")
+-        public Attribute attribute = new Attribute();
+-
+-        public static class Attribute extends OkaeriConfig {
+-
+-            @CustomKey("maxHealth.max")
+-            public double maxHealthMax = 2048;
+-            @CustomKey("movementSpeed.max")
+-            public double movementSpeedMax = 2048;
+-            @CustomKey("attackDamage.max")
+-            public double attackDamageMax = 2048;
+-
+-        }
+-
+-    }
+-
+-    @Comment("Various messages sent to clients for errors.")
+-    public Messages messages = new Messages();
+-
+-    // TODO Support colors
+-    public static class Messages extends OkaeriConfig {
+-
+-        public String restart = "Server is restarting!";
+-        public String whitelist = "You are not on the whitelist!";
+-        public String unknownCommand = "Unknown command. Type /help for help.";
+-        public String internalError = "&cAn internal error occurred while attempting to perform this command";
+-        public String serverFull = "The server is full!";
+-        public String outdatedClient = "Outdated client! Please use {0}";
+-        public String outdatedServer = "Outdated server! Server is on {0}";
+-
+-    }
+-
+-    public Commands commands = new Commands();
+-
+-    public static class Commands extends OkaeriConfig {
+-
+-        @Comment("Whether player commands should be logged.")
+-        public boolean log = true;
+-
+-        @Comment("Whether command block commands should be logged to console.")
+-        public boolean silentCommandblockConsole = false;
+-
+-        @Comment("Disables the bukkit variants of the following commands and defaults to the vanilla variants.")
+-        public Set<String> replaceCommands = ImmutableSet.<String>builder()
+-                .add("setblock")
+-                .add("summon")
+-                .add("testforblock")
+-                .add("tellraw")
+-                .build();
+-
+-        @Comment("Change the verbosity of tab complete events.")
+-        @Comment("Disable all tab completion with -1.")
+-        @Comment("Enable server commands to be queryable with 0.")
+-        @Comment("Require n letters to be typed before completing with n.")
+-        public int tabComplete = 0;
+-
+-    }
+-
+-    @Comment("Various settings related to server timings and debugging.")
+-    public Timings timings = new Timings();
+-
+-    // TODO Set timings settings
+-    public static class Timings extends OkaeriConfig {
+-
+-        public boolean enabled = true;
+-        public boolean verbose = true;
+-        public boolean serverNamePrivacy = false;
+-
+-        public Set<String> hiddenConfigEntries = ImmutableSet.<String>builder()
+-                .add("database")
+-                .add("bungeecord-addresses")
+-                .build();
+-
+-        public int historyInterval = 300;
+-        public int historyLength = 3600;
+-
+-    }
+-
+-    public Stats stats = new Stats();
+-
+-    public static class Stats extends OkaeriConfig {
+-
+-        @Comment("Whether to disable saving of player statistics and achievements.")
+-        public boolean disableSaving = true;
+-
+-        @Comment("Map of statistics and the values they should be forced.")
+-        // TODO Log warning if openInventory is set to 1
+-        public Map<String, Integer> forcedStats = new Object2IntOpenHashMap<>();
+-
+-    }
+-
+-    public SpigotWorldConfig worldSettings = new SpigotWorldConfig();
+-
+-    public static SpigotConfig get() {
+-        return INSTANCE;
+-    }
+-
+-}
+diff --git a/src/main/java/net/minecraft/titanium/config/BukkitConfig.java b/src/main/java/net/titanium/config/BukkitConfig.java
+similarity index 80%
+rename from src/main/java/net/minecraft/titanium/config/BukkitConfig.java
+rename to src/main/java/net/titanium/config/BukkitConfig.java
+index 8500745c..75a9ebec 100644
+--- a/src/main/java/net/minecraft/titanium/config/BukkitConfig.java
++++ b/src/main/java/net/titanium/config/BukkitConfig.java
+@@ -1,4 +1,4 @@
+-package net.minecraft.titanium.config;
++package net.titanium.config;
+ 
+ import eu.okaeri.configs.OkaeriConfig;
+ import eu.okaeri.configs.annotation.Comment;
+@@ -10,14 +10,11 @@ import org.bukkit.Warning;
+ 
+ @Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
+ 
+-public class BukkitConfig extends OkaeriConfig{
+-
+-    @Exclude
+-    private static BukkitConfig INSTANCE;
++public class BukkitConfig extends TitaniumConfigSection {
+ 
+     public Settings settings = new Settings();
+ 
+-    public static class Settings extends OkaeriConfig {
++    public static class Settings extends TitaniumConfigSection {
+ 
+         @Comment("Whether the end world is loaded.")
+         public boolean allowEnd = true;
+@@ -42,7 +39,7 @@ public class BukkitConfig extends OkaeriConfig{
+         public Warning.WarningState deprecatedVerbose = Warning.WarningState.DEFAULT;
+ 
+         @Comment("Message sent to clients before shutdown.")
+-        public String shutdownMessage = "Server close!";
++        public String shutdownMessage = TitaniumConfig.color("Server close!");
+ 
+         @Comment("Whether to not check if the login location is safe.")
+         public boolean useExactLoginLocation = false;
+@@ -54,7 +51,7 @@ public class BukkitConfig extends OkaeriConfig{
+ 
+     public ChunkGC chunkGC = new ChunkGC();
+ 
+-    public static class ChunkGC extends OkaeriConfig {
++    public static class ChunkGC extends TitaniumConfigSection {
+ 
+         @Comment("Ticks between each chunk garbage collection event.")
+         @Comment("Disabled if set to 0.")
+@@ -68,7 +65,7 @@ public class BukkitConfig extends OkaeriConfig{
+ 
+     public SpawnLimits spawnLimits = new SpawnLimits();
+ 
+-    public static class SpawnLimits extends OkaeriConfig {
++    public static class SpawnLimits extends TitaniumConfigSection {
+ 
+         @Comment("Maximum number of naturally spawned monsters per-world.")
+         public int monsters = 80;
+@@ -83,7 +80,7 @@ public class BukkitConfig extends OkaeriConfig{
+ 
+     public TicksPer ticksPer = new TicksPer();
+ 
+-    public static class TicksPer extends OkaeriConfig {
++    public static class TicksPer extends TitaniumConfigSection {
+ 
+         @Comment("Number of ticks before considering a natural animal spawn event.")
+         @Comment("Below 0 will reset to server default.")
+@@ -99,8 +96,16 @@ public class BukkitConfig extends OkaeriConfig{
+ 
+     }
+ 
+-    public static BukkitConfig get() {
+-        return INSTANCE;
++    public Database database = new Database();
++
++    public static class Database extends TitaniumConfigSection {
++
++        public String username = "bukkit";
++        public String isolation = "SERIALIZABLE";
++        public String driver = "org.sqlite.JDBC";
++        public String password = "walrus";
++        public String url = "jdbc:sqlite:{DIR}{NAME}.db";
++
+     }
+ 
+ }
+diff --git a/src/main/java/net/titanium/config/PaperConfig.java b/src/main/java/net/titanium/config/PaperConfig.java
+new file mode 100644
+index 00000000..365a9ab5
+--- /dev/null
++++ b/src/main/java/net/titanium/config/PaperConfig.java
+@@ -0,0 +1,188 @@
++package net.titanium.config;
++
++import eu.okaeri.configs.OkaeriConfig;
++import eu.okaeri.configs.annotation.Comment;
++import eu.okaeri.configs.annotation.CustomKey;
++import eu.okaeri.configs.annotation.Exclude;
++import eu.okaeri.configs.annotation.NameModifier;
++import eu.okaeri.configs.annotation.NameStrategy;
++import eu.okaeri.configs.annotation.Names;
++import java.lang.reflect.Field;
++import java.lang.reflect.Modifier;
++import java.time.Duration;
++import java.util.HashSet;
++import java.util.Set;
++import java.util.logging.Level;
++import net.minecraft.server.Items;
++import org.apache.commons.lang.StringUtils;
++import org.bukkit.Bukkit;
++import org.bukkit.Material;
++
++@Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
++public class PaperConfig extends TitaniumConfigSection {
++
++    public Settings settings = new Settings();
++
++    public static class Settings extends TitaniumConfigSection {
++
++        @Comment("Whether interaction packets should be limited from clients.")
++        public boolean limitPlayerInteractions = true;
++
++        @Comment("Size of the region file cache.")
++        public int regionFileCacheSize = 256;
++
++        @Comment("Speed at which baby zombies can move.")
++        public double babyZombieMovementSpeed = 0.5;
++
++        @Comment("Whether to save empty scoreboard teams.")
++        public boolean saveEmptyScoreboardTeams = false;
++
++        @Comment("Whether to save player data to disk.")
++        public boolean savePlayerData = true;
++
++        @Comment("Whether to actively tick worlds with no players.")
++        public boolean tickEmptyWorlds = true;
++
++        @Comment("Whether to abort server startup if at least one plugin fails to load.")
++        public boolean requireAllPlugins = false;
++
++        public SpamLimiter spamLimiter = new SpamLimiter();
++
++        public static class SpamLimiter extends TitaniumConfigSection {
++
++            @Comment("Value to increment for each tab complete event.")
++            public int tabSpamIncrement = 10;
++            @Comment("Maximum number of increment values before disconnecting the player.")
++            public int tabSpamLimit = 500;
++
++        }
++
++        @Comment("Duration to wait before suspending an server with no players online.")
++        public Duration emptyServerSuspend = Duration.ofMinutes(1);
++
++        @Comment("Whether arrow projectiles should have a random factor.")
++        public boolean includeRandomnessInArrowTrajectory = false;
++
++        @Comment("Whether arrow projectiles should add a random amount of damage (like in vanilla minecraft)")
++        public boolean includeRandomnessInArrowDamage = true;
++
++        @Comment("Number of ticks between player data saves to disk.")
++        public int playerAutoSaveRate = -1;
++
++        @Comment("Maximum number of player data to save per tick.")
++        @CustomKey("max-players-auto-save-per-tic")
++        public int maxPlayersAutoSavePerTick_ = 10;
++        @Exclude
++        public int maxPlayersAutoSavePerTick = 10;
++
++        @Override
++        public void loadProcessedProperties() {
++            if (!limitPlayerInteractions) {
++                Bukkit.getLogger().log(Level.INFO, "Disabling player interaction limiter, your server may be more vulnerable to malicious users");
++            }
++
++            if (!savePlayerData) {
++                Bukkit.getLogger().log(Level.WARNING, "Player Data Saving is currently disabled. Any changes to your players data, " +
++                        "such as inventories, experience points, advancements and the like will not be saved when they log out.");
++            }
++
++            if (maxPlayersAutoSavePerTick_ == -1) { // -1 Automatic / "Recommended"
++                // 10 should be safe for everyone unless your mass spamming player auto save
++                maxPlayersAutoSavePerTick = (playerAutoSaveRate == -1 || playerAutoSaveRate > 100) ? 10 : 20;
++            } else {
++                maxPlayersAutoSavePerTick = maxPlayersAutoSavePerTick_;
++            }
++        }
++
++    }
++
++    @Comment("Whether to fire a physics event for redstone activation.")
++    public boolean firePhysicsEventForRedstone = false;
++
++    @Comment("Percentage improvement to player damage with certain potions.")
++    public EffectModifiers effectModifiers = new EffectModifiers();
++
++    public static class EffectModifiers extends TitaniumConfigSection {
++
++        public double strength = 1.3;
++        public double weakness = -0.3;
++
++    }
++
++    @Comment("Whether to allow certain buckets to stack as items.")
++    public StackableBuckets stackableBuckets = new StackableBuckets();
++
++    public static class StackableBuckets extends TitaniumConfigSection {
++
++        public boolean lava = false;
++        public boolean water = false;
++        public boolean milk = false;
++
++        @Override
++        public void loadProcessedProperties() {
++            Field maxStack;
++
++            try {
++                maxStack = Material.class.getDeclaredField("maxStack");
++                maxStack.setAccessible(true);
++
++                Field modifiers = Field.class.getDeclaredField("modifiers");
++                modifiers.setAccessible(true);
++                modifiers.setInt(maxStack, maxStack.getModifiers() & ~Modifier.FINAL);
++            } catch (Exception e) {
++                e.printStackTrace();
++                return;
++            }
++
++            try {
++                if (lava) {
++                    maxStack.set(Material.LAVA_BUCKET, Material.BUCKET.getMaxStackSize());
++                    Items.LAVA_BUCKET.c(Material.BUCKET.getMaxStackSize());
++                }
++
++                if (water) {
++                    maxStack.set(Material.WATER_BUCKET, Material.BUCKET.getMaxStackSize());
++                    Items.WATER_BUCKET.c(Material.BUCKET.getMaxStackSize());
++                }
++
++                if (milk) {
++                    maxStack.set(Material.MILK_BUCKET, Material.BUCKET.getMaxStackSize());
++                    Items.MILK_BUCKET.c(Material.BUCKET.getMaxStackSize());
++                }
++            } catch (Exception e) {
++                e.printStackTrace();
++            }
++        }
++
++    }
++
++    @Comment("Send a warning to console when players are moving at excessive speeds.")
++    public boolean warnWhenSettingExcessiveVelocity = true;
++
++    @Comment("List of items that are allowed to keep invalid data values.")
++    public Set<Integer> dataValueAllowedItems = new HashSet<>();
++
++    @Comment("Configuration how knockback should behave.")
++    public Knockback knockback = new Knockback();
++
++    public static class Knockback extends TitaniumConfigSection {
++        public double friction = 2.0;
++        public double horizontal = 0.4;
++        public double vertical = 0.4;
++        public double verticalLimit = 0.4;
++        public double extraHorizontal = 0.5;
++        public double extraVertical = 0.1;
++
++        @Override
++        public void loadProcessedProperties() {
++
++        }
++    }
++
++    public PaperWorldConfig worldSettings = new PaperWorldConfig();
++
++    public void loadProcessedProperties() {
++        Bukkit.getLogger().info("Data value allowed items: " + StringUtils.join(dataValueAllowedItems, ", "));
++    }
++
++}
+diff --git a/src/main/java/net/minecraft/titanium/config/PaperWorldConfig.java b/src/main/java/net/titanium/config/PaperWorldConfig.java
+similarity index 69%
+rename from src/main/java/net/minecraft/titanium/config/PaperWorldConfig.java
+rename to src/main/java/net/titanium/config/PaperWorldConfig.java
+index b810eca7..f199ee60 100644
+--- a/src/main/java/net/minecraft/titanium/config/PaperWorldConfig.java
++++ b/src/main/java/net/titanium/config/PaperWorldConfig.java
+@@ -1,17 +1,19 @@
+-package net.minecraft.titanium.config;
++package net.titanium.config;
+ 
+ import eu.okaeri.configs.OkaeriConfig;
+ import eu.okaeri.configs.annotation.Comment;
+ import eu.okaeri.configs.annotation.CustomKey;
++import eu.okaeri.configs.annotation.Exclude;
+ import eu.okaeri.configs.annotation.NameModifier;
+ import eu.okaeri.configs.annotation.NameStrategy;
+ import eu.okaeri.configs.annotation.Names;
++import net.minecraft.server.MinecraftServer;
+ 
+ @Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
+-public class PaperWorldConfig extends OkaeriConfig {
++public class PaperWorldConfig extends TitaniumConfigSection {
+ 
+     @Comment("Whether to log the per-world settings in console.")
+-    public boolean verbose = true;
++    public static boolean verbose = true;
+ 
+     @Comment("Number of ticks before attempting to spread grass.")
+     public int grassSpreadTickRate = 1;
+@@ -52,23 +54,34 @@ public class PaperWorldConfig extends OkaeriConfig {
+     @Comment("Y-level at which squids will spawn.")
+     public SquidSpawnHeight squidSpawnHeight = new SquidSpawnHeight();
+ 
+-    public static class SquidSpawnHeight extends OkaeriConfig {
++    public static class SquidSpawnHeight extends TitaniumConfigSection {
++
+         public double minimum = 45.0;
+         public double maximum = 63.0;
++
+     }
+ 
+     @Comment("Maximum number of blocks certain plants will grow.")
+     public MaxGrowthHeight maxGrowthHeight = new MaxGrowthHeight();
+ 
+-    public static class MaxGrowthHeight extends OkaeriConfig {
++    public static class MaxGrowthHeight extends TitaniumConfigSection {
++
+         public int cactus = 3;
+         public int reeds = 3;
++
++        @Override
++        public void loadProcessedProperties() {
++            log("Max growth height:");
++            log(" > Cactus: " + cactus);
++            log(" > Reeds: " + reeds);
++        }
++
+     }
+ 
+     @Comment("Number of ticks before a fish can be caught.")
+     public FishingTimeRange fishingTimeRange = new FishingTimeRange();
+ 
+-    public static class FishingTimeRange extends OkaeriConfig {
++    public static class FishingTimeRange extends TitaniumConfigSection {
+ 
+         @CustomKey("MinimumTicks")
+         public int minimumTicks = 100;
+@@ -80,18 +93,43 @@ public class PaperWorldConfig extends OkaeriConfig {
+     @Comment("Magic number for food exhaustion rate for certain events.")
+     public PlayerExhaustion playerExhaustion = new PlayerExhaustion();
+ 
+-    public static class PlayerExhaustion extends OkaeriConfig {
++    public static class PlayerExhaustion extends TitaniumConfigSection {
++
+         public float blockBreak = 0.025F;
+         public float swimming = 0.015F;
++
+     }
+ 
+     public DespawnRanges despawnRanges = new DespawnRanges();
+ 
+-    public static class DespawnRanges extends OkaeriConfig {
++    public static class DespawnRanges extends TitaniumConfigSection {
++
+         @Comment("Distance in blocks that mobs are randomly queued for removal.")
+-        public int soft = 32;
++        @CustomKey("soft")
++        public int soft_ = 32;
++        @Exclude
++        public int soft = 0;
++
+         @Comment("Distance in blocks that mobs are immediately removed.")
+-        public int hard = 128;
++        @CustomKey("hard")
++        public int hard_ = 128;
++        @Exclude
++        public int hard = 0;
++
++        @Override
++        public void loadProcessedProperties() {
++            if (soft_ > hard_) {
++                soft_ = hard_;
++            }
++
++            log("Despawn ranges:");
++            log(" > Soft: " + soft_);
++            log(" > Hard: " + hard_);
++
++            soft = soft_ * soft_;
++            hard = hard_ * hard_;
++        }
++
+     }
+ 
+     @Comment("Y-level at which falling blocks will despawn.")
+@@ -100,24 +138,28 @@ public class PaperWorldConfig extends OkaeriConfig {
+     @Comment("Whether to remove certain entities when entering unloaded chunks.")
+     public RemoveUnloaded removeUnloaded = new RemoveUnloaded();
+ 
+-    public static class RemoveUnloaded extends OkaeriConfig {
++    public static class RemoveUnloaded extends TitaniumConfigSection {
++
+         public boolean enderpearls = true;
+         public boolean tntEntities = true;
+         public boolean fallingBlocks = true;
++
+     }
+ 
+     @Comment("Whether to load chunks when certain entities enter them.")
+     public LoadChunks loadChunks = new LoadChunks();
+ 
+-    public static class LoadChunks extends OkaeriConfig {
++    public static class LoadChunks extends TitaniumConfigSection {
++
+         public boolean enderpearls = false;
+         public boolean tntEntities = false;
+         public boolean fallingBlocks = false;
++
+     }
+ 
+     public GameMechanics gameMechanics = new GameMechanics();
+ 
+-    public static class GameMechanics extends OkaeriConfig {
++    public static class GameMechanics extends TitaniumConfigSection {
+ 
+         @Comment("Whether boats should always drop boat items.")
+         public boolean boatsDropBoats = false;
+@@ -139,17 +181,21 @@ public class PaperWorldConfig extends OkaeriConfig {
+     @Comment("Whether liquids should drain faster than normal.")
+     public FastDrain fastDrain = new FastDrain();
+ 
+-    public static class FastDrain extends OkaeriConfig {
++    public static class FastDrain extends TitaniumConfigSection {
++
+         public boolean lava = false;
+         public boolean water = false;
++
+     }
+ 
+     @Comment("Speed in ticks at which lava flows in different worlds.")
+     public LavaFlowSpeed lavaFlowSpeed = new LavaFlowSpeed();
+ 
+-    public static class LavaFlowSpeed extends OkaeriConfig {
++    public static class LavaFlowSpeed extends TitaniumConfigSection {
++
+         public int normal = 30;
+         public int nether = 10;
++
+     }
+ 
+     @Comment("Whether entities should not receive knockback from explosions.")
+@@ -205,12 +251,16 @@ public class PaperWorldConfig extends OkaeriConfig {
+     public boolean tickNextTickListCapIgnoresRedstone = false;
+ 
+     @Comment("Number of ticks before saving the world.")
++    @CustomKey("auto-save-interval")
++    public int autoSaveInterval_ = -1;
++    @Exclude
+     public int autoSaveInterval = -1;
+ 
+     @Comment("Whether to enable certain features during world generation.")
+     public GeneratorSettings generatorSettings = new GeneratorSettings();
+ 
+-    public static class GeneratorSettings extends OkaeriConfig {
++    public static class GeneratorSettings extends TitaniumConfigSection {
++
+         public boolean canyon = true;
+         public boolean caves = true;
+         public boolean dungeon = true;
+@@ -221,9 +271,50 @@ public class PaperWorldConfig extends OkaeriConfig {
+         public boolean temple = true;
+         public boolean village = true;
+         public boolean flatBedrock = false;
++
+     }
+ 
+     @Comment("Whether block locations are allowed to be tab completed.")
+     public boolean allowBlockLocationTabCompletion = true;
+ 
++    @Override
++    public void loadProcessedProperties() {
++        log("Grass Spread Tick Rate: " + grassSpreadTickRate);
++
++        log("Player blocking damage multiplier set to " + playerBlockingDamageMultiplier);
++
++        log("Remove invalid mob spawner tile entities: " + removeInvalidMobSpawnerTileEntities);
++
++        log("Squids will spawn between Y: " + squidSpawnHeight.minimum + " & Y: " + squidSpawnHeight.maximum);
++
++        if (fallingBlockHeightNerf > 0) {
++            log("Falling Block Height Limit set to Y: " + fallingBlockHeightNerf);
++        }
++        if (tntEntityHeightNerf > 0) {
++            log("TNT Entity Height Limit set to Y: " + tntEntityHeightNerf);
++        }
++
++        log("Allow undead horse types to be leashed: " + allowUndeadHorseLeashing);
++
++        log("Water over lava flow speed: " + waterOverLavaFlowSpeed);
++
++        log("Keep spawn chunk loaded: " + keepSpawnLoaded);
++
++        log("World async lighting: " + useAsyncLightning);
++
++        log("WorldServer TickNextTick cap set at " + tickNextTickListCap);
++        log("WorldServer TickNextTickList cap always processes redstone: " + tickNextTickListCapIgnoresRedstone);
++
++        if (autoSaveInterval_ > 0) {
++            autoSaveInterval = autoSaveInterval_;
++            log("Auto Save Interval: " + autoSaveInterval + " (" + (autoSaveInterval / 20) + "s)");
++        } else if (autoSaveInterval < 0) {
++            autoSaveInterval = MinecraftServer.getServer().autosavePeriod;
++        }
++    }
++
++    private static void log(String log) {
++        TitaniumConfig.log(verbose, log);
++    }
++
+ }
+diff --git a/src/main/java/net/titanium/config/SpigotConfig.java b/src/main/java/net/titanium/config/SpigotConfig.java
+new file mode 100644
+index 00000000..7fa25e88
+--- /dev/null
++++ b/src/main/java/net/titanium/config/SpigotConfig.java
+@@ -0,0 +1,252 @@
++package net.titanium.config;
++
++import co.aikar.timings.TimingsManager;
++import com.google.common.collect.ImmutableSet;
++import eu.okaeri.configs.annotation.Comment;
++import eu.okaeri.configs.annotation.CustomKey;
++import eu.okaeri.configs.annotation.Exclude;
++import eu.okaeri.configs.annotation.NameModifier;
++import eu.okaeri.configs.annotation.NameStrategy;
++import eu.okaeri.configs.annotation.Names;
++import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
++import java.util.Arrays;
++import java.util.HashMap;
++import java.util.List;
++import java.util.Map;
++import java.util.Set;
++import java.util.concurrent.TimeUnit;
++import java.util.logging.Level;
++import net.minecraft.server.AttributeRanged;
++import net.minecraft.server.GenericAttributes;
++import org.apache.logging.log4j.LogManager;
++import org.apache.logging.log4j.core.LoggerContext;
++import org.apache.logging.log4j.core.config.Configuration;
++import org.bukkit.Bukkit;
++import org.spigotmc.WatchdogThread;
++import static net.titanium.config.TitaniumConfig.log;
++
++@Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
++public class SpigotConfig extends TitaniumConfigSection {
++
++    @Exclude
++    private static SpigotConfig INSTANCE;
++
++    public Settings settings = new Settings();
++
++    public static class Settings extends TitaniumConfigSection {
++
++        @Comment("Whether to run in debugger mode.")
++        public boolean debug = false;
++
++        @Comment("Whether to write the user cache to disk only before shutdown.")
++        public boolean saveUserCacheOnStopOnly = false;
++
++        @Comment("Number of seconds to abort and print a thread dump when the server is unresponsive.")
++        public int timeoutTime = 60;
++
++        @Comment("Whether to run the restart-script on server-crash.")
++        public boolean restartOnCrash = false;
++
++        @Comment("Path to a restart script to turn the server back on.")
++        public String restartScript = "./start.sh";
++
++        @Comment("Whether to bind to the network only after all plugins are loaded.")
++        public boolean lateBind = false;
++
++        @Comment("Whether the server is running behind a bungee cord proxy")
++        public boolean bungeecord = false;
++
++        @Comment("Maximum number of players to publish in ping messages.")
++        public int sampleCount = 12;
++
++        @Comment("Number of ticks before shuffling the tick-order of players to prevent relog gaming to be first to get items.")
++        public int playerShuffle = 0;
++
++        @Comment("Whether to blacklist certain items that creative players can spawn.")
++        public boolean filterCreativeItems = true;
++
++        @Comment("Maximum number of entries in the usercache.json file.")
++        public int userCacheSize = 1000;
++
++        @Comment("Maximum number of entries in the integer cache, which is used extensively during world generation.")
++        public int cacheLimit = 1024;
++
++        @Comment("Magic number used as a threshold for invalid move events.")
++        public double movedWronglyThreshold = 0.0625;
++
++        @Comment("Maximum number of blocks per second a player can move before the event is cancelled.")
++        public double movedTooQuicklyThreshold = 100.0;
++
++        @Comment("Whether to fetch the UUID of old skulls that only contain a username.")
++        public boolean fetchSkulls = true;
++
++        @Comment("Number of networking threads to allocate.")
++        public int nettyThreads = 4;
++
++        @Comment("Maximum attribute values for various modifiers.")
++        public Attribute attribute = new Attribute();
++
++        public static class Attribute extends TitaniumConfigSection {
++
++            @CustomKey("maxHealth.max")
++            public double maxHealth = 2048;
++            @CustomKey("movementSpeed.max")
++            public double movementSpeed = 2048;
++            @CustomKey("attackDamage.max")
++            public double attackDamage = 2048;
++
++            @Override
++            public void loadProcessedProperties() {
++                ((AttributeRanged) GenericAttributes.maxHealth).b = maxHealth;
++                ((AttributeRanged) GenericAttributes.MOVEMENT_SPEED).b = movementSpeed;
++                ((AttributeRanged) GenericAttributes.ATTACK_DAMAGE).b = attackDamage;
++            }
++
++        }
++
++        @Override
++        public void loadProcessedProperties() {
++            if (debug && !LogManager.getRootLogger().isTraceEnabled()) {
++                // Enable debug logging
++                LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
++                Configuration conf = ctx.getConfiguration();
++                conf.getLoggerConfig(LogManager.ROOT_LOGGER_NAME).setLevel(org.apache.logging.log4j.Level.ALL);
++                ctx.updateLoggers(conf);
++            }
++
++            if (LogManager.getRootLogger().isTraceEnabled()) {
++                Bukkit.getLogger().info("Debug logging is enabled");
++            } else {
++                Bukkit.getLogger().info("Debug logging is disabled");
++            }
++
++            WatchdogThread.doStart(timeoutTime, restartOnCrash);
++
++            log("Server Ping Player Sample Count: " + sampleCount);
++
++            System.setProperty("io.netty.eventLoopThreads", Integer.toString(nettyThreads));
++            Bukkit.getLogger().log(Level.INFO, "Using {0} threads for Netty based IO", nettyThreads);
++        }
++
++    }
++
++    @Comment("Various messages sent to clients for errors.")
++    public Messages messages = new Messages();
++
++    public static class Messages extends TitaniumConfigSection {
++
++        public String restart = TitaniumConfig.color("Server is restarting!");
++        public String whitelist = TitaniumConfig.color("You are not on the whitelist!");
++        public String unknownCommand = TitaniumConfig.color("Unknown command. Type /help for help.");
++        public String internalError = TitaniumConfig.color("&cAn internal error occurred while attempting to perform this command");
++        public String serverFull = TitaniumConfig.color("The server is full!");
++        public String outdatedClient = TitaniumConfig.color("Outdated client! Please use {0}");
++        public String outdatedServer = TitaniumConfig.color("Outdated server! Server is on {0}");
++
++    }
++
++    public Commands commands = new Commands();
++
++    public static class Commands extends TitaniumConfigSection {
++
++        @Comment("Whether player commands should be logged.")
++        public boolean log = true;
++
++        @Comment("Whether command block commands should be logged to console.")
++        public boolean silentCommandblockConsole = false;
++
++        @Comment("Disables the bukkit variants of the following commands and defaults to the vanilla variants.")
++        public Set<String> replaceCommands = ImmutableSet.<String>builder()
++                .add("setblock")
++                .add("summon")
++                .add("testforblock")
++                .add("tellraw")
++                .build();
++
++        @Comment("Change the verbosity of tab complete events.")
++        @Comment("Disable all tab completion with -1.")
++        @Comment("Enable server commands to be queryable with 0.")
++        @Comment("Require n letters to be typed before completing with n.")
++        public int tabComplete = 0;
++
++    }
++
++    @Comment("Various settings related to server timings and debugging.")
++    public Timings timings = new Timings();
++
++    public static class Timings extends TitaniumConfigSection {
++
++        public boolean enabled = true;
++        public boolean verbose = true;
++        public boolean serverNamePrivacy = false;
++        public List<String> hiddenConfigEntries = Arrays.asList("database", "bungeecord-addresses");
++        public int historyInterval = 300;
++        public int historyLength = 3600;
++
++        @Override
++        public void loadProcessedProperties() {
++            TimingsManager.privacy = serverNamePrivacy;
++            TimingsManager.hiddenConfigs = hiddenConfigEntries;
++
++            co.aikar.timings.Timings.setTimingsEnabled(enabled);
++            co.aikar.timings.Timings.setVerboseTimingsEnabled(verbose);
++            co.aikar.timings.Timings.setHistoryInterval(historyInterval * 20);
++            co.aikar.timings.Timings.setHistoryLength(historyLength * 20);
++
++            Bukkit.getLogger().log(Level.INFO, "Spigot Timings: " + enabled +
++                    " - Verbose: " + verbose +
++                    " - Interval: " + timeSummary(co.aikar.timings.Timings.getHistoryInterval() / 20) +
++                    " - Length: " + timeSummary(co.aikar.timings.Timings.getHistoryLength() / 20));
++        }
++
++        private static String timeSummary(int seconds) {
++            String time = "";
++            if (seconds > 60 * 60) {
++                time += TimeUnit.SECONDS.toHours(seconds) + "h";
++                seconds /= 60;
++            }
++
++            if (seconds > 0) {
++                time += TimeUnit.SECONDS.toMinutes(seconds) + "m";
++            }
++            return time;
++        }
++
++    }
++
++    public Stats stats = new Stats();
++
++    public static class Stats extends TitaniumConfigSection {
++
++        @Comment("Whether to disable saving of player statistics and achievements.")
++        public boolean disableSaving = false;
++
++        @Comment("Map of statistics and the values they should be forced.")
++        @CustomKey("forced-stats")
++        private Map<String, Map<String, Integer>> forcedStats_ = new HashMap<>();
++
++        @Exclude
++        public Map<String, Integer> forcedStats = new Object2IntOpenHashMap<>();
++
++        @Override
++        public void loadProcessedProperties() {
++            forcedStats_.forEach((key, value) ->
++                    value.forEach((key2, value2) ->
++                            forcedStats.put(key + "." + key2, value2)));
++
++            if (disableSaving && forcedStats.getOrDefault("achievement.openInventory", 0) < 1) {
++                Bukkit.getLogger().warning("*** WARNING *** stats.disable-saving is true but stats.forced-stats.achievement.openInventory" +
++                        " isn't set to 1. Disabling stat saving without forcing the achievement may cause it to get stuck on the player's " +
++                        "screen.");
++            }
++        }
++
++    }
++
++    public SpigotWorldConfig worldSettings = new SpigotWorldConfig();
++
++    public static SpigotConfig get() {
++        return INSTANCE;
++    }
++
++}
+diff --git a/src/main/java/net/minecraft/titanium/config/SpigotWorldConfig.java b/src/main/java/net/titanium/config/SpigotWorldConfig.java
+similarity index 53%
+rename from src/main/java/net/minecraft/titanium/config/SpigotWorldConfig.java
+rename to src/main/java/net/titanium/config/SpigotWorldConfig.java
+index 1826c9a0..e8579720 100644
+--- a/src/main/java/net/minecraft/titanium/config/SpigotWorldConfig.java
++++ b/src/main/java/net/titanium/config/SpigotWorldConfig.java
+@@ -1,26 +1,27 @@
+-package net.minecraft.titanium.config;
++package net.titanium.config;
+ 
+ import com.google.common.collect.ImmutableSet;
+ import eu.okaeri.configs.OkaeriConfig;
+ import eu.okaeri.configs.annotation.Comment;
++import eu.okaeri.configs.annotation.Exclude;
+ import eu.okaeri.configs.annotation.NameModifier;
+ import eu.okaeri.configs.annotation.NameStrategy;
+ import eu.okaeri.configs.annotation.Names;
+ import java.util.Set;
+ 
+ @Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
+-public class SpigotWorldConfig extends OkaeriConfig {
++public class SpigotWorldConfig extends TitaniumConfigSection {
+ 
+-    @Comment("Whether to log the per-world settings in console.")
+-    public boolean verbose = true;
++    @Exclude
++    private static org.spigotmc.AntiXray ANTIXRAY_INSTANCE;
+ 
+-    @Comment("Radius of chunks around players that mobs will naturally spawn.")
+-    public int mobSpawnRange = 4;
++    @Comment("Whether to log the per-world settings in console.")
++    public static boolean verbose = true;
+ 
+     public AntiXray antiXray = new AntiXray();
+ 
+-    // TODO Create xray instancee
+-    public static class AntiXray extends OkaeriConfig {
++    //TODO Create xray instance
++    public static class AntiXray extends TitaniumConfigSection {
+ 
+         @Comment("Whether to enable the anti-xray module.")
+         public boolean enabled = true;
+@@ -40,6 +41,17 @@ public class SpigotWorldConfig extends OkaeriConfig {
+                 .add(1, 5)
+                 .build();
+ 
++        @Override
++        public void loadProcessedProperties() {
++            log("AntiXray: ");
++            log(" > Enabled: " + enabled);
++            log(" > Engine Mode: " + engineMode);
++            log(" > Hidden Blocks: " + hideBlocks);
++            log(" > Replace Blocks: " + replaceBlocks);
++
++            ANTIXRAY_INSTANCE = new org.spigotmc.AntiXray(this);
++        }
++
+     }
+ 
+     @Comment("Whether to remove AI from mobs that originate from mob spawners.")
+@@ -49,8 +61,8 @@ public class SpigotWorldConfig extends OkaeriConfig {
+     @Comment("Changing these values will not affect performance.")
+     public Growth growth = new Growth();
+ 
+-    // TODO Validation
+-    public static class Growth extends OkaeriConfig {
++    public static class Growth extends TitaniumConfigSection {
++
+         public int cactusModifier = 100;
+         public int caneModifier = 100;
+         public int melonModifier = 100;
+@@ -59,35 +71,91 @@ public class SpigotWorldConfig extends OkaeriConfig {
+         public int mushroomModifier = 100;
+         public int saplingModifier = 100;
+         public int netherWartModifier = 100;
++
++        @Override
++        public void loadProcessedProperties() {
++            log("Growth modifiers:");
++            cactusModifier = validateAndLog("Cactus", cactusModifier);
++            caneModifier = validateAndLog("Cane", caneModifier);
++            melonModifier = validateAndLog("Melon", melonModifier);
++            pumpkinModifier = validateAndLog("Pumpkin", pumpkinModifier);
++            wheatModifier = validateAndLog("Wheat", wheatModifier);
++            mushroomModifier = validateAndLog("Mushroom", mushroomModifier);
++            saplingModifier = validateAndLog("Sapling", saplingModifier);
++            netherWartModifier = validateAndLog("Nether Wart", netherWartModifier);
++        }
++
++        private int validateAndLog(String crop, int modifier) {
++            if (modifier == 0) {
++                log("Cannot set " + crop + " growth to zero, defaulting to 100");
++                modifier = 100;
++            }
++            log(" > " + crop + ": " + modifier + "%");
++
++            return modifier;
++        }
++
+     }
+ 
++    @Comment("Radius of chunks around players that mobs will naturally spawn.")
++    public int mobSpawnRange = 4;
++
+     @Comment("Radius in blocks around players that mobs are marked as active and are ticked.")
+     public EntityActivationRange entityActivationRange = new EntityActivationRange();
+ 
+-    public static class EntityActivationRange extends OkaeriConfig {
++    public static class EntityActivationRange extends TitaniumConfigSection {
++
+         public int animals = 32;
+         public int monsters = 32;
+         public int ambient = 16;
++
++        @Override
++        public void loadProcessedProperties() {
++            log("Entity activation ranges:");
++            log(" > Animals: " + animals + " blocks");
++            log(" > Monsters: " + monsters + " blocks");
++            log(" > Ambient: " + ambient + " blocks");
++        }
++
+     }
+ 
+     @Comment("Radius in blocks around players that the client will see.")
+     @Comment("Only affects client-side performance.")
+     public EntityTrackingRange entityTrackingRange = new EntityTrackingRange();
+ 
+-    public static class EntityTrackingRange extends OkaeriConfig {
++    public static class EntityTrackingRange extends TitaniumConfigSection {
++
+         public int players = 48;
+         public int animals = 48;
+         public int monsters = 48;
+         public int misc = 32;
+         public int other = 64;
++
++        @Override
++        public void loadProcessedProperties() {
++            log("Entity tracking ranges:");
++            log(" > Players: " + players + " blocks");
++            log(" > Animals: " + animals + " blocks");
++            log(" > Monsters: " + monsters + " blocks");
++            log(" > Misc: " + misc + " blocks");
++            log(" > Other: " + other + " blocks");
++        }
++
+     }
+ 
+     @Comment("Number of ticks between each of the following events.")
+     public TicksPer ticksPer = new TicksPer();
+ 
+     public static class TicksPer extends OkaeriConfig {
++
+         public int hopperTransfer = 8;
+         public int hopperCheck = 8;
++
++        public void loadProcessedProperties() {
++            log(" > Transfer: " + hopperTransfer);
++            log(" > Check: " + hopperCheck);
++        }
++
+     }
+ 
+     @Comment("Maximum throughput of items in a hopper per tick cycle.")
+@@ -121,11 +189,13 @@ public class SpigotWorldConfig extends OkaeriConfig {
+     @Comment("Number of hunger points to subtract upon each event.")
+     public Hunger hunger = new Hunger();
+ 
+-    public static class Hunger extends OkaeriConfig {
++    public static class Hunger extends TitaniumConfigSection {
++
+         public float walkExhaustion = 0.2F;
+         public float sprintExhaustion = 0.8F;
+         public float combatExhaustion = 0.3F;
+         public float regenExhaustion = 3F;
++
+     }
+ 
+     @Comment("Maximum number of primed tnt entities per tick.")
+@@ -135,9 +205,11 @@ public class SpigotWorldConfig extends OkaeriConfig {
+     @Comment("Use 1000 to disable this feature, as recommended by paper.")
+     public MaxTickTime maxTickTime = new MaxTickTime();
+ 
+-    public static class MaxTickTime extends OkaeriConfig {
++    public static class MaxTickTime extends TitaniumConfigSection {
++
+         public int tile = 50;
+         public int entity = 50;
++
+     }
+ 
+     @Comment("Set the tick update interval for hanging entities.")
+@@ -146,16 +218,28 @@ public class SpigotWorldConfig extends OkaeriConfig {
+     @Comment("Number of ticks before items on the ground will despawn.")
+     public int itemDespawnRate = 6000;
+ 
++    @Comment("Number of ticks before despawning arrows on the ground.")
++    public int arrowDespawnRate = 1200;
++
+     @Comment("Radius in blocks for certain entities to merge together.")
+     public MergeRadius mergeRadius = new MergeRadius();
+ 
+-    public static class MergeRadius extends OkaeriConfig {
++    public static class MergeRadius extends TitaniumConfigSection {
++
+         public double item = 2.5;
+         public double exp = 3.0;
++
++        @Override
++        public void loadProcessedProperties() {
++            log("Merge radius:");
++            log(" > Items: " + item);
++            log(" > Experience: " + exp);
++        }
++
+     }
+ 
+     @Comment("Whether to allow zombie pigmen from spawning inside nether portals.")
+-    public boolean enableZombiePigmenPortalSpawn = true;
++    public boolean enableZombiePigmenPortalSpawns = true;
+ 
+     @Comment("Number of chunks to load around each player.")
+     @Comment("Must be within 1 and 15.")
+@@ -171,7 +255,58 @@ public class SpigotWorldConfig extends OkaeriConfig {
+     @Comment("Use with caution, because world growth is stunted.")
+     public boolean clearTickList = false;
+ 
+-    @Comment("Number of ticks before despawning arrows on the ground.")
+-    public int arrowDespawnRate = 1200;
++    @Override
++    public void loadProcessedProperties() {
++        log("Nerfing mobs spawned from spawners: " + nerfSpawnerMobs);
++
++        log("Mob Spawn Range: " + mobSpawnRange);
++
++        log("Hopper:");
++        ticksPer.loadProcessedProperties();
++        log(" > Amount: " + hopperAmount);
++
++        log("Random Lighting Updates: " + randomLightUpdates);
++
++        log("Structure Info Saving: " + saveStructureInfo);
++        if (!saveStructureInfo) {
++            log("*** WARNING *** You have selected to NOT save structure info. This may cause structures such as fortresses to not spawn mobs!");
++            log("*** WARNING *** Please use this option with caution, SpigotMC is not responsible for any issues this option may cause in the future!");
++        }
++
++        log("Sending up to " + maxBulkChunks + " chunks per packet");
++
++        log("Max Entity Collisions: " + maxEntityCollisions);
++
++        log("Custom Map Seeds: ");
++        log(" > Village: " + seedVillage);
++        log(" > Feature: " + seedFeature);
++
++        log("Max TNT Explosions: " + maxTntPerTick);
++
++        log("Max Tick Time: ");
++        log(" > Tile Entities: " + maxTickTime.tile + "ms");
++        log(" > Entities: " + maxTickTime.entity + "ms");
++
++        log("Despawn rate: ");
++        log(" > Items: " + itemDespawnRate);
++        log(" > Arrows: " + arrowDespawnRate);
++
++        log("Allow Zombie Pigmen to spawn from portal blocks: " + enableZombiePigmenPortalSpawns);
++
++        log("View Distance: " + viewDistance);
++
++        log("Zombie Aggressive Towards Villager: " + zombieAggressiveTowardsVillager);
++
++        log("Chunks to Grow per Tick: " + chunksPerTick);
++        log("Clear tick list: " + clearTickList);
++    }
++
++    public static org.spigotmc.AntiXray getAntiXray() {
++        return ANTIXRAY_INSTANCE;
++    }
++
++    private static void log(String log) {
++        TitaniumConfig.log(verbose, log);
++    }
+ 
+ }
+diff --git a/src/main/java/net/minecraft/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+similarity index 70%
+rename from src/main/java/net/minecraft/titanium/config/TitaniumConfig.java
+rename to src/main/java/net/titanium/config/TitaniumConfig.java
+index 473537ca..48b75858 100644
+--- a/src/main/java/net/minecraft/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -1,4 +1,4 @@
+-package net.minecraft.titanium.config;
++package net.titanium.config;
+ 
+ import eu.okaeri.configs.OkaeriConfig;
+ import eu.okaeri.configs.annotation.Comment;
+@@ -8,6 +8,8 @@ import eu.okaeri.configs.annotation.NameModifier;
+ import eu.okaeri.configs.annotation.NameStrategy;
+ import eu.okaeri.configs.annotation.Names;
+ import eu.okaeri.configs.exception.OkaeriException;
++import org.bukkit.Bukkit;
++import org.bukkit.ChatColor;
+ 
+ @Header("This is the main configuration file for Titanium.")
+ @Header("It's collect all the settings from bukkit.yml, spigot.yml etc.")
+@@ -15,6 +17,9 @@ import eu.okaeri.configs.exception.OkaeriException;
+ @Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
+ public class TitaniumConfig extends OkaeriConfig {
+ 
++    //TODO commands
++    //TODO /restart
++
+     @Exclude
+     private static TitaniumConfig INSTANCE;
+ 
+@@ -33,6 +38,10 @@ public class TitaniumConfig extends OkaeriConfig {
+ 
+         INSTANCE = this;
+ 
++        spigot.loadProperties();
++
++        paper.loadProperties();
++
+         return this;
+     }
+ 
+@@ -40,4 +49,20 @@ public class TitaniumConfig extends OkaeriConfig {
+         return INSTANCE;
+     }
+ 
++    protected static String color(String input) {
++        return ChatColor.translateAlternateColorCodes('&', input);
++    }
++
++    protected static void log(boolean verbose, String log) {
++        if (!verbose) {
++            return;
++        }
++
++        Bukkit.getLogger().info(log);
++    }
++
++    protected static void log(String log) {
++        log(true, log);
++    }
++
+ }
+diff --git a/src/main/java/net/titanium/config/TitaniumConfigSection.java b/src/main/java/net/titanium/config/TitaniumConfigSection.java
+new file mode 100644
+index 00000000..e0e3ab67
+--- /dev/null
++++ b/src/main/java/net/titanium/config/TitaniumConfigSection.java
+@@ -0,0 +1,40 @@
++package net.titanium.config;
++
++import eu.okaeri.configs.OkaeriConfig;
++import eu.okaeri.configs.annotation.Exclude;
++import java.lang.reflect.Field;
++import java.lang.reflect.Modifier;
++import java.util.logging.Level;
++import org.bukkit.Bukkit;
++
++public abstract class TitaniumConfigSection extends OkaeriConfig {
++
++    private final static Class<TitaniumConfigSection> SECTION_CLASS = TitaniumConfigSection.class;
++
++    public void loadProcessedProperties() {
++    }
++
++    public void loadProperties() {
++        this.loadProcessedProperties();
++        Class<?> clazz = this.getClass();
++        for (Field field : clazz.getDeclaredFields()) {
++            if (Modifier.isStatic(field.getModifiers())) {
++                continue;
++            }
++
++            if (field.getAnnotation(Exclude.class) != null) {
++                continue;
++            }
++
++            if (SECTION_CLASS.isAssignableFrom(field.getType())) {
++                field.setAccessible(true);
++                try {
++                    ((TitaniumConfigSection) field.get(this)).loadProperties();
++                } catch (Exception ex) {
++                    Bukkit.getLogger().log(Level.SEVERE, "Failed to load properties for " + field.getName(), ex);
++                }
++            }
++        }
++    }
++
++}
+diff --git a/src/main/java/net/minecraft/titanium/config/serdes/DecolorTransformer.java b/src/main/java/net/titanium/config/serdes/DecolorTransformer.java
+similarity index 94%
+rename from src/main/java/net/minecraft/titanium/config/serdes/DecolorTransformer.java
+rename to src/main/java/net/titanium/config/serdes/DecolorTransformer.java
+index ef5cbe69..8b853f85 100644
+--- a/src/main/java/net/minecraft/titanium/config/serdes/DecolorTransformer.java
++++ b/src/main/java/net/titanium/config/serdes/DecolorTransformer.java
+@@ -1,4 +1,4 @@
+-package net.minecraft.titanium.config.serdes;
++package net.titanium.config.serdes;
+ 
+ import eu.okaeri.configs.annotation.Exclude;
+ import eu.okaeri.configs.schema.GenericsPair;
+diff --git a/src/main/java/net/minecraft/titanium/config/serdes/WarningStateTransformer.java b/src/main/java/net/titanium/config/serdes/WarningStateTransformer.java
+similarity index 94%
+rename from src/main/java/net/minecraft/titanium/config/serdes/WarningStateTransformer.java
+rename to src/main/java/net/titanium/config/serdes/WarningStateTransformer.java
+index 6f75bcca..76dcadfd 100644
+--- a/src/main/java/net/minecraft/titanium/config/serdes/WarningStateTransformer.java
++++ b/src/main/java/net/titanium/config/serdes/WarningStateTransformer.java
+@@ -1,4 +1,4 @@
+-package net.minecraft.titanium.config.serdes;
++package net.titanium.config.serdes;
+ 
+ import eu.okaeri.configs.schema.GenericsPair;
+ import eu.okaeri.configs.serdes.BidirectionalTransformer;
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index c310afb9..72967037 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -31,7 +31,9 @@ import javax.imageio.ImageIO;
+ import net.minecraft.server.*;
+ 
+ import app.ashcon.sportpaper.server.WorldGenSettingsManager;
+-import net.minecraft.titanium.config.TitaniumConfig;
++import net.titanium.config.TitaniumConfig;
++import net.titanium.config.serdes.DecolorTransformer;
++import net.titanium.config.serdes.WarningStateTransformer;
+ import org.bukkit.BanList;
+ import org.bukkit.Bukkit;
+ import org.bukkit.ChatColor;
+@@ -205,6 +207,10 @@ public final class CraftServer implements Server {
+         // Titanium start
+         serverConfig = ConfigManager.create(TitaniumConfig.class, (it) -> {
+             it.withConfigurer(new YamlBukkitConfigurer(), new SerdesCommons());
++            it.withSerdesPack(registry -> {
++                registry.register(new DecolorTransformer());
++                registry.register(new WarningStateTransformer());
++            });
+             it.withBindFile("titanium-config.yml"); // TODO Change to console.options.valueOf("titanium-settings") after migrating everything
+             it.saveDefaults();
+             it.load(true);
+diff --git a/src/main/java/org/spigotmc/AntiXray.java b/src/main/java/org/spigotmc/AntiXray.java
+index c2ad90c8..6030616e 100644
+--- a/src/main/java/org/spigotmc/AntiXray.java
++++ b/src/main/java/org/spigotmc/AntiXray.java
+@@ -26,6 +26,7 @@ public class AntiXray
+     public final Set<BlockPosition> pendingUpdates = new HashSet<BlockPosition>();
+     // PaperSpigot end
+ 
++    @Deprecated // Titanium
+     public AntiXray(SpigotWorldConfig config)
+     {
+         // Set all listed blocks as true to be obfuscated
+@@ -50,6 +51,28 @@ public class AntiXray
+         replacementOres = blocks.toArray();
+     }
+ 
++    // Titanium start
++    public AntiXray(net.titanium.config.SpigotWorldConfig.AntiXray config) {
++        // Set all listed blocks as true to be obfuscated
++        for (int id : (config.engineMode == 1) ? config.hideBlocks : config.replaceBlocks) {
++            obfuscateBlocks[id] = true;
++        }
++
++        // For every block
++        TByteSet blocks = new TByteHashSet();
++        for (Integer i : config.hideBlocks) {
++            Block block = Block.getById(i);
++            // Check it exists and is not a tile entity
++            if (block != null && !block.isTileEntity()) {
++                // Add it to the set of replacement blocks
++                blocks.add((byte) (int) i);
++            }
++        }
++        // Bake it to a flat array of replacements
++        replacementOres = blocks.toArray();
++    }
++    // Titanium end
++
+     /**
+      * PaperSpigot - Flush queued block updates for world.
+      */
+-- 
+2.32.0.windows.2
+
