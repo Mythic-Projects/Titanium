@@ -1,15 +1,13 @@
-Titanium
----
+# Titanium
+
 [SportPaper](https://github.com/Electroid/SportPaper) fork which aims to be fast, fix exploits and bugs, improve API, and provide better configuration for server administrators. 
 
-### Download
+## Download
 
----
 TODO
 
-### Patches
+## Patches
 
----
 Titanium implements patches from other engines as well. **All credits go to the people which created them.**
 ```
 [Paper-0076] Optimized light level comaprsions by Aikar
@@ -34,12 +32,10 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Akarin-0007] - Avoid double I/O operation on load player file
 ```
 
-### API
+## API
 
----
 TODO
 
-### Contributing
+## Contributing
 
----
 TODO
