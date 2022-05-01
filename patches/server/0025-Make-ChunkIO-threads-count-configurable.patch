@@ -1,11 +1,11 @@
-From f3c4c0777be1c719fc720aec100a7b21e94b157a Mon Sep 17 00:00:00 2001
+From 947dd0eaeed3b77b2ba9d860500c24a54c027b10 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sat, 30 Apr 2022 18:56:32 +0200
 Subject: [PATCH] Make ChunkIO threads count configurable
 
 
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 9a4d74f2..72ca40f9 100644
+index 9a4d74f2..f76119e0 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -49,9 +49,25 @@ public class TitaniumConfig extends OkaeriConfig {
@@ -13,9 +13,9 @@ index 9a4d74f2..72ca40f9 100644
      public IonConfig ion = new IonConfig();
  
 -    //TODO comment this (https://github.com/CobbleSword/NachoSpigot/commit/64b8084cb8516df77d362512fe76dc54b17ba594)
-+    @Comment("The max NBT size in bytes. The default value is 2097152 which is ~2Mb, and it's insane big.")
-+    @Comment("We are setting this to 50000 which is only ~0.05MB, which is enough in most cases.")
-+    @Comment("Smaller value (50000 is enough, but smaller would be even greater) prevents most NBT related overflow exploits (for eg. Books)")
++    @Comment("The max NBT size in bytes. The default value is 2097152 which is ~2Mb - it's insane big.")
++    @Comment("We are setting this to 50000 which is only ~0.05MB. That's enough in most cases.")
++    @Comment("Smaller values (Our 50000 is probably enough, but smaller value would be even better) prevents most NBT related overflow exploits (for eg. Books)")
      public long nbtReadLimiter = 50000L;
  
 +    public Chunk chunk = new Chunk();

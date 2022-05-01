@@ -31,6 +31,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [MineTick-0023] Fix chunk coordinates miscalculations
 
 [Migot-0009] Prevent creature spawning in unloaded chunks
+[Migot-0032] Thread Local IntCache
 [Migot-0036] Check for lava only once per tick
 
 [Akarin-0007] Avoid double I/O operation on load player file
