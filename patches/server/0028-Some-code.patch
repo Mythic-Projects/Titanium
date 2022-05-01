@@ -1,0 +1,143 @@
+From efcb1ad2e41c70eaa7aa088017271bfc6901c9b3 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 1 May 2022 10:09:28 +0200
+Subject: [PATCH] Some code
+
+
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderGenerate.java b/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
+index 942179ae..242127d4 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
+@@ -31,6 +31,8 @@ public class ChunkProviderGenerate implements IChunkProvider {
+     private WorldGenLargeFeature y;
+     private WorldGenBase z;
+     private WorldGenMonument A;
++
++    // Titanium start
+     /*private BiomeBase[] B;
+     double[] d;
+     double[] e;
+@@ -39,17 +41,13 @@ public class ChunkProviderGenerate implements IChunkProvider {
+ 
+     private final Map<Long, ChunkGenData> chunkGenData = new ConcurrentHashMap<>();
+ 
+-    public ChunkGenData getChunkData(Thread thread) {
+-        return chunkGenData.computeIfAbsent(thread.getId(), (key) -> {
++    public ChunkGenData getChunkData() {
++        return chunkGenData.computeIfAbsent(Thread.currentThread().getId(), (key) -> {
+             System.out.println("Creating new ChunkGenData for thread " + key);
+             return new ChunkGenData();
+         });
+     }
+ 
+-    public ChunkGenData getChunkData() {
+-        return this.getChunkData(Thread.currentThread());
+-    }
+-
+     private static class ChunkGenData {
+         private BiomeBase[] B;
+         private double[] d;
+@@ -57,6 +55,7 @@ public class ChunkProviderGenerate implements IChunkProvider {
+         private double[] f;
+         private double[] g;
+     }
++    // Titanium end
+ 
+     public ChunkProviderGenerate(World world, long i, boolean flag, String s) {
+         this.s = Blocks.WATER;
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+index 46c525df..217def9b 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+@@ -4,6 +4,8 @@ import java.io.IOException;
+ import java.util.Iterator;
+ import java.util.List;
+ 
++import java.util.Map;
++import java.util.concurrent.ConcurrentHashMap;
+ import net.titanium.chunk.gen.ChunkGenExecutor;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+@@ -38,9 +40,13 @@ public class ChunkProviderServer implements IChunkProvider {
+     public boolean forceChunkLoad = false; // CraftBukkit - true -> false
+     // Paper start
+     protected Chunk lastChunkByPos = null;
+-    public Long2ObjectMap<Chunk> chunks = new Long2ObjectOpenHashMap<Chunk>(8192, 0.5f) {
++    protected Map<Long, Chunk> lastChunkByPosThread = new ConcurrentHashMap<>();
++    /*public Long2ObjectMap<Chunk> chunks = new Long2ObjectOpenHashMap<Chunk>(8192, 0.5f) {
+         @Override
+         public Chunk get(long key) {
++            synchronized (this) {
++
++            }
+             if (lastChunkByPos != null && key == lastChunkByPos.chunkKey) {
+                 return lastChunkByPos;
+             }
+@@ -54,7 +60,45 @@ public class ChunkProviderServer implements IChunkProvider {
+             }
+             return super.remove(key);
+         }
+-    }; // CraftBukkit
++    };*/ // CraftBukkit
++
++    public net.minecraft.server.Chunk getLastChunkByPos() {
++        return lastChunkByPosThread.get(Thread.currentThread().getId());
++    }
++
++    public Chunk setLastChunkByPos(net.minecraft.server.Chunk lastChunkByPos) {
++        if (lastChunkByPos == null) {
++            this.lastChunkByPosThread.remove(Thread.currentThread().getId());
++            return null;
++        }
++        this.lastChunkByPosThread.put(Thread.currentThread().getId(), lastChunkByPos);
++        return lastChunkByPos;
++    }
++
++    public Map<Long, Chunk> chunks = new ChunkMap(8192, 0.5f);
++
++    private class ChunkMap extends ConcurrentHashMap<Long, Chunk> {
++
++        public ChunkMap(int initialCapacity, float loadFactor) {
++            super(initialCapacity, loadFactor);
++        }
++
++        @Override
++        public Chunk get(Object key) {
++            if (getLastChunkByPos() != null && key.equals(getLastChunkByPos().chunkKey)) {
++                return getLastChunkByPos();
++            }
++            return setLastChunkByPos(super.get(key));
++        }
++
++        @Override
++        public Chunk remove(Object key) {
++            if (lastChunkByPos != null && key.equals(lastChunkByPos.chunkKey)) {
++                setLastChunkByPos(null);
++            }
++            return super.remove(key);
++        }
++    }
+     // Paper end
+     public WorldServer world;
+ 
+@@ -166,7 +210,7 @@ public class ChunkProviderServer implements IChunkProvider {
+ 
+         unloadQueue.remove(LongHash.toLong(i, j)); // SportPaper
+         // If we didn't load the chunk async and have a callback run it now
+-        if (runnable != null) {
++        if (chunk != null && runnable != null) {
+             runnable.run();
+         }
+ 
+@@ -189,7 +233,7 @@ public class ChunkProviderServer implements IChunkProvider {
+                     chunk = this.emptyChunk;
+                 } else {
+                     try {
+-                        if (runnable != null && false) {
++                        if (runnable != null) {
+                             ChunkGenExecutor.queueChunkGen(world, this.chunkProvider, this, i, j, runnable);
+                             return null;
+                         } else {
+-- 
+2.32.0.windows.2
+
