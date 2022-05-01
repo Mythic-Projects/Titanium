@@ -30,7 +30,7 @@ jobs:
       - name: Apply Titanium patches
         run: bash titanium apply
       - name: Setup Maven Action
-        uses: s4u/setup-maven-action@v1.3.1
+        uses: s4u/maven-settings-action@v2.6.0
         with:
           servers: '[{"id": "titanvale-releases", "username": "${{ secrets.RELEASES_USERNAME }}", "password": "${{ secrets.RELEASES_PASSWORD }}"}]'
       - name: Publish Titanium JAR
