@@ -95,6 +95,8 @@ case "$1" in
         echo "  * p, patch     | Apply patches"
         echo "  * rb, rebuild  | Rebuild patches"
         echo "  * j, jar       | Create a runnable JAR"
+        echo "    * pc, papeprclip | Create runnable JAR with Paperclip"
+        echo "  * deploy       | Deploy to maven repository"
     ;;
 esac
 
