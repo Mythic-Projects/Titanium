@@ -29,6 +29,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [IonSpigot-0011] Async Spawn Chunks
 [IonSpigot-0023] Implement PandaWire
 
+[Migot-0005] Fix Occasional Client Side Unloading of Chunk 0 0
 [Migot-0009] Prevent creature spawning in unloaded chunks
 [Migot-0027] Enable Concurrent Chunk Decoration
 [Migot-0032] Thread Local IntCache
