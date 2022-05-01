@@ -21,6 +21,10 @@ jobs:
         run: |
           git config --global user.email "titanium@titanvale.net"
           git config --global user.name "Titanium CI"
+      - name: Grant execute permissions
+        run: |
+          chmod -R +x ./base/
+          chmod -R +x ./scripts/
       - name: Prepare Titanium upstream
         run: bash titanium upstream
       - name: Apply Titanium patches
