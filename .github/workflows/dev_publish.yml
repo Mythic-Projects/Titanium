@@ -34,5 +34,5 @@ jobs:
         with:
           servers: '[{"id": "titanvale-snapshots", "username": "${{ secrets.SNAPSHOTS_USERNAME }}", "password": "${{ secrets.SNAPSHOTS_PASSWORD }}"}]'
       - name: Publish Titanium JAR
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        if: github.event_name == 'push'
         run: bash titanium deploy
