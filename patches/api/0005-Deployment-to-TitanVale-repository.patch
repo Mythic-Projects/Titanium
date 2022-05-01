@@ -1,0 +1,48 @@
+From 59b1ba7606b9013bf984be3839559d98937e53d3 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 1 May 2022 18:16:14 +0200
+Subject: [PATCH] Deployment to TitanVale repository
+
+
+diff --git a/pom.xml b/pom.xml
+index 473f77c2..39b29757 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -19,6 +19,8 @@
+         <maven.compiler.source>1.8</maven.compiler.source>
+         <maven.compiler.target>1.8</maven.compiler.target>
+         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
++        <!-- Titanium - since submodules inherit this from titanium-parent -->
++        <maven.deploy.skip>false</maven.deploy.skip>
+     </properties>
+ 
+     <repositories>
+@@ -160,6 +162,25 @@
+                     <shadedArtifactAttached>true</shadedArtifactAttached>
+                 </configuration>
+             </plugin>
++            <plugin>
++                <groupId>org.apache.maven.plugins</groupId>
++                <artifactId>maven-source-plugin</artifactId>
++                <version>3.2.0</version>
++                <executions>
++                    <execution>
++                        <id>attach-sources</id>
++                        <phase>verify</phase>
++                        <goals>
++                            <goal>jar-no-fork</goal>
++                        </goals>
++                    </execution>
++                </executions>
++            </plugin>
++            <plugin>
++                <groupId>org.apache.maven.plugins</groupId>
++                <artifactId>maven-deploy-plugin</artifactId>
++                <version>3.0.0-M2</version>
++            </plugin>
+         </plugins>
+     </build>
+ </project>
+-- 
+2.32.0.windows.2
+
