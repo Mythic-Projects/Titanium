@@ -1,0 +1,31 @@
+name: Publish Titanium main to TitanVale repository
+
+on:
+  push:
+    branches:
+     - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Setup Java 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: "8"
+          distribution: adopt
+          cache: maven
+      - name: Setup Git
+        run: |
+          git config --global user.email "titanium@titanvale.net"
+          git config --global user.name "Titanium CI"
+      - name: Build Titanium
+        run: bash titanium build
+      - name: Publish Titanium JAR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: mvn deploy --settings settings.xml
+        env:
+          REPO_USERNAME: ${{ secrets.RELEASES_USERNAME }}
+          REPO_PASSWORD: ${{ secrets.RELEASES_PASSWORD }}
