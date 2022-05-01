@@ -23,9 +23,10 @@ jobs:
           git config --global user.name "Titanium CI"
       - name: Build Titanium
         run: bash titanium build
+      - name: Setup Maven Action
+        uses: s4u/setup-maven-action@v1.3.1
+        with:
+          servers: '[{"id": "titanvale-snapshots", "username": "${{ secrets.SNAPSHOTS_USERNAME }}", "password": "${{ secrets.SNAPSHOTS_PASSWORD }}"}]'
       - name: Publish Titanium JAR
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        run: mvn deploy --settings settings.xml
-        env:
-          REPO_USERNAME: ${{ secrets.SNAPSHOTS_USERNAME }}
-          REPO_PASSWORD: ${{ secrets.SNAPSHOTS_PASSWORD }}
+        run: bash titanium deploy
