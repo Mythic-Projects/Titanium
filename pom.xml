@@ -29,12 +29,12 @@
     </repositories>
     <distributionManagement>
         <repository>
-            <id>ashcon-releases</id>
-            <url>https://repo.ashcon.app/nexus/content/repositories/releases</url>
+            <id>titanvale-releases</id>
+            <url>https://repo.titanvale.net/releases</url>
         </repository>
         <snapshotRepository>
-            <id>ashcon-snapshots</id>
-            <url>https://repo.ashcon.app/nexus/content/repositories/snapshots</url>
+            <id>titanvale-snapshots</id>
+            <url>https://repo.titanvale.net/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
     <modules>

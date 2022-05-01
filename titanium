@@ -69,6 +69,23 @@ case "$1" in
         esac
     )
     ;;
+    "deploy")
+    (
+      set -e
+      case "$2" in
+        "server")
+          cd ./Titanium-Server/
+        ;;
+        "api")
+          cd ./Titanium-API/
+        ;;
+        *)
+          cd ./
+        ;;
+      esac
+      mvn clean deploy
+    )
+    ;;
     *)
         echo "Titanium build tool."
         echo ""
