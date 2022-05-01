@@ -2,9 +2,52 @@
 
 [SportPaper](https://github.com/Electroid/SportPaper) fork which aims to be fast, fix exploits and bugs, improve API, and provide better configuration for server administrators. 
 
-## Download
+**Titanium officially supports JDK 8, 11 and 17.**
 
-TODO
+## Getting Titanium
+
+Currently, you have to build Titanium by yourself. In the future Download option will be available.
+
+### Requirements
+
+If you want to build Titanium you will need these things to be installed and available from your shell:
+* [JDK 8](https://www.oracle.com/java/technologies/downloads/#java8)
+* [Git](https://git-scm.com/)
+* [Maven](https://maven.apache.org/)
+
+### How to build
+
+To patching, compiling and building Titanium you will use `titanium` script.
+
+To just build Titanium clone this repository and run `titanium build paperclip` in the root directory. Then you will find your server jar in `Titanium-Server/target`, it should be named `titanium-paperclip.jar`.
+
+## Maven
+
+Repository:
+```xml
+<repository>
+  <id>titanvale-snapshots</id>
+  <url>https://repo.titanvale.net/snapshots/</url>
+</repository>
+```
+API:
+```xml
+<dependency>
+  <groupId>net.titanvale</groupId>
+  <artifactId>titanium-api</artifactId>
+  <version>1.8.8-R0.1-SNAPSHOT</version>
+  <scope>provided</scope>
+</dependency>
+```
+Server:
+```xml
+<dependency>
+  <groupId>net.titanvale</groupId>
+  <artifactId>titanium</artifactId>
+  <version>1.8.8-R0.1-SNAPSHOT</version>
+  <scope>provided</scope>
+</dependency>
+```
 
 ## Patches
 
@@ -41,34 +84,10 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Akarin-0007] Avoid double I/O operation on load player file
 ```
 
-## Maven
-
-Repository:
-```xml
-<repository>
-  <id>titanvale-snapshots</id>
-  <url>https://repo.titanvale.net/snapshots/</url>
-</repository>
-```
-API:
-```xml
-<dependency>
-  <groupId>net.titanvale</groupId>
-  <artifactId>titanium-api</artifactId>
-  <version>1.8.8-R0.1-SNAPSHOT</version>
-  <scope>provided</scope>
-</dependency>
-```
-Server:
-```xml
-<dependency>
-  <groupId>net.titanvale</groupId>
-  <artifactId>titanium</artifactId>
-  <version>1.8.8-R0.1-SNAPSHOT</version>
-  <scope>provided</scope>
-</dependency>
-```
-
 ## Contributing
 
-TODO
+**This section came from [SportPaper](https://github.com/Electroid/SportPaper#contributing)**
+
+* Before contributing to Titanium, make sure you have run `./titanium build` and that you have the latest version of git installed
+* To add patches to Titanium simply make your changes in `Titanium-API` and `Titanium-Server` and commit them. Then run `./sportpaper rebuild`.
+* To modify nms files not currently imported into Titanium, you must add an import for that file in `scripts/importmcdev.sh` and then run `./titanium build` for those files to show up in `Titanium-Server`
