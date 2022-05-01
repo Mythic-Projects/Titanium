@@ -5,6 +5,9 @@
     <artifactId>titanium-parent</artifactId>
     <version>1.8.8-SNAPSHOT</version>
     <packaging>pom</packaging>
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
     <repositories>
         <repository>
             <id>sonatype-repo</id>
@@ -15,12 +18,12 @@
             <url>https://hub.spigotmc.org/nexus/content/groups/public</url>
         </repository>
         <repository>
-            <id>ashcon-releases</id>
-            <url>https://repo.ashcon.app/nexus/content/repositories/releases</url>
+            <id>titanvale-releases</id>
+            <url>https://repo.titanvale.net/releases/</url>
         </repository>
         <repository>
-            <id>ashcon-snapshots</id>
-            <url>https://repo.ashcon.app/nexus/content/repositories/snapshots</url>
+            <id>titanvale-snapshots</id>
+            <url>https://repo.titanvale.net/snapshots/</url>
         </repository>
         <repository>
             <id>okaeri-repo</id>
@@ -30,11 +33,11 @@
     <distributionManagement>
         <repository>
             <id>titanvale-releases</id>
-            <url>https://repo.titanvale.net/releases</url>
+            <url>https://repo.titanvale.net/releases/</url>
         </repository>
         <snapshotRepository>
             <id>titanvale-snapshots</id>
-            <url>https://repo.titanvale.net/snapshots</url>
+            <url>https://repo.titanvale.net/snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
     <modules>

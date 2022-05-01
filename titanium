@@ -72,31 +72,34 @@ case "$1" in
     "deploy")
     (
       set -e
+
+      REPOSITORY='titanvale-snapshots::https://repo.titanvale.net/snapshots'
+
       case "$2" in
-        "server")
-          cd ./Titanium-Server/
-        ;;
-        "api")
-          cd ./Titanium-API/
-        ;;
-        *)
-          cd ./
+        "release")
+          REPOSITORY='titanvale-releases::https://repo.titanvale.net/releases'
         ;;
       esac
-      mvn clean deploy
+
+      echo "Deploying to $REPOSITORY"
+
+      basedir
+
+      mvn clean install deploy:deploy -DaltDeploymentRepository=$REPOSITORY
     )
     ;;
     *)
         echo "Titanium build tool."
         echo ""
         echo " Commands:"
-        echo "  * setup        | Setup the build environment"
-        echo "  * build        | Setup the build environment, apply patches, and create a runnable JAR"
-        echo "  * p, patch     | Apply patches"
-        echo "  * rb, rebuild  | Rebuild patches"
-        echo "  * j, jar       | Create a runnable JAR"
-        echo "    * pc, papeprclip | Create runnable JAR with Paperclip"
-        echo "  * deploy       | Deploy to maven repository"
+        echo "  * setup              | Setup the build environment"
+        echo "  * build              | Setup the build environment, apply patches, and create a runnable JAR"
+        echo "  * p, patch           | Apply patches"
+        echo "  * rb, rebuild        | Rebuild patches"
+        echo "  * j, jar             | Create a runnable JAR"
+        echo "    * (pc, papeprclip) | Create runnable JAR with Paperclip"
+        echo "  * deploy             | Deploy to maven repository"
+        echo "    * (release)        | Define if deploy to releases repository, empty deploy to snapshots"
     ;;
 esac
 
