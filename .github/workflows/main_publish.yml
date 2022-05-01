@@ -21,8 +21,10 @@ jobs:
         run: |
           git config --global user.email "titanium@titanvale.net"
           git config --global user.name "Titanium CI"
-      - name: Build Titanium
-        run: bash titanium build
+      - name: Prepare Titanium upstream
+        run: bash titanium upstream
+      - name: Apply Titanium patches
+        run: bash titanium apply
       - name: Setup Maven Action
         uses: s4u/setup-maven-action@v1.3.1
         with:
