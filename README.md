@@ -41,9 +41,33 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Akarin-0007] Avoid double I/O operation on load player file
 ```
 
-## API
+## Maven
 
-TODO
+Repository:
+```xml
+<repository>
+  <id>titanvale-snapshots</id>
+  <url>https://repo.titanvale.net/snapshots/</url>
+</repository>
+```
+API:
+```xml
+<dependency>
+  <groupId>net.titanvale</groupId>
+  <artifactId>titanium-api</artifactId>
+  <version>1.8.8-R0.1-SNAPSHOT</version>
+  <scope>provided</scope>
+</dependency>
+```
+Server:
+```xml
+<dependency>
+  <groupId>net.titanvale</groupId>
+  <artifactId>titanium</artifactId>
+  <version>1.8.8-R0.1-SNAPSHOT</version>
+  <scope>provided</scope>
+</dependency>
+```
 
 ## Contributing
 
