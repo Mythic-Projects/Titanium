@@ -1,0 +1,125 @@
+From c8acd773e1452920db1556b82a5a820b35a0855e Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 1 May 2022 12:42:29 +0200
+Subject: [PATCH] Fix Aikar Timings server configuration mapping
+
+
+diff --git a/pom.xml b/pom.xml
+index 87992a63..473f77c2 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -94,7 +94,16 @@
+             <type>jar</type>
+             <scope>compile</scope>
+         </dependency>
+-
++        <dependency>
++            <groupId>eu.okaeri</groupId>
++            <artifactId>okaeri-configs-yaml-bukkit</artifactId>
++            <version>4.0.0-beta18</version>
++        </dependency>
++        <dependency>
++            <groupId>eu.okaeri</groupId>
++            <artifactId>okaeri-configs-serdes-commons</artifactId>
++            <version>4.0.0-beta18</version>
++        </dependency>
+         <!-- testing -->
+         <dependency>
+             <groupId>junit</groupId>
+diff --git a/src/main/java/co/aikar/timings/TimingsExport.java b/src/main/java/co/aikar/timings/TimingsExport.java
+index fe19ea00..f4690082 100644
+--- a/src/main/java/co/aikar/timings/TimingsExport.java
++++ b/src/main/java/co/aikar/timings/TimingsExport.java
+@@ -25,6 +25,7 @@ package co.aikar.timings;
+ 
+ import com.google.common.base.Function;
+ import com.google.common.collect.Sets;
++import eu.okaeri.configs.OkaeriConfig;
+ import org.apache.commons.lang.StringUtils;
+ import org.bukkit.Bukkit;
+ import org.bukkit.ChatColor;
+@@ -200,9 +201,10 @@ class TimingsExport extends Thread {
+         // Information on the users Config
+ 
+         parent.put("config", createObject(
+-            pair("spigot", mapAsJSON(Bukkit.spigot().getSpigotConfig(), null)),
+-            pair("bukkit", mapAsJSON(Bukkit.spigot().getBukkitConfig(), null)),
+-            pair("paperspigot", mapAsJSON(Bukkit.spigot().getPaperSpigotConfig(), null))
++                pair("bukkit", mapAsJSON(Bukkit.spigot().getTitaniumConfig(), "bukkit")),
++                pair("spigot", mapAsJSON(Bukkit.spigot().getTitaniumConfig(), "spigot")),
++                pair("paperspigot", mapAsJSON(Bukkit.spigot().getTitaniumConfig(), "paper")),
++                pair("ion", mapAsJSON(Bukkit.spigot().getTitaniumConfig(), "ion"))
+         ));
+ 
+         new TimingsExport(sender, parent, history).start();
+@@ -243,6 +245,8 @@ class TimingsExport extends Thread {
+         return timingsCost;
+     }
+ 
++    // Titanium start
++    /*
+     private static JSONObject mapAsJSON(ConfigurationSection config, String parentKey) {
+ 
+         JSONObject object = new JSONObject();
+@@ -257,9 +261,26 @@ class TimingsExport extends Thread {
+         }
+         return object;
+     }
++     */
++    // Titanium end
++
++    private static JSONObject mapAsJSON(OkaeriConfig config, String parentKey) {
++        JSONObject object = new JSONObject();
++
++        for (String key : config.getConfigurer().getAllKeys()) {
++            String fullKey = (parentKey != null ? parentKey + "." + key : key);
++            if (fullKey.equals("database") || fullKey.equals("settings.bungeecord-addresses") || TimingsManager.hiddenConfigs.contains(fullKey)) {
++                continue;
++            }
++            final Object val = config.get(key);
++
++            object.put(key, valAsJSON(val, fullKey));
++        }
++        return object;
++    }
+ 
+     private static Object valAsJSON(Object val, final String parentKey) {
+-        if (!(val instanceof MemorySection)) {
++        if (!(val instanceof OkaeriConfig)) {
+             if (val instanceof List) {
+                 Iterable<Object> v = (Iterable<Object>) val;
+                 return toArrayMapper(v, new Function<Object, Object>() {
+@@ -272,7 +293,7 @@ class TimingsExport extends Thread {
+                 return val.toString();
+             }
+         } else {
+-            return mapAsJSON((ConfigurationSection) val, parentKey);
++            return mapAsJSON((OkaeriConfig) val, parentKey);
+         }
+     }
+ 
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index c136cb6d..c4f8123d 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -1,5 +1,6 @@
+ package org.bukkit;
+ 
++import eu.okaeri.configs.OkaeriConfig;
+ import java.awt.image.BufferedImage;
+ import java.io.File;
+ import java.io.Serializable;
+@@ -1128,6 +1129,10 @@ public interface Server extends PluginMessageRecipient {
+             throw new UnsupportedOperationException("Not supported yet.");
+         }
+ 
++        public OkaeriConfig getTitaniumConfig() {
++            throw new UnsupportedOperationException("Not supported yet.");
++        }
++
+         /**
+          * Sends the component to the player
+          *
+-- 
+2.32.0.windows.2
+
