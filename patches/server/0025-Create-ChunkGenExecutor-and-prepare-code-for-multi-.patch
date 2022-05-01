@@ -1,0 +1,550 @@
+From af5526039c5b6b02e39822408e261233011aeeaa Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sat, 30 Apr 2022 18:56:32 +0200
+Subject: [PATCH] Create ChunkGenExecutor and prepare code for multi-threading
+
+
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderGenerate.java b/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
+index 1c08afa5..6678921e 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
+@@ -1,7 +1,10 @@
+ package net.minecraft.server;
+ 
++import java.util.HashMap;
+ import java.util.List;
++import java.util.Map;
+ import java.util.Random;
++import java.util.concurrent.ConcurrentHashMap;
+ 
+ public class ChunkProviderGenerate implements IChunkProvider {
+ 
+@@ -28,11 +31,28 @@ public class ChunkProviderGenerate implements IChunkProvider {
+     private WorldGenLargeFeature y;
+     private WorldGenBase z;
+     private WorldGenMonument A;
+-    private BiomeBase[] B;
++
++    // Titanium start
++    /*private BiomeBase[] B;
+     double[] d;
+     double[] e;
+     double[] f;
+-    double[] g;
++    double[] g;*/
++
++    private final Map<Long, ChunkGenData> chunkGenData = new ConcurrentHashMap<>();
++
++    public ChunkGenData getChunkData() {
++        return chunkGenData.computeIfAbsent(Thread.currentThread().getId(), (key) -> new ChunkGenData());
++    }
++
++    private static class ChunkGenData {
++        private BiomeBase[] B;
++        private double[] d;
++        private double[] e;
++        private double[] f;
++        private double[] g;
++    }
++    // Titanium end
+ 
+     public ChunkProviderGenerate(World world, long i, boolean flag, String s) {
+         this.s = Blocks.WATER;
+@@ -75,7 +95,7 @@ public class ChunkProviderGenerate implements IChunkProvider {
+     }
+ 
+     public void a(int i, int j, ChunkSnapshot chunksnapshot) {
+-        this.B = this.m.getWorldChunkManager().getBiomes(this.B, i * 4 - 2, j * 4 - 2, 10, 10);
++        this.getChunkData().B = this.m.getWorldChunkManager().getBiomes(this.getChunkData().B, i * 4 - 2, j * 4 - 2, 10, 10);
+         this.a(i * 4, 0, j * 4);
+ 
+         for (int k = 0; k < 4; ++k) {
+@@ -154,8 +174,8 @@ public class ChunkProviderGenerate implements IChunkProvider {
+         ChunkSnapshot chunksnapshot = new ChunkSnapshot();
+ 
+         this.a(i, j, chunksnapshot);
+-        this.B = this.m.getWorldChunkManager().getBiomeBlock(this.B, i * 16, j * 16, 16, 16);
+-        this.a(i, j, chunksnapshot, this.B);
++        this.getChunkData().B = this.m.getWorldChunkManager().getBiomeBlock(this.getChunkData().B, i * 16, j * 16, 16, 16);
++        this.a(i, j, chunksnapshot, this.getChunkData().B);
+         if (this.r.r && this.m.paperConfigTitanium.generatorSettings.caves) { // PaperSpigot
+             this.u.a(this, this.m, i, j, chunksnapshot);
+         }
+@@ -188,7 +208,7 @@ public class ChunkProviderGenerate implements IChunkProvider {
+         byte[] abyte = chunk.getBiomeIndex();
+ 
+         for (int k = 0; k < abyte.length; ++k) {
+-            abyte[k] = (byte) this.B[k].id;
++            abyte[k] = (byte) this.getChunkData().B[k].id;
+         }
+ 
+         chunk.initLighting();
+@@ -196,13 +216,13 @@ public class ChunkProviderGenerate implements IChunkProvider {
+     }
+ 
+     private void a(int i, int j, int k) {
+-        this.g = this.b.a(this.g, i, k, 5, 5, (double) this.r.e, (double) this.r.f, (double) this.r.g);
++        this.getChunkData().g = this.b.a(this.getChunkData().g, i, k, 5, 5, (double) this.r.e, (double) this.r.f, (double) this.r.g);
+         float f = this.r.a;
+         float f1 = this.r.b;
+ 
+-        this.d = this.k.a(this.d, i, j, k, 5, 33, 5, (double) (f / this.r.h), (double) (f1 / this.r.i), (double) (f / this.r.j));
+-        this.e = this.i.a(this.e, i, j, k, 5, 33, 5, (double) f, (double) f1, (double) f);
+-        this.f = this.j.a(this.f, i, j, k, 5, 33, 5, (double) f, (double) f1, (double) f);
++        this.getChunkData().d = this.k.a(this.getChunkData().d, i, j, k, 5, 33, 5, (double) (f / this.r.h), (double) (f1 / this.r.i), (double) (f / this.r.j));
++        this.getChunkData().e = this.i.a(this.getChunkData().e, i, j, k, 5, 33, 5, (double) f, (double) f1, (double) f);
++        this.getChunkData().f = this.j.a(this.getChunkData().f, i, j, k, 5, 33, 5, (double) f, (double) f1, (double) f);
+         boolean flag = false;
+         boolean flag1 = false;
+         int l = 0;
+@@ -214,11 +234,11 @@ public class ChunkProviderGenerate implements IChunkProvider {
+                 float f3 = 0.0F;
+                 float f4 = 0.0F;
+                 byte b0 = 2;
+-                BiomeBase biomebase = this.B[j1 + 2 + (k1 + 2) * 10];
++                BiomeBase biomebase = this.getChunkData().B[j1 + 2 + (k1 + 2) * 10];
+ 
+                 for (int l1 = -b0; l1 <= b0; ++l1) {
+                     for (int i2 = -b0; i2 <= b0; ++i2) {
+-                        BiomeBase biomebase1 = this.B[j1 + l1 + 2 + (k1 + i2 + 2) * 10];
++                        BiomeBase biomebase1 = this.getChunkData().B[j1 + l1 + 2 + (k1 + i2 + 2) * 10];
+                         float f5 = this.r.n + biomebase1.an * this.r.m;
+                         float f6 = this.r.p + biomebase1.ao * this.r.o;
+ 
+@@ -243,7 +263,7 @@ public class ChunkProviderGenerate implements IChunkProvider {
+                 f3 /= f4;
+                 f2 = f2 * 0.9F + 0.1F;
+                 f3 = (f3 * 4.0F - 1.0F) / 8.0F;
+-                double d0 = this.g[i1] / 8000.0D;
++                double d0 = this.getChunkData().g[i1] / 8000.0D;
+ 
+                 if (d0 < 0.0D) {
+                     d0 = -d0 * 0.3D;
+@@ -281,9 +301,9 @@ public class ChunkProviderGenerate implements IChunkProvider {
+                         d4 *= 4.0D;
+                     }
+ 
+-                    double d5 = this.e[l] / (double) this.r.d;
+-                    double d6 = this.f[l] / (double) this.r.c;
+-                    double d7 = (this.d[l] / 10.0D + 1.0D) / 2.0D;
++                    double d5 = this.getChunkData().e[l] / (double) this.r.d;
++                    double d6 = this.getChunkData().f[l] / (double) this.r.c;
++                    double d7 = (this.getChunkData().d[l] / 10.0D + 1.0D) / 2.0D;
+                     double d8 = MathHelper.b(d5, d6, d7) - d4;
+ 
+                     if (j2 > 29) {
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+index 32bd3431..fe64c629 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+@@ -4,6 +4,9 @@ import java.io.IOException;
+ import java.util.Iterator;
+ import java.util.List;
+ 
++import java.util.Map;
++import java.util.concurrent.ConcurrentHashMap;
++import net.titanium.chunk.gen.ChunkGenExecutor;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
+@@ -37,9 +40,13 @@ public class ChunkProviderServer implements IChunkProvider {
+     public boolean forceChunkLoad = false; // CraftBukkit - true -> false
+     // Paper start
+     protected Chunk lastChunkByPos = null;
+-    public Long2ObjectMap<Chunk> chunks = new Long2ObjectOpenHashMap<Chunk>(8192, 0.5f) {
++    protected Map<Long, Chunk> lastChunkByPosThread = new ConcurrentHashMap<>();
++    /*public Long2ObjectMap<Chunk> chunks = new Long2ObjectOpenHashMap<Chunk>(8192, 0.5f) {
+         @Override
+         public Chunk get(long key) {
++            synchronized (this) {
++
++            }
+             if (lastChunkByPos != null && key == lastChunkByPos.chunkKey) {
+                 return lastChunkByPos;
+             }
+@@ -53,7 +60,45 @@ public class ChunkProviderServer implements IChunkProvider {
+             }
+             return super.remove(key);
+         }
+-    }; // CraftBukkit
++    };*/ // CraftBukkit
++
++    public net.minecraft.server.Chunk getLastChunkByPos() {
++        return lastChunkByPosThread.get(Thread.currentThread().getId());
++    }
++
++    public Chunk setLastChunkByPos(net.minecraft.server.Chunk lastChunkByPos) {
++        if (lastChunkByPos == null) {
++            this.lastChunkByPosThread.remove(Thread.currentThread().getId());
++            return null;
++        }
++        this.lastChunkByPosThread.put(Thread.currentThread().getId(), lastChunkByPos);
++        return lastChunkByPos;
++    }
++
++    public Map<Long, Chunk> chunks = new ChunkMap(8192, 0.5f);
++
++    private class ChunkMap extends ConcurrentHashMap<Long, Chunk> {
++
++        public ChunkMap(int initialCapacity, float loadFactor) {
++            super(initialCapacity, loadFactor);
++        }
++
++        @Override
++        public Chunk get(Object key) {
++            if (getLastChunkByPos() != null && key.equals(getLastChunkByPos().chunkKey)) {
++                return getLastChunkByPos();
++            }
++            return setLastChunkByPos(super.get(key));
++        }
++
++        @Override
++        public Chunk remove(Object key) {
++            if (lastChunkByPos != null && key.equals(lastChunkByPos.chunkKey)) {
++                setLastChunkByPos(null);
++            }
++            return super.remove(key);
++        }
++    }
+     // Paper end
+     public WorldServer world;
+ 
+@@ -160,31 +205,40 @@ public class ChunkProviderServer implements IChunkProvider {
+                 chunk = ChunkIOExecutor.syncChunkLoad(world, loader, this, i, j);
+             }
+         } else if (chunk == null) {
+-            chunk = originalGetChunkAt(i, j);
++            chunk = originalGetChunkAt(i, j, runnable);
+         }
+ 
+         unloadQueue.remove(LongHash.toLong(i, j)); // SportPaper
+         // If we didn't load the chunk async and have a callback run it now
+-        if (runnable != null) {
++        if (chunk != null && runnable != null) {
+             runnable.run();
+         }
+ 
+         return chunk;
+     }
++
+     public Chunk originalGetChunkAt(int i, int j) {
++        return originalGetChunkAt(i, j, null);
++    }
++
++    public Chunk originalGetChunkAt(int i, int j, Runnable runnable) {
+         Chunk chunk = (Chunk) this.chunks.get(LongHash.toLong(i, j));
+         boolean newChunk = false;
+         // CraftBukkit end
+ 
+         if (chunk == null) {
+-            world.timings.syncChunkLoadTimer.startTiming(); // Spigot
+             chunk = this.loadChunk(i, j);
+             if (chunk == null) {
+                 if (this.chunkProvider == null) {
+                     chunk = this.emptyChunk;
+                 } else {
+                     try {
+-                        chunk = this.chunkProvider.getOrCreateChunk(i, j);
++                        if (runnable != null && false) {
++                            ChunkGenExecutor.queueChunkGen(world, this.chunkProvider, this, i, j, runnable);
++                            return null;
++                        } else {
++                            chunk = ChunkGenExecutor.syncChunkGen(world, this.chunkProvider, this, i, j);
++                        }
+                     } catch (Throwable throwable) {
+                         CrashReport crashreport = CrashReport.a(throwable, "Exception generating new chunk");
+                         CrashReportSystemDetails crashreportsystemdetails = crashreport.a("Chunk to be generated");
+@@ -197,42 +251,14 @@ public class ChunkProviderServer implements IChunkProvider {
+                 }
+                 newChunk = true; // CraftBukkit
+             }
++        }
+ 
+-            this.chunks.put(LongHash.toLong(i, j), chunk);
+-            
+-            chunk.addEntities();
+-            
+-            // CraftBukkit start
+-            Server server = world.getServer();
+-            if (server != null) {
+-                /*
+-                 * If it's a new world, the first few chunks are generated inside
+-                 * the World constructor. We can't reliably alter that, so we have
+-                 * no way of creating a CraftWorld/CraftServer at that point.
+-                 */
+-                server.getPluginManager().callEvent(new org.bukkit.event.world.ChunkLoadEvent(chunk.bukkitChunk, newChunk));
+-            }
+-
+-            // Update neighbor counts
+-            for (int x = -2; x < 3; x++) {
+-                for (int z = -2; z < 3; z++) {
+-                    if (x == 0 && z == 0) {
+-                        continue;
+-                    }
++        this.unloadQueue.remove(LongHash.toLong(i, j)); // SportPaper
+ 
+-                    Chunk neighbor = this.getChunkIfLoaded(chunk.locX + x, chunk.locZ + z);
+-                    if (neighbor != null) {
+-                        neighbor.setNeighborLoaded(-x, -z);
+-                        chunk.setNeighborLoaded(x, z);
+-                    }
+-                }
+-            }
+-            // CraftBukkit end
+-            chunk.loadNearby(this, this, i, j);
+-            world.timings.syncChunkLoadTimer.stopTiming(); // Spigot
++        if (runnable != null) {
++            runnable.run();
+         }
+ 
+-        this.unloadQueue.remove(LongHash.toLong(i, j)); // SportPaper
+         return chunk;
+     }
+ 
+diff --git a/src/main/java/net/titanium/chunk/gen/ChunkGenExecutor.java b/src/main/java/net/titanium/chunk/gen/ChunkGenExecutor.java
+new file mode 100644
+index 00000000..2bff0a5f
+--- /dev/null
++++ b/src/main/java/net/titanium/chunk/gen/ChunkGenExecutor.java
+@@ -0,0 +1,41 @@
++package net.titanium.chunk.gen;
++
++import net.minecraft.server.BiomeBase;
++import net.minecraft.server.Chunk;
++import net.minecraft.server.ChunkProviderServer;
++import net.minecraft.server.ChunkRegionLoader;
++import net.minecraft.server.IChunkProvider;
++import net.minecraft.server.MCUtil;
++import net.minecraft.server.World;
++import net.titanium.config.TitaniumConfig;
++import org.bukkit.craftbukkit.block.CraftBlock;
++import org.bukkit.craftbukkit.util.AsynchronousExecutor;
++
++public class ChunkGenExecutor {
++    static final int BASE_THREADS = TitaniumConfig.get().chunk.io.baseThreads;
++    static final int PLAYERS_PER_THREAD = TitaniumConfig.get().chunk.io.playersPerThread;
++
++    private static final AsynchronousExecutor<QueuedGenChunk, Chunk, Runnable, RuntimeException> instance = new AsynchronousExecutor<QueuedGenChunk, Chunk, Runnable, RuntimeException>(new ChunkGenProvider(), BASE_THREADS);
++
++    public static Chunk syncChunkGen(World world, IChunkProvider chunkGenerator, ChunkProviderServer provider, int x, int z) {
++        return MCUtil.ensureMain("Async Chunk Gen", () -> instance.getSkipQueue(new QueuedGenChunk(x, z, chunkGenerator, world, provider))); // Paper
++    }
++
++    public static void queueChunkGen(World world, IChunkProvider chunkGenerator, ChunkProviderServer provider, int x, int z, Runnable runnable) {
++        instance.add(new QueuedGenChunk(x, z, chunkGenerator, world, provider), runnable);
++    }
++
++    // Abuses the fact that hashCode and equals for QueuedChunk only use world and coords
++    public static void dropQueuedChunkGen(World world, int x, int z, Runnable runnable) {
++        instance.drop(new QueuedGenChunk(x, z, null, world, null), runnable);
++    }
++
++    public static void adjustPoolSize(int players) {
++        int size = Math.max(BASE_THREADS, (int) Math.ceil(players / PLAYERS_PER_THREAD));
++        instance.setActiveThreads(size);
++    }
++
++    public static void tick() {
++        instance.finishActive();
++    }
++}
+diff --git a/src/main/java/net/titanium/chunk/gen/ChunkGenProvider.java b/src/main/java/net/titanium/chunk/gen/ChunkGenProvider.java
+new file mode 100644
+index 00000000..1f457c33
+--- /dev/null
++++ b/src/main/java/net/titanium/chunk/gen/ChunkGenProvider.java
+@@ -0,0 +1,76 @@
++package net.titanium.chunk.gen;
++
++import java.io.IOException;
++import java.util.concurrent.atomic.AtomicInteger;
++import net.minecraft.server.Chunk;
++import net.minecraft.server.ChunkCoordIntPair;
++import net.minecraft.server.ChunkProviderGenerate;
++import net.minecraft.server.ChunkProviderServer;
++import net.minecraft.server.ChunkRegionLoader;
++import net.minecraft.server.IChunkProvider;
++import net.minecraft.server.MCUtil;
++import net.minecraft.server.NBTTagCompound;
++import org.bukkit.Server;
++import org.bukkit.craftbukkit.generator.NormalChunkGenerator;
++import org.bukkit.craftbukkit.util.AsynchronousExecutor;
++import org.bukkit.craftbukkit.util.LongHash;
++
++class ChunkGenProvider implements AsynchronousExecutor.CallBackProvider<QueuedGenChunk, Chunk, Runnable, RuntimeException> {
++
++    private final AtomicInteger threadNumber = new AtomicInteger(1);
++
++    // async stuff
++    public Chunk callStage1(QueuedGenChunk queuedChunk) throws RuntimeException {
++        IChunkProvider chunkGenerator = queuedChunk.chunkGenerator;
++        return chunkGenerator.getOrCreateChunk(queuedChunk.x, queuedChunk.z);
++    }
++
++    // sync stuff
++    public void callStage2(QueuedGenChunk queuedChunk, Chunk chunk) throws RuntimeException {
++        if (chunk == null || queuedChunk.provider.chunks.containsKey(ChunkCoordIntPair.a(queuedChunk.x, queuedChunk.z))) {
++            queuedChunk.provider.originalGetChunkAt(queuedChunk.x, queuedChunk.z);
++            return;
++        }
++
++        chunk.world.timings.syncChunkLoadTimer.startTiming(); // Spigot
++
++        queuedChunk.provider.chunks.put(LongHash.toLong(queuedChunk.x, queuedChunk.z), chunk);
++
++        chunk.addEntities();
++
++        Server server = queuedChunk.provider.world.getServer();
++        if (server != null) {
++            server.getPluginManager().callEvent(new org.bukkit.event.world.ChunkLoadEvent(chunk.bukkitChunk, true));
++        }
++
++        // Update neighbor counts
++        for (int x = -2; x < 3; x++) {
++            for (int z = -2; z < 3; z++) {
++                if (x == 0 && z == 0) {
++                    continue;
++                }
++
++                Chunk neighbor = queuedChunk.provider.getChunkIfLoaded(chunk.locX + x, chunk.locZ + z);
++                if (neighbor != null) {
++                    neighbor.setNeighborLoaded(-x, -z);
++                    chunk.setNeighborLoaded(x, z);
++                }
++            }
++        }
++
++        chunk.loadNearby(queuedChunk.provider, queuedChunk.provider, queuedChunk.x, queuedChunk.z);
++
++        chunk.world.timings.syncChunkLoadTimer.stopTiming(); // Spigot
++    }
++
++    public void callStage3(QueuedGenChunk queuedChunk, Chunk chunk, Runnable runnable) throws RuntimeException {
++        runnable.run();
++    }
++
++    public Thread newThread(Runnable runnable) {
++        Thread thread = new Thread(runnable, "Chunk Gen Executor Thread-" + threadNumber.getAndIncrement());
++        thread.setDaemon(true);
++        return thread;
++    }
++
++}
+diff --git a/src/main/java/net/titanium/chunk/gen/QueuedGenChunk.java b/src/main/java/net/titanium/chunk/gen/QueuedGenChunk.java
+new file mode 100644
+index 00000000..d26b6406
+--- /dev/null
++++ b/src/main/java/net/titanium/chunk/gen/QueuedGenChunk.java
+@@ -0,0 +1,38 @@
++package net.titanium.chunk.gen;
++
++import net.minecraft.server.ChunkProviderServer;
++import net.minecraft.server.ChunkRegionLoader;
++import net.minecraft.server.IChunkProvider;
++import net.minecraft.server.NBTTagCompound;
++import net.minecraft.server.World;
++
++class QueuedGenChunk {
++    final int x;
++    final int z;
++    final IChunkProvider chunkGenerator;
++    final World world;
++    final ChunkProviderServer provider;
++
++    public QueuedGenChunk(int x, int z,  IChunkProvider chunkGenerator, World world, ChunkProviderServer provider) {
++        this.x = x;
++        this.z = z;
++        this.chunkGenerator = chunkGenerator;
++        this.world = world;
++        this.provider = provider;
++    }
++
++    @Override
++    public int hashCode() {
++        return (x * 31 + z * 29) ^ world.hashCode();
++    }
++
++    @Override
++    public boolean equals(Object object) {
++        if (object instanceof QueuedGenChunk) {
++            QueuedGenChunk other = (QueuedGenChunk) object;
++            return x == other.x && z == other.z && world == other.world;
++        }
++
++        return false;
++    }
++}
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index 9a4d74f2..72ca40f9 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -49,9 +49,25 @@ public class TitaniumConfig extends OkaeriConfig {
+     @Comment("Configuration from ion.yml")
+     public IonConfig ion = new IonConfig();
+ 
+-    //TODO comment this (https://github.com/CobbleSword/NachoSpigot/commit/64b8084cb8516df77d362512fe76dc54b17ba594)
++    @Comment("The max NBT size in bytes. The default value is 2097152 which is ~2Mb, and it's insane big.")
++    @Comment("We are setting this to 50000 which is only ~0.05MB, which is enough in most cases.")
++    @Comment("Smaller value (50000 is enough, but smaller would be even greater) prevents most NBT related overflow exploits (for eg. Books)")
+     public long nbtReadLimiter = 50000L;
+ 
++    public Chunk chunk = new Chunk();
++
++    public static class Chunk extends TitaniumConfigSection {
++
++        public IO io = new IO();
++
++        //TODO Add comments to this
++        public static class IO extends TitaniumConfigSection {
++            public int baseThreads = 2; // PaperSpigot - Bumped value
++            public int playersPerThread = 50;
++        }
++
++    }
++
+     public Commands commands = new Commands();
+ 
+     public static class Commands extends TitaniumConfigSection {
+diff --git a/src/main/java/org/bukkit/craftbukkit/Main.java b/src/main/java/org/bukkit/craftbukkit/Main.java
+index 8d1a0380..4980c189 100644
+--- a/src/main/java/org/bukkit/craftbukkit/Main.java
++++ b/src/main/java/org/bukkit/craftbukkit/Main.java
+@@ -149,13 +149,13 @@ public class Main {
+ 
+                 acceptsAll(asList("demo"), "Demo mode");
+ 
+-                // SportPaper start // Titanium start
+-                acceptsAll(asList("SP", "sportpaper-settings", "TS", "titanium-settings"), "File for titanium settings")
++                // Titanium start
++                acceptsAll(asList("TS", "titanium-settings"), "File for titanium settings")
+                         .withRequiredArg()
+                         .ofType(File.class)
+                         .defaultsTo(new File("titanium.yml"))
+                         .describedAs("Yml file");
+-                // SportPaper end // Titanium end
++                // Titanium end
+ 
+                 // Paper start
+                 acceptsAll(asList("server-name"), "Name of the server")
+diff --git a/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOExecutor.java b/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOExecutor.java
+index ed31ec83..7c5c60c2 100644
+--- a/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOExecutor.java
++++ b/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOExecutor.java
+@@ -5,11 +5,12 @@ import net.minecraft.server.ChunkProviderServer;
+ import net.minecraft.server.ChunkRegionLoader;
+ import net.minecraft.server.MCUtil;
+ import net.minecraft.server.World;
++import net.titanium.config.TitaniumConfig;
+ import org.bukkit.craftbukkit.util.AsynchronousExecutor;
+ 
+ public class ChunkIOExecutor {
+-    static final int BASE_THREADS = 2; // PaperSpigot - Bumped value
+-    static final int PLAYERS_PER_THREAD = 50;
++    static final int BASE_THREADS = TitaniumConfig.get().chunk.io.baseThreads;
++    static final int PLAYERS_PER_THREAD = TitaniumConfig.get().chunk.io.playersPerThread;
+ 
+     private static final AsynchronousExecutor<QueuedChunk, Chunk, Runnable, RuntimeException> instance = new AsynchronousExecutor<QueuedChunk, Chunk, Runnable, RuntimeException>(new ChunkIOProvider(), BASE_THREADS);
+ 
+-- 
+2.32.0.windows.2
+
