@@ -25,7 +25,7 @@ sportpaperVer=$(gethead base/SportPaper)
 
 basedir
 
-cp -f scripts/sportpaper/baseimportmcdev.sh base/SportPaper/scripts/importmcdev.sh
+cp -f scripts/base/baseimportmcdev.sh base/SportPaper/scripts/importmcdev.sh
 
 cd "$basedir/base/SportPaper/"
 
