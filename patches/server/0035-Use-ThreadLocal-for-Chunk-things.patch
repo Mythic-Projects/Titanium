@@ -1,0 +1,110 @@
+From 9aec9e18c50cc9109aab02859fd6669183f134a3 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Mon, 2 May 2022 14:14:40 +0200
+Subject: [PATCH] Use ThreadLocal for Chunk things
+
+
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderGenerate.java b/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
+index 6678921e..2fb59ed2 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
+@@ -39,10 +39,10 @@ public class ChunkProviderGenerate implements IChunkProvider {
+     double[] f;
+     double[] g;*/
+ 
+-    private final Map<Long, ChunkGenData> chunkGenData = new ConcurrentHashMap<>();
++    private final ThreadLocal<ChunkGenData> chunkGenData = ThreadLocal.withInitial(ChunkGenData::new);
+ 
+     public ChunkGenData getChunkData() {
+-        return chunkGenData.computeIfAbsent(Thread.currentThread().getId(), (key) -> new ChunkGenData());
++        return chunkGenData.get();
+     }
+ 
+     private static class ChunkGenData {
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+index 0f3f88e5..f6685a1f 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+@@ -1,6 +1,7 @@
+ package net.minecraft.server;
+ 
+ import java.io.IOException;
++import java.lang.ref.WeakReference;
+ import java.util.Iterator;
+ import java.util.List;
+ 
+@@ -40,7 +41,6 @@ public class ChunkProviderServer implements IChunkProvider {
+     public boolean forceChunkLoad = false; // CraftBukkit - true -> false
+     // Paper start
+     protected Chunk lastChunkByPos = null;
+-    protected Map<Long, Chunk> lastChunkByPosThread = new ConcurrentHashMap<>();
+     /*public Long2ObjectMap<Chunk> chunks = new Long2ObjectOpenHashMap<Chunk>(8192, 0.5f) {
+         @Override
+         public Chunk get(long key) {
+@@ -62,18 +62,18 @@ public class ChunkProviderServer implements IChunkProvider {
+         }
+     };*/ // CraftBukkit
+ 
++    // Titanium start
++    protected ThreadLocal<Chunk> lastChunkByPosThread = new ThreadLocal<>();
++
+     public net.minecraft.server.Chunk getLastChunkByPos() {
+-        return lastChunkByPosThread.get(Thread.currentThread().getId());
++        return lastChunkByPosThread.get();
+     }
+ 
+     public Chunk setLastChunkByPos(net.minecraft.server.Chunk lastChunkByPos) {
+-        if (lastChunkByPos == null) {
+-            this.lastChunkByPosThread.remove(Thread.currentThread().getId());
+-            return null;
+-        }
+-        this.lastChunkByPosThread.put(Thread.currentThread().getId(), lastChunkByPos);
++        lastChunkByPosThread.set(lastChunkByPos);
+         return lastChunkByPos;
+     }
++    // Titanium end
+ 
+     public Map<Long, Chunk> chunks = new ChunkMap(8192, 0.5f);
+ 
+@@ -98,6 +98,7 @@ public class ChunkProviderServer implements IChunkProvider {
+             }
+             return super.remove(key);
+         }
++
+     }
+     // Paper end
+     public WorldServer world;
+diff --git a/src/main/java/net/minecraft/server/IntCache.java b/src/main/java/net/minecraft/server/IntCache.java
+index bfbbf9f8..3da46ae6 100644
+--- a/src/main/java/net/minecraft/server/IntCache.java
++++ b/src/main/java/net/minecraft/server/IntCache.java
+@@ -6,6 +6,8 @@ import java.lang.ref.WeakReference;
+ import java.util.Iterator;
+ import java.util.List;
+ // Migot end
++import java.util.Set;
++import java.util.concurrent.ConcurrentHashMap;
+ import net.titanium.config.TitaniumConfig;
+ 
+ public class IntCache {
+@@ -15,14 +17,12 @@ public class IntCache {
+         @Override
+         protected IntCache initialValue() {
+             IntCache cache = new IntCache();
+-            synchronized (ALL_CACHES) {
+-                ALL_CACHES.add(new WeakReference<>(cache));
+-            }
+-            return new IntCache();
++            ALL_CACHES.add(new WeakReference<>(cache));
++            return cache;
+         }
+     };
+ 
+-    private static final List<WeakReference<IntCache>> ALL_CACHES = new ObjectArrayList<>();
++    private static final Set<WeakReference<IntCache>> ALL_CACHES = ConcurrentHashMap.newKeySet(); // Titanium - ConcurrentSet
+ 
+     private int a = 256;
+     private final List<int[]> b = new ObjectArrayList<>();
+-- 
+2.36.0.windows.1
+
