@@ -1,0 +1,22 @@
+From 0433fa825d2e964f15fb72898f72026a26377c98 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 1 May 2022 12:17:39 +0200
+Subject: [PATCH] Implement [Paper-0344] [MC-111480] Start Entity ID's at 1
+
+
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index 16b7ccd8..3964d4e9 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -65,7 +65,7 @@ public abstract class Entity implements ICommandListener {
+     // CraftBukikt end
+ 
+     private static final AxisAlignedBB a = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D);
+-    public static int entityCount; // SportPaper - make public
++    public static int entityCount = 1; // SportPaper - make public
+     private int id;
+     public double j;
+     public boolean k; public boolean blocksEntitySpawning() { return k; } // Paper - OBFHELPER
+-- 
+2.32.0.windows.2
+

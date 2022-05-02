@@ -62,6 +62,8 @@ import MerchantRecipeList
 import DamageSource
 import ServerNBTManager
 import IChunkLoader
+# Titanium - Import BiomeDecorator for Concurrent Chunk Decoration patch
+import BiomeDecorator
 # Titanium - Import WorldChunkManager for async chunk loading patch
 import WorldChunkManager
 

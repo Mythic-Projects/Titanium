@@ -10,10 +10,14 @@ initScript=$(dirname "$SOURCE")/init.sh
 . "$initScript"
 
 
-cd "$basedir/base/SportPaper/"
-git fetch && git reset --hard origin/master
-cd ../
-git add SportPaper
+if [[ "$1" == up* ]]; then
+    (
+        cd "$basedir/base/SportPaper/"
+        git fetch && git reset --hard origin/master
+        cd ../
+        git add SportPaper
+    )
+fi
 
 basedir
 
@@ -25,7 +29,7 @@ sportpaperVer=$(gethead base/SportPaper)
 
 basedir
 
-cp -f scripts/sportpaper/baseimportmcdev.sh base/SportPaper/scripts/importmcdev.sh
+cp -f ./scripts/base/baseimportmcdev.sh ./base/SportPaper/scripts/importmcdev.sh
 
 cd "$basedir/base/SportPaper/"
 

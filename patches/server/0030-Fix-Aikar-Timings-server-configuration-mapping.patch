@@ -1,0 +1,33 @@
+From 31b79352a6e171c00e461029e58049f4d7a23a7d Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 1 May 2022 12:42:19 +0200
+Subject: [PATCH] Fix Aikar Timings server configuration mapping
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index a27316c0..e7fe7356 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -1,6 +1,7 @@
+ package org.bukkit.craftbukkit;
+ 
+ import eu.okaeri.configs.ConfigManager;
++import eu.okaeri.configs.OkaeriConfig;
+ import eu.okaeri.configs.serdes.commons.SerdesCommons;
+ import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
+ import java.awt.image.BufferedImage;
+@@ -1821,6 +1822,11 @@ public final class CraftServer implements Server {
+             return org.github.paperspigot.PaperSpigotConfig.config;
+         }
+ 
++        @Override
++        public OkaeriConfig getTitaniumConfig() {
++            return serverConfig;
++        }
++
+         @Override
+         public void restart() {
+             org.spigotmc.RestartCommand.restart();
+-- 
+2.32.0.windows.2
+
