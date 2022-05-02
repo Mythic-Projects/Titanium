@@ -1,8 +1,8 @@
 # Titanium ![Titanium CI](https://github.com/TitanVale/Titanium/actions/workflows/build_titanium.yml/badge.svg)
 
-[SportPaper](https://github.com/Electroid/SportPaper) fork which aims to be fast, fix exploits and bugs, improve API, and provide better configuration for server administrators. 
+Titanium is [SportPaper](https://github.com/Electroid/SportPaper) fork which aims to be fast, fix exploits and bugs, improve API, and provide better configuration for server administrators. 
 
-**Titanium officially supports JDK 8, 11 and 17.**
+*Titanium officially supports JDK **8**, **11** & **17**.*
 
 ## Getting Titanium
 
