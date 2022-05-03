@@ -1,4 +1,4 @@
-From 07c2212a91a62940b522450e4c14e74a7a05a78a Mon Sep 17 00:00:00 2001
+From 1db2a442cb90a52c7d5a6487251f9c3394276f5b Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 1 May 2022 13:29:20 +0200
 Subject: [PATCH] Implement [Migot-0005] Fix Occasional Client Side Unloading
@@ -6,10 +6,10 @@ Subject: [PATCH] Implement [Migot-0005] Fix Occasional Client Side Unloading
 
 
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index fe64c629..0f3f88e5 100644
+index 32bd3431..5ed08908 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-@@ -103,7 +103,7 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -58,7 +58,7 @@ public class ChunkProviderServer implements IChunkProvider {
      public WorldServer world;
  
      public ChunkProviderServer(WorldServer worldserver, IChunkLoader ichunkloader, IChunkProvider ichunkprovider) {

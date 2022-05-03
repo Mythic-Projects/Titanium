@@ -1,4 +1,4 @@
-From 23fa4c4d94252712fd2335206ecf4d5024090db1 Mon Sep 17 00:00:00 2001
+From 0574b34ea28e68e8166b73c1f78546c0b9ea9176 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 1 May 2022 12:42:19 +0200
 Subject: [PATCH] Fix Aikar Timings server configuration mapping
