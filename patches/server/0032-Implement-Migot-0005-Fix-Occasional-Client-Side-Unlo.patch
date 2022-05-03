@@ -1,4 +1,4 @@
-From 1db2a442cb90a52c7d5a6487251f9c3394276f5b Mon Sep 17 00:00:00 2001
+From 4e021c3822e83e7fca419b56b549c189a62c0777 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 1 May 2022 13:29:20 +0200
 Subject: [PATCH] Implement [Migot-0005] Fix Occasional Client Side Unloading
