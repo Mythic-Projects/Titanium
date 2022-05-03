@@ -1,11 +1,11 @@
-From f5259a937eed7ada3c323f714e509555f3c7cdf7 Mon Sep 17 00:00:00 2001
+From b0cc8f83c36e38a1444dd5ac826a6688e0abc4d7 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
-Date: Mon, 2 May 2022 20:02:01 +0200
-Subject: [PATCH] Use own AsynchronousExecutor for chunk gen
+Date: Mon, 2 May 2022 14:14:40 +0200
+Subject: [PATCH] Improve async chunk generation
 
 
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderGenerate.java b/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
-index 2fb59ed2..05fb17bf 100644
+index 6678921e..05fb17bf 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
 @@ -5,6 +5,7 @@ import java.util.List;
@@ -16,19 +16,24 @@ index 2fb59ed2..05fb17bf 100644
  
  public class ChunkProviderGenerate implements IChunkProvider {
  
+@@ -39,10 +40,10 @@ public class ChunkProviderGenerate implements IChunkProvider {
+     double[] f;
+     double[] g;*/
+ 
+-    private final Map<Long, ChunkGenData> chunkGenData = new ConcurrentHashMap<>();
++    private final ThreadLocal<ChunkGenData> chunkGenData = ThreadLocal.withInitial(ChunkGenData::new);
+ 
+     public ChunkGenData getChunkData() {
+-        return chunkGenData.computeIfAbsent(Thread.currentThread().getId(), (key) -> new ChunkGenData());
++        return chunkGenData.get();
+     }
+ 
+     private static class ChunkGenData {
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index f6685a1f..4d5c4812 100644
+index 0f3f88e5..4d5c4812 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-@@ -1,7 +1,6 @@
- package net.minecraft.server;
- 
- import java.io.IOException;
--import java.lang.ref.WeakReference;
- import java.util.Iterator;
- import java.util.List;
- 
-@@ -23,8 +22,6 @@ import org.github.paperspigot.event.ServerExceptionEvent;
+@@ -22,8 +22,6 @@ import org.github.paperspigot.event.ServerExceptionEvent;
  import org.github.paperspigot.exception.ServerInternalException;
  // CraftBukkit end
  // SportPaper start
@@ -37,7 +42,48 @@ index f6685a1f..4d5c4812 100644
  import it.unimi.dsi.fastutil.longs.LongIterator;
  import it.unimi.dsi.fastutil.longs.LongArraySet;
  import it.unimi.dsi.fastutil.longs.LongSet;
-@@ -234,11 +231,11 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -40,7 +38,6 @@ public class ChunkProviderServer implements IChunkProvider {
+     public boolean forceChunkLoad = false; // CraftBukkit - true -> false
+     // Paper start
+     protected Chunk lastChunkByPos = null;
+-    protected Map<Long, Chunk> lastChunkByPosThread = new ConcurrentHashMap<>();
+     /*public Long2ObjectMap<Chunk> chunks = new Long2ObjectOpenHashMap<Chunk>(8192, 0.5f) {
+         @Override
+         public Chunk get(long key) {
+@@ -62,18 +59,18 @@ public class ChunkProviderServer implements IChunkProvider {
+         }
+     };*/ // CraftBukkit
+ 
++    // Titanium start
++    protected ThreadLocal<Chunk> lastChunkByPosThread = new ThreadLocal<>();
++
+     public net.minecraft.server.Chunk getLastChunkByPos() {
+-        return lastChunkByPosThread.get(Thread.currentThread().getId());
++        return lastChunkByPosThread.get();
+     }
+ 
+     public Chunk setLastChunkByPos(net.minecraft.server.Chunk lastChunkByPos) {
+-        if (lastChunkByPos == null) {
+-            this.lastChunkByPosThread.remove(Thread.currentThread().getId());
+-            return null;
+-        }
+-        this.lastChunkByPosThread.put(Thread.currentThread().getId(), lastChunkByPos);
++        lastChunkByPosThread.set(lastChunkByPos);
+         return lastChunkByPos;
+     }
++    // Titanium end
+ 
+     public Map<Long, Chunk> chunks = new ChunkMap(8192, 0.5f);
+ 
+@@ -98,6 +95,7 @@ public class ChunkProviderServer implements IChunkProvider {
+             }
+             return super.remove(key);
+         }
++
+     }
+     // Paper end
+     public WorldServer world;
+@@ -233,11 +231,11 @@ public class ChunkProviderServer implements IChunkProvider {
                      chunk = this.emptyChunk;
                  } else {
                      try {
@@ -52,7 +98,7 @@ index f6685a1f..4d5c4812 100644
                          }
                      } catch (Throwable throwable) {
                          CrashReport crashreport = CrashReport.a(throwable, "Exception generating new chunk");
-@@ -256,7 +253,7 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -255,7 +253,7 @@ public class ChunkProviderServer implements IChunkProvider {
  
          this.unloadQueue.remove(LongHash.toLong(i, j)); // SportPaper
  
@@ -61,6 +107,37 @@ index f6685a1f..4d5c4812 100644
              runnable.run();
          }
  
+diff --git a/src/main/java/net/minecraft/server/IntCache.java b/src/main/java/net/minecraft/server/IntCache.java
+index bfbbf9f8..3da46ae6 100644
+--- a/src/main/java/net/minecraft/server/IntCache.java
++++ b/src/main/java/net/minecraft/server/IntCache.java
+@@ -6,6 +6,8 @@ import java.lang.ref.WeakReference;
+ import java.util.Iterator;
+ import java.util.List;
+ // Migot end
++import java.util.Set;
++import java.util.concurrent.ConcurrentHashMap;
+ import net.titanium.config.TitaniumConfig;
+ 
+ public class IntCache {
+@@ -15,14 +17,12 @@ public class IntCache {
+         @Override
+         protected IntCache initialValue() {
+             IntCache cache = new IntCache();
+-            synchronized (ALL_CACHES) {
+-                ALL_CACHES.add(new WeakReference<>(cache));
+-            }
+-            return new IntCache();
++            ALL_CACHES.add(new WeakReference<>(cache));
++            return cache;
+         }
+     };
+ 
+-    private static final List<WeakReference<IntCache>> ALL_CACHES = new ObjectArrayList<>();
++    private static final Set<WeakReference<IntCache>> ALL_CACHES = ConcurrentHashMap.newKeySet(); // Titanium - ConcurrentSet
+ 
+     private int a = 256;
+     private final List<int[]> b = new ObjectArrayList<>();
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
 index f8416b98..100c3dee 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java

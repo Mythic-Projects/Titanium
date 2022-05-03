@@ -1,4 +1,4 @@
-From 31b79352a6e171c00e461029e58049f4d7a23a7d Mon Sep 17 00:00:00 2001
+From 23fa4c4d94252712fd2335206ecf4d5024090db1 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 1 May 2022 12:42:19 +0200
 Subject: [PATCH] Fix Aikar Timings server configuration mapping
@@ -29,5 +29,5 @@ index a27316c0..e7fe7356 100644
          public void restart() {
              org.spigotmc.RestartCommand.restart();
 -- 
-2.32.0.windows.2
+2.36.0.windows.1
 
