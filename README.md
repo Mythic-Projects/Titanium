@@ -66,6 +66,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [FlamePaper-0010] Fix NullPointerException exploits for invalid logins
 [FlamePaper-0013] Check channel before reading
 [FlamePaper-0015] Fix Book Exploits
+[FlamePaper-0024] Disable Unloaded Chunk Movement
 
 [Nacho-0012] Don't load chunks for physics
 [Nacho-0008] Update netty 4.1.50 (We updated it to 4.1.75)
