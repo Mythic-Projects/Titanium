@@ -61,6 +61,9 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0346] [MC-135506] Experience should save as Integers
 [Paper-0347] Don't go below 0 for pickupDelay, breaks picking up items by Aikar
 
+[Taco-0024] Optimize-tnt-entity-and-falling-block-movement
+[Taco-0025] Fix-east-west-cannoning
+
 [FlamePaper-0003] Fix chunk memory leak
 [FlamePaper-0005] Fix multiple memory leaks
 [FlamePaper-0010] Fix NullPointerException exploits for invalid logins
