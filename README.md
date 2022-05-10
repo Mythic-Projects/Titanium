@@ -61,8 +61,8 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0346] [MC-135506] Experience should save as Integers
 [Paper-0347] Don't go below 0 for pickupDelay, breaks picking up items by Aikar
 
-[Taco-0024] Optimize-tnt-entity-and-falling-block-movement
-[Taco-0025] Fix-east-west-cannoning
+[Taco-0024] Optimize tnt entity and falling block movement
+[Taco-0025] Fix east west cannoning
 
 [FlamePaper-0003] Fix chunk memory leak
 [FlamePaper-0005] Fix multiple memory leaks
@@ -73,8 +73,8 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [FlamePaper-0024] Disable Unloaded Chunk Movement
 [FlamePaper-0030] Adaptive chunk GC
 
-[Nacho-0012] Don't load chunks for physics
 [Nacho-0008] Update netty 4.1.50 (We updated it to 4.1.75)
+[Nacho-0012] Don't load chunks for physics
 [Nacho-????] Prevent most NBT related overflow exploits
 
 [IonSpigot-0011] Async Spawn Chunks
@@ -97,5 +97,5 @@ Titanium implements patches from other engines as well. **All credits go to the 
 **This section came from [SportPaper](https://github.com/Electroid/SportPaper#contributing)**
 
 * Before contributing to Titanium, make sure you have run `./titanium build` and that you have the latest version of git installed
-* To add patches to Titanium simply make your changes in `Titanium-API` and `Titanium-Server` and commit them. Then run `./sportpaper rebuild`.
+* To add patches to Titanium simply make your changes in `Titanium-API` and `Titanium-Server` and commit them. Then run `./titanium rebuild`.
 * To modify nms files not currently imported into Titanium, you must add an import for that file in `scripts/importmcdev.sh` and then run `./titanium build` for those files to show up in `Titanium-Server`
