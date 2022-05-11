@@ -213,7 +213,7 @@ index 000000000..968c53e60
 +    public static class Movement extends TitaniumConfigSection {
 +
 +        //TODO comment this
-+        public boolean cache = false;
++        public boolean cache = true;
 +
 +    }
 +
