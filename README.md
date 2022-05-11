@@ -85,6 +85,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [IonSpigot-0011] Async Spawn Chunks
 [IonSpigot-0012] Movement Cache
 [IonSpigot-0014] Faster Chunk Entity List
+[IonSpigot-0020] Faster EntityTracker Collections
 [IonSpigot-0023] Implement PandaWire
 
 [Migot-0005] Fix Occasional Client Side Unloading of Chunk 0 0
