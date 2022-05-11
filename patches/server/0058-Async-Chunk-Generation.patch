@@ -1,7 +1,7 @@
-From ec0bfd32941616cb986a6133a8271c24ecd26538 Mon Sep 17 00:00:00 2001
+From 8455cc6b11983d29c70cc0fbc5d8f64f6e4b7b3b Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
-Date: Tue, 3 May 2022 11:30:39 +0200
-Subject: [PATCH] Async Chunk Generation
+Date: Wed, 11 May 2022 17:42:41 +0200
+Subject: [PATCH] Async chunk generation
 
 
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderGenerate.java b/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
@@ -406,10 +406,10 @@ index 1c08afa52..2aeb2fc79 100644
 +
  }
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index 5ed08908e..4d5c4812e 100644
+index b1310c1f9..d3ef96177 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-@@ -4,6 +4,9 @@ import java.io.IOException;
+@@ -5,6 +5,9 @@ import java.io.IOException;
  import java.util.Iterator;
  import java.util.List;
  
@@ -419,7 +419,7 @@ index 5ed08908e..4d5c4812e 100644
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
-@@ -19,8 +22,6 @@ import org.github.paperspigot.event.ServerExceptionEvent;
+@@ -20,8 +23,6 @@ import org.github.paperspigot.event.ServerExceptionEvent;
  import org.github.paperspigot.exception.ServerInternalException;
  // CraftBukkit end
  // SportPaper start
@@ -428,46 +428,42 @@ index 5ed08908e..4d5c4812e 100644
  import it.unimi.dsi.fastutil.longs.LongIterator;
  import it.unimi.dsi.fastutil.longs.LongArraySet;
  import it.unimi.dsi.fastutil.longs.LongSet;
-@@ -37,9 +38,12 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -37,7 +38,11 @@ public class ChunkProviderServer implements IChunkProvider {
+     public IChunkLoader chunkLoader;
      public boolean forceChunkLoad = false; // CraftBukkit - true -> false
      // Paper start
++
++    // Titanium start
++    /*
      protected Chunk lastChunkByPos = null;
--    public Long2ObjectMap<Chunk> chunks = new Long2ObjectOpenHashMap<Chunk>(8192, 0.5f) {
-+    /*public Long2ObjectMap<Chunk> chunks = new Long2ObjectOpenHashMap<Chunk>(8192, 0.5f) {
++
+     public Long2ObjectMap<Chunk> chunks = new Long2ObjectOpenHashMap<Chunk>(8192, 0.5f) {
          @Override
          public Chunk get(long key) {
-+            synchronized (this) {
-+
-+            }
-             if (lastChunkByPos != null && key == lastChunkByPos.chunkKey) {
-                 return lastChunkByPos;
-             }
-@@ -53,7 +57,46 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -54,7 +59,46 @@ public class ChunkProviderServer implements IChunkProvider {
              }
              return super.remove(key);
          }
 -    }; // CraftBukkit
-+    };*/ // CraftBukkit
-+
-+    // Titanium start
-+    protected ThreadLocal<Chunk> lastChunkByPosThread = new ThreadLocal<>();
-+
-+    public net.minecraft.server.Chunk getLastChunkByPos() {
-+        return lastChunkByPosThread.get();
-+    }
-+
-+    public Chunk setLastChunkByPos(net.minecraft.server.Chunk lastChunkByPos) {
-+        lastChunkByPosThread.set(lastChunkByPos);
-+        return lastChunkByPos;
-+    }
-+    // Titanium end
++    }; // CraftBukkit */
 +
 +    public Map<Long, Chunk> chunks = new ChunkMap(8192, 0.5f);
 +
 +    private class ChunkMap extends ConcurrentHashMap<Long, Chunk> {
 +
++        protected ThreadLocal<Chunk> lastChunkByPosThread = new ThreadLocal<>();
++
 +        public ChunkMap(int initialCapacity, float loadFactor) {
 +            super(initialCapacity, loadFactor);
++        }
++
++        public net.minecraft.server.Chunk getLastChunkByPos() {
++            return lastChunkByPosThread.get();
++        }
++
++        public Chunk setLastChunkByPos(net.minecraft.server.Chunk lastChunkByPos) {
++            lastChunkByPosThread.set(lastChunkByPos);
++            return lastChunkByPos;
 +        }
 +
 +        @Override
@@ -480,17 +476,19 @@ index 5ed08908e..4d5c4812e 100644
 +
 +        @Override
 +        public Chunk remove(Object key) {
-+            if (lastChunkByPos != null && key.equals(lastChunkByPos.chunkKey)) {
++            if (getLastChunkByPos() != null && key.equals(getLastChunkByPos().chunkKey)) {
 +                setLastChunkByPos(null);
 +            }
 +            return super.remove(key);
 +        }
 +
 +    }
++    // Titanium end
++
      // Paper end
      public WorldServer world;
  
-@@ -160,31 +203,40 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -163,32 +207,40 @@ public class ChunkProviderServer implements IChunkProvider {
                  chunk = ChunkIOExecutor.syncChunkLoad(world, loader, this, i, j);
              }
          } else if (chunk == null) {
@@ -498,7 +496,7 @@ index 5ed08908e..4d5c4812e 100644
 +            chunk = originalGetChunkAt(i, j, runnable);
          }
  
-         unloadQueue.remove(LongHash.toLong(i, j)); // SportPaper
+         unloadQueue.remove(key); //IonSpigot // SportPaper
          // If we didn't load the chunk async and have a callback run it now
 -        if (runnable != null) {
 +        if (chunk != null && runnable != null) {
@@ -513,8 +511,9 @@ index 5ed08908e..4d5c4812e 100644
 +    }
 +
 +    public Chunk originalGetChunkAt(int i, int j, Runnable runnable) {
-         Chunk chunk = (Chunk) this.chunks.get(LongHash.toLong(i, j));
-         boolean newChunk = false;
+         long key = LongHash.toLong(i, j); // IonSpigot - Only create key once
+         Chunk chunk = (Chunk) this.chunks.get(key);
+-        boolean newChunk = false;
          // CraftBukkit end
  
          if (chunk == null) {
@@ -535,13 +534,14 @@ index 5ed08908e..4d5c4812e 100644
                      } catch (Throwable throwable) {
                          CrashReport crashreport = CrashReport.a(throwable, "Exception generating new chunk");
                          CrashReportSystemDetails crashreportsystemdetails = crashreport.a("Chunk to be generated");
-@@ -197,42 +249,14 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -199,44 +251,15 @@ public class ChunkProviderServer implements IChunkProvider {
+                         throw new ReportedException(crashreport);
+                     }
                  }
-                 newChunk = true; // CraftBukkit
-             }
-+        }
- 
--            this.chunks.put(LongHash.toLong(i, j), chunk);
+-                newChunk = true; // CraftBukkit
+-            }
+-
+-            this.chunks.put(key, chunk); // IonSpigot
 -            
 -            chunk.addEntities();
 -            
@@ -554,15 +554,16 @@ index 5ed08908e..4d5c4812e 100644
 -                 * no way of creating a CraftWorld/CraftServer at that point.
 -                 */
 -                server.getPluginManager().callEvent(new org.bukkit.event.world.ChunkLoadEvent(chunk.bukkitChunk, newChunk));
--            }
--
+             }
++        }
+ 
 -            // Update neighbor counts
 -            for (int x = -2; x < 3; x++) {
 -                for (int z = -2; z < 3; z++) {
 -                    if (x == 0 && z == 0) {
 -                        continue;
 -                    }
-+        this.unloadQueue.remove(LongHash.toLong(i, j)); // SportPaper
++        this.unloadQueue.remove(key); // SportPaper
  
 -                    Chunk neighbor = this.getChunkIfLoaded(chunk.locX + x, chunk.locZ + z);
 -                    if (neighbor != null) {
@@ -578,7 +579,7 @@ index 5ed08908e..4d5c4812e 100644
 +            runnable.run();
          }
  
--        this.unloadQueue.remove(LongHash.toLong(i, j)); // SportPaper
+-        this.unloadQueue.remove(key); // IonSpigot // SportPaper
          return chunk;
      }
  
