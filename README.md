@@ -82,6 +82,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 
 [IonSpigot-0005] Fix Sand Unloading
 [IonSpigot-0008] Reduce Chunk Hashing
+[IonSpigot-0009] Reduce Unload Queue Complexity
 [IonSpigot-0011] Async Spawn Chunks
 [IonSpigot-0012] Movement Cache
 [IonSpigot-0014] Faster Chunk Entity List
