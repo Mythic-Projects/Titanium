@@ -1,0 +1,182 @@
+From 276cb403d159a19272391b01fe7e3af538f391d8 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Tue, 10 May 2022 21:09:54 +0200
+Subject: [PATCH] Use Jafama
+
+
+diff --git a/pom.xml b/pom.xml
+index 02f473599..2b00fed90 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -92,6 +92,11 @@
+             <type>jar</type>
+             <scope>compile</scope>
+         </dependency>
++        <dependency>
++            <groupId>net.jafama</groupId>
++            <artifactId>jafama</artifactId>
++            <version>2.3.2</version>
++        </dependency>
+         <dependency>
+             <groupId>com.eatthepath</groupId>
+             <artifactId>fast-uuid</artifactId>
+diff --git a/src/main/java/net/minecraft/server/BiomeMesa.java b/src/main/java/net/minecraft/server/BiomeMesa.java
+index e9ec299ff..574c3cd97 100644
+--- a/src/main/java/net/minecraft/server/BiomeMesa.java
++++ b/src/main/java/net/minecraft/server/BiomeMesa.java
+@@ -2,6 +2,7 @@ package net.minecraft.server;
+ 
+ import java.util.Arrays;
+ import java.util.Random;
++import net.jafama.FastMath;
+ 
+ public class BiomeMesa extends BiomeBase {
+ 
+@@ -85,7 +86,7 @@ public class BiomeMesa extends BiomeBase {
+         IBlockData iblockdata = Blocks.STAINED_HARDENED_CLAY.getBlockData();
+         IBlockData iblockdata1 = this.al;
+         int j1 = (int) (d0 / 3.0D + 3.0D + random.nextDouble() * 0.25D);
+-        boolean flag = Math.cos(d0 / 3.0D * 3.141592653589793D) > 0.0D;
++        boolean flag = FastMath.cos(d0 / 3.0D * 3.141592653589793D) > 0.0D;
+         int k1 = -1;
+         boolean flag1 = false;
+ 
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderHell.java b/src/main/java/net/minecraft/server/ChunkProviderHell.java
+index 51538b7c4..4c9426528 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderHell.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderHell.java
+@@ -2,6 +2,7 @@ package net.minecraft.server;
+ 
+ import java.util.List;
+ import java.util.Random;
++import net.jafama.FastMath;
+ 
+ public class ChunkProviderHell implements IChunkProvider {
+ 
+@@ -237,7 +238,7 @@ public class ChunkProviderHell implements IChunkProvider {
+         int l1;
+ 
+         for (l1 = 0; l1 < i1; ++l1) {
+-            adouble1[l1] = Math.cos((double) l1 * 3.141592653589793D * 6.0D / (double) i1) * 2.0D;
++            adouble1[l1] = FastMath.cos((double) l1 * 3.141592653589793D * 6.0D / (double) i1) * 2.0D;
+             double d2 = (double) l1;
+ 
+             if (l1 > i1 / 2) {
+diff --git a/src/main/java/net/minecraft/server/EntityBoat.java b/src/main/java/net/minecraft/server/EntityBoat.java
+index e860038eb..b03d06fd8 100644
+--- a/src/main/java/net/minecraft/server/EntityBoat.java
++++ b/src/main/java/net/minecraft/server/EntityBoat.java
+@@ -3,6 +3,7 @@ package net.minecraft.server;
+ import java.util.List;
+ 
+ // CraftBukkit start
++import net.jafama.FastMath;
+ import org.bukkit.Location;
+ import org.bukkit.craftbukkit.event.CraftEventFactory;
+ import org.bukkit.entity.Vehicle;
+@@ -188,8 +189,8 @@ public class EntityBoat extends Entity {
+         int j;
+ 
+         if (d3 > 0.2975D) {
+-            d4 = Math.cos((double) this.yaw * 3.141592653589793D / 180.0D);
+-            d5 = Math.sin((double) this.yaw * 3.141592653589793D / 180.0D);
++            d4 = FastMath.cos((double) this.yaw * 3.141592653589793D / 180.0D);
++            d5 = FastMath.sin((double) this.yaw * 3.141592653589793D / 180.0D);
+ 
+             for (j = 0; (double) j < 1.0D + d3 * 60.0D; ++j) {
+                 double d6 = (double) (this.random.nextFloat() * 2.0F - 1.0F);
+@@ -255,8 +256,8 @@ public class EntityBoat extends Entity {
+                 EntityLiving entityliving = (EntityLiving) this.passenger;
+                 float f = this.passenger.yaw + -entityliving.aZ * 90.0F;
+ 
+-                this.motX += -Math.sin((double) (f * 3.1415927F / 180.0F)) * this.b * (double) entityliving.ba * 0.05000000074505806D;
+-                this.motZ += Math.cos((double) (f * 3.1415927F / 180.0F)) * this.b * (double) entityliving.ba * 0.05000000074505806D;
++                this.motX += -FastMath.sin((double) (f * 3.1415927F / 180.0F)) * this.b * (double) entityliving.ba * 0.05000000074505806D;
++                this.motZ += FastMath.cos((double) (f * 3.1415927F / 180.0F)) * this.b * (double) entityliving.ba * 0.05000000074505806D;
+             }
+             // CraftBukkit start - Support unoccupied deceleration
+             else if (unoccupiedDeceleration >= 0) {
+@@ -410,8 +411,8 @@ public class EntityBoat extends Entity {
+ 
+     public void al() {
+         if (this.passenger != null) {
+-            double d0 = Math.cos((double) this.yaw * 3.141592653589793D / 180.0D) * 0.4D;
+-            double d1 = Math.sin((double) this.yaw * 3.141592653589793D / 180.0D) * 0.4D;
++            double d0 = FastMath.cos((double) this.yaw * 3.141592653589793D / 180.0D) * 0.4D;
++            double d1 = FastMath.sin((double) this.yaw * 3.141592653589793D / 180.0D) * 0.4D;
+ 
+             this.passenger.setPosition(this.locX + d0, this.locY + this.an() + this.passenger.am(), this.locZ + d1);
+         }
+diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
+index 9bbff5bb0..8d6322310 100644
+--- a/src/main/java/net/minecraft/server/EntityHuman.java
++++ b/src/main/java/net/minecraft/server/EntityHuman.java
+@@ -9,6 +9,7 @@ import java.util.List;
+ import java.util.UUID;
+ 
+ // CraftBukkit start
++import net.jafama.FastMath;
+ import net.titanium.config.TitaniumConfig;
+ import org.bukkit.craftbukkit.entity.CraftHumanEntity;
+ import org.bukkit.craftbukkit.entity.CraftItem;
+@@ -618,9 +619,9 @@ public abstract class EntityHuman extends EntityLiving {
+                 entityitem.motY = (double) (-MathHelper.sin(this.pitch / 180.0F * 3.1415927F) * f + 0.1F);
+                 f1 = this.random.nextFloat() * 3.1415927F * 2.0F;
+                 f = 0.02F * this.random.nextFloat();
+-                entityitem.motX += Math.cos((double) f1) * (double) f;
++                entityitem.motX += FastMath.cos((double) f1) * (double) f;
+                 entityitem.motY += (double) ((this.random.nextFloat() - this.random.nextFloat()) * 0.1F);
+-                entityitem.motZ += Math.sin((double) f1) * (double) f;
++                entityitem.motZ += FastMath.sin((double) f1) * (double) f;
+             }
+ 
+             // CraftBukkit start - fire PlayerDropItemEvent
+diff --git a/src/main/java/net/minecraft/server/EntityMinecartAbstract.java b/src/main/java/net/minecraft/server/EntityMinecartAbstract.java
+index 70a8a679a..bea841aa0 100644
+--- a/src/main/java/net/minecraft/server/EntityMinecartAbstract.java
++++ b/src/main/java/net/minecraft/server/EntityMinecartAbstract.java
+@@ -5,6 +5,7 @@ import java.util.Iterator;
+ import java.util.Map;
+ 
+ // CraftBukkit start
++import net.jafama.FastMath;
+ import org.bukkit.Location;
+ import org.bukkit.entity.Vehicle;
+ import org.bukkit.event.vehicle.VehicleDamageEvent;
+@@ -440,8 +441,8 @@ public abstract class EntityMinecartAbstract extends Entity implements INamableT
+         if (this.passenger instanceof EntityLiving) {
+             d6 = (double) ((EntityLiving) this.passenger).ba;
+             if (d6 > 0.0D) {
+-                d7 = -Math.sin((double) (this.passenger.yaw * 3.1415927F / 180.0F));
+-                d8 = Math.cos((double) (this.passenger.yaw * 3.1415927F / 180.0F));
++                d7 = -FastMath.sin((double) (this.passenger.yaw * 3.1415927F / 180.0F));
++                d8 = FastMath.cos((double) (this.passenger.yaw * 3.1415927F / 180.0F));
+                 d9 = this.motX * this.motX + this.motZ * this.motZ;
+                 if (d9 < 0.01D) {
+                     this.motX += d7 * 0.1D;
+diff --git a/src/main/java/net/minecraft/server/EntityTNTPrimed.java b/src/main/java/net/minecraft/server/EntityTNTPrimed.java
+index 508cea4f2..e6c41a10f 100644
+--- a/src/main/java/net/minecraft/server/EntityTNTPrimed.java
++++ b/src/main/java/net/minecraft/server/EntityTNTPrimed.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import net.jafama.FastMath;
+ import org.bukkit.event.entity.ExplosionPrimeEvent; // CraftBukkit
+ 
+ public class EntityTNTPrimed extends Entity {
+@@ -29,9 +30,9 @@ public class EntityTNTPrimed extends Entity {
+         this.setPosition(d0, d1, d2);
+         float f = (float) (Math.random() * 3.1415927410125732D * 2.0D);
+ 
+-        this.motX = (double) (-((float) Math.sin((double) f)) * 0.02F);
++        this.motX = (double) (-((float) FastMath.sin((double) f)) * 0.02F);
+         this.motY = 0.20000000298023224D;
+-        this.motZ = (double) (-((float) Math.cos((double) f)) * 0.02F);
++        this.motZ = (double) (-((float) FastMath.cos((double) f)) * 0.02F);
+         this.fuseTicks = 80;
+         this.lastX = d0;
+         this.lastY = d1;
+-- 
+2.36.0.windows.1
+
