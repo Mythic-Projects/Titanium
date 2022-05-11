@@ -101,6 +101,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Migot-0032] Thread Local IntCache
 [Migot-0036] Check for lava only once per tick
 
+[MineTick-0011] Optimize Idle Furnaces
 [MineTick-0017] Fix insane nether portal lag
 [MineTick-0023] Fix chunk coordinates miscalculations
 

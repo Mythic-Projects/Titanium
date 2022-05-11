@@ -1,0 +1,22 @@
+From d7332610dc3dd55030ea8ee94baf7587bf4576ab Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Wed, 11 May 2022 16:26:10 +0200
+Subject: [PATCH] Implement [MineTick-0011] Optimize Idle Furnaces
+
+
+diff --git a/src/main/java/net/minecraft/server/TileEntityFurnace.java b/src/main/java/net/minecraft/server/TileEntityFurnace.java
+index 14fc635da..300c51695 100644
+--- a/src/main/java/net/minecraft/server/TileEntityFurnace.java
++++ b/src/main/java/net/minecraft/server/TileEntityFurnace.java
+@@ -206,7 +206,7 @@ public class TileEntityFurnace extends TileEntityContainer implements IUpdatePla
+                 if (!this.isBurning() && this.cookTime > 0) {
+                     this.cookTime = MathHelper.clamp(this.cookTime - 2, 0, this.cookTimeTotal);
+                 }
+-            } else {
++            } else if(this.items[1] != null && this.items[1].getItem() != Items.BUCKET) {
+                 // CraftBukkit start - Handle multiple elapsed ticks
+                 if (this.burnTime <= 0 && this.canBurn()) { // CraftBukkit - == to <=
+                     CraftItemStack fuel = CraftItemStack.asCraftMirror(this.items[1]);
+-- 
+2.36.0.windows.1
+
