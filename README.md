@@ -82,6 +82,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Nacho-????] Prevent most NBT related overflow exploits
 
 [IonSpigot-0005] Fix Sand Unloading
+[IonSpigot-0006] Fix Chunk Loading
 [IonSpigot-0008] Reduce Chunk Hashing
 [IonSpigot-0009] Reduce Unload Queue Complexity
 [IonSpigot-0011] Async Spawn Chunks
