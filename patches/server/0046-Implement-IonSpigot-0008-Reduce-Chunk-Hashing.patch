@@ -46,7 +46,7 @@ index 5ed08908e..68be6b471 100644
      public Chunk getChunkAt(int i, int j, Runnable runnable) {
 -        Chunk chunk = chunks.get(LongHash.toLong(i, j));
 +        long key = LongHash.toLong(i, j); // IonSpigot - Only create key once
-+        Chunk chunk = chunks.get(key); //IonSpigot
++        Chunk chunk = chunks.get(key);
          ChunkRegionLoader loader = null;
  
          if (this.chunkLoader instanceof ChunkRegionLoader) {
@@ -83,7 +83,7 @@ index 5ed08908e..68be6b471 100644
              }
  
 -            this.chunks.put(LongHash.toLong(i, j), chunk);
-+            this.chunks.put(key, chunk);
++            this.chunks.put(key, chunk); // IonSpigot
              
              chunk.addEntities();
              
@@ -92,7 +92,7 @@ index 5ed08908e..68be6b471 100644
          }
  
 -        this.unloadQueue.remove(LongHash.toLong(i, j)); // SportPaper
-+        this.unloadQueue.remove(key); // SportPaper
++        this.unloadQueue.remove(key); // IonSpigot // SportPaper
          return chunk;
      }
  
