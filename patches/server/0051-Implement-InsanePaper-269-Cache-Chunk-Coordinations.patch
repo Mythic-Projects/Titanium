@@ -1,0 +1,38 @@
+From 1329463a4c5d92e539aca5764de3383567831a77 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Wed, 11 May 2022 15:14:18 +0200
+Subject: [PATCH] Implement [InsanePaper-269] Cache Chunk Coordinations
+
+
+diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
+index 49e2449d4..2b9f7496f 100644
+--- a/src/main/java/net/minecraft/server/Chunk.java
++++ b/src/main/java/net/minecraft/server/Chunk.java
+@@ -35,6 +35,7 @@ public class Chunk {
+     public final long chunkKey; // Paper
+     public final int locX;
+     public final int locZ;
++    private final ChunkCoordIntPair chunkCoords;
+     private boolean k;
+     public final Map<BlockPosition, TileEntity> tileEntities;
+     public final List<Entity>[] entitySlices; // Spigot
+@@ -142,6 +143,7 @@ public class Chunk {
+         this.world = world;
+         this.locX = i;
+         this.locZ = j;
++        this.chunkCoords = new ChunkCoordIntPair(i, j);
+         this.chunkKey = org.bukkit.craftbukkit.util.LongHash.toLong(this.locX, this.locZ); // Paper
+         this.heightMap = new int[256];
+ 
+@@ -1217,7 +1219,7 @@ public class Chunk {
+     }
+ 
+     public ChunkCoordIntPair j() {
+-        return new ChunkCoordIntPair(this.locX, this.locZ);
++        return this.chunkCoords;
+     }
+ 
+     public boolean c(int i, int j) {
+-- 
+2.36.0.windows.1
+

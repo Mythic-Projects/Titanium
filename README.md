@@ -100,6 +100,8 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [MineTick-0023] Fix chunk coordinates miscalculations
 
 [Akarin-0007] Avoid double I/O operation on load player file
+
+[InsanePaper-269] Cache Chunk Coordinations
 ```
 
 ## Contributing
