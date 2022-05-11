@@ -83,6 +83,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Nacho-0012] Don't load chunks for physics
 [Nacho-0019] Avoid lock every packet send
 [Nacho-0023] Optimize EntityTracker for the chunk updater
+[Nacho-0024] Do not create new BlockPosition when loading chunk
 [Nacho-????] Prevent most NBT related overflow exploits
 
 [IonSpigot-0005] Fix Sand Unloading
