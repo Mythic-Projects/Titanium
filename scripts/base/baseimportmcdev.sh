@@ -64,6 +64,8 @@ import ServerNBTManager
 import IChunkLoader
 # Titanium - Import BiomeDecorator for Concurrent Chunk Decoration patch
 import BiomeDecorator
+# Titanium - Import BlockSnowBlock for Disable ticking of snow blocks patch
+import BlockSnowBlock
 
 cd "$basedir/base/Paper/PaperSpigot-Server/"
 rm -rf nms-patches applyPatches.sh makePatches.sh >/dev/null 2>&1
