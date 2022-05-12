@@ -61,6 +61,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0144] Improve Minecraft Hopper Performance
 [Paper-0302] Don't load chunks for villager door check by Aikar
 [Paper-0313] Optimized world time updates by Aikar
+[Paper-0342] Always process chunk removal in removeEntity by Aikar 2018
 [Paper-0344] [MC-111480] Start Entity ID's at 1
 [Paper-0346] [MC-135506] Experience should save as Integers
 [Paper-0347] Don't go below 0 for pickupDelay, breaks picking up items by Aikar

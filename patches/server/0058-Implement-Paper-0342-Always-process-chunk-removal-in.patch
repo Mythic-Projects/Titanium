@@ -1,0 +1,31 @@
+From 71eb3a6a5d2ddd144e2620c4bc33f122dc8b1b4f Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Thu, 12 May 2022 10:55:26 +0200
+Subject: [PATCH] Implement [Paper-0342] Always process chunk removal in
+ removeEntity by Aikar 2018
+
+
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index 4cc02f308..ba6c9be9a 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -1232,7 +1232,7 @@ public abstract class World implements IBlockAccess {
+             this.everyoneSleeping();
+         }
+ 
+-        if (!guardEntityList) { // Spigot - It will get removed after the tick if we are ticking
++        // if (!guardEntityList) { // Spigot - It will get removed after the tick if we are ticking // Paper - moved down
+         int i = entity.ae;
+         int j = entity.ag;
+ 
+@@ -1240,6 +1240,7 @@ public abstract class World implements IBlockAccess {
+             this.getChunkAt(i, j).b(entity);
+         }
+ 
++        if (!guardEntityList) { // Spigot - It will get removed after the tick if we are ticking // Paper - always remove from current chunk above
+         // CraftBukkit start - Decrement loop variable field if we've already ticked this entity
+         int index = this.entityList.indexOf(entity);
+         if (index != -1) {
+-- 
+2.36.0.windows.1
+
