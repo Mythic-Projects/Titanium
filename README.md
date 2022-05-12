@@ -59,6 +59,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0072] Fix Furnace cook time bug when lagging by Aikar
 [Paper-0076] Optimized light level comaprsions by Aikar
 [Paper-0144] Improve Minecraft Hopper Performance
+[Paper-0180] Server Tick Events
 [Paper-0302] Don't load chunks for villager door check by Aikar
 [Paper-0313] Optimized world time updates by Aikar
 [Paper-0342] Always process chunk removal in removeEntity by Aikar 2018
