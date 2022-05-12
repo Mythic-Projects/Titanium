@@ -58,6 +58,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0044] Use UserCache for player heads
 [Paper-0072] Fix Furnace cook time bug when lagging by Aikar
 [Paper-0076] Optimized light level comaprsions by Aikar
+[Paper-0121] Reduce IO ops opening a new region
 [Paper-0144] Improve Minecraft Hopper Performance
 [Paper-0168] Disable ticking of snow blocks
 [Paper-0180] Server Tick Events
