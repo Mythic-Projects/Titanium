@@ -1,4 +1,4 @@
-From e42551f909aba69698cf55a6c1e59364c56c8e72 Mon Sep 17 00:00:00 2001
+From 540f6d689e9a52c612af8a8ef2432626bce2a49c Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 11 May 2022 16:26:10 +0200
 Subject: [PATCH] Implement [MineTick-0011] Optimize Idle Furnaces
