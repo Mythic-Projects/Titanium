@@ -1,3 +1,4 @@
 [submodule "base/SportPaper"]
+    ignore = all
 	path = base/SportPaper
 	url = https://github.com/Electroid/SportPaper.git
