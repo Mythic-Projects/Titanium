@@ -53,6 +53,7 @@ Server:
 
 Titanium implements patches from other engines as well. **All credits go to the people which created them.**
 ```
+[Spigot-0097] Remove DataWatcher Locking by leafy
 [Spigot-0138] Branchless NibbleArray by md5
 [Spigot-2380] Hitting in the air will always load the chunk at 0,0 by md_5
 
