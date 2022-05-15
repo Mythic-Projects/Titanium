@@ -66,6 +66,11 @@ import IChunkLoader
 import BiomeDecorator
 # Titanium - Import BlockSnowBlock for Disable ticking of snow blocks patch
 import BlockSnowBlock
+# Titanium - Import Item, ItemTool, ItemHoe and ItemSword for Improve calculating TileEntityFurnace#fuelTime patch
+import Item
+import ItemTool
+import ItemHoe
+import ItemSword
 
 cd "$basedir/base/Paper/PaperSpigot-Server/"
 rm -rf nms-patches applyPatches.sh makePatches.sh >/dev/null 2>&1
