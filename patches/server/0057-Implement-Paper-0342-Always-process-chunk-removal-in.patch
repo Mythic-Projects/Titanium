@@ -1,4 +1,4 @@
-From 71eb3a6a5d2ddd144e2620c4bc33f122dc8b1b4f Mon Sep 17 00:00:00 2001
+From 01cbfc283195af41d74c407d32e60452e339599a Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 12 May 2022 10:55:26 +0200
 Subject: [PATCH] Implement [Paper-0342] Always process chunk removal in
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0342] Always process chunk removal in
 
 
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 4cc02f308..ba6c9be9a 100644
+index 4cc02f30..ba6c9be9 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -1232,7 +1232,7 @@ public abstract class World implements IBlockAccess {

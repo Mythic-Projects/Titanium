@@ -1,4 +1,4 @@
-From f27fa0c2af6d0691eacf8b11fa6032ad05e3281c Mon Sep 17 00:00:00 2001
+From dbe2924ccea88227370c2fc071c69fe1a9866c73 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 11 May 2022 16:39:18 +0200
 Subject: [PATCH] Implement [Nacho-0024] Do not create new BlockPosition when
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Nacho-0024] Do not create new BlockPosition when
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index 2ab55d8b5..e4791c03a 100644
+index 2ab55d8b..e4791c03 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
 @@ -241,7 +241,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
@@ -47,7 +47,7 @@ index 2ab55d8b5..e4791c03a 100644
                      this.a(tileentity);
                  }
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 7e514f2c4..4cc02f308 100644
+index 7e514f2c..4cc02f30 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -326,6 +326,10 @@ public abstract class World implements IBlockAccess {

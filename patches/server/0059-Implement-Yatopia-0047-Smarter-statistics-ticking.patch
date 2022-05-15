@@ -1,11 +1,11 @@
-From c5c799b69b1504a8de4f9fc9879f59df0383aee2 Mon Sep 17 00:00:00 2001
+From 949298e6a6e53e2749ab1247b4098a7ab0c022e9 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 12 May 2022 11:27:50 +0200
 Subject: [PATCH] Implement [Yatopia-0047] Smarter statistics ticking
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
-index 8d6322310..e51cb96ea 100644
+index 8d632231..e51cb96e 100644
 --- a/src/main/java/net/minecraft/server/EntityHuman.java
 +++ b/src/main/java/net/minecraft/server/EntityHuman.java
 @@ -1376,8 +1376,10 @@ public abstract class EntityHuman extends EntityLiving {
@@ -21,7 +21,7 @@ index 8d6322310..e51cb96ea 100644
  
      public void a(Statistic statistic, int i) {}
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index ebd01683e..8bf00dfa3 100644
+index ebd01683..8bf00dfa 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -70,6 +70,9 @@ public class TitaniumConfig extends OkaeriConfig {

@@ -1,11 +1,11 @@
-From 6f2e94fff378fd23a532ba46891dc388e6972738 Mon Sep 17 00:00:00 2001
+From 741c694e3c69422c9caa38b96a597d2dcc44b580 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 12 May 2022 11:52:25 +0200
 Subject: [PATCH] Implement [Paper-0168] Disable ticking of snow blocks
 
 
 diff --git a/src/main/java/net/minecraft/server/BlockSnowBlock.java b/src/main/java/net/minecraft/server/BlockSnowBlock.java
-index 88865aa1b..09e024644 100644
+index 88865aa1..09e02464 100644
 --- a/src/main/java/net/minecraft/server/BlockSnowBlock.java
 +++ b/src/main/java/net/minecraft/server/BlockSnowBlock.java
 @@ -6,7 +6,7 @@ public class BlockSnowBlock extends Block {
