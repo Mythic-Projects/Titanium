@@ -1,0 +1,557 @@
+From 92ae7e1a299e690007fd4bcf9a7512aed078963c Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Thu, 19 May 2022 07:21:28 +0200
+Subject: [PATCH] This is Titanium
+
+
+diff --git a/pom.xml b/pom.xml
+index 644305e6..496541bd 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -1,12 +1,18 @@
+ <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+     <modelVersion>4.0.0</modelVersion>
+-    <groupId>org.github.paperspigot</groupId>
+-    <artifactId>paperspigot</artifactId>
++
++    <parent>
++        <groupId>net.titanvale</groupId>
++        <artifactId>titanium-parent</artifactId>
++        <version>1.8.8-SNAPSHOT</version>
++        <relativePath>../pom.xml</relativePath>
++    </parent>
++
++    <name>Titanium</name>
++    <artifactId>titanium</artifactId>
+     <packaging>jar</packaging>
+     <version>1.8.8-R0.1-SNAPSHOT</version>
+-    <name>PaperSpigot</name>
+-    <url>https://hub.spigotmc.org/stash/projects/PAPER/</url>
+ 
+     <properties>
+         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+@@ -19,24 +25,24 @@
+         <!--PaperSpigot - Bump to 1.8 - This will haunt me -->
+         <maven.compiler.source>1.8</maven.compiler.source>
+         <maven.compiler.target>1.8</maven.compiler.target>
++        <!-- Titanium - since submodules inherit this from titanium-parent -->
++        <maven.deploy.skip>false</maven.deploy.skip>
+     </properties>
+ 
+-    <parent>
+-        <groupId>org.github.paperspigot</groupId>
+-        <artifactId>paperspigot-parent</artifactId>
+-        <version>dev-SNAPSHOT</version>
+-        <relativePath>../pom.xml</relativePath>
+-    </parent>
+-
+     <dependencies>
++        <dependency>
++            <groupId>it.unimi.dsi</groupId>
++            <artifactId>fastutil</artifactId>
++            <version>8.5.8</version>
++        </dependency>
+         <dependency>
+             <groupId>net.sf.trove4j</groupId>
+             <artifactId>trove4j</artifactId>
+             <version>3.0.3</version>
+         </dependency>
+         <dependency>
+-            <groupId>org.github.paperspigot</groupId>
+-            <artifactId>paperspigot-api</artifactId>
++            <groupId>net.titanvale</groupId>
++            <artifactId>titanium-api</artifactId>
+             <version>${project.version}</version>
+             <type>jar</type>
+             <scope>compile</scope>
+@@ -44,7 +50,7 @@
+         <dependency>
+             <groupId>org.apache.logging.log4j</groupId>
+             <artifactId>log4j-core</artifactId>
+-            <version>2.17.0</version> <!-- Paper - Update Log4j -->
++            <version>2.8.1</version>
+             <scope>compile</scope>
+         </dependency>
+         <dependency>
+@@ -64,7 +70,7 @@
+         <dependency>
+             <groupId>jline</groupId>
+             <artifactId>jline</artifactId>
+-            <version>2.12.1</version> <!-- Paper - Update Log4j - use this specific version as it works on both aarch64 and windows -->
++            <version>2.12</version>
+             <type>jar</type>
+             <scope>compile</scope>
+         </dependency>
+@@ -78,10 +84,30 @@
+         <dependency>
+             <groupId>mysql</groupId>
+             <artifactId>mysql-connector-java</artifactId>
+-            <version>5.1.14</version>
++            <version>8.0.22</version>
+             <type>jar</type>
+             <scope>compile</scope>
+         </dependency>
++        <dependency>
++            <groupId>net.jafama</groupId>
++            <artifactId>jafama</artifactId>
++            <version>2.3.2</version>
++        </dependency>
++        <dependency>
++            <groupId>com.eatthepath</groupId>
++            <artifactId>fast-uuid</artifactId>
++            <version>0.2.0</version>
++        </dependency>
++        <dependency>
++            <groupId>eu.okaeri</groupId>
++            <artifactId>okaeri-configs-yaml-bukkit</artifactId>
++            <version>4.0.0-beta18</version>
++        </dependency>
++        <dependency>
++            <groupId>eu.okaeri</groupId>
++            <artifactId>okaeri-configs-serdes-commons</artifactId>
++            <version>4.0.0-beta18</version>
++        </dependency>
+         <!-- testing -->
+         <dependency>
+             <groupId>junit</groupId>
+@@ -105,8 +131,8 @@
+         </pluginRepository>
+         <!-- PaperSpigot - Repo for gitdescribe -->
+         <pluginRepository>
+-            <id>papermc</id> <!-- Paper - Update Log4j -->
+-            <url>https://papermc.io/repo/repository/maven-public/</url> <!-- Paper - Update Log4j -->
++            <id>destroystokyo</id>
++            <url>https://papermc.io/repo/repository/maven-public/</url>
+         </pluginRepository>
+     </pluginRepositories>
+ 
+@@ -115,22 +141,72 @@
+         <defaultGoal>install</defaultGoal>
+         <plugins>
+             <plugin>
+-            <groupId>com.lukegb.mojo</groupId>
+-            <artifactId>gitdescribe-maven-plugin</artifactId>
+-            <version>1.3</version>
+-            <configuration>
+-                <outputPrefix>git-PaperSpigot-</outputPrefix>
+-                <scmDirectory>..</scmDirectory>
+-            </configuration>
+-            <executions>
+-                <execution>
+-                    <phase>compile</phase>
+-                    <goals>
+-                        <goal>gitdescribe</goal>
+-                    </goals>
+-                </execution>
+-            </executions>
+-        </plugin>
++                <groupId>net.md-5</groupId>
++                <artifactId>scriptus</artifactId>
++                <version>0.4.1</version>
++                <executions>
++                    <execution>
++                        <id>ex-titanium</id>
++                        <configuration>
++                            <format>git-Titanium-%s</format>
++                            <scmDirectory>../</scmDirectory>
++                            <descriptionProperty>titanium.desc</descriptionProperty>
++                        </configuration>
++                        <phase>initialize</phase>
++                        <goals>
++                            <goal>describe</goal>
++                        </goals>
++                    </execution>
++                    <execution>
++                        <id>ex-sport</id>
++                        <configuration>
++                            <format>git-SportPaper-%s</format>
++                            <scmDirectory>../base/SportPaper</scmDirectory>
++                            <descriptionProperty>sportpaper.desc</descriptionProperty>
++                        </configuration>
++                        <phase>initialize</phase>
++                        <goals>
++                            <goal>describe</goal>
++                        </goals>
++                    </execution>
++                    <execution>
++                        <id>ex-paper</id>
++                        <configuration>
++                            <format>-P.%s</format>
++                            <scmDirectory>../base/SportPaper/base/Paper/PaperSpigot-Server</scmDirectory>
++                            <descriptionProperty>paper.desc</descriptionProperty>
++                        </configuration>
++                        <phase>initialize</phase>
++                        <goals>
++                            <goal>describe</goal>
++                        </goals>
++                    </execution>
++                    <execution>
++                        <id>ex-spigot</id>
++                        <configuration>
++                            <format>-SP.%s</format>
++                            <scmDirectory>../base/SportPaper/base/Paper/Spigot-Server</scmDirectory>
++                            <descriptionProperty>spigot.desc</descriptionProperty>
++                        </configuration>
++                        <phase>initialize</phase>
++                        <goals>
++                            <goal>describe</goal>
++                        </goals>
++                    </execution>
++                    <execution>
++                        <id>ex-craftbukkit</id>
++                        <configuration>
++                            <format>-CB.%s</format>
++                            <scmDirectory>../base/SportPaper/base/Paper/CraftBukkit</scmDirectory>
++                            <descriptionProperty>craftbukkit.desc</descriptionProperty>
++                        </configuration>
++                        <phase>initialize</phase>
++                        <goals>
++                            <goal>describe</goal>
++                        </goals>
++                    </execution>
++                </executions>
++            </plugin>
+             <plugin>
+                 <groupId>org.apache.maven.plugins</groupId>
+                 <artifactId>maven-jar-plugin</artifactId>
+@@ -141,12 +217,11 @@
+                         <manifestEntries>
+                             <Main-Class>org.bukkit.craftbukkit.Main</Main-Class>
+                             <Implementation-Title>CraftBukkit</Implementation-Title>
+-                            <Implementation-Version>${describe}</Implementation-Version>
++                            <Implementation-Version>${titanium.desc} ${sportpaper.desc} ${paper.desc}${spigot.desc}${craftbukkit.desc}</Implementation-Version>
+                             <Implementation-Vendor>Bukkit Team</Implementation-Vendor>
+                             <Specification-Title>Bukkit</Specification-Title>
+                             <Specification-Version>${api.version}</Specification-Version>
+                             <Specification-Vendor>Bukkit Team</Specification-Vendor>
+-                            <Multi-Release>true</Multi-Release> <!-- Paper - update log4j -->
+                         </manifestEntries>
+                         <manifestSections>
+                             <manifestSection>
+@@ -174,7 +249,7 @@
+             <plugin>
+                 <groupId>org.apache.maven.plugins</groupId>
+                 <artifactId>maven-shade-plugin</artifactId>
+-                <version>3.2.4</version> <!-- Paper - Update Log4j -->
++                <version>2.3</version>
+                 <executions>
+                     <execution>
+                         <phase>package</phase>
+@@ -182,16 +257,6 @@
+                             <goal>shade</goal>
+                         </goals>
+                         <configuration>
+-                            <!-- Paper start - Update Log4j -->
+-                            <filters>
+-                                <filter>
+-                                    <artifact>org.spigotmc:minecraft-server:**</artifact>
+-                                    <excludes>
+-                                        <exclude>org/apache/logging/log4j/**</exclude>
+-                                    </excludes>
+-                                </filter>
+-                            </filters>
+-                            <!-- Paper end - Update Log4j -->
+                             <relocations>
+                                 <relocation>
+                                     <pattern>joptsimple</pattern>
+@@ -229,7 +294,7 @@
+             <plugin>
+                 <groupId>net.md-5</groupId>
+                 <artifactId>specialsource-maven-plugin</artifactId>
+-		<version>1.2.3</version> <!-- paper - bump log4j -->
++                <version>1.2.1</version>
+                 <executions>
+                     <execution>
+                         <phase>package</phase>
+@@ -274,6 +339,25 @@
+                     </excludes>
+                 </configuration>
+             </plugin>
++            <plugin>
++                <groupId>org.apache.maven.plugins</groupId>
++                <artifactId>maven-source-plugin</artifactId>
++                <version>3.2.0</version>
++                <executions>
++                    <execution>
++                        <id>attach-sources</id>
++                        <phase>verify</phase>
++                        <goals>
++                            <goal>jar-no-fork</goal>
++                        </goals>
++                    </execution>
++                </executions>
++            </plugin>
++            <plugin>
++                <groupId>org.apache.maven.plugins</groupId>
++                <artifactId>maven-deploy-plugin</artifactId>
++                <version>3.0.0-M2</version>
++            </plugin>
+         </plugins>
+     </build>
+ </project>
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index b400ce04..4308b992 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -1084,7 +1084,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+     }
+ 
+     public String getServerModName() {
+-        return "PaperSpigot"; // PaperSpigot - PaperSpigot > // Spigot - Spigot > // CraftBukkit - cb > vanilla!
++        return "Titanium"; // Titanium - Titanium -> // PaperSpigot - PaperSpigot > // Spigot - Spigot > // CraftBukkit - cb > vanilla!
+     }
+ 
+     public CrashReport b(CrashReport crashreport) {
+diff --git a/src/main/java/net/minecraft/server/PacketPlayInUseEntity.java b/src/main/java/net/minecraft/server/PacketPlayInUseEntity.java
+index f55bedaf..a8fc3361 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayInUseEntity.java
++++ b/src/main/java/net/minecraft/server/PacketPlayInUseEntity.java
+@@ -46,10 +46,6 @@ public class PacketPlayInUseEntity implements Packet<PacketListenerPlayIn> {
+         return this.c;
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayIn) packetlistener);
+-    }
+-
+     public static enum EnumEntityUseAction {
+ 
+         INTERACT, ATTACK, INTERACT_AT;
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutAttachEntity.java b/src/main/java/net/minecraft/server/PacketPlayOutAttachEntity.java
+index bf6f6643..670b54fb 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutAttachEntity.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutAttachEntity.java
+@@ -32,7 +32,4 @@ public class PacketPlayOutAttachEntity implements Packet<PacketListenerPlayOut>
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutEntityMetadata.java b/src/main/java/net/minecraft/server/PacketPlayOutEntityMetadata.java
+index c5be70f8..dbfcc3c8 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutEntityMetadata.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutEntityMetadata.java
+@@ -5,8 +5,8 @@ import java.util.List;
+ 
+ public class PacketPlayOutEntityMetadata implements Packet<PacketListenerPlayOut> {
+ 
+-    private int a;
+-    private List<DataWatcher.WatchableObject> b;
++    public int a;
++    public List<DataWatcher.WatchableObject> b;
+ 
+     public PacketPlayOutEntityMetadata() {}
+ 
+@@ -34,7 +34,4 @@ public class PacketPlayOutEntityMetadata implements Packet<PacketListenerPlayOut
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutNamedEntitySpawn.java b/src/main/java/net/minecraft/server/PacketPlayOutNamedEntitySpawn.java
+index 953d6ef5..e94c81fc 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutNamedEntitySpawn.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutNamedEntitySpawn.java
+@@ -61,7 +61,4 @@ public class PacketPlayOutNamedEntitySpawn implements Packet<PacketListenerPlayO
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutPlayerInfo.java b/src/main/java/net/minecraft/server/PacketPlayOutPlayerInfo.java
+index ab4520ba..fc5ad291 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutPlayerInfo.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutPlayerInfo.java
+@@ -172,10 +172,6 @@ public class PacketPlayOutPlayerInfo implements Packet<PacketListenerPlayOut> {
+         return Objects.toStringHelper(this).add("action", this.a).add("entries", this.b).toString();
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+-
+     static class SyntheticClass_1 {
+ 
+         static final int[] a = new int[PacketPlayOutPlayerInfo.EnumPlayerInfoAction.values().length];
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutScoreboardTeam.java b/src/main/java/net/minecraft/server/PacketPlayOutScoreboardTeam.java
+index 90606f50..2557762f 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutScoreboardTeam.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutScoreboardTeam.java
+@@ -98,6 +98,7 @@ public class PacketPlayOutScoreboardTeam implements Packet<PacketListenerPlayOut
+             Iterator iterator = this.g.iterator();
+ 
+             while (iterator.hasNext()) {
++
+                 String s = (String) iterator.next();
+ 
+                 packetdataserializer.a(s);
+@@ -110,7 +111,4 @@ public class PacketPlayOutScoreboardTeam implements Packet<PacketListenerPlayOut
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntity.java b/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntity.java
+index 69dd590a..8ce93876 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntity.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntity.java
+@@ -130,7 +130,4 @@ public class PacketPlayOutSpawnEntity implements Packet<PacketListenerPlayOut> {
+         this.g = i;
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntityLiving.java b/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntityLiving.java
+index 1541921c..87314f5b 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntityLiving.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntityLiving.java
+@@ -99,7 +99,4 @@ public class PacketPlayOutSpawnEntityLiving implements Packet<PacketListenerPlay
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/ServerPing.java b/src/main/java/net/minecraft/server/ServerPing.java
+index 034a559b..3df77653 100644
+--- a/src/main/java/net/minecraft/server/ServerPing.java
++++ b/src/main/java/net/minecraft/server/ServerPing.java
+@@ -12,12 +12,19 @@ import com.mojang.authlib.GameProfile;
+ import java.lang.reflect.Type;
+ import java.util.UUID;
+ 
++// SportPaper start
++import java.util.Locale;
++import java.util.Map;
++import java.util.HashMap;
++// SportPaper end
++
+ public class ServerPing {
+ 
+     private IChatBaseComponent a;
+     private ServerPing.ServerPingPlayerSample b;
+     private ServerPing.ServerData c;
+     private String d;
++    private final Map<String, JsonObject> extra = new HashMap<>(); // SportPaper - extra
+ 
+     public ServerPing() {}
+ 
+@@ -53,6 +60,13 @@ public class ServerPing {
+         return this.d;
+     }
+ 
++    // SportPaper start - getter for extra
++    // NOTE: keys are plugin names in lower case, same as in NamespacedKey
++    public Map<String, JsonObject> getExtra() {
++        return this.extra;
++    }
++    // SportPaper end
++
+     public static class Serializer implements JsonDeserializer<ServerPing>, JsonSerializer<ServerPing> {
+ 
+         public Serializer() {}
+@@ -77,6 +91,14 @@ public class ServerPing {
+                 serverping.setFavicon(ChatDeserializer.h(jsonobject, "favicon"));
+             }
+ 
++            // SportPaper start - deserialize extra
++            if (jsonobject.has("bukkit_extra")) {
++                jsonobject.getAsJsonObject("bukkit_extra").entrySet().forEach(entry -> {
++                    serverping.extra.putIfAbsent(entry.getKey(), entry.getValue().getAsJsonObject());
++                });
++            }
++            // SportPaper end
++
+             return serverping;
+         }
+ 
+@@ -99,14 +121,27 @@ public class ServerPing {
+                 jsonobject.addProperty("favicon", serverping.d());
+             }
+ 
++            // SportPaper start - serialize extra
++            JsonObject serializedExtra = new JsonObject();
++            serverping.extra.forEach((pluginName, jsonObject) -> {
++                if (!jsonObject.entrySet().isEmpty()) {
++                    serializedExtra.add(pluginName, jsonObject);
++                }
++            });
++
++            if (!serializedExtra.entrySet().isEmpty()) {
++                jsonobject.add("bukkit_extra", serializedExtra);
++            }
++            // SportPaper end
++
+             return jsonobject;
+         }
+ 
+-        public JsonElement serialize(Object object, Type type, JsonSerializationContext jsonserializationcontext) {
++        public JsonElement serialize(ServerPing object, Type type, JsonSerializationContext jsonserializationcontext) { // SportPaper - compile error
+             return this.a((ServerPing) object, type, jsonserializationcontext);
+         }
+ 
+-        public Object deserialize(JsonElement jsonelement, Type type, JsonDeserializationContext jsondeserializationcontext) throws JsonParseException {
++        public ServerPing deserialize(JsonElement jsonelement, Type type, JsonDeserializationContext jsondeserializationcontext) throws JsonParseException { // SportPaper - compile error
+             return this.a(jsonelement, type, jsondeserializationcontext);
+         }
+     }
+@@ -147,11 +182,11 @@ public class ServerPing {
+                 return jsonobject;
+             }
+ 
+-            public JsonElement serialize(Object object, Type type, JsonSerializationContext jsonserializationcontext) {
++            public JsonElement serialize(ServerPing.ServerData object, Type type, JsonSerializationContext jsonserializationcontext) { // SportPaper - compile error
+                 return this.a((ServerPing.ServerData) object, type, jsonserializationcontext);
+             }
+ 
+-            public Object deserialize(JsonElement jsonelement, Type type, JsonDeserializationContext jsondeserializationcontext) throws JsonParseException {
++            public ServerPing.ServerData deserialize(JsonElement jsonelement, Type type, JsonDeserializationContext jsondeserializationcontext) throws JsonParseException { // SportPaper - compile error
+                 return this.a(jsonelement, type, jsondeserializationcontext);
+             }
+         }
+@@ -235,13 +270,13 @@ public class ServerPing {
+                 return jsonobject;
+             }
+ 
+-            public JsonElement serialize(Object object, Type type, JsonSerializationContext jsonserializationcontext) {
++            public JsonElement serialize(ServerPing.ServerPingPlayerSample object, Type type, JsonSerializationContext jsonserializationcontext) { // SportPaper - compile error
+                 return this.a((ServerPing.ServerPingPlayerSample) object, type, jsonserializationcontext);
+             }
+ 
+-            public Object deserialize(JsonElement jsonelement, Type type, JsonDeserializationContext jsondeserializationcontext) throws JsonParseException {
++            public ServerPing.ServerPingPlayerSample deserialize(JsonElement jsonelement, Type type, JsonDeserializationContext jsondeserializationcontext) throws JsonParseException { // SportPaper - compile error
+                 return this.a(jsonelement, type, jsondeserializationcontext);
+             }
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/main/java/org/spigotmc/Metrics.java b/src/main/java/org/spigotmc/Metrics.java
+index 558989ce..448134e6 100644
+--- a/src/main/java/org/spigotmc/Metrics.java
++++ b/src/main/java/org/spigotmc/Metrics.java
+@@ -344,7 +344,7 @@ public class Metrics {
+      */
+     private void postPlugin(final boolean isPing) throws IOException {
+         // Server software specific section
+-        String pluginName = "PaperSpigot"; // PaperSpigot - We need some usage data
++        String pluginName = "Titanium"; // Titanium - Titanium -> // PaperSpigot - We need some usage data
+         boolean onlineMode = Bukkit.getServer().getOnlineMode(); // TRUE if online mode is enabled
+         String pluginVersion = (Metrics.class.getPackage().getImplementationVersion() != null) ? Metrics.class.getPackage().getImplementationVersion() : "unknown";
+         String serverVersion = Bukkit.getVersion();
+-- 
+2.36.0.windows.1
+
