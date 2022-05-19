@@ -1,4 +1,5 @@
 /.idea/
+/base/mc-dev/
 /Titanium-API/
 /Titanium-Server/
 *.iml
