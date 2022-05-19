@@ -31,7 +31,7 @@ index 142f4268..4dc4a626 100644
 +++ b/src/main/java/app/ashcon/sportpaper/server/KnockbackModificationCommand.java
 @@ -1,11 +1,12 @@
  package app.ashcon.sportpaper.server;
- 
+
  import com.google.common.collect.ImmutableList;
 +import net.titanium.config.PaperConfig;
 +import net.titanium.config.TitaniumConfig;
@@ -40,12 +40,12 @@ index 142f4268..4dc4a626 100644
  import org.bukkit.command.CommandSender;
  import org.bukkit.util.StringUtil;
 -import org.github.paperspigot.PaperSpigotConfig;
- 
+
  import java.util.ArrayList;
  import java.util.List;
 @@ -46,70 +47,72 @@ public class KnockbackModificationCommand extends Command {
- 
- 
+
+
          try {
 +            PaperConfig.Knockback knockbackConfig = TitaniumConfig.get().paper.knockback;
              switch (args[0].toLowerCase()) {
@@ -171,7 +171,7 @@ index 874af8a3..cf649e7a 100644
 --- a/src/main/java/net/minecraft/server/Block.java
 +++ b/src/main/java/net/minecraft/server/Block.java
 @@ -582,7 +582,7 @@ public class Block {
- 
+
      public void a(World world, EntityHuman entityhuman, BlockPosition blockposition, IBlockData iblockdata, TileEntity tileentity) {
          entityhuman.b(StatisticList.MINE_BLOCK_COUNT[getId(this)]);
 -        entityhuman.applyExhaustion(world.paperSpigotConfig.blockBreakExhaustion); // PaperSpigot - Configurable block break exhaustion
@@ -195,13 +195,13 @@ index ddc21351..142ae5c4 100644
 +                if (j >= (byte) range(3, (world.growthOdds /  world.spigotConfigTitanium.growth.cactusModifier * 15) + 0.5F, 15)) { // Spigot
                      // world.setTypeUpdate(blockposition1, this.getBlockData()); // CraftBukkit
                      IBlockData iblockdata1 = iblockdata.set(BlockCactus.AGE, Integer.valueOf(0));
- 
+
 diff --git a/src/main/java/net/minecraft/server/BlockChest.java b/src/main/java/net/minecraft/server/BlockChest.java
 index 26160dbe..393e6401 100644
 --- a/src/main/java/net/minecraft/server/BlockChest.java
 +++ b/src/main/java/net/minecraft/server/BlockChest.java
 @@ -417,7 +417,7 @@ public class BlockChest extends BlockContainer {
- 
+
      private boolean p(World world, BlockPosition blockposition) {
          // PaperSpigot start - Option to disable chest's cat detection (Performance++)
 -        if (world.paperSpigotConfig.disableChestCatDetection) {

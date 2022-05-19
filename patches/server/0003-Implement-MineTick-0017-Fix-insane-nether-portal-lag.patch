@@ -1,4 +1,4 @@
-From 45e62aa11571763928d59f6e9fbadd64b502270f Mon Sep 17 00:00:00 2001
+From f79b7f2c88521987a1d4fba8945f84b5b0ed6b6c Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 9 Apr 2021 13:59:12 +0200
 Subject: [PATCH] Implement [MineTick-0017] - Fix insane nether portal lag
@@ -44,5 +44,5 @@ index cae65cf8..6b671a50 100644
      }
  
 -- 
-2.32.0.windows.2
+2.36.0.windows.1
 

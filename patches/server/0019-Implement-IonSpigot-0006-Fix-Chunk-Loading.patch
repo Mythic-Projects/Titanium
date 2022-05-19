@@ -1,14 +1,14 @@
-From d81fac5dca35bbdbb7e7d9946e8865bf312ab216 Mon Sep 17 00:00:00 2001
+From e54fe55b0539524d34963faf877ca921609919c7 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 11 May 2022 16:04:30 +0200
 Subject: [PATCH] Implement [IonSpigot-0006] Fix Chunk Loading
 
 
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index cfa38a2cd..6f1578fb8 100644
+index fd17fc63..3b03f651 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
-@@ -458,11 +458,31 @@ public abstract class Entity implements ICommandListener {
+@@ -422,11 +422,31 @@ public abstract class Entity implements ICommandListener {
       * PaperSpigot - Load surrounding chunks the entity is moving through
       */
      public void loadChunks() {

@@ -1,4 +1,4 @@
-From c2eef389895358e86fd52a9282d689cbd878e61d Mon Sep 17 00:00:00 2001
+From 3ba8fadf9f8df771bbca9c818048fc845387bdd7 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 1 May 2022 12:12:12 +0200
 Subject: [PATCH] Implement [Paper-0346] [MC-135506] Experience should save as
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0346] [MC-135506] Experience should save as
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityExperienceOrb.java b/src/main/java/net/minecraft/server/EntityExperienceOrb.java
-index b89346fa..20d37820 100644
+index aefa9fa8..d4a5c256 100644
 --- a/src/main/java/net/minecraft/server/EntityExperienceOrb.java
 +++ b/src/main/java/net/minecraft/server/EntityExperienceOrb.java
 @@ -145,13 +145,13 @@ public class EntityExperienceOrb extends Entity {
@@ -26,5 +26,5 @@ index b89346fa..20d37820 100644
  
      public void d(EntityHuman entityhuman) {
 -- 
-2.32.0.windows.2
+2.36.0.windows.1
 

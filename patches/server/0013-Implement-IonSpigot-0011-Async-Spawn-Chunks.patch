@@ -1,14 +1,14 @@
-From 2676f2d99c3499c7744457a303c176d4e028e355 Mon Sep 17 00:00:00 2001
+From 6260cd244dc581a18d1d25f03706f313b9816fd0 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sat, 30 Apr 2022 18:29:35 +0200
 Subject: [PATCH] Implement [IonSpigot-0011] Async Spawn Chunks
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index ba744422..f8416b98 100644
+index 88ff70f2..bf753849 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -384,7 +384,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+@@ -360,7 +360,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
                      }
  
                      ++i;
@@ -18,10 +18,10 @@ index ba744422..f8416b98 100644
              }
          }
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index a1d486cb..a27316c0 100644
+index 32ad864a..c0971e75 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-@@ -884,7 +884,7 @@ public final class CraftServer implements Server {
+@@ -950,7 +950,7 @@ public final class CraftServer implements Server {
                      }
  
                      BlockPosition chunkcoordinates = internal.getSpawn();
@@ -31,5 +31,5 @@ index a1d486cb..a27316c0 100644
              }
          }
 -- 
-2.32.0.windows.2
+2.36.0.windows.1
 

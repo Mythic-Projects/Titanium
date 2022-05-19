@@ -1,4 +1,4 @@
-From 29d88f41ac1e44e7690b31d70373b1d300a2d9eb Mon Sep 17 00:00:00 2001
+From 596256b5c34412b78986c7293c80484774c496f8 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 15 May 2022 18:17:49 +0200
 Subject: [PATCH] Implement [Nacho-0009] Remove an extra file io call within
@@ -6,10 +6,10 @@ Subject: [PATCH] Implement [Nacho-0009] Remove an extra file io call within
 
 
 diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
-index e949767f..eb058a7e 100644
+index 3cc2ed72..90c629f1 100644
 --- a/src/main/java/net/minecraft/server/NetworkManager.java
 +++ b/src/main/java/net/minecraft/server/NetworkManager.java
-@@ -170,7 +170,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+@@ -169,7 +169,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
  
      private void a(final Packet packet, final GenericFutureListener<? extends Future<? super Void>>[] agenericfuturelistener) {
          final EnumProtocol enumprotocol = EnumProtocol.a(packet);
@@ -18,7 +18,7 @@ index e949767f..eb058a7e 100644
  
          if (enumprotocol1 != enumprotocol) {
              NetworkManager.g.debug("Disabled auto read");
-@@ -190,20 +190,18 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+@@ -189,20 +189,18 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
  
              channelfuture.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
          } else {
@@ -49,10 +49,10 @@ index e949767f..eb058a7e 100644
          }
  
 diff --git a/src/main/java/net/minecraft/server/WorldNBTStorage.java b/src/main/java/net/minecraft/server/WorldNBTStorage.java
-index f4e4c915..33355a37 100644
+index eab41804..d508977f 100644
 --- a/src/main/java/net/minecraft/server/WorldNBTStorage.java
 +++ b/src/main/java/net/minecraft/server/WorldNBTStorage.java
-@@ -157,7 +157,7 @@ public class WorldNBTStorage implements IDataManager, IPlayerFileData {
+@@ -207,7 +207,7 @@ public class WorldNBTStorage implements IDataManager, IPlayerFileData {
              File file = new File(this.playerDir, entityhuman.getUniqueID().toString() + ".dat");
              // Spigot Start
              boolean usingWrongFile = false;

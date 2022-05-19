@@ -1,11 +1,11 @@
-From 006b47be158892451ebbc762b97da7067bf2ed3a Mon Sep 17 00:00:00 2001
+From 67e39ac45d41f2d0f47505f2fbef702082aa00df Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 15 May 2022 17:39:58 +0200
 Subject: [PATCH] Implement [MineTick-0011] Optimize Idle Furnaces
 
 
 diff --git a/src/main/java/net/minecraft/server/TileEntityFurnace.java b/src/main/java/net/minecraft/server/TileEntityFurnace.java
-index 14fc635d..300c5169 100644
+index a284b3cd..41802611 100644
 --- a/src/main/java/net/minecraft/server/TileEntityFurnace.java
 +++ b/src/main/java/net/minecraft/server/TileEntityFurnace.java
 @@ -206,7 +206,7 @@ public class TileEntityFurnace extends TileEntityContainer implements IUpdatePla

@@ -5,15 +5,15 @@ cd "${basedir:-$sourceBase}"
 basedir="$(pwd -P)"
 
 log_info() {
-    echo -e "\033[32m---\033[0m $1"
+    echo -e "\033[0;35m-\033[0;36m=\033[0;35m-\033[0m $1"
 }
 
 log_warning() {
-    echo -e "\033[33m!!!\033[0m $1"
+    echo -e "\033[0;35m-\033[0;33m=\033[0;35m-\033[0m $1"
 }
 
 log_error() {
-    echo -e "\033[31m###\033[0m $1"
+    echo -e "\033[0;35m-\033[0;31m=\033[0;35m-\033[0m $1"
 }
 
 function cleanupPatches {

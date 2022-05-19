@@ -1,4 +1,4 @@
-From 279335e18e2d64bf6dd90b030020f74cb70705f5 Mon Sep 17 00:00:00 2001
+From d576ef27155d2b8d64a38d38b65fbfe712ad5d81 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Tue, 10 May 2022 20:25:51 +0200
 Subject: [PATCH] Implement [IonSpigot-0014] Faster Chunk Entity List
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [IonSpigot-0014] Faster Chunk Entity List
 
 diff --git a/src/main/java/io/papermc/paper/util/maplist/ObjectMapList.java b/src/main/java/io/papermc/paper/util/maplist/ObjectMapList.java
 new file mode 100644
-index 000000000..8fc248c8b
+index 00000000..8fc248c8
 --- /dev/null
 +++ b/src/main/java/io/papermc/paper/util/maplist/ObjectMapList.java
 @@ -0,0 +1,200 @@
@@ -212,10 +212,10 @@ index 000000000..8fc248c8b
 +}
 \ No newline at end of file
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index a3c1d08ac..49e2449d4 100644
+index ab0d41ca..7a0001d0 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
-@@ -146,7 +146,7 @@ public class Chunk {
+@@ -144,7 +144,7 @@ public class Chunk {
          this.heightMap = new int[256];
  
          for (int k = 0; k < this.entitySlices.length; ++k) {

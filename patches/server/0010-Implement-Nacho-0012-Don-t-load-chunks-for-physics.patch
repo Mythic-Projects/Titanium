@@ -1,14 +1,14 @@
-From f251f4cabdf1b1a290f6d05a3a2b4e9e8572f6d7 Mon Sep 17 00:00:00 2001
+From 8423252a8db8b402c4a611c4a66f80553babc71d Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 9 Apr 2021 15:56:09 +0200
 Subject: [PATCH] Implement [Nacho-0012] Don't load chunks for physics
 
 
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 6c181c7c..55434414 100644
+index b92a64ea..104e61e2 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -579,7 +579,8 @@ public abstract class World implements IBlockAccess {
+@@ -573,7 +573,8 @@ public abstract class World implements IBlockAccess {
  
      public void d(BlockPosition blockposition, final Block block) {
          if (!this.isClientSide) {
@@ -19,5 +19,5 @@ index 6c181c7c..55434414 100644
              try {
                  // CraftBukkit start
 -- 
-2.32.0.windows.2
+2.36.0.windows.1
 

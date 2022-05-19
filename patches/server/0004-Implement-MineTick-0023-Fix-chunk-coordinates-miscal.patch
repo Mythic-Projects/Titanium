@@ -1,4 +1,4 @@
-From f6fa8d7532c1a04b7b06b0b64e76ce23692a1af8 Mon Sep 17 00:00:00 2001
+From 1d754542c9d3a8fee655982ae58f7de66497be7e Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 9 Apr 2021 14:11:53 +0200
 Subject: [PATCH] Implement [MineTick-0023] - Fix chunk coordinates
@@ -6,10 +6,10 @@ Subject: [PATCH] Implement [MineTick-0023] - Fix chunk coordinates
 
 
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 9ab157cd..4b655951 100644
+index 2da303fe..fd17fc63 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
-@@ -1637,7 +1637,7 @@ public abstract class Entity implements ICommandListener {
+@@ -1592,7 +1592,7 @@ public abstract class Entity implements ICommandListener {
              this.vehicle = null;
          } else {
              // CraftBukkit start
@@ -19,10 +19,10 @@ index 9ab157cd..4b655951 100644
                  VehicleExitEvent exitEvent = null;
                  if (this.vehicle != null && this.vehicle.getBukkitEntity() instanceof Vehicle) {
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index cb6a3be0..5a5c8a25 100644
+index 3c2d3197..bc8124b8 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
-@@ -274,7 +274,7 @@ public abstract class PlayerList {
+@@ -270,7 +270,7 @@ public abstract class PlayerList {
          }
  
          worldserver1.getPlayerChunkMap().addPlayer(entityplayer);
@@ -31,7 +31,7 @@ index cb6a3be0..5a5c8a25 100644
      }
  
      public int d() {
-@@ -619,7 +619,7 @@ public abstract class PlayerList {
+@@ -597,7 +597,7 @@ public abstract class PlayerList {
          entityplayer1.setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
          // CraftBukkit end
  
@@ -41,5 +41,5 @@ index cb6a3be0..5a5c8a25 100644
          while (avoidSuffocation && !worldserver.getCubes(entityplayer1, entityplayer1.getBoundingBox()).isEmpty() && entityplayer1.locY < 256.0D) {
              entityplayer1.setPosition(entityplayer1.locX, entityplayer1.locY + 1.0D, entityplayer1.locZ);
 -- 
-2.32.0.windows.2
+2.36.0.windows.1
 

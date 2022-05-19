@@ -1,4 +1,4 @@
-From 936628f6f7d671b95030e6414aa8bf5d64abec19 Mon Sep 17 00:00:00 2001
+From 4e3c93349dd2a06ef471ce0ad670fa72248171b0 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 9 Apr 2021 14:41:18 +0200
 Subject: [PATCH] Implement [Akarin-0007] - Avoid double I/O operation on load
@@ -6,10 +6,10 @@ Subject: [PATCH] Implement [Akarin-0007] - Avoid double I/O operation on load
 
 
 diff --git a/src/main/java/net/minecraft/server/WorldNBTStorage.java b/src/main/java/net/minecraft/server/WorldNBTStorage.java
-index 363b4d4d..4eee95ae 100644
+index b4056a28..eab41804 100644
 --- a/src/main/java/net/minecraft/server/WorldNBTStorage.java
 +++ b/src/main/java/net/minecraft/server/WorldNBTStorage.java
-@@ -157,7 +157,8 @@ public class WorldNBTStorage implements IDataManager, IPlayerFileData {
+@@ -207,7 +207,8 @@ public class WorldNBTStorage implements IDataManager, IPlayerFileData {
              File file = new File(this.playerDir, entityhuman.getUniqueID().toString() + ".dat");
              // Spigot Start
              boolean usingWrongFile = false;
@@ -19,7 +19,7 @@ index 363b4d4d..4eee95ae 100644
              {
                  file = new File( this.playerDir, UUID.nameUUIDFromBytes( ( "OfflinePlayer:" + entityhuman.getName() ).getBytes( "UTF-8" ) ).toString() + ".dat");
                  if ( file.exists() )
-@@ -168,7 +169,7 @@ public class WorldNBTStorage implements IDataManager, IPlayerFileData {
+@@ -218,7 +219,7 @@ public class WorldNBTStorage implements IDataManager, IPlayerFileData {
              }
              // Spigot End
  
@@ -29,5 +29,5 @@ index 363b4d4d..4eee95ae 100644
              }
              // Spigot Start
 -- 
-2.32.0.windows.2
+2.36.0.windows.1
 

@@ -1,4 +1,4 @@
-From 7c9e6e40a3bcdbce413c396b4e754c036882e6d1 Mon Sep 17 00:00:00 2001
+From 65215e1833244731810b653b4bdb5699dd33362d Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 9 Apr 2021 18:59:20 +0200
 Subject: [PATCH] Implement [Paper-0313] - Optimized world time updates by
@@ -6,10 +6,10 @@ Subject: [PATCH] Implement [Paper-0313] - Optimized world time updates by
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 2fedc462..1f94d925 100644
+index 4308b992..88ff70f2 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -899,16 +899,35 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+@@ -796,16 +796,35 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
  
          SpigotTimings.timeUpdateTimer.startTiming(); // Spigot
          // Send time updates to everyone, it will get the right time from the world the player is in.
@@ -52,5 +52,5 @@ index 2fedc462..1f94d925 100644
              long j = System.nanoTime();
  
 -- 
-2.32.0.windows.2
+2.36.0.windows.1
 

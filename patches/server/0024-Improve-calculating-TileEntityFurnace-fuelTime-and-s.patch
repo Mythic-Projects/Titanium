@@ -1,4 +1,4 @@
-From 8fd566480bacc21b35d29bbc25df860c43a9eb3b Mon Sep 17 00:00:00 2001
+From bcdf8649c25478fad4281bd4e9c514ad6929f0bf Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 15 May 2022 18:56:03 +0200
 Subject: [PATCH] Improve calculating TileEntityFurnace#fuelTime and some
@@ -152,7 +152,7 @@ index 4e94ea1a..3d8fd484 100644
 +
  }
 diff --git a/src/main/java/net/minecraft/server/TileEntityFurnace.java b/src/main/java/net/minecraft/server/TileEntityFurnace.java
-index 300c5169..fcda21e2 100644
+index 41802611..33c496d4 100644
 --- a/src/main/java/net/minecraft/server/TileEntityFurnace.java
 +++ b/src/main/java/net/minecraft/server/TileEntityFurnace.java
 @@ -3,6 +3,7 @@ package net.minecraft.server;

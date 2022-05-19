@@ -1,4 +1,4 @@
-From 8627e04c6fbad12a0880569242800d643af55af5 Mon Sep 17 00:00:00 2001
+From a8a460609e717779dace835d90a1d6fe215a7123 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 9 Apr 2021 13:54:47 +0200
 Subject: [PATCH] Implement [Migot-0009] - Prevent creature spawning in
@@ -6,10 +6,10 @@ Subject: [PATCH] Implement [Migot-0009] - Prevent creature spawning in
 
 
 diff --git a/src/main/java/net/minecraft/server/SpawnerCreature.java b/src/main/java/net/minecraft/server/SpawnerCreature.java
-index 0e447613..ab396fcf 100644
+index 284f4bf2..31a99c39 100644
 --- a/src/main/java/net/minecraft/server/SpawnerCreature.java
 +++ b/src/main/java/net/minecraft/server/SpawnerCreature.java
-@@ -84,7 +84,7 @@ public final class SpawnerCreature {
+@@ -73,7 +73,7 @@ public final class SpawnerCreature {
                              long chunkCoords = LongHash.toLong(i1 + l, k + j);
                              if (!this.b.contains(chunkCoords)) {
                                  ++i;
@@ -19,5 +19,5 @@ index 0e447613..ab396fcf 100644
                                  }
                              }
 -- 
-2.32.0.windows.2
+2.36.0.windows.1
 
