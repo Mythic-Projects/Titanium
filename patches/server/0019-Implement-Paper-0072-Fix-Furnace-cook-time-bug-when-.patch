@@ -1,4 +1,4 @@
-From 7823a9bc7d322fc5c3ef0d3a96c9d64513819941 Mon Sep 17 00:00:00 2001
+From 20b0cf0a1d2ae5fb9d86a764e62a2126daf7a49b Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 11 May 2022 16:19:25 +0200
 Subject: [PATCH] Implement [Paper-0072] Fix Furnace cook time bug when lagging

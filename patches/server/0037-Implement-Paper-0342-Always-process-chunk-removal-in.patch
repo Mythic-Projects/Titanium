@@ -1,4 +1,4 @@
-From 01cbfc283195af41d74c407d32e60452e339599a Mon Sep 17 00:00:00 2001
+From 38001b8ab22c593ed53cae979b8a0c2197f9d152 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 12 May 2022 10:55:26 +0200
 Subject: [PATCH] Implement [Paper-0342] Always process chunk removal in
@@ -6,10 +6,10 @@ Subject: [PATCH] Implement [Paper-0342] Always process chunk removal in
 
 
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 4cc02f30..ba6c9be9 100644
+index b1f4a354..70f3661b 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -1232,7 +1232,7 @@ public abstract class World implements IBlockAccess {
+@@ -1156,7 +1156,7 @@ public abstract class World implements IBlockAccess {
              this.everyoneSleeping();
          }
  
@@ -18,7 +18,7 @@ index 4cc02f30..ba6c9be9 100644
          int i = entity.ae;
          int j = entity.ag;
  
-@@ -1240,6 +1240,7 @@ public abstract class World implements IBlockAccess {
+@@ -1164,6 +1164,7 @@ public abstract class World implements IBlockAccess {
              this.getChunkAt(i, j).b(entity);
          }
  

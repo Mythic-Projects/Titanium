@@ -1,4 +1,4 @@
-From 6f412b42f1c7d0daa80eb273c27c65161cd8ee78 Mon Sep 17 00:00:00 2001
+From f6114fb1d0fba523b0808b5fda9598663a3a460f Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 12 May 2022 11:52:25 +0200
 Subject: [PATCH] Implement [Paper-0168] Disable ticking of snow blocks

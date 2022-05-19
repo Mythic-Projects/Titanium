@@ -1,24 +1,28 @@
-From dbe2924ccea88227370c2fc071c69fe1a9866c73 Mon Sep 17 00:00:00 2001
+From 04d5e1aa5e24d66df12b6346bd3e5ee3e92e64a9 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
-Date: Wed, 11 May 2022 16:39:18 +0200
+Date: Thu, 19 May 2022 19:32:31 +0200
 Subject: [PATCH] Implement [Nacho-0024] Do not create new BlockPosition when
  loading chunk
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index 2ab55d8b..e4791c03 100644
+index 0c49a256..9f46e1c2 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
-@@ -241,7 +241,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+@@ -225,21 +225,21 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+         }
+ 
          if (!this.chunkCoordIntPairQueue.isEmpty()) {
-             ArrayList<Chunk> chunkList = Lists.newArrayList();
+-            ArrayList arraylist = Lists.newArrayList();
++            ArrayList<Chunk> chunkList = Lists.newArrayList();
              Iterator iterator1 = this.chunkCoordIntPairQueue.iterator();
 -            ArrayList arraylist1 = Lists.newArrayList();
 +            ArrayList<TileEntity> tileEntities = Lists.newArrayList();
  
-             Chunk chunk = null;
+             Chunk chunk;
  
-@@ -249,11 +249,11 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+-            while (iterator1.hasNext() && arraylist.size() < this.world.spigotConfig.maxBulkChunk) { // Spigot
++            while (iterator1.hasNext() && chunkList.size() < this.world.spigotConfig.maxBulkChunk) { // Spigot
                  ChunkCoordIntPair chunkcoordintpair = (ChunkCoordIntPair) iterator1.next();
  
                  if (chunkcoordintpair != null) {
@@ -26,32 +30,55 @@ index 2ab55d8b..e4791c03 100644
 +                    if (this.world.isLoaded(chunkcoordintpair.x << 4, 0, chunkcoordintpair.z << 4)) {// [Nacho-0024] Do not create new BlockPosition when loading chunk
                          chunk = this.world.getChunkAt(chunkcoordintpair.x, chunkcoordintpair.z);
                          if (chunk.isReady()) {
-                             chunkList.add(chunk);
+-                            arraylist.add(chunk);
 -                            arraylist1.addAll(chunk.tileEntities.values()); // CraftBukkit - Get tile entities directly from the chunk instead of the world
++                            chunkList.add(chunk);
 +                            tileEntities.addAll(chunk.tileEntities.values()); // CraftBukkit - Get tile entities directly from the chunk instead of the world
                              iterator1.remove();
                          }
                      }
-@@ -269,10 +269,10 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
-                     this.playerConnection.sendPacket(new PacketPlayOutMapChunkBulk(chunkList));
+@@ -248,25 +248,22 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+                 }
+             }
+ 
+-            if (!arraylist.isEmpty()) {
+-                if (arraylist.size() == 1) {
+-                    this.playerConnection.sendPacket(new PacketPlayOutMapChunk((Chunk) arraylist.get(0), true, '\uffff'));
++            if (!chunkList.isEmpty()) {
++                if (chunkList.size() == 1) {
++                    this.playerConnection.sendPacket(new PacketPlayOutMapChunk(chunkList.get(0), true, '\uffff'));
+                 } else {
+-                    this.playerConnection.sendPacket(new PacketPlayOutMapChunkBulk(arraylist));
++                    this.playerConnection.sendPacket(new PacketPlayOutMapChunkBulk(chunkList));
                  }
  
 -                Iterator iterator2 = arraylist1.iterator();
-+                Iterator<TileEntity> tileEntitiesIterator = tileEntities.iterator();
- 
+-
 -                while (iterator2.hasNext()) {
 -                    TileEntity tileentity = (TileEntity) iterator2.next();
+-
++                Iterator<TileEntity> tileEntitiesIterator = tileEntities.iterator();
 +                while (tileEntitiesIterator.hasNext()) {
-+                    TileEntity tileentity = (TileEntity) tileEntitiesIterator.next();
- 
++                    TileEntity tileentity = tileEntitiesIterator.next();
                      this.a(tileentity);
                  }
+ 
+-                iterator2 = arraylist.iterator();
+-
+-                while (iterator2.hasNext()) {
+-                    chunk = (Chunk) iterator2.next();
++                Iterator<Chunk> chunkIterator = chunkList.iterator();
++                while (chunkIterator.hasNext()) {
++                    chunk = chunkIterator.next();
+                     this.u().getTracker().a(this, chunk);
+                 }
+             }
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 7e514f2c..4cc02f30 100644
+index 104e61e2..b1f4a354 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -326,6 +326,10 @@ public abstract class World implements IBlockAccess {
-         return getChunkIfLoaded(blockposition.getX() >> 4, blockposition.getZ() >> 4) != null; // Paper
+@@ -305,6 +305,10 @@ public abstract class World implements IBlockAccess {
+         return this.a(blockposition, true);
      }
  
 +    public boolean isLoaded(int blockposition_x, int blockposition_y, int blockposition_z) {

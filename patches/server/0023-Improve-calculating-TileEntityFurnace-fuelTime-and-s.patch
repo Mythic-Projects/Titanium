@@ -1,4 +1,4 @@
-From bcdf8649c25478fad4281bd4e9c514ad6929f0bf Mon Sep 17 00:00:00 2001
+From 4b3e578c38acd8a86af302d5b086472d2cb372ec Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 15 May 2022 18:56:03 +0200
 Subject: [PATCH] Improve calculating TileEntityFurnace#fuelTime and some

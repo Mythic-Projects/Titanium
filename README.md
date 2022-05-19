@@ -74,6 +74,9 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Taco-0024] Optimize tnt entity and falling block movement
 [Taco-0025] Fix east west cannoning
 
+[SportPaper-0176] Use fast util collections
+[SportPaper-0185] Speed up chunk unloading
+
 [FlamePaper-0003] Fix chunk memory leak
 [FlamePaper-0005] Fix multiple memory leaks
 [FlamePaper-0010] Fix NullPointerException exploits for invalid logins
@@ -86,7 +89,6 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Nacho-0008] Update netty 4.1.50 (We updated it to 4.1.75)
 [Nacho-0009] Remove an extra file io call within world credit bob7l"
 [Nacho-0010] Use jchambers' FAST UUID methods
-[Nacho-0011] Optimize weather update loops
 [Nacho-0012] Don't load chunks for physics
 [Nacho-0019] Avoid lock every packet send
 [Nacho-0023] Optimize EntityTracker for the chunk updater

@@ -1,14 +1,14 @@
-From dbbeb04202bc9d9bf54ebde7cb4c1589ce45b662 Mon Sep 17 00:00:00 2001
+From 4b65e7c0172e60329f01bd0e47d15095f32cdad4 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
-Date: Sun, 1 May 2022 11:36:09 +0200
+Date: Thu, 19 May 2022 19:39:26 +0200
 Subject: [PATCH] Implement [Migot-0036] Check for lava only once per tick
 
 
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 8a4fc05c..16b7ccd8 100644
+index 0f3ed169..f584a417 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
-@@ -160,6 +160,11 @@ public abstract class Entity implements ICommandListener {
+@@ -142,6 +142,11 @@ public abstract class Entity implements ICommandListener {
      public void inactiveTick() { }
      // Spigot end
  
@@ -20,20 +20,20 @@ index 8a4fc05c..16b7ccd8 100644
      public int getId() {
          return this.id;
      }
-@@ -1016,7 +1021,12 @@ public abstract class Entity implements ICommandListener {
+@@ -993,7 +998,12 @@ public abstract class Entity implements ICommandListener {
      }
  
      public boolean ab() {
 -        return this.world.a(this.getBoundingBox().grow(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D), Material.LAVA);
 +        int currentTick = MinecraftServer.currentTick;
 +        if (this.lastLavaCheck != currentTick) {
-+             this.lastLavaCheck = currentTick;
-+             this.isInLava = this.world.a(this.getBoundingBox().grow(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D), Material.LAVA);
++            this.lastLavaCheck = currentTick;
++            this.isInLava = this.world.a(this.getBoundingBox().grow(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D), Material.LAVA);
 +        }
 +        return this.isInLava;
      }
  
      public void a(float f, float f1, float f2) {
 -- 
-2.32.0.windows.2
+2.36.0.windows.1
 

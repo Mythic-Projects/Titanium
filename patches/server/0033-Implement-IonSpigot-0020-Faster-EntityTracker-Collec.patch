@@ -1,11 +1,11 @@
-From bbbf74ab608b351db04c0697b857d193ef5940a7 Mon Sep 17 00:00:00 2001
+From 9bffd14eb9d7f9ff8b48afb63986a37cc8c171b6 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 11 May 2022 08:15:32 +0200
 Subject: [PATCH] Implement [IonSpigot-0020] Faster EntityTracker Collections
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityTracker.java b/src/main/java/net/minecraft/server/EntityTracker.java
-index cb72b3672..e24644c42 100644
+index cb72b367..e24644c4 100644
 --- a/src/main/java/net/minecraft/server/EntityTracker.java
 +++ b/src/main/java/net/minecraft/server/EntityTracker.java
 @@ -13,7 +13,7 @@ public class EntityTracker {
@@ -18,10 +18,10 @@ index cb72b3672..e24644c42 100644
      private int e;
  
 diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-index 97fbf0eab..c06abea82 100644
+index 1fc2388e..beff6376 100644
 --- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 +++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-@@ -46,7 +46,7 @@ public class EntityTrackerEntry {
+@@ -42,7 +42,7 @@ public class EntityTrackerEntry {
      // PaperSpigot start
      // Replace trackedPlayers Set with a Map. The value is true until the player receives
      // their first update (which is forced to have absolute coordinates), false afterward.

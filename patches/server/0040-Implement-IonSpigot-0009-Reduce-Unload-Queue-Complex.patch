@@ -1,29 +1,30 @@
-From 0de7994c5b0538a06369ed046ab214f931098d7a Mon Sep 17 00:00:00 2001
+From b97f14568ae7e1bc9322d783c04f0a2a40e5b2ce Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
-Date: Wed, 11 May 2022 14:49:00 +0200
+Date: Thu, 19 May 2022 22:54:27 +0200
 Subject: [PATCH] Implement [IonSpigot-0009] Reduce Unload Queue Complexity
 
 
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index 31e61b156..b1310c1f9 100644
+index 97b9b97c..c9d3f5b9 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-@@ -1,5 +1,6 @@
+@@ -1,6 +1,7 @@
  package net.minecraft.server;
  
+ import com.google.common.collect.Lists;
 +import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
  import java.io.IOException;
- import java.util.Iterator;
- import java.util.List;
-@@ -29,7 +30,7 @@ import it.unimi.dsi.fastutil.longs.LongSet;
+ import java.util.ArrayList;
+ import java.util.Collections;
+@@ -36,7 +37,7 @@ import it.unimi.dsi.fastutil.longs.LongSet;
  public class ChunkProviderServer implements IChunkProvider {
  
      private static final Logger b = LogManager.getLogger();
 -    public LongSet unloadQueue = new LongArraySet(20); // SportPaper
-+    public LongSet unloadQueue = new LongOpenHashSet(20); // SportPaper - LongArraySet // IonSpigot - LongOpenHashSet
++    public LongSet unloadQueue = new LongOpenHashSet(20); // SportPaper // IonSpigot - LongOpenHashSet
      public Chunk emptyChunk;
      public IChunkProvider chunkProvider;
-     // FlamePaper - Make chunkloader public
+     private IChunkLoader chunkLoader;
 -- 
 2.36.0.windows.1
 
