@@ -48,15 +48,15 @@ function applyPatch {
         echo "  Something did not apply cleanly to $target."
         echo "  Please review above details and finish the apply then"
         echo "  save the changes with rebuildPatches.sh"
-        exit 1
+        #exit 1
     else
         echo "  Patches applied cleanly to $target"
     fi
 }
 
 log_info "Applying Titanium API patches"
-applyPatch base/Paper/PaperSpigot-API Titanium-API HEAD api
+applyPatch base/SportPaper/SportPaper-API Titanium-API HEAD api
 log_info "Applying Titanium server patches"
-applyPatch base/Paper/PaperSpigot-Server Titanium-Server HEAD server
+applyPatch base/SportPaper/SportPaper-Server Titanium-Server HEAD server
 
 log_info "Patches successfully applied."
