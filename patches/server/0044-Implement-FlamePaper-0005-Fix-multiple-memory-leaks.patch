@@ -1,6 +1,6 @@
-From c5ce2e475b9b52950517cb30c5d9976793309730 Mon Sep 17 00:00:00 2001
+From 57fcdcab16c479c1161fbcfd2f6402fa956e4a05 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
-Date: Thu, 28 Apr 2022 21:47:37 +0200
+Date: Thu, 19 May 2022 23:11:00 +0200
 Subject: [PATCH] Implement [FlamePaper-0005] Fix multiple memory leaks
 
 
@@ -29,10 +29,10 @@ index 98656815..07c72dc4 100644
  
      public static int a(EntityLiving entityliving) {
 diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
-index 9e35715a..421ebc59 100644
+index 90c629f1..681f0a99 100644
 --- a/src/main/java/net/minecraft/server/NetworkManager.java
 +++ b/src/main/java/net/minecraft/server/NetworkManager.java
-@@ -240,6 +240,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+@@ -238,6 +238,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
      }
  
      public void close(IChatBaseComponent ichatbasecomponent) {
@@ -60,10 +60,10 @@ index 6459594c..12b30412 100644
 +    }
  }
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 55434414..506f97ff 100644
+index 70f3661b..f9664044 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -1176,6 +1176,7 @@ public abstract class World implements IBlockAccess {
+@@ -1125,6 +1125,7 @@ public abstract class World implements IBlockAccess {
          entity.die();
          if (entity instanceof EntityHuman) {
              this.players.remove(entity);
@@ -71,7 +71,7 @@ index 55434414..506f97ff 100644
              // Spigot start
              for ( Object o : worldMaps.c )
              {
-@@ -1205,6 +1206,7 @@ public abstract class World implements IBlockAccess {
+@@ -1153,6 +1154,7 @@ public abstract class World implements IBlockAccess {
          entity.die();
          if (entity instanceof EntityHuman) {
              this.players.remove(entity);
@@ -80,10 +80,10 @@ index 55434414..506f97ff 100644
          }
  
 diff --git a/src/main/java/net/minecraft/server/WorldMap.java b/src/main/java/net/minecraft/server/WorldMap.java
-index 6bc58691..eb13483c 100644
+index 162b3a31..f5d2d6d4 100644
 --- a/src/main/java/net/minecraft/server/WorldMap.java
 +++ b/src/main/java/net/minecraft/server/WorldMap.java
-@@ -336,4 +336,18 @@ public class WorldMap extends PersistentBase {
+@@ -313,4 +313,17 @@ public class WorldMap extends PersistentBase {
  
          }
      }
@@ -100,8 +100,7 @@ index 6bc58691..eb13483c 100644
 +            }
 +        }
 +    }
-+
  }
 -- 
-2.32.0.windows.2
+2.36.0.windows.1
 

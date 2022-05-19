@@ -1,4 +1,4 @@
-From a921ee2bb407a9e3bbb519a4f9fc310d4c8e8017 Mon Sep 17 00:00:00 2001
+From ac68711fae6b3aaee6c9fd3897376cb6e16fbabd Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 19 May 2022 19:36:03 +0200
 Subject: [PATCH] Implement [Spigot-2380] Hitting in the air will always load

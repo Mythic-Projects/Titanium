@@ -1,4 +1,4 @@
-From 4b65e7c0172e60329f01bd0e47d15095f32cdad4 Mon Sep 17 00:00:00 2001
+From 81b06eea5f2129d9ee07e45ac5384f80279ee778 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 19 May 2022 19:39:26 +0200
 Subject: [PATCH] Implement [Migot-0036] Check for lava only once per tick
