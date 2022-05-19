@@ -1,14 +1,14 @@
-From faa01955a14a48e6546b712e78d9fedb9d45d674 Mon Sep 17 00:00:00 2001
+From 132aefcfbeeeb564a33300336723dff7c11f8357 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 12 May 2022 11:02:29 +0200
 Subject: [PATCH] Backport [Paper-0180] Server Tick Events
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index f8416b98..22100492 100644
+index bf753849..2a4e28af 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -722,7 +722,13 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+@@ -613,7 +613,13 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
                      }
                      lastTick = curTime;
  

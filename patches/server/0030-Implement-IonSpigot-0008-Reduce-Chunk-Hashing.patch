@@ -1,14 +1,14 @@
-From 6611cdaa7e118f93774055339304ed7dab3c67ca Mon Sep 17 00:00:00 2001
+From 6d0847d82658249855a3998411941dabf39072d8 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
-Date: Wed, 11 May 2022 08:07:56 +0200
+Date: Thu, 19 May 2022 19:14:10 +0200
 Subject: [PATCH] Implement [IonSpigot-0008] Reduce Chunk Hashing
 
 
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index 5ed08908e..68be6b471 100644
+index c4dab42b..19d407b4 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-@@ -76,8 +76,9 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -56,8 +56,9 @@ public class ChunkProviderServer implements IChunkProvider {
      }
  
      public void queueUnload(int i, int j) {
@@ -16,86 +16,71 @@ index 5ed08908e..68be6b471 100644
          // PaperSpigot start - Asynchronous lighting updates
 -        Chunk chunk = chunks.get(LongHash.toLong(i, j));
 +        Chunk chunk = chunks.get(key);
-         if (chunk != null && chunk.world.paperConfigTitanium.useAsyncLightning && (chunk.pendingLightUpdates.get() > 0 || chunk.world.getTime() - chunk.lightUpdateTime < 20)) {
+         if (chunk != null && chunk.world.paperSpigotConfig.useAsyncLighting && (chunk.pendingLightUpdates.get() > 0 || chunk.world.getTime() - chunk.lightUpdateTime < 20)) {
              return;
          }
-@@ -96,9 +97,9 @@ public class ChunkProviderServer implements IChunkProvider {
-         if (this.world.worldProvider.e()) {
-             if (!this.world.c(i, j)) {
+@@ -78,7 +79,7 @@ public class ChunkProviderServer implements IChunkProvider {
                  // CraftBukkit start
--                this.unloadQueue.add(LongHash.toLong(i, j)); // SportPaper
-+                this.unloadQueue.add(key); // IonSpigot // SportPaper
+                 this.unloadQueue.add(i, j);
  
 -                Chunk c = chunks.get(LongHash.toLong(i, j));
-+                Chunk c = chunks.get(key); // IonSpigot
++                Chunk c = chunks.get(key);
                  if (c != null) {
                      c.mustSave = true;
                  }
-@@ -106,7 +107,7 @@ public class ChunkProviderServer implements IChunkProvider {
-             }
-         } else {
+@@ -88,7 +89,7 @@ public class ChunkProviderServer implements IChunkProvider {
              // CraftBukkit start
--            this.unloadQueue.add(LongHash.toLong(i, j)); // SportPaper
-+            this.unloadQueue.add(key); // IonSpigot // SportPaper
+             this.unloadQueue.add(i, j);
  
-             Chunk c = chunks.get(LongHash.toLong(i, j));
+-            Chunk c = chunks.get(LongHash.toLong(i, j));
++            Chunk c = chunks.get(key);
              if (c != null) {
-@@ -144,7 +145,8 @@ public class ChunkProviderServer implements IChunkProvider {
+                 c.mustSave = true;
+             }
+@@ -118,8 +119,9 @@ public class ChunkProviderServer implements IChunkProvider {
      }
  
      public Chunk getChunkAt(int i, int j, Runnable runnable) {
+-        unloadQueue.remove(i, j);
 -        Chunk chunk = chunks.get(LongHash.toLong(i, j));
 +        long key = LongHash.toLong(i, j); // IonSpigot - Only create key once
++        unloadQueue.remove(key);
 +        Chunk chunk = chunks.get(key);
          ChunkRegionLoader loader = null;
  
          if (this.chunkLoader instanceof ChunkRegionLoader) {
-@@ -163,7 +165,7 @@ public class ChunkProviderServer implements IChunkProvider {
-             chunk = originalGetChunkAt(i, j);
-         }
- 
--        unloadQueue.remove(LongHash.toLong(i, j)); // SportPaper
-+        unloadQueue.remove(key); //IonSpigot // SportPaper
-         // If we didn't load the chunk async and have a callback run it now
-         if (runnable != null) {
-             runnable.run();
-@@ -172,7 +174,8 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -146,8 +148,9 @@ public class ChunkProviderServer implements IChunkProvider {
          return chunk;
      }
      public Chunk originalGetChunkAt(int i, int j) {
+-        this.unloadQueue.remove(i, j);
 -        Chunk chunk = (Chunk) this.chunks.get(LongHash.toLong(i, j));
 +        long key = LongHash.toLong(i, j); // IonSpigot - Only create key once
++        this.unloadQueue.remove(key);
 +        Chunk chunk = (Chunk) this.chunks.get(key);
          boolean newChunk = false;
          // CraftBukkit end
  
-@@ -190,7 +193,7 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -164,8 +167,8 @@ public class ChunkProviderServer implements IChunkProvider {
+                         CrashReport crashreport = CrashReport.a(throwable, "Exception generating new chunk");
                          CrashReportSystemDetails crashreportsystemdetails = crashreport.a("Chunk to be generated");
  
-                         crashreportsystemdetails.a("Location", (Object) String.format("%d,%d", new Object[] { Integer.valueOf(i), Integer.valueOf(j)}));
+-                        crashreportsystemdetails.a("Location", (Object) String.format("%d,%d", new Object[] { Integer.valueOf(i), Integer.valueOf(j)}));
 -                        crashreportsystemdetails.a("Position hash", (Object) Long.valueOf(LongHash.toLong(i, j))); // CraftBukkit - Use LongHash
++                        crashreportsystemdetails.a("Location", (Object) String.format("%d,%d", new Object[] {i, j}));
 +                        crashreportsystemdetails.a("Position hash", (Object) key); // CraftBukkit - Use LongHash
                          crashreportsystemdetails.a("Generator", (Object) this.chunkProvider.getName());
                          throw new ReportedException(crashreport);
                      }
-@@ -198,7 +201,7 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -173,7 +176,7 @@ public class ChunkProviderServer implements IChunkProvider {
                  newChunk = true; // CraftBukkit
              }
  
 -            this.chunks.put(LongHash.toLong(i, j), chunk);
-+            this.chunks.put(key, chunk); // IonSpigot
++            this.chunks.put(key, chunk);
              
              chunk.addEntities();
              
-@@ -232,7 +235,7 @@ public class ChunkProviderServer implements IChunkProvider {
-             world.timings.syncChunkLoadTimer.stopTiming(); // Spigot
-         }
- 
--        this.unloadQueue.remove(LongHash.toLong(i, j)); // SportPaper
-+        this.unloadQueue.remove(key); // IonSpigot // SportPaper
-         return chunk;
-     }
- 
 -- 
 2.36.0.windows.1
 

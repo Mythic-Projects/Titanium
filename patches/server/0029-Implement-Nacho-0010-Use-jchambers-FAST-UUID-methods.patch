@@ -1,27 +1,11 @@
-From 724ffc905bb0e5b481ac17f0c76c2c460c6e95e5 Mon Sep 17 00:00:00 2001
+From dfe43318fde878eebd5d7572d0061f5732e75b48 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
-Date: Tue, 10 May 2022 20:58:39 +0200
+Date: Thu, 19 May 2022 19:09:33 +0200
 Subject: [PATCH] Implement [Nacho-0010] Use jchambers' FAST UUID methods
 
 
-diff --git a/pom.xml b/pom.xml
-index 647ab29dc..02f473599 100644
---- a/pom.xml
-+++ b/pom.xml
-@@ -92,6 +92,11 @@
-             <type>jar</type>
-             <scope>compile</scope>
-         </dependency>
-+        <dependency>
-+            <groupId>com.eatthepath</groupId>
-+            <artifactId>fast-uuid</artifactId>
-+            <version>0.2.0</version>
-+        </dependency>
-         <dependency>
-             <groupId>eu.okaeri</groupId>
-             <artifactId>okaeri-configs-yaml-bukkit</artifactId>
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index a1a9a4e86..cfa38a2cd 100644
+index 3b03f651..0f3ed169 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
 @@ -1,5 +1,6 @@
@@ -31,7 +15,7 @@ index a1a9a4e86..cfa38a2cd 100644
  import java.util.Iterator;
  import java.util.List;
  import java.util.Random;
-@@ -1411,7 +1412,7 @@ public abstract class Entity implements ICommandListener {
+@@ -1319,7 +1320,7 @@ public abstract class Entity implements ICommandListener {
              if (nbttagcompound.hasKeyOfType("UUIDMost", 4) && nbttagcompound.hasKeyOfType("UUIDLeast", 4)) {
                  this.uniqueID = new UUID(nbttagcompound.getLong("UUIDMost"), nbttagcompound.getLong("UUIDLeast"));
              } else if (nbttagcompound.hasKeyOfType("UUID", 8)) {
@@ -41,7 +25,7 @@ index a1a9a4e86..cfa38a2cd 100644
  
              this.setPosition(this.locX, this.locY, this.locZ);
 diff --git a/src/main/java/net/minecraft/server/EntityCreature.java b/src/main/java/net/minecraft/server/EntityCreature.java
-index 5ea36f7eb..9e150f8a0 100644
+index 5ea36f7e..9e150f8a 100644
 --- a/src/main/java/net/minecraft/server/EntityCreature.java
 +++ b/src/main/java/net/minecraft/server/EntityCreature.java
 @@ -1,5 +1,6 @@
@@ -60,18 +44,58 @@ index 5ea36f7eb..9e150f8a0 100644
      public static final AttributeModifier bl = (new AttributeModifier(EntityCreature.bk, "Fleeing speed bonus", 2.0D, 2)).a(false);
      private BlockPosition a;
      private float b;
+diff --git a/src/main/java/net/minecraft/server/EntityEnderman.java b/src/main/java/net/minecraft/server/EntityEnderman.java
+index f3afbbd3..72645353 100644
+--- a/src/main/java/net/minecraft/server/EntityEnderman.java
++++ b/src/main/java/net/minecraft/server/EntityEnderman.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import com.eatthepath.uuid.FastUUID;
+ import com.google.common.base.Predicate;
+ import com.google.common.collect.Sets;
+ import java.util.Collections;
+@@ -16,7 +17,7 @@ import org.bukkit.event.entity.EntityTeleportEvent;
+ 
+ public class EntityEnderman extends EntityMonster {
+ 
+-    private static final UUID a = UUID.fromString("020E0DFB-87AE-4653-9556-831010E291A0");
++    private static final UUID a = FastUUID.parseUUID("020E0DFB-87AE-4653-9556-831010E291A0");
+     private static final AttributeModifier b = (new AttributeModifier(EntityEnderman.a, "Attacking speed boost", 0.15000000596046448D, 0)).a(false);
+     private static final Set<Block> c = Sets.newIdentityHashSet();
+     private boolean bm;
+diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
+index c8b4e292..9c5ed1ec 100644
+--- a/src/main/java/net/minecraft/server/EntityLiving.java
++++ b/src/main/java/net/minecraft/server/EntityLiving.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import com.eatthepath.uuid.FastUUID;
+ import com.google.common.base.Predicate;
+ import com.google.common.base.Predicates;
+ import com.google.common.collect.Maps;
+@@ -32,7 +33,7 @@ import org.spigotmc.event.entity.EntityDismountEvent;
+ 
+ public abstract class EntityLiving extends Entity {
+ 
+-    private static final UUID a = UUID.fromString("662A6B8D-DA3E-4C1C-8813-96EA6097278D");
++    private static final UUID a = FastUUID.parseUUID("662A6B8D-DA3E-4C1C-8813-96EA6097278D");
+     private static final AttributeModifier b = (new AttributeModifier(EntityLiving.a, "Sprinting speed boost", 0.30000001192092896D, 2)).a(false);
+     private AttributeMapBase c;
+     public CombatTracker combatTracker = new CombatTracker(this);
 diff --git a/src/main/java/net/minecraft/server/EntityProjectile.java b/src/main/java/net/minecraft/server/EntityProjectile.java
-index 54f8b512c..ac1b4fe25 100644
+index e7cca3c6..4cb8a804 100644
 --- a/src/main/java/net/minecraft/server/EntityProjectile.java
 +++ b/src/main/java/net/minecraft/server/EntityProjectile.java
 @@ -1,5 +1,6 @@
  package net.minecraft.server;
  
 +import com.eatthepath.uuid.FastUUID;
- import org.github.paperspigot.event.entity.ProjectileCollideEvent;
- 
  import java.util.List;
-@@ -272,7 +273,7 @@ public abstract class EntityProjectile extends Entity implements IProjectile {
+ import java.util.UUID;
+ 
+@@ -261,7 +262,7 @@ public abstract class EntityProjectile extends Entity implements IProjectile {
              this.shooter = this.world.a(this.shooterName);
              if (this.shooter == null && this.world instanceof WorldServer) {
                  try {
@@ -80,8 +104,28 @@ index 54f8b512c..ac1b4fe25 100644
  
                      if (entity instanceof EntityLiving) {
                          this.shooter = (EntityLiving) entity;
+diff --git a/src/main/java/net/minecraft/server/EntityZombie.java b/src/main/java/net/minecraft/server/EntityZombie.java
+index 6d3b002b..2f5e3e12 100644
+--- a/src/main/java/net/minecraft/server/EntityZombie.java
++++ b/src/main/java/net/minecraft/server/EntityZombie.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import com.eatthepath.uuid.FastUUID;
+ import java.util.Calendar;
+ import java.util.List;
+ import java.util.UUID;
+@@ -15,7 +16,7 @@ import org.bukkit.event.entity.EntityTargetEvent;
+ public class EntityZombie extends EntityMonster {
+ 
+     protected static final IAttribute a = (new AttributeRanged((IAttribute) null, "zombie.spawnReinforcements", 0.0D, 0.0D, 1.0D)).a("Spawn Reinforcements Chance");
+-    private static final UUID b = UUID.fromString("B9766B59-9566-4402-BC1F-2EE2A276D836");
++    private static final UUID b = FastUUID.parseUUID("B9766B59-9566-4402-BC1F-2EE2A276D836");
+     private static final AttributeModifier c = new AttributeModifier(EntityZombie.b, "Baby speed boost", org.github.paperspigot.PaperSpigotConfig.babyZombieMovementSpeed, 1); // PaperSpigot - Configurable baby zombie movement speed
+     private final PathfinderGoalBreakDoor bm = new PathfinderGoalBreakDoor(this);
+     private int bn;
 diff --git a/src/main/java/net/minecraft/server/GameProfileBanEntry.java b/src/main/java/net/minecraft/server/GameProfileBanEntry.java
-index 16fe48193..33685974e 100644
+index 16fe4819..33685974 100644
 --- a/src/main/java/net/minecraft/server/GameProfileBanEntry.java
 +++ b/src/main/java/net/minecraft/server/GameProfileBanEntry.java
 @@ -1,5 +1,6 @@
@@ -100,8 +144,28 @@ index 16fe48193..33685974e 100644
              } catch (Throwable throwable) {
              }
  
+diff --git a/src/main/java/net/minecraft/server/Item.java b/src/main/java/net/minecraft/server/Item.java
+index 87a2d7b9..d5d93e99 100644
+--- a/src/main/java/net/minecraft/server/Item.java
++++ b/src/main/java/net/minecraft/server/Item.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import com.eatthepath.uuid.FastUUID;
+ import com.google.common.base.Function;
+ import com.google.common.collect.HashMultimap;
+ import com.google.common.collect.Maps;
+@@ -12,7 +13,7 @@ public class Item {
+ 
+     public static final RegistryMaterials<MinecraftKey, Item> REGISTRY = new RegistryMaterials();
+     private static final Map<Block, Item> a = Maps.newHashMap();
+-    protected static final UUID f = UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
++    protected static final UUID f = FastUUID.parseUUID("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
+     private CreativeModeTab b;
+     protected static Random g = new Random();
+     protected int maxStackSize = 64;
 diff --git a/src/main/java/net/minecraft/server/MobEffectList.java b/src/main/java/net/minecraft/server/MobEffectList.java
-index 863e9d8e9..550053588 100644
+index 863e9d8e..55005358 100644
 --- a/src/main/java/net/minecraft/server/MobEffectList.java
 +++ b/src/main/java/net/minecraft/server/MobEffectList.java
 @@ -1,5 +1,6 @@
@@ -121,7 +185,7 @@ index 863e9d8e9..550053588 100644
          this.J.put(iattribute, attributemodifier);
          return this;
 diff --git a/src/main/java/net/minecraft/server/NameReferencingFileConverter.java b/src/main/java/net/minecraft/server/NameReferencingFileConverter.java
-index d7949903e..4ad369ae4 100644
+index 40291094..dd8477c4 100644
 --- a/src/main/java/net/minecraft/server/NameReferencingFileConverter.java
 +++ b/src/main/java/net/minecraft/server/NameReferencingFileConverter.java
 @@ -1,5 +1,6 @@
@@ -131,7 +195,7 @@ index d7949903e..4ad369ae4 100644
  import com.google.common.base.Charsets;
  import com.google.common.base.Predicate;
  import com.google.common.collect.Iterators;
-@@ -339,7 +340,7 @@ public class NameReferencingFileConverter {
+@@ -338,7 +339,7 @@ public class NameReferencingFileConverter {
                          if (uuid == null) {
                              throw new NameReferencingFileConverter.FileConversionException("Missing UUID for user profile " + gameprofile.getName(), null);
                          } else {
@@ -141,7 +205,7 @@ index d7949903e..4ad369ae4 100644
                      }
  
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index f08ef9f90..95ec6f425 100644
+index 96a906f0..24c306ea 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -1,5 +1,6 @@
@@ -151,7 +215,7 @@ index f08ef9f90..95ec6f425 100644
  import com.google.common.collect.Lists;
  import com.google.common.collect.Maps;
  import com.google.common.collect.Sets;
-@@ -1261,7 +1262,7 @@ public abstract class PlayerList {
+@@ -1223,7 +1224,7 @@ public abstract class PlayerList {
  
          if (serverstatisticmanager == null) {
              File file = new File(this.server.getWorldServer(0).getDataManager().getDirectory(), "stats");
@@ -160,8 +224,37 @@ index f08ef9f90..95ec6f425 100644
  
              if (!file1.exists()) {
                  File file2 = new File(file, entityhuman.getName() + ".json");
+diff --git a/src/main/java/net/minecraft/server/ServerPing.java b/src/main/java/net/minecraft/server/ServerPing.java
+index 3df77653..a8ddbfe2 100644
+--- a/src/main/java/net/minecraft/server/ServerPing.java
++++ b/src/main/java/net/minecraft/server/ServerPing.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import com.eatthepath.uuid.FastUUID;
+ import com.google.gson.JsonArray;
+ import com.google.gson.JsonDeserializationContext;
+ import com.google.gson.JsonDeserializer;
+@@ -237,7 +238,7 @@ public class ServerPing {
+                             JsonObject jsonobject1 = ChatDeserializer.l(jsonarray.get(i), "player[" + i + "]");
+                             String s = ChatDeserializer.h(jsonobject1, "id");
+ 
+-                            agameprofile[i] = new GameProfile(UUID.fromString(s), ChatDeserializer.h(jsonobject1, "name"));
++                            agameprofile[i] = new GameProfile(FastUUID.parseUUID(s), ChatDeserializer.h(jsonobject1, "name"));
+                         }
+ 
+                         serverping_serverpingplayersample.a(agameprofile);
+@@ -259,7 +260,7 @@ public class ServerPing {
+                         JsonObject jsonobject1 = new JsonObject();
+                         UUID uuid = serverping_serverpingplayersample.c()[i].getId();
+ 
+-                        jsonobject1.addProperty("id", uuid == null ? "" : uuid.toString());
++                        jsonobject1.addProperty("id", uuid == null ? "" : FastUUID.toString(uuid));
+                         jsonobject1.addProperty("name", serverping_serverpingplayersample.c()[i].getName());
+                         jsonarray.add(jsonobject1);
+                     }
 diff --git a/src/main/java/net/minecraft/server/UserCache.java b/src/main/java/net/minecraft/server/UserCache.java
-index 101862cdd..d6ba093d1 100644
+index 0f82e06c..1ac356b0 100644
 --- a/src/main/java/net/minecraft/server/UserCache.java
 +++ b/src/main/java/net/minecraft/server/UserCache.java
 @@ -1,5 +1,6 @@
@@ -171,7 +264,7 @@ index 101862cdd..d6ba093d1 100644
  import com.google.common.base.Charsets;
  import com.google.common.collect.Iterators;
  import com.google.common.collect.Lists;
-@@ -290,7 +291,7 @@ public class UserCache {
+@@ -280,7 +281,7 @@ public class UserCache {
              jsonobject.addProperty("name", usercache_usercacheentry.a().getName());
              UUID uuid = usercache_usercacheentry.a().getId();
  
@@ -180,7 +273,7 @@ index 101862cdd..d6ba093d1 100644
              jsonobject.addProperty("expiresOn", UserCache.a.format(usercache_usercacheentry.b()));
              return jsonobject;
          }
-@@ -319,7 +320,7 @@ public class UserCache {
+@@ -309,7 +310,7 @@ public class UserCache {
                          UUID uuid;
  
                          try {
@@ -190,7 +283,7 @@ index 101862cdd..d6ba093d1 100644
                              return null;
                          }
 diff --git a/src/main/java/net/minecraft/server/Village.java b/src/main/java/net/minecraft/server/Village.java
-index 072f466a2..23ee9b1c2 100644
+index 072f466a..23ee9b1c 100644
 --- a/src/main/java/net/minecraft/server/Village.java
 +++ b/src/main/java/net/minecraft/server/Village.java
 @@ -1,5 +1,6 @@
@@ -210,7 +303,7 @@ index 072f466a2..23ee9b1c2 100644
                  if (gameprofile != null) {
                      this.j.put(gameprofile.getName(), Integer.valueOf(nbttagcompound2.getInt("S")));
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftOfflinePlayer.java b/src/main/java/org/bukkit/craftbukkit/CraftOfflinePlayer.java
-index b4ca64010..54ac75317 100644
+index 45217866..65f66c65 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftOfflinePlayer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftOfflinePlayer.java
 @@ -1,5 +1,6 @@
@@ -220,7 +313,7 @@ index b4ca64010..54ac75317 100644
  import com.mojang.authlib.GameProfile;
  import java.io.File;
  import java.util.LinkedHashMap;
-@@ -141,7 +142,7 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
+@@ -135,7 +136,7 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
              return Bukkit.getServer().getOfflinePlayer((String) args.get("name"));
          }
  
@@ -230,17 +323,17 @@ index b4ca64010..54ac75317 100644
  
      @Override
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index e7fe73562..4bc3b0061 100644
+index c0971e75..190a81c8 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -1,5 +1,6 @@
  package org.bukkit.craftbukkit;
  
 +import com.eatthepath.uuid.FastUUID;
- import eu.okaeri.configs.ConfigManager;
- import eu.okaeri.configs.OkaeriConfig;
- import eu.okaeri.configs.serdes.commons.SerdesCommons;
-@@ -1428,7 +1429,7 @@ public final class CraftServer implements Server {
+ import it.unimi.dsi.fastutil.objects.ObjectLists;
+ import java.awt.image.BufferedImage;
+ import java.io.File;
+@@ -1506,7 +1507,7 @@ public final class CraftServer implements Server {
  
          for (String file : files) {
              try {
@@ -250,7 +343,7 @@ index e7fe73562..4bc3b0061 100644
                  // Who knows what is in this directory, just ignore invalid files
              }
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftHorse.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftHorse.java
-index 230ae9ee4..7dfd3f986 100644
+index 230ae9ee..7dfd3f98 100644
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftHorse.java
 +++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftHorse.java
 @@ -1,5 +1,6 @@
@@ -279,7 +372,7 @@ index 230ae9ee4..7dfd3f986 100644
      }
  
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftTameableAnimal.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftTameableAnimal.java
-index ea1d10b3c..e6d3c9ac1 100644
+index ea1d10b3..e6d3c9ac 100644
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftTameableAnimal.java
 +++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftTameableAnimal.java
 @@ -1,5 +1,6 @@
