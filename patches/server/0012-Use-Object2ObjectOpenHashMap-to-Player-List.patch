@@ -1,8 +1,7 @@
-From 0480d65207d6aec3558410250c611460538f4466 Mon Sep 17 00:00:00 2001
+From 1f47314f1bd108694d51a21fc74003f45d5aae3d Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 27 Apr 2022 22:20:00 +0200
-Subject: [PATCH] Use Object2ObjectOpenHashMap to Player List and update
- fastutil
+Subject: [PATCH] Use Object2ObjectOpenHashMap to Player List
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
