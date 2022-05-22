@@ -95,7 +95,9 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Nacho-0025] Disable random tickSpeed being modified
 [Nacho-????] Prevent most NBT related overflow exploits
 
+[PandaSpigot-0005] Add internal setMaxStackSize method for materials
 [PandaSpigot-0006] Update to Netty 4.1.x
+[PandaSpigot-0008] Remove hacky stackable buckets code
 
 [IonSpigot-0006] Fix Chunk Loading
 [IonSpigot-0008] Reduce Chunk Hashing
