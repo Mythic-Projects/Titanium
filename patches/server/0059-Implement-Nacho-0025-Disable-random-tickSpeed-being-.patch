@@ -1,12 +1,12 @@
-From b8881018ca2178eb7a3e596a688d48ae19e40a2e Mon Sep 17 00:00:00 2001
+From 9d7829babcb0226da20465af32ea890af6563af3 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
-Date: Sun, 15 May 2022 18:46:50 +0200
+Date: Sun, 22 May 2022 23:11:39 +0200
 Subject: [PATCH] Implement [Nacho-0025] Disable random tickSpeed being
  modified and make it configurable
 
 
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index ba6c9be9..eb67bfbb 100644
+index 16441d09..46ffc14d 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -10,6 +10,7 @@ import net.titanium.config.PaperWorldConfig;
@@ -17,36 +17,27 @@ index ba6c9be9..eb67bfbb 100644
  import org.bukkit.Bukkit;
  import org.bukkit.block.BlockState;
  import org.bukkit.craftbukkit.CraftServer;
-@@ -179,6 +180,7 @@ public abstract class World implements IBlockAccess {
-     public final PaperWorldConfig paperConfigTitanium;
-     public final TacoSpigotWorldConfig tacoSpigotConfigTitanium;
-     public final IonWorldConfig ionConfigTitanium;
-+    public final TitaniumWorldConfig titaniumConfig;
-     // Titanium end
+@@ -173,6 +174,7 @@ public abstract class World implements IBlockAccess {
+     public final org.github.paperspigot.PaperSpigotWorldConfig paperSpigotConfig; // PaperSpigot
+      */
  
-     public final co.aikar.timings.WorldTimingsHandler timings; // Spigot
-@@ -204,10 +206,12 @@ public abstract class World implements IBlockAccess {
-     protected World(IDataManager idatamanager, WorldData worlddata, WorldProvider worldprovider, MethodProfiler methodprofiler, boolean flag, ChunkGenerator gen, org.bukkit.World.Environment env) {
-         this.spigotConfig = new org.spigotmc.SpigotWorldConfig(); // Spigot
-         this.paperSpigotConfig = new org.github.paperspigot.PaperSpigotWorldConfig(); // PaperSpigot
--        this.spigotConfigTitanium = TitaniumConfig.get().spigot.worldSettings;
--        this.paperConfigTitanium = TitaniumConfig.get().paper.worldSettings;
--        this.tacoSpigotConfigTitanium = TitaniumConfig.get().taco.worldSettings;
--        this.ionConfigTitanium = TitaniumConfig.get().ion.worldSettings;
-+        TitaniumConfig titaniumConfig = TitaniumConfig.get();
-+        this.spigotConfigTitanium = titaniumConfig.spigot.worldSettings;
-+        this.paperConfigTitanium = titaniumConfig.paper.worldSettings;
-+        this.tacoSpigotConfigTitanium = titaniumConfig.taco.worldSettings;
-+        this.ionConfigTitanium = titaniumConfig.ion.worldSettings;
-+        this.titaniumConfig = titaniumConfig.worldSettings;
-         this.generator = gen;
-         this.world = new CraftWorld((WorldServer) this, gen, env);
-         this.ticksPerAnimalSpawns = this.getServer().getTicksPerAnimalSpawns(); // CraftBukkit
++    public final TitaniumWorldConfig titaniumConfig;
+     public final SpigotWorldConfig spigotConfigTitanium;
+     public final PaperWorldConfig paperConfigTitanium;
+     public final TacoSpigotWorldConfig tacoConfigTitanium;
+@@ -205,6 +207,7 @@ public abstract class World implements IBlockAccess {
+         this.paperSpigotConfig = new org.github.paperspigot.PaperSpigotWorldConfig( worlddata.getName() ); // PaperSpigot
+          */
+         TitaniumConfig serverConfig = TitaniumConfig.get();
++        this.titaniumConfig = serverConfig.worldSettings;
+         this.spigotConfigTitanium = serverConfig.spigot.worldSettings;
+         this.paperConfigTitanium = serverConfig.paper.worldSettings;
+         this.tacoConfigTitanium = serverConfig.taco.worldSettings;
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index d67bb695..ad769d2b 100644
+index 8fa99c50..1b7b28f9 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
-@@ -480,7 +480,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -479,7 +479,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
  
                  this.methodProfiler.c("tickBlocks");
                  timings.chunkTicksBlocks.startTiming(); // Spigot
@@ -56,12 +47,12 @@ index d67bb695..ad769d2b 100644
                      ChunkSection[] achunksection = chunk.getSections();
                      int j1 = achunksection.length;
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 8bf00dfa..c3b8e36d 100644
+index a8891538..c17d5b55 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
-@@ -130,6 +130,8 @@ public class TitaniumConfig extends OkaeriConfig {
- 
-     }
+@@ -102,6 +102,8 @@ public class TitaniumConfig extends TitaniumConfigSection {
+     @Comment("Enable this option only if some of your plugins are not compatible with the new configs.")
+     public boolean enableLegacyConfigFiles = false;
  
 +    public TitaniumWorldConfig worldSettings = new TitaniumWorldConfig();
 +

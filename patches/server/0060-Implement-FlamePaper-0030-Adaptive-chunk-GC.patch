@@ -1,31 +1,41 @@
-From 37ce456e9c11ee91c3a02da9411f5a25bfd70b5c Mon Sep 17 00:00:00 2001
+From 473aaf39766ccb0095406f80fdb629f55e9b9628 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
-Date: Sun, 8 May 2022 23:43:33 +0200
+Date: Sun, 22 May 2022 23:13:48 +0200
 Subject: [PATCH] Implement [FlamePaper-0030] Adaptive chunk GC
 
 
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 9d6216e5b..6da6e5426 100644
+index c17d5b55..19853ce9 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
-@@ -105,6 +105,9 @@ public class TitaniumConfig extends OkaeriConfig {
-         // TODO comment this
-         public boolean disableUnloadedChunksMovement = false;
+@@ -78,6 +78,9 @@ public class TitaniumConfig extends TitaniumConfigSection {
  
-+        // TODO comment this
+     public static class Chunk extends TitaniumConfigSection {
+ 
++        //TODO comment this
 +        public boolean adaptiveChunkGC = false;
 +
-         @Comment("Configuration of chunk I/O (loading) since chunk loading is asynchronous.")
-         @Comment("If you have CPU with more threads changing these values can have good impact on performance.")
-         public IO io = new IO();
+         @Comment("Enabling this option prevents entities from moving in unloaded chunk (and for eg. falling down in \"slow-motion\")")
+         public boolean disableUnloadedChunksMovement = false;
+ 
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
-index c85049909..ae983a5fe 100644
+index 2aadafea..46fcbc01 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
-@@ -1554,7 +1554,14 @@ public class CraftWorld implements World {
-     public void processChunkGC() {
-         chunkGCTickCount++;
+@@ -14,6 +14,7 @@ import java.util.UUID;
  
+ import net.minecraft.server.*;
+ 
++import net.titanium.config.TitaniumConfig;
+ import org.apache.commons.lang.Validate;
+ import org.bukkit.BlockChangeDelegate;
+ import org.bukkit.Bukkit;
+@@ -1395,9 +1396,14 @@ public class CraftWorld implements World {
+     }
+ 
+     public void processChunkGC() {
+-        chunkGCTickCount++;
+-
 -        if (chunkLoadCount >= server.chunkGCLoadThresh && server.chunkGCLoadThresh > 0) {
 +        // FlamePaper start - Adaptative chunk GC
 +        int playerCount = getPlayers().size();
