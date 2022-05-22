@@ -97,7 +97,6 @@ Titanium implements patches from other engines as well. **All credits go to the 
 
 [PandaSpigot-0006] Update to Netty 4.1.x
 
-[IonSpigot-0005] Fix Sand Unloading
 [IonSpigot-0006] Fix Chunk Loading
 [IonSpigot-0008] Reduce Chunk Hashing
 [IonSpigot-0009] Reduce Unload Queue Complexity
