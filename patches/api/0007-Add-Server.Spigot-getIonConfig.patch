@@ -1,0 +1,31 @@
+From 182733469b611cb6b688b8f1d8c3b719a7a475ae Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 22 May 2022 22:24:29 +0200
+Subject: [PATCH] Add Server.Spigot#getIonConfig
+
+
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index 9997c307..2653e84d 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -990,6 +990,17 @@ public interface Server extends PluginMessageRecipient {
+             throw new UnsupportedOperationException("Not supported yet.");
+         }
+ 
++        // IonSpigot start
++        /**
++         * @deprecated Use {@link Titanium#getServerConfig()}
++         */
++        @Deprecated
++        public org.bukkit.configuration.file.YamlConfiguration getIonConfig()
++        {
++            throw new UnsupportedOperationException("Not supported yet.");
++        }
++        // IonSpigot end
++
+         /**
+          * Sends the component to the player
+          *
+-- 
+2.36.0.windows.1
+

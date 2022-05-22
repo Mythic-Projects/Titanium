@@ -1,16 +1,16 @@
-From a6c1a7a71de0b07bd56162f1f73e7db6f83eaf85 Mon Sep 17 00:00:00 2001
+From 1576911ecffde6df335d902b690d704bc1910956 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
-Date: Tue, 10 May 2022 20:44:57 +0200
+Date: Sun, 22 May 2022 22:45:52 +0200
 Subject: [PATCH] Implement [IonSpigot-0012] Movement Cache
 
 
-diff --git a/src/main/java/me/suicidalkids/ion/movement/MovementCache.java b/src/main/java/me/suicidalkids/ion/movement/MovementCache.java
+diff --git a/src/main/java/me/suicidalkids/ion/blocks/movement/MovementCache.java b/src/main/java/me/suicidalkids/ion/blocks/movement/MovementCache.java
 new file mode 100644
-index 000000000..92d28b1ae
+index 00000000..4577d182
 --- /dev/null
-+++ b/src/main/java/me/suicidalkids/ion/movement/MovementCache.java
++++ b/src/main/java/me/suicidalkids/ion/blocks/movement/MovementCache.java
 @@ -0,0 +1,65 @@
-+package me.suicidalkids.ion.movement;
++package me.suicidalkids.ion.blocks.movement;
 +
 +import net.minecraft.server.AxisAlignedBB;
 +import net.minecraft.server.Entity;
@@ -76,10 +76,10 @@ index 000000000..92d28b1ae
 +
 +}
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 47de4c646..a1a9a4e86 100644
+index 66e63e1f..0f8b94fa 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
-@@ -83,11 +83,16 @@ public abstract class Entity implements ICommandListener {
+@@ -66,11 +66,16 @@ public abstract class Entity implements ICommandListener {
      public double motX;
      public double motY;
      public double motZ;
@@ -97,7 +97,7 @@ index 47de4c646..a1a9a4e86 100644
      public boolean onGround;
      public boolean positionChanged;
      public boolean E;
-@@ -472,6 +477,15 @@ public abstract class Entity implements ICommandListener {
+@@ -469,6 +474,15 @@ public abstract class Entity implements ICommandListener {
              this.a(this.getBoundingBox().c(d0, d1, d2));
              this.recalcPosition();
          } else {
@@ -113,7 +113,7 @@ index 47de4c646..a1a9a4e86 100644
              // CraftBukkit start - Don't do anything if we aren't moving
              // We need to do this regardless of whether or not we are moving thanks to portals
              try {
-@@ -742,6 +756,7 @@ public abstract class Entity implements ICommandListener {
+@@ -704,6 +718,7 @@ public abstract class Entity implements ICommandListener {
              if (d7 != d1) {
                  block.a(this.world, this);
              }
@@ -122,11 +122,11 @@ index 47de4c646..a1a9a4e86 100644
              // CraftBukkit start
              if (positionChanged && getBukkitEntity() instanceof Vehicle) {
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 2e4701d39..5d5b20bbb 100644
+index e4da0544..4e4610b2 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
-@@ -426,6 +426,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
-                         // Paper end
+@@ -409,6 +409,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+                         this.player.bF();
                      }
  
 +                    this.player.world.movementCache.clear(); // IonSpigot - Movement Cache
@@ -134,60 +134,49 @@ index 2e4701d39..5d5b20bbb 100644
                      this.player.onGround = packetplayinflying.f();
                      double d16 = d12;
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 3e6af4f14..7e514f2c4 100644
+index fd416f20..b0c5da5c 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -4,6 +4,8 @@ import com.google.common.base.Predicate;
  import com.google.common.collect.Lists;
  import com.google.common.collect.Maps;
  import com.google.common.collect.Sets;
-+import me.suicidalkids.ion.movement.MovementCache;
++import me.suicidalkids.ion.blocks.movement.MovementCache;
 +import net.titanium.config.IonWorldConfig;
  import net.titanium.config.PaperWorldConfig;
  import net.titanium.config.SpigotWorldConfig;
- import net.titanium.config.TacoSpigotWorldConfig;
-@@ -148,6 +150,8 @@ public abstract class World implements IBlockAccess {
-     public final RecipesFurnace recipesFurnace = new RecipesFurnace();
-     public final Map<BlockPosition, Float> changedBlockStrengthMap = new HashMap<>(); // SportPaper
+ import net.titanium.config.TitaniumConfig;
+@@ -144,6 +146,8 @@ public abstract class World implements IBlockAccess {
+     public ExecutorService lightingExecutor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("PaperSpigot - Lighting Thread").build()); // PaperSpigot - Asynchronous lighting updates
+     public final Map<Explosion.CacheKey, Float> explosionDensityCache = new HashMap<Explosion.CacheKey, Float>(); // PaperSpigot - Optimize explosions
  
 +    public final MovementCache movementCache = new MovementCache(); // IonSpigot - Movement Cache
 +
      public static long chunkToKey(int x, int z)
      {
          long k = ( ( ( (long) x ) & 0xFFFF0000L ) << 16 ) | ( ( ( (long) x ) & 0x0000FFFFL ) << 0 );
-@@ -174,6 +178,7 @@ public abstract class World implements IBlockAccess {
+@@ -170,6 +174,7 @@ public abstract class World implements IBlockAccess {
+ 
      public final SpigotWorldConfig spigotConfigTitanium;
      public final PaperWorldConfig paperConfigTitanium;
-     public final TacoSpigotWorldConfig tacoSpigotConfigTitanium;
 +    public final IonWorldConfig ionConfigTitanium;
      // Titanium end
  
      public final co.aikar.timings.WorldTimingsHandler timings; // Spigot
-@@ -202,6 +207,7 @@ public abstract class World implements IBlockAccess {
-         this.spigotConfigTitanium = TitaniumConfig.get().spigot.worldSettings;
-         this.paperConfigTitanium = TitaniumConfig.get().paper.worldSettings;
-         this.tacoSpigotConfigTitanium = TitaniumConfig.get().taco.worldSettings;
-+        this.ionConfigTitanium = TitaniumConfig.get().ion.worldSettings;
+@@ -200,6 +205,7 @@ public abstract class World implements IBlockAccess {
+         TitaniumConfig serverConfig = TitaniumConfig.get();
+         this.spigotConfigTitanium = serverConfig.spigot.worldSettings;
+         this.paperConfigTitanium = serverConfig.paper.worldSettings;
++        this.ionConfigTitanium = serverConfig.ion.worldSettings;
+         // Titanium end
          this.generator = gen;
          this.world = new CraftWorld((WorldServer) this, gen, env);
-         this.ticksPerAnimalSpawns = this.getServer().getTicksPerAnimalSpawns(); // CraftBukkit
-@@ -438,6 +444,7 @@ public abstract class World implements IBlockAccess {
-                     this.methodProfiler.b();
-                 }
- 
-+                movementCache.clear(); // IonSpigot - Movement Cache
-                 /*
-                 if ((i & 2) != 0 && (!this.isClientSide || (i & 4) == 0) && chunk.isReady()) {
-                     this.notify(blockposition);
 diff --git a/src/main/java/net/titanium/config/IonConfig.java b/src/main/java/net/titanium/config/IonConfig.java
-index 9b467326a..eb839d9d7 100644
+index 282ab263..eb839d9d 100644
 --- a/src/main/java/net/titanium/config/IonConfig.java
 +++ b/src/main/java/net/titanium/config/IonConfig.java
-@@ -24,7 +24,8 @@ public class IonConfig extends TitaniumConfigSection{
+@@ -26,4 +26,6 @@ public class IonConfig extends TitaniumConfigSection{
  
-         }
- 
--
      }
  
 +    public IonWorldConfig worldSettings = new IonWorldConfig();
@@ -195,12 +184,13 @@ index 9b467326a..eb839d9d7 100644
  }
 diff --git a/src/main/java/net/titanium/config/IonWorldConfig.java b/src/main/java/net/titanium/config/IonWorldConfig.java
 new file mode 100644
-index 000000000..968c53e60
+index 00000000..38152bd5
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/IonWorldConfig.java
-@@ -0,0 +1,19 @@
+@@ -0,0 +1,22 @@
 +package net.titanium.config;
 +
++import eu.okaeri.configs.annotation.Comment;
 +import eu.okaeri.configs.annotation.NameModifier;
 +import eu.okaeri.configs.annotation.NameStrategy;
 +import eu.okaeri.configs.annotation.Names;
@@ -212,7 +202,9 @@ index 000000000..968c53e60
 +
 +    public static class Movement extends TitaniumConfigSection {
 +
-+        //TODO comment this
++        @Comment("Does entities movements should be cached.")
++        @Comment("Enabled by default because shouldn't cause any bugs.")
++        @Comment("Disable this if some bugs actually occur.")
 +        public boolean cache = true;
 +
 +    }

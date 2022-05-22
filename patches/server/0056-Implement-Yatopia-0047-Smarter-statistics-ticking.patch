@@ -1,14 +1,22 @@
-From 949298e6a6e53e2749ab1247b4098a7ab0c022e9 Mon Sep 17 00:00:00 2001
+From bc27412981bb840ca0514cc8ee2f4083667292b9 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
-Date: Thu, 12 May 2022 11:27:50 +0200
+Date: Sun, 22 May 2022 22:47:33 +0200
 Subject: [PATCH] Implement [Yatopia-0047] Smarter statistics ticking
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
-index 8d632231..e51cb96e 100644
+index fa24e106..fe479750 100644
 --- a/src/main/java/net/minecraft/server/EntityHuman.java
 +++ b/src/main/java/net/minecraft/server/EntityHuman.java
-@@ -1376,8 +1376,10 @@ public abstract class EntityHuman extends EntityLiving {
+@@ -10,6 +10,7 @@ import java.util.UUID;
+ 
+ // CraftBukkit start
+ import net.jafama.FastMath;
++import net.titanium.config.TitaniumConfig;
+ import org.bukkit.craftbukkit.entity.CraftHumanEntity;
+ import org.bukkit.craftbukkit.entity.CraftItem;
+ import org.bukkit.craftbukkit.inventory.CraftItemStack;
+@@ -1331,8 +1332,10 @@ public abstract class EntityHuman extends EntityLiving {
  
      }
  
@@ -21,19 +29,19 @@ index 8d632231..e51cb96e 100644
  
      public void a(Statistic statistic, int i) {}
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index ebd01683..8bf00dfa 100644
+index 73fc33e5..01ba17d0 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
-@@ -70,6 +70,9 @@ public class TitaniumConfig extends OkaeriConfig {
+@@ -68,6 +68,9 @@ public class TitaniumConfig extends TitaniumConfigSection {
  
      }
  
 +    //TODO comment this
 +    public int playerTimeStatisticsInterval = 20;
 +
-     @Comment("The max NBT size in bytes. The default value is 2097152 which is ~2Mb - it's insane big.")
-     @Comment("We are setting this to 50000 which is only ~0.05MB. That's enough in most cases.")
-     @Comment("Smaller values (Our 50000 is probably enough, but smaller value would be even better) prevents most NBT related overflow exploits (for eg. Books)")
+     public Chunk chunk = new Chunk();
+ 
+     public static class Chunk extends TitaniumConfigSection {
 -- 
 2.36.0.windows.1
 

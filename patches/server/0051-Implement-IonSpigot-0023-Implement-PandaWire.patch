@@ -1,6 +1,6 @@
-From dd240390b38147b45740646284eb4739aefa661a Mon Sep 17 00:00:00 2001
+From c6948da5355bb5747a8d22cc07fb0aefa0146ec3 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
-Date: Sat, 30 Apr 2022 18:22:33 +0200
+Date: Sun, 22 May 2022 22:26:25 +0200
 Subject: [PATCH] Implement [IonSpigot-0023] Implement PandaWire
 
 
@@ -523,7 +523,7 @@ index 00000000..bb0361f0
 +
 +}
 diff --git a/src/main/java/net/minecraft/server/Block.java b/src/main/java/net/minecraft/server/Block.java
-index cf649e7a..7a5a2ea4 100644
+index 69155130..86f111df 100644
 --- a/src/main/java/net/minecraft/server/Block.java
 +++ b/src/main/java/net/minecraft/server/Block.java
 @@ -3,6 +3,8 @@ package net.minecraft.server;
@@ -535,7 +535,7 @@ index cf649e7a..7a5a2ea4 100644
  
  public class Block {
  
-@@ -785,7 +787,7 @@ public class Block {
+@@ -779,7 +781,7 @@ public class Block {
          a(52, "mob_spawner", (new BlockMobSpawner()).c(5.0F).a(Block.j).c("mobSpawner").K());
          a(53, "oak_stairs", (new BlockStairs(block1.getBlockData().set(BlockWood.VARIANT, BlockWood.EnumLogVariant.OAK))).c("stairsWood"));
          a(54, "chest", (new BlockChest(0)).c(2.5F).a(Block.f).c("chest"));
@@ -546,10 +546,10 @@ index cf649e7a..7a5a2ea4 100644
          a(58, "crafting_table", (new BlockWorkbench()).c(2.5F).a(Block.f).c("workbench"));
 diff --git a/src/main/java/net/titanium/config/IonConfig.java b/src/main/java/net/titanium/config/IonConfig.java
 new file mode 100644
-index 00000000..015ff85b
+index 00000000..282ab263
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/IonConfig.java
-@@ -0,0 +1,30 @@
+@@ -0,0 +1,29 @@
 +package net.titanium.config;
 +
 +import eu.okaeri.configs.annotation.Comment;
@@ -576,37 +576,68 @@ index 00000000..015ff85b
 +
 +        }
 +
-+
 +    }
 +
 +}
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index cebcbda9..9a4d74f2 100644
+index a3ce72a7..5da1c1fd 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
-@@ -46,6 +46,12 @@ public class TitaniumConfig extends OkaeriConfig {
+@@ -47,6 +47,9 @@ public class TitaniumConfig extends TitaniumConfigSection {
      @Comment("Configuration from paper.yml")
      public PaperConfig paper = new PaperConfig();
  
 +    @Comment("Configuration from ion.yml")
 +    public IonConfig ion = new IonConfig();
 +
-+    //TODO comment this (https://github.com/CobbleSword/NachoSpigot/commit/64b8084cb8516df77d362512fe76dc54b17ba594)
-+    public long nbtReadLimiter = 50000L;
-+
      public Commands commands = new Commands();
  
-     public static class Commands extends TitaniumConfigSection {
-@@ -58,9 +64,6 @@ public class TitaniumConfig extends OkaeriConfig {
+     @Comment("When this option is enabled, the server will create a directory `legacy_configs` with files like bukkit.yml, spigot.yml etc.")
+@@ -85,6 +88,11 @@ public class TitaniumConfig extends TitaniumConfigSection {
+                 this.paperConfigHelper = new LegacyConfigHelper(this, "paper", 9);
+             }
+             this.paperConfigHelper.saveSectionToFile();
++
++            if (this.ionConfigHelper == null) {
++                this.ionConfigHelper = new LegacyConfigHelper(this, "ion", 1);
++            }
++            this.ionConfigHelper.saveSectionToFile();
+         }
  
+         this.loadProperties();
+@@ -154,6 +162,13 @@ public class TitaniumConfig extends TitaniumConfigSection {
+         return this.paperConfigHelper;
      }
  
--    //TODO comment this (https://github.com/CobbleSword/NachoSpigot/commit/64b8084cb8516df77d362512fe76dc54b17ba594)
--    public long nbtReadLimiter = 50000L;
--
-     @Override
-     public OkaeriConfig load() throws OkaeriException {
-         super.load();
++    @Exclude
++    private LegacyConfigHelper ionConfigHelper;
++
++    public LegacyConfigHelper getIonConfigHelper() {
++        return this.ionConfigHelper;
++    }
++
+     static String color(String input) {
+         return ChatColor.translateAlternateColorCodes('&', input);
+     }
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 74e3c97a..4bab5413 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -1862,6 +1862,14 @@ public final class CraftServer implements Server {
+             return serverConfig.getPaperConfigHelper().getConfiguration();
+         }
+ 
++        // IonSpigot start
++        @Deprecated // Titanium
++        @Override
++        public YamlConfiguration getIonConfig() {
++            return serverConfig.getIonConfigHelper().getConfiguration();
++        }
++        // IonSpigot end
++
+         @Override
+         public void restart() {
+             org.spigotmc.RestartCommand.restart();
 -- 
-2.32.0.windows.2
+2.36.0.windows.1
 

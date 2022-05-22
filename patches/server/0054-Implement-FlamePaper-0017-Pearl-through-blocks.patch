@@ -1,24 +1,11 @@
-From 469c1804a556f9dbcfb6d430478da9f5a13b7862 Mon Sep 17 00:00:00 2001
+From 0b2e25c348dff714db1106bab40674f9a5ba84ab Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
-Date: Sun, 8 May 2022 23:38:45 +0200
+Date: Sun, 22 May 2022 22:36:59 +0200
 Subject: [PATCH] Implement [FlamePaper-0017] Pearl through blocks
 
 
-diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 2c69cd7ca..fe2e81917 100644
---- a/src/main/java/net/minecraft/server/Entity.java
-+++ b/src/main/java/net/minecraft/server/Entity.java
-@@ -463,7 +463,7 @@ public abstract class Entity implements ICommandListener {
-     public void move(double d0, double d1, double d2) {
-         if (this.loadChunks) loadChunks(); // PaperSpigot - Load chunks
-         // FlamePaper start - Disable Unloaded Chunk Movement
--        if (!((ChunkProviderServer) world.chunkProvider).isChunkLoaded((int) locX >> 4, (int) locZ >> 4) && TitaniumConfig.get().disableUnloadedChunksMovement) {
-+        if (!((ChunkProviderServer) world.chunkProvider).isChunkLoaded((int) locX >> 4, (int) locZ >> 4) && TitaniumConfig.get().chunk.disableUnloadedChunksMovement) {
-             this.a(this.getBoundingBox().c(d0, d1, d2));
-             this.recalcPosition();
-         } else
 diff --git a/src/main/java/net/minecraft/server/EntityEnderPearl.java b/src/main/java/net/minecraft/server/EntityEnderPearl.java
-index 80f2c1166..15dd86f33 100644
+index 80f2c116..2ed7f279 100644
 --- a/src/main/java/net/minecraft/server/EntityEnderPearl.java
 +++ b/src/main/java/net/minecraft/server/EntityEnderPearl.java
 @@ -1,6 +1,7 @@
@@ -29,11 +16,10 @@ index 80f2c1166..15dd86f33 100644
  import org.bukkit.Bukkit;
  import org.bukkit.craftbukkit.event.CraftEventFactory;
  import org.bukkit.event.player.PlayerTeleportEvent;
-@@ -37,6 +38,31 @@ public class EntityEnderPearl extends EntityProjectile {
-             this.die();
+@@ -38,6 +39,31 @@ public class EntityEnderPearl extends EntityProjectile {
          }
          // PaperSpigot end
-+        
+ 
 +        // FlamePaper start
 +        BlockPosition blockPosition = movingobjectposition.a();
 +
@@ -58,14 +44,15 @@ index 80f2c1166..15dd86f33 100644
 +            }
 +        }
 +        // FlamePaper end
- 
++
          for (int i = 0; i < 32; ++i) {
              this.world.addParticle(EnumParticle.PORTAL, this.locX, this.locY + this.random.nextDouble() * 2.0D, this.locZ, this.random.nextGaussian(), 0.0D, this.random.nextGaussian(), new int[0]);
+         }
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index d7527e302..9d6216e5b 100644
+index e5954d89..73fc33e5 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
-@@ -49,14 +49,29 @@ public class TitaniumConfig extends OkaeriConfig {
+@@ -50,6 +50,24 @@ public class TitaniumConfig extends TitaniumConfigSection {
      @Comment("Configuration from ion.yml")
      public IonConfig ion = new IonConfig();
  
@@ -87,27 +74,9 @@ index d7527e302..9d6216e5b 100644
 +
 +    }
 +
-     @Comment("The max NBT size in bytes. The default value is 2097152 which is ~2Mb - it's insane big.")
-     @Comment("We are setting this to 50000 which is only ~0.05MB. That's enough in most cases.")
-     @Comment("Smaller values (Our 50000 is probably enough, but smaller value would be even better) prevents most NBT related overflow exploits (for eg. Books)")
-     public long nbtReadLimiter = 50000L;
- 
--    // TODO comment this
--    public boolean disableUnloadedChunksMovement = false;
--
-     @Comment("Configuration of book limits.")
-     @Comment("Setting these values prevent players from using NBT overflow exploits.")
-     @Comment("See also nbt-read-limiter, maybe you don't have to change these values.")
-@@ -87,6 +102,9 @@ public class TitaniumConfig extends OkaeriConfig {
+     public Chunk chunk = new Chunk();
  
      public static class Chunk extends TitaniumConfigSection {
- 
-+        // TODO comment this
-+        public boolean disableUnloadedChunksMovement = false;
-+
-         @Comment("Configuration of chunk I/O (loading) since chunk loading is asynchronous.")
-         @Comment("If you have CPU with more threads changing these values can have good impact on performance.")
-         public IO io = new IO();
 -- 
 2.36.0.windows.1
 
