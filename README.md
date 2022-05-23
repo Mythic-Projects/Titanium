@@ -100,6 +100,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [PandaSpigot-0007] Add Unix domain socket support
 [PandaSpigot-0008] Remove hacky stackable buckets code
 [PandaSpigot-0010] Optimize Network Manager and add advanced packet support
+[PandaSpigot-0011] Allow controlled flushing for network manager
 
 [IonSpigot-0006] Fix Chunk Loading
 [IonSpigot-0008] Reduce Chunk Hashing
