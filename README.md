@@ -65,6 +65,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0168] Disable ticking of snow blocks
 [Paper-0173] Optimize World.isLoaded(BlockPosition)
 [Paper-0180] Server Tick Events
+[Paper-0202] Shame on you Mojang moves chunk loading off https thread
 [Paper-0302] Don't load chunks for villager door check by Aikar
 [Paper-0313] Optimized world time updates by Aikar
 [Paper-0321] Cleanup allocated favicon ByteBuf
