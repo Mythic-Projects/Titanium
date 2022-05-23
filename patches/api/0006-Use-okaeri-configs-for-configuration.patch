@@ -1,0 +1,182 @@
+From ce61c17a1b0d28ef9eb3f1966274cb92c735a9a9 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 22 May 2022 22:11:28 +0200
+Subject: [PATCH] Use okaeri-configs for configuration
+
+
+diff --git a/src/main/java/co/aikar/timings/TimingsCommand.java b/src/main/java/co/aikar/timings/TimingsCommand.java
+index 3dba3aa1..cfb99253 100644
+--- a/src/main/java/co/aikar/timings/TimingsCommand.java
++++ b/src/main/java/co/aikar/timings/TimingsCommand.java
+@@ -54,11 +54,11 @@ public class TimingsCommand extends BukkitCommand {
+             return true;
+         }
+         final String arg = args[0];
+-        if ("on".equalsIgnoreCase(arg)) {
++        if ("on".equalsIgnoreCase(arg) || "start".equalsIgnoreCase(arg)) {
+             Timings.setTimingsEnabled(true);
+             sender.sendMessage("Enabled Timings & Reset");
+             return true;
+-        } else if ("off".equalsIgnoreCase(arg)) {
++        } else if ("off".equalsIgnoreCase(arg) || "stop".equalsIgnoreCase(arg)) {
+             Timings.setTimingsEnabled(false);
+             sender.sendMessage("Disabled Timings");
+             return true;
+diff --git a/src/main/java/co/aikar/timings/TimingsExport.java b/src/main/java/co/aikar/timings/TimingsExport.java
+index fe19ea00..c563513c 100644
+--- a/src/main/java/co/aikar/timings/TimingsExport.java
++++ b/src/main/java/co/aikar/timings/TimingsExport.java
+@@ -25,6 +25,7 @@ package co.aikar.timings;
+ 
+ import com.google.common.base.Function;
+ import com.google.common.collect.Sets;
++import eu.okaeri.configs.OkaeriConfig;
+ import org.apache.commons.lang.StringUtils;
+ import org.bukkit.Bukkit;
+ import org.bukkit.ChatColor;
+@@ -200,9 +201,12 @@ class TimingsExport extends Thread {
+         // Information on the users Config
+ 
+         parent.put("config", createObject(
+-            pair("spigot", mapAsJSON(Bukkit.spigot().getSpigotConfig(), null)),
+-            pair("bukkit", mapAsJSON(Bukkit.spigot().getBukkitConfig(), null)),
+-            pair("paperspigot", mapAsJSON(Bukkit.spigot().getPaperSpigotConfig(), null))
++                //Titanium start
++                /*pair("spigot", mapAsJSON(Bukkit.spigot().getSpigotConfig(), null)),
++                pair("bukkit", mapAsJSON(Bukkit.spigot().getBukkitConfig(), null)),
++                pair("paperspigot", mapAsJSON(Bukkit.spigot().getPaperSpigotConfig(), null))*/
++                pair("titanium", mapAsJSON(Bukkit.titanium().getServerConfig(), null))
++                // Titanium end
+         ));
+ 
+         new TimingsExport(sender, parent, history).start();
+@@ -243,8 +247,9 @@ class TimingsExport extends Thread {
+         return timingsCost;
+     }
+ 
++    // Titanium start
++    /*
+     private static JSONObject mapAsJSON(ConfigurationSection config, String parentKey) {
+-
+         JSONObject object = new JSONObject();
+         for (String key : config.getKeys(false)) {
+             String fullKey = (parentKey != null ? parentKey + "." + key : key);
+@@ -257,9 +262,26 @@ class TimingsExport extends Thread {
+         }
+         return object;
+     }
++     */
++
++    private static JSONObject mapAsJSON(OkaeriConfig config, String parentKey) {
++        JSONObject object = new JSONObject();
++
++        for (String key : config.getConfigurer().getAllKeys()) {
++            String fullKey = (parentKey != null ? parentKey + "." + key : key);
++            if (key.equalsIgnoreCase("database") || key.equalsIgnoreCase("bungeecord-addresses") || TimingsManager.hiddenConfigs.contains(fullKey)) {
++                continue;
++            }
++            final Object val = config.get(key);
++
++            object.put(key, valAsJSON(val, fullKey));
++        }
++        return object;
++    }
++    // Titanium end
+ 
+     private static Object valAsJSON(Object val, final String parentKey) {
+-        if (!(val instanceof MemorySection)) {
++        if (!(val instanceof OkaeriConfig)) { // Titanium
+             if (val instanceof List) {
+                 Iterable<Object> v = (Iterable<Object>) val;
+                 return toArrayMapper(v, new Function<Object, Object>() {
+@@ -272,7 +294,7 @@ class TimingsExport extends Thread {
+                 return val.toString();
+             }
+         } else {
+-            return mapAsJSON((ConfigurationSection) val, parentKey);
++            return mapAsJSON((OkaeriConfig) val, parentKey); // Titanium
+         }
+     }
+ 
+diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
+index 8fbc8283..9adccafb 100644
+--- a/src/main/java/org/bukkit/Bukkit.java
++++ b/src/main/java/org/bukkit/Bukkit.java
+@@ -1166,4 +1166,8 @@ public final class Bukkit {
+     {
+         return server.spigot();
+     }
++
++    public static Server.Titanium titanium() {
++        return server.titanium();
++    }
+ }
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index 1b62463a..9997c307 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -1,5 +1,6 @@
+ package org.bukkit;
+ 
++import eu.okaeri.configs.OkaeriConfig;
+ import java.awt.image.BufferedImage;
+ import java.io.File;
+ import java.io.Serializable;
+@@ -952,22 +953,38 @@ public interface Server extends PluginMessageRecipient {
+ 
+     public class Spigot
+     {
++
++        /**
++         * @deprecated Use {@link Titanium#getServerConfig()}
++         */
+         @Deprecated
+         public org.bukkit.configuration.file.YamlConfiguration getConfig()
+         {
+             throw new UnsupportedOperationException( "Not supported yet." );
+         }
+ 
++        /**
++         * @deprecated Use {@link Titanium#getServerConfig()}
++         */
++        @Deprecated
+         public org.bukkit.configuration.file.YamlConfiguration getBukkitConfig()
+         {
+             throw new UnsupportedOperationException( "Not supported yet." );
+         }
+ 
++        /**
++         * @deprecated Use {@link Titanium#getServerConfig()}
++         */
++        @Deprecated
+         public org.bukkit.configuration.file.YamlConfiguration getSpigotConfig()
+         {
+             throw new UnsupportedOperationException("Not supported yet.");
+         }
+ 
++        /**
++         * @deprecated Use {@link Titanium#getServerConfig()}
++         */
++        @Deprecated
+         public org.bukkit.configuration.file.YamlConfiguration getPaperSpigotConfig()
+         {
+             throw new UnsupportedOperationException("Not supported yet.");
+@@ -1007,4 +1024,15 @@ public interface Server extends PluginMessageRecipient {
+     }
+ 
+     Spigot spigot();
++
++    public class Titanium {
++
++        public OkaeriConfig getServerConfig() {
++            throw new UnsupportedOperationException( "Not supported yet." );
++        }
++
++    }
++
++    Titanium titanium();
++
+ }
+-- 
+2.36.0.windows.1
+

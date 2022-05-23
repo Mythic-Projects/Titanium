@@ -1,0 +1,30 @@
+From 0195682e174fb395242f37b790f23929fa035be2 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Thu, 19 May 2022 22:54:27 +0200
+Subject: [PATCH] Implement [IonSpigot-0009] Reduce Unload Queue Complexity
+
+
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+index 4f21d254..c0845446 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+@@ -1,6 +1,7 @@
+ package net.minecraft.server;
+ 
+ import com.google.common.collect.Lists;
++import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+ import java.io.IOException;
+ import java.util.ArrayList;
+ import java.util.Collections;
+@@ -36,7 +37,7 @@ import it.unimi.dsi.fastutil.longs.LongSet;
+ public class ChunkProviderServer implements IChunkProvider {
+ 
+     private static final Logger b = LogManager.getLogger();
+-    public LongSet unloadQueue = new LongArraySet(20); // SportPaper
++    public LongSet unloadQueue = new LongOpenHashSet(20); // SportPaper // IonSpigot - LongOpenHashSet
+     public Chunk emptyChunk;
+     public IChunkProvider chunkProvider;
+     private IChunkLoader chunkLoader;
+-- 
+2.36.0.windows.1
+

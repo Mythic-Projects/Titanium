@@ -1,0 +1,29 @@
+From 0459a0d0a14c89df3e87dc6fe6be0612f8d0b505 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 22 May 2022 23:02:34 +0200
+Subject: [PATCH] Add Server.Spigot#getTacoSpigotConfig
+
+
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index 2653e84d..76999087 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -990,6 +990,15 @@ public interface Server extends PluginMessageRecipient {
+             throw new UnsupportedOperationException("Not supported yet.");
+         }
+ 
++        /**
++         * @deprecated Use {@link Titanium#getServerConfig()}
++         */
++        @Deprecated
++        public org.bukkit.configuration.file.YamlConfiguration getTacoSpigotConfig()
++        {
++            throw new UnsupportedOperationException("Not supported yet.");
++        }
++
+         // IonSpigot start
+         /**
+          * @deprecated Use {@link Titanium#getServerConfig()}
+-- 
+2.36.0.windows.1
+

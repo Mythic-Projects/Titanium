@@ -1,0 +1,23 @@
+From a8a460609e717779dace835d90a1d6fe215a7123 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 9 Apr 2021 13:54:47 +0200
+Subject: [PATCH] Implement [Migot-0009] - Prevent creature spawning in
+ unloaded chunks
+
+
+diff --git a/src/main/java/net/minecraft/server/SpawnerCreature.java b/src/main/java/net/minecraft/server/SpawnerCreature.java
+index 284f4bf2..31a99c39 100644
+--- a/src/main/java/net/minecraft/server/SpawnerCreature.java
++++ b/src/main/java/net/minecraft/server/SpawnerCreature.java
+@@ -73,7 +73,7 @@ public final class SpawnerCreature {
+                             long chunkCoords = LongHash.toLong(i1 + l, k + j);
+                             if (!this.b.contains(chunkCoords)) {
+                                 ++i;
+-                                if (!flag3 && worldserver.getWorldBorder().isInBounds(i1 + l, k + j)) {
++                                if (!flag3 && worldserver.isChunkLoaded(i1 + l, k + j, true) && worldserver.getWorldBorder().isInBounds(i1 + l, k + j)) { // Migot
+                                     this.b.add(chunkCoords);
+                                 }
+                             }
+-- 
+2.36.0.windows.1
+

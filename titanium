@@ -23,8 +23,8 @@ paperunstash() {
 }
 
 buildpaperclipjar() {
-    cp -f ./scripts/base/basepaperclip.sh ./base/SportPaper/base/Paper/paperclip.sh
-    cd ./base/SportPaper/base/Paper
+    cp -f ./scripts/base/basepaperclip.sh ./base/Paper/paperclip.sh
+    cd ./base/Paper
     ./paperclip.sh
     basedir
 }

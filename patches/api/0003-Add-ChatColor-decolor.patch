@@ -1,4 +1,4 @@
-From 3def6f1d857e38fcc5ffedcfe49218eb3c22288c Mon Sep 17 00:00:00 2001
+From cc996aeed78e2f16347a07fc6a4272d67f8e8d98 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 29 Apr 2022 20:44:16 +0200
 Subject: [PATCH] Add ChatColor#decolor
@@ -48,5 +48,5 @@ index adbae51a..b92e337b 100644
       * Translates a string using an alternate color code character into a
       * string that uses the internal ChatColor.COLOR_CODE color code
 -- 
-2.32.0.windows.2
+2.36.0.windows.1
 

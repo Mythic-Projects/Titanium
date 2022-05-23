@@ -1,0 +1,25 @@
+From 7ad18028222b1a4ca1e316d0b1015263b307466c Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 8 May 2022 23:08:43 +0200
+Subject: [PATCH] Implement [FlamePaper-0013] Check channel before reading
+
+
+diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
+index 9d23c6c0..ba422aec 100644
+--- a/src/main/java/net/minecraft/server/NetworkManager.java
++++ b/src/main/java/net/minecraft/server/NetworkManager.java
+@@ -322,7 +322,10 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+     }
+ 
+     protected void channelRead0(ChannelHandlerContext channelhandlercontext, Packet object) throws Exception { // CraftBukkit - fix decompile error
+-        this.a(channelhandlercontext, (Packet) object);
++        // FlamePaper - Check if channel is opened before reading packet
++        if (g()) {
++            this.a(channelhandlercontext, object);
++        }
+     }
+ 
+     static class QueuedPacket {
+-- 
+2.36.0.windows.1
+

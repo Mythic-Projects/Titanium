@@ -1,0 +1,30 @@
+From 72ec348b2508897fed4a8a55b5275608c1770985 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 9 Apr 2021 15:49:05 +0200
+Subject: [PATCH] Implement [Paper-0347] Don't go below 0 for pickupDelay,
+ breaks picking up items by Aikar
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityItem.java b/src/main/java/net/minecraft/server/EntityItem.java
+index 1f8b1c72..f05805ab 100644
+--- a/src/main/java/net/minecraft/server/EntityItem.java
++++ b/src/main/java/net/minecraft/server/EntityItem.java
+@@ -62,6 +62,7 @@ public class EntityItem extends Entity {
+             // CraftBukkit start - Use wall time for pickup and despawn timers
+             int elapsedTicks = MinecraftServer.currentTick - this.lastTick;
+             if (this.pickupDelay != 32767) this.pickupDelay -= elapsedTicks;
++            this.pickupDelay = Math.max(0, this.pickupDelay); // Paper - don't go below 0
+             if (this.age != -32768) this.age += elapsedTicks;
+             this.lastTick = MinecraftServer.currentTick;
+             // CraftBukkit end
+@@ -127,6 +128,7 @@ public class EntityItem extends Entity {
+         // CraftBukkit start - Use wall time for pickup and despawn timers
+         int elapsedTicks = MinecraftServer.currentTick - this.lastTick;
+         if (this.pickupDelay != 32767) this.pickupDelay -= elapsedTicks;
++        this.pickupDelay = Math.max(0, this.pickupDelay); // Paper - don't go below 0
+         if (this.age != -32768) this.age += elapsedTicks;
+         this.lastTick = MinecraftServer.currentTick;
+         // CraftBukkit end
+-- 
+2.36.0.windows.1
+

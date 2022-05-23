@@ -1,0 +1,68 @@
+From 5ddd8bb74b547cc158c6212f91e945f855484de6 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Tue, 10 May 2022 20:22:45 +0200
+Subject: [PATCH] Backport arguments of Player#sendTitle
+
+
+diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/bukkit/entity/Player.java
+index d02fe560..cd41b87c 100644
+--- a/src/main/java/org/bukkit/entity/Player.java
++++ b/src/main/java/org/bukkit/entity/Player.java
+@@ -429,6 +429,22 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
+     @Deprecated
+     public void showTitle(net.md_5.bungee.api.chat.BaseComponent title, net.md_5.bungee.api.chat.BaseComponent subtitle, int fadeInTicks, int stayTicks, int fadeOutTicks);
+ 
++    /**
++     * Show the title to the player, overriding any previously displayed title.
++     *
++     * <p>This method overrides any previous title, use {@link #updateTitle(Title)} to change the existing one.</p>
++     *
++     * @param title        big text
++     * @param subtitle     little text under it
++     * @param fadeInTicks  ticks to fade-in
++     * @param stayTicks    ticks to stay visible
++     * @param fadeOutTicks ticks to fade-out
++     * @throws NullPointerException if title is null
++     */
++    default void sendTitle(String title, String subtitle, int fadeInTicks, int stayTicks, int fadeOutTicks) {
++        this.sendTitle(new Title(title, subtitle, fadeInTicks, stayTicks, fadeOutTicks));
++    }
++
+     /**
+      * Show the title to the player, overriding any previously displayed title.
+      *
+@@ -439,6 +455,22 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
+      */
+     void sendTitle(Title title);
+ 
++    /**
++     * Show the title to the player, overriding any previously displayed title.
++     *
++     * <p>This method doesn't override previous titles, but changes their values.</p>
++     *
++     * @param title        big text
++     * @param subtitle     little text under it
++     * @param fadeInTicks  ticks to fade-in
++     * @param stayTicks    ticks to stay visible
++     * @param fadeOutTicks ticks to fade-out
++     * @throws NullPointerException if title is null
++     */
++    default void updateTitle(String title, String subtitle, int fadeInTicks, int stayTicks, int fadeOutTicks) {
++        this.updateTitle(new Title(title, subtitle, fadeInTicks, stayTicks, fadeOutTicks));
++    }
++
+     /**
+      * Show the title to the player, overriding any previously displayed title.
+      *
+@@ -1259,7 +1291,7 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
+         }
+ 
+         /**
+-         * Gets all players hidden with {@link hidePlayer(org.bukkit.entity.Player)}.
++         * Gets all players hidden with {@link Player#hidePlayer(org.bukkit.entity.Player)}.
+          *
+          * @return a Set with all hidden players
+          */
+-- 
+2.36.0.windows.1
+

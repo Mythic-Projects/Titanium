@@ -53,7 +53,6 @@ Server:
 
 Titanium implements patches from other engines as well. **All credits go to the people which created them.**
 ```
-[Spigot-0097] Remove DataWatcher Locking by leafy
 [Spigot-0138] Branchless NibbleArray by md5
 [Spigot-2380] Hitting in the air will always load the chunk at 0,0 by md_5
 
@@ -74,6 +73,9 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Taco-0024] Optimize tnt entity and falling block movement
 [Taco-0025] Fix east west cannoning
 
+[SportPaper-0176] Use fast util collections
+[SportPaper-0185] Speed up chunk unloading
+
 [FlamePaper-0003] Fix chunk memory leak
 [FlamePaper-0005] Fix multiple memory leaks
 [FlamePaper-0010] Fix NullPointerException exploits for invalid logins
@@ -86,7 +88,6 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Nacho-0008] Update netty 4.1.50 (We updated it to 4.1.75)
 [Nacho-0009] Remove an extra file io call within world credit bob7l"
 [Nacho-0010] Use jchambers' FAST UUID methods
-[Nacho-0011] Optimize weather update loops
 [Nacho-0012] Don't load chunks for physics
 [Nacho-0019] Avoid lock every packet send
 [Nacho-0023] Optimize EntityTracker for the chunk updater
@@ -94,7 +95,10 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Nacho-0025] Disable random tickSpeed being modified
 [Nacho-????] Prevent most NBT related overflow exploits
 
-[IonSpigot-0005] Fix Sand Unloading
+[PandaSpigot-0005] Add internal setMaxStackSize method for materials
+[PandaSpigot-0006] Update to Netty 4.1.x
+[PandaSpigot-0008] Remove hacky stackable buckets code
+
 [IonSpigot-0006] Fix Chunk Loading
 [IonSpigot-0008] Reduce Chunk Hashing
 [IonSpigot-0009] Reduce Unload Queue Complexity

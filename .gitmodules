@@ -1,4 +1,5 @@
-[submodule "base/SportPaper"]
+[submodule "Paper"]
     ignore = all
-	path = base/SportPaper
-	url = https://github.com/Electroid/SportPaper.git
+	path = base/Paper
+	url = https://github.com/PaperMC/Paper.git
+	branch = ver/1.8.8

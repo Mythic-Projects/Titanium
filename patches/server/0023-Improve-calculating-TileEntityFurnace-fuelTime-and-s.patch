@@ -1,0 +1,226 @@
+From 4b3e578c38acd8a86af302d5b086472d2cb372ec Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 15 May 2022 18:56:03 +0200
+Subject: [PATCH] Improve calculating TileEntityFurnace#fuelTime and some
+ helpers for Item correlated classes
+
+
+diff --git a/src/main/java/net/minecraft/server/ItemHoe.java b/src/main/java/net/minecraft/server/ItemHoe.java
+index 7c041a01..07c9a9d9 100644
+--- a/src/main/java/net/minecraft/server/ItemHoe.java
++++ b/src/main/java/net/minecraft/server/ItemHoe.java
+@@ -1,6 +1,9 @@
+ package net.minecraft.server;
+ 
+-public class ItemHoe extends Item {
++import net.titanium.item.Burnable;
++import net.titanium.item.HasToolMaterial;
++
++public class ItemHoe extends Item implements Burnable, HasToolMaterial {
+ 
+     protected Item.EnumToolMaterial a;
+ 
+@@ -49,9 +52,23 @@ public class ItemHoe extends Item {
+         }
+     }
+ 
+-    public String g() {
+-        return this.a.toString();
++    // Titanium start
++    @Override
++    public EnumToolMaterial getToolMaterial() {
++        return this.a;
++    }
++    // Titanium end
++
++    public String h() {
++        return this.getToolMaterialName(); // Titanium
++    }
++
++    // Titanium start
++    @Override
++    public int getBurnTime() {
++        return this.a == EnumToolMaterial.WOOD ? 200 : 0;
+     }
++    // Titanium end
+ 
+     static class SyntheticClass_1 {
+ 
+diff --git a/src/main/java/net/minecraft/server/ItemSword.java b/src/main/java/net/minecraft/server/ItemSword.java
+index f2efd9f7..edd34301 100644
+--- a/src/main/java/net/minecraft/server/ItemSword.java
++++ b/src/main/java/net/minecraft/server/ItemSword.java
+@@ -1,8 +1,10 @@
+ package net.minecraft.server;
+ 
+ import com.google.common.collect.Multimap;
++import net.titanium.item.Burnable;
++import net.titanium.item.HasToolMaterial;
+ 
+-public class ItemSword extends Item {
++public class ItemSword extends Item implements Burnable, HasToolMaterial {
+ 
+     private float a;
+     private final Item.EnumToolMaterial b;
+@@ -59,12 +61,19 @@ public class ItemSword extends Item {
+         return block == Blocks.WEB;
+     }
+ 
++    // Titanium start
++    @Override
++    public EnumToolMaterial getToolMaterial() {
++        return this.b;
++    }
++    // Titanium end
++
+     public int b() {
+-        return this.b.e();
++        return this.getToolMaterial().e(); // Titanium
+     }
+ 
+     public String h() {
+-        return this.b.toString();
++        return this.getToolMaterialName(); // Titanium
+     }
+ 
+     public boolean a(ItemStack itemstack, ItemStack itemstack1) {
+@@ -77,4 +86,10 @@ public class ItemSword extends Item {
+         multimap.put(GenericAttributes.ATTACK_DAMAGE.getName(), new AttributeModifier(ItemSword.f, "Weapon modifier", (double) this.a, 0));
+         return multimap;
+     }
++
++    @Override
++    public int getBurnTime() {
++        return this.b == EnumToolMaterial.WOOD ? 200 : 0;
++    }
++
+ }
+diff --git a/src/main/java/net/minecraft/server/ItemTool.java b/src/main/java/net/minecraft/server/ItemTool.java
+index 4e94ea1a..3d8fd484 100644
+--- a/src/main/java/net/minecraft/server/ItemTool.java
++++ b/src/main/java/net/minecraft/server/ItemTool.java
+@@ -2,8 +2,10 @@ package net.minecraft.server;
+ 
+ import com.google.common.collect.Multimap;
+ import java.util.Set;
++import net.titanium.item.Burnable;
++import net.titanium.item.HasToolMaterial;
+ 
+-public class ItemTool extends Item {
++public class ItemTool extends Item implements Burnable, HasToolMaterial {
+ 
+     private Set<Block> c;
+     protected float a = 4.0F;
+@@ -37,16 +39,23 @@ public class ItemTool extends Item {
+         return true;
+     }
+ 
+-    public Item.EnumToolMaterial g() {
++    // Titanium start
++    @Override
++    public EnumToolMaterial getToolMaterial() {
+         return this.b;
+     }
++    // Titanium end
++
++    public Item.EnumToolMaterial g() {
++        return this.getToolMaterial(); // Titanium
++    }
+ 
+     public int b() {
+-        return this.b.e();
++        return this.getToolMaterial().e(); // Titanium
+     }
+ 
+     public String h() {
+-        return this.b.toString();
++        return this.getToolMaterialName(); // Titanium
+     }
+ 
+     public boolean a(ItemStack itemstack, ItemStack itemstack1) {
+@@ -59,4 +68,12 @@ public class ItemTool extends Item {
+         multimap.put(GenericAttributes.ATTACK_DAMAGE.getName(), new AttributeModifier(ItemTool.f, "Tool modifier", (double) this.d, 0));
+         return multimap;
+     }
++
++    // Titanium start
++    @Override
++    public int getBurnTime() {
++        return this.b == EnumToolMaterial.WOOD ? 200 : 0;
++    }
++    // Titanium end
++
+ }
+diff --git a/src/main/java/net/minecraft/server/TileEntityFurnace.java b/src/main/java/net/minecraft/server/TileEntityFurnace.java
+index 41802611..33c496d4 100644
+--- a/src/main/java/net/minecraft/server/TileEntityFurnace.java
++++ b/src/main/java/net/minecraft/server/TileEntityFurnace.java
+@@ -3,6 +3,7 @@ package net.minecraft.server;
+ // CraftBukkit start
+ import java.util.List;
+ 
++import net.titanium.item.Burnable;
+ import org.bukkit.craftbukkit.inventory.CraftItemStack;
+ import org.bukkit.entity.HumanEntity;
+ import org.bukkit.event.inventory.FurnaceBurnEvent;
+@@ -348,7 +349,24 @@ public class TileEntityFurnace extends TileEntityContainer implements IUpdatePla
+                 }
+             }
+ 
+-            return item instanceof ItemTool && ((ItemTool) item).h().equals("WOOD") ? 200 : (item instanceof ItemSword && ((ItemSword) item).h().equals("WOOD") ? 200 : (item instanceof ItemHoe && ((ItemHoe) item).g().equals("WOOD") ? 200 : (item == Items.STICK ? 100 : (item == Items.COAL ? 1600 : (item == Items.LAVA_BUCKET ? 20000 : (item == Item.getItemOf(Blocks.SAPLING) ? 100 : (item == Items.BLAZE_ROD ? 2400 : 0)))))));
++            // Titanium start
++            if (item == Items.COAL) {
++                return 1600;
++            } else if (item == Items.STICK) {
++                return 100;
++            } else if (item == Items.LAVA_BUCKET) {
++                return 20000;
++            } else if (item == Item.getItemOf(Blocks.SAPLING)) {
++                return 100;
++            } else if (item == Items.BLAZE_ROD) {
++                return 2400;
++            } else if (item instanceof Burnable) {
++                return ((Burnable) item).getBurnTime();
++            }
++
++            //return item instanceof ItemTool && ((ItemTool) item).h().equals("WOOD") ? 200 : item instanceof ItemSword && ((ItemSword) item).h().equals("WOOD") ? 200 : item instanceof ItemHoe && ((ItemHoe) item).g().equals("WOOD") ? 200 : item == Items.STICK ? 100 : item == Items.LAVA_BUCKET ? 20000 : item == Item.getItemOf(Blocks.SAPLING) ? 100 : item == Items.BLAZE_ROD ? 2400 : 0; // Titanium
++            return 0;
++            // Titanium end
+         }
+     }
+ 
+diff --git a/src/main/java/net/titanium/item/Burnable.java b/src/main/java/net/titanium/item/Burnable.java
+new file mode 100644
+index 00000000..7f09ab3f
+--- /dev/null
++++ b/src/main/java/net/titanium/item/Burnable.java
+@@ -0,0 +1,7 @@
++package net.titanium.item;
++
++public interface Burnable {
++
++    int getBurnTime();
++
++}
+diff --git a/src/main/java/net/titanium/item/HasToolMaterial.java b/src/main/java/net/titanium/item/HasToolMaterial.java
+new file mode 100644
+index 00000000..5ea6604b
+--- /dev/null
++++ b/src/main/java/net/titanium/item/HasToolMaterial.java
+@@ -0,0 +1,13 @@
++package net.titanium.item;
++
++import net.minecraft.server.Item;
++
++public interface HasToolMaterial {
++
++    Item.EnumToolMaterial getToolMaterial();
++
++    default String getToolMaterialName() {
++        return getToolMaterial().toString();
++    }
++
++}
+-- 
+2.36.0.windows.1
+
