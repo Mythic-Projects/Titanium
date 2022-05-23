@@ -1,0 +1,47 @@
+From 3c71fd8b020f7a0194df608cc126eedf20a54adb Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Mon, 23 May 2022 23:07:46 +0200
+Subject: [PATCH] Implement [Nacho-????] Prevent most NBT related overflow
+ exploits
+
+
+diff --git a/src/main/java/net/minecraft/server/PacketDataSerializer.java b/src/main/java/net/minecraft/server/PacketDataSerializer.java
+index b6b0e6dd..9ab02874 100644
+--- a/src/main/java/net/minecraft/server/PacketDataSerializer.java
++++ b/src/main/java/net/minecraft/server/PacketDataSerializer.java
+@@ -23,6 +23,7 @@ import java.nio.channels.ScatteringByteChannel;
+ import java.nio.charset.Charset;
+ import java.util.UUID;
+ 
++import net.titanium.config.TitaniumConfig;
+ import org.bukkit.craftbukkit.inventory.CraftItemStack; // CraftBukkit
+ 
+ public class PacketDataSerializer extends ByteBuf {
+@@ -169,7 +170,7 @@ public class PacketDataSerializer extends ByteBuf {
+             return null;
+         } else {
+             this.readerIndex(i);
+-            return NBTCompressedStreamTools.a((DataInput) (new ByteBufInputStream(this)), new NBTReadLimiter(2097152L));
++            return NBTCompressedStreamTools.a((DataInput) (new ByteBufInputStream(this)), new NBTReadLimiter(TitaniumConfig.get().nbtReadLimiter));
+         }
+     }
+ 
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index b7843b6b..96a53723 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -74,6 +74,11 @@ public class TitaniumConfig extends TitaniumConfigSection {
+     //TODO comment this
+     public int playerTimeStatisticsInterval = 20;
+ 
++    @Comment("The max NBT size in bytes. The default value is 2097152 which is ~2Mb - it's insane big.")
++    @Comment("We are setting this to 50000 which is only ~0.05MB. That's enough in most cases.")
++    @Comment("Smaller values (Our 50000 is probably enough, but smaller value would be even better) prevents most NBT related overflow exploits (for eg. Books)")
++    public long nbtReadLimiter = 50000L;
++
+     @Comment("Configuration of book limits.")
+     @Comment("Setting these values prevent players from using NBT overflow exploits.")
+     @Comment("See also nbt-read-limiter, maybe you don't have to change these values.")
+-- 
+2.36.0.windows.1
+
