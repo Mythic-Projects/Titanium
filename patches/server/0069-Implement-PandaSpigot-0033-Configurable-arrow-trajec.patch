@@ -1,0 +1,60 @@
+From 417b3a00137a9cc2799708cec8aa2f29612f42a2 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Mon, 23 May 2022 21:41:21 +0200
+Subject: [PATCH] Implement [PandaSpigot-0033] Configurable arrow trajectory
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityArrow.java b/src/main/java/net/minecraft/server/EntityArrow.java
+index 80c1e71e..1d3a3e39 100644
+--- a/src/main/java/net/minecraft/server/EntityArrow.java
++++ b/src/main/java/net/minecraft/server/EntityArrow.java
+@@ -3,6 +3,7 @@ package net.minecraft.server;
+ import java.util.List;
+ 
+ // CraftBukkit start
++import net.titanium.config.TitaniumConfig;
+ import org.bukkit.entity.LivingEntity;
+ import org.bukkit.event.entity.EntityCombustByEntityEvent;
+ import org.bukkit.event.player.PlayerPickupItemEvent;
+@@ -95,7 +96,7 @@ public class EntityArrow extends Entity implements IProjectile {
+         this.motX = (double) (-MathHelper.sin(this.yaw / 180.0F * 3.1415927F) * MathHelper.cos(this.pitch / 180.0F * 3.1415927F));
+         this.motZ = (double) (MathHelper.cos(this.yaw / 180.0F * 3.1415927F) * MathHelper.cos(this.pitch / 180.0F * 3.1415927F));
+         this.motY = (double) (-MathHelper.sin(this.pitch / 180.0F * 3.1415927F));
+-        this.shoot(this.motX, this.motY, this.motZ, f * 1.5F, 1.0F);
++        this.shoot(this.motX, this.motY, this.motZ, f * 1.5F, TitaniumConfig.get().paper.settings.includeRandomnessInArrowTrajectory ? 1.0F : 0); // PandaSpigot
+     }
+ 
+     protected void h() {
+@@ -108,9 +109,11 @@ public class EntityArrow extends Entity implements IProjectile {
+         d0 /= (double) f2;
+         d1 /= (double) f2;
+         d2 /= (double) f2;
++        if (f1 != 0) { // PandaSpigot - Configurable random arrow trajectory
+         d0 += this.random.nextGaussian() * (double) (this.random.nextBoolean() ? -1 : 1) * 0.007499999832361937D * (double) f1;
+         d1 += this.random.nextGaussian() * (double) (this.random.nextBoolean() ? -1 : 1) * 0.007499999832361937D * (double) f1;
+         d2 += this.random.nextGaussian() * (double) (this.random.nextBoolean() ? -1 : 1) * 0.007499999832361937D * (double) f1;
++        } // PandaSpigot - closing bracket
+         d0 *= (double) f;
+         d1 *= (double) f;
+         d2 *= (double) f;
+diff --git a/src/main/java/net/titanium/config/PaperConfig.java b/src/main/java/net/titanium/config/PaperConfig.java
+index f9ad4c6f..589f0103 100644
+--- a/src/main/java/net/titanium/config/PaperConfig.java
++++ b/src/main/java/net/titanium/config/PaperConfig.java
+@@ -59,10 +59,10 @@ public class PaperConfig extends TitaniumConfigSection {
+         @Comment("Duration to wait before suspending an server with no players online.")
+         public Duration emptyServerSuspend = Duration.ofMinutes(1);
+ 
+-        @Comment("Whether arrow projectiles should have a random factor.")
+-        public boolean includeRandomnessInArrowTrajectory = false;
++        @Comment("Whether arrow projectiles should have a random factor (like in vanilla minecraft).")
++        public boolean includeRandomnessInArrowTrajectory = true;
+ 
+-        @Comment("Whether arrow projectiles should add a random amount of damage (like in vanilla minecraft)")
++        @Comment("Whether arrow projectiles should add a random amount of damage (like in vanilla minecraft).")
+         public boolean includeRandomnessInArrowDamage = true;
+ 
+         @Comment("Number of ticks between player data saves to disk.")
+-- 
+2.36.0.windows.1
+
