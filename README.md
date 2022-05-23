@@ -91,7 +91,6 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [FlamePaper-0024] Disable Unloaded Chunk Movement
 [FlamePaper-0030] Adaptive chunk GC
 
-[Nacho-0008] Update netty 4.1.50 (We updated it to 4.1.75)
 [Nacho-0009] Remove an extra file io call within world credit bob7l"
 [Nacho-0010] Use jchambers' FAST UUID methods
 [Nacho-0012] Don't load chunks for physics
