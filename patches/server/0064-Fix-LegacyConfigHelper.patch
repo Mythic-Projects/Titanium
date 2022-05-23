@@ -1,4 +1,4 @@
-From b4faf01893bca868521e6f48fc499f918e516e14 Mon Sep 17 00:00:00 2001
+From e41cb907582413a1ad24d656fbdbcd3594ce6a18 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 23 May 2022 19:47:37 +0200
 Subject: [PATCH] Fix LegacyConfigHelper
@@ -162,6 +162,78 @@ index 05ab2e8e..b7843b6b 100644
              }
              this.ionConfigHelper.saveSectionToFile();
          }
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index afbb710e..94a94588 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -33,6 +33,7 @@ import javax.imageio.ImageIO;
+ import net.minecraft.server.*;
+ 
+ import net.titanium.config.BukkitConfig;
++import net.titanium.config.LegacyConfigHelper;
+ import net.titanium.config.TitaniumConfig;
+ import net.titanium.config.serdes.DecolorTransformer;
+ import net.titanium.config.serdes.WarningStateTransformer;
+@@ -1845,34 +1846,54 @@ public final class CraftServer implements Server {
+         @Override
+         public YamlConfiguration getBukkitConfig()
+         {
+-            return serverConfig.getBukkitConfigHelper().getConfiguration();
++            LegacyConfigHelper configHelper = serverConfig.getBukkitConfigHelper();
++             if (configHelper == null) {
++                 throw new IllegalStateException("Legacy config files are disable. Set `enable-legacy-config-files` in titanium.yml to true to use them.");
++             }
++            return configHelper.getConfiguration();
+         }
+ 
+         @Deprecated // Titanium
+         @Override
+         public YamlConfiguration getSpigotConfig()
+         {
+-            return serverConfig.getSpigotConfigHelper().getConfiguration();
++            LegacyConfigHelper configHelper = serverConfig.getSpigotConfigHelper();
++            if (configHelper == null) {
++                throw new IllegalStateException("Legacy config files are disable. Set `enable-legacy-config-files` in titanium.yml to true to use them.");
++            }
++            return configHelper.getConfiguration();
+         }
+ 
+         @Deprecated // Titanium
+         @Override
+         public YamlConfiguration getPaperSpigotConfig()
+         {
+-            return serverConfig.getPaperConfigHelper().getConfiguration();
++            LegacyConfigHelper configHelper = serverConfig.getPaperConfigHelper();
++            if (configHelper == null) {
++                throw new IllegalStateException("Legacy config files are disable. Set `enable-legacy-config-files` in titanium.yml to true to use them.");
++            }
++            return configHelper.getConfiguration();
+         }
+ 
+         @Deprecated // Titanium
+         @Override
+         public YamlConfiguration getTacoSpigotConfig() {
+-            return serverConfig.getTacoSpigotConfigHelper().getConfiguration();
++            LegacyConfigHelper configHelper = serverConfig.getTacoSpigotConfigHelper();
++            if (configHelper == null) {
++                throw new IllegalStateException("Legacy config files are disable. Set `enable-legacy-config-files` in titanium.yml to true to use them.");
++            }
++            return configHelper.getConfiguration();
+         }
+ 
+         // IonSpigot start
+         @Deprecated // Titanium
+         @Override
+         public YamlConfiguration getIonConfig() {
+-            return serverConfig.getIonConfigHelper().getConfiguration();
++            LegacyConfigHelper configHelper = serverConfig.getIonConfigHelper();
++            if (configHelper == null) {
++                throw new IllegalStateException("Legacy config files are disable. Set `enable-legacy-config-files` in titanium.yml to true to use them.");
++            }
++            return configHelper.getConfiguration();
+         }
+         // IonSpigot end
+ 
 -- 
 2.36.0.windows.1
 
