@@ -58,6 +58,8 @@ import WorldGenCaves
 import WorldSettings
 import BlockCarpet
 import MerchantRecipeList
+# PandaSpigot - Import Packet for Optimize Network Manager and add advanced packet support patch
+import Packet
 # Titanium - Import BiomeDecorator for Concurrent Chunk Decoration patch
 import BiomeDecorator
 # Titanium - Import BlockSnowBlock for Disable ticking of snow blocks patch
