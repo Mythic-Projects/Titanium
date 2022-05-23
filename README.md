@@ -63,6 +63,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0121] Reduce IO ops opening a new region
 [Paper-0144] Improve Minecraft Hopper Performance
 [Paper-0168] Disable ticking of snow blocks
+[Paper-0173] Optimize World.isLoaded(BlockPosition)
 [Paper-0180] Server Tick Events
 [Paper-0302] Don't load chunks for villager door check by Aikar
 [Paper-0313] Optimized world time updates by Aikar
