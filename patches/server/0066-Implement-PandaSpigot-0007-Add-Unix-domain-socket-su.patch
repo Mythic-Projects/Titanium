@@ -1,0 +1,166 @@
+From e317c9dcc1c88d1123ed05abe582443881ed4bb5 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Mon, 23 May 2022 21:01:48 +0200
+Subject: [PATCH] Implement [PandaSpigot-0007] Add Unix domain socket support
+
+
+diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
+index 4968358d..b8a137b6 100644
+--- a/src/main/java/net/minecraft/server/DedicatedServer.java
++++ b/src/main/java/net/minecraft/server/DedicatedServer.java
+@@ -164,17 +164,36 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+ 
+             this.r = WorldSettings.a(i);
+             DedicatedServer.LOGGER.info("Default game type: " + this.r);
+-            InetAddress inetaddress = null;
+ 
+-            if (this.getServerIp().length() > 0) {
+-                inetaddress = InetAddress.getByName(this.getServerIp());
+-            }
+-
+-            if (this.R() < 0) {
+-                this.setPort(this.propertyManager.getInt("server-port", 25565));
+-            }
++            // PandaSpigot start - Unix domain socket support
+             // Spigot start
+             this.a((PlayerList) (new DedicatedPlayerList(this)));
++            // Spigot end
++            java.net.SocketAddress bindAddress;
++            if (this.getServerIp().startsWith("unix:")) {
++                if (!io.netty.channel.epoll.Epoll.isAvailable()) {
++                    DedicatedServer.LOGGER.fatal("**** INVALID CONFIGURATION!");
++                    DedicatedServer.LOGGER.fatal("You are trying to use a Unix domain socket but you're not on a supported OS.");
++                    return false;
++                } else if (!server.serverConfig.spigot.settings.bungeecord) {
++                    DedicatedServer.LOGGER.fatal("**** INVALID CONFIGURATION!");
++                    DedicatedServer.LOGGER.fatal("Unix domain sockets require IPs to be forwarded from a proxy.");
++                    return false;
++                }
++                bindAddress = new io.netty.channel.unix.DomainSocketAddress(this.getServerIp().substring("unix:".length()));
++            } else {
++                InetAddress inetaddress = null;
++
++                if (this.getServerIp().length() > 0) {
++                    inetaddress = InetAddress.getByName(this.getServerIp());
++                }
++
++                if (this.R() < 0) {
++                    this.setPort(this.propertyManager.getInt("server-port", 25565));
++                }
++                bindAddress = new java.net.InetSocketAddress(inetaddress, this.R());
++            }
++            // PandaSpigot end
+             // Titanium start
+             /*
+             org.spigotmc.SpigotConfig.init((File) options.valueOf("spigot-settings"));
+@@ -194,7 +213,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+ 
+         if (!TitaniumConfig.get().spigot.settings.lateBind) {
+             try {
+-                this.aq().a(inetaddress, this.R());
++                this.aq().bind(bindAddress); // PandaSpigot - Unix domain socket support
+             } catch (IOException ioexception) {
+                 DedicatedServer.LOGGER.warn("**** FAILED TO BIND TO PORT!");
+                 DedicatedServer.LOGGER.warn("The exception was: {}", new Object[] { ioexception.toString()});
+@@ -300,7 +319,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+ 
+         if (TitaniumConfig.get().spigot.settings.lateBind) {
+             try {
+-                this.aq().a(inetaddress, this.R());
++                this.aq().bind(bindAddress); // PandaSpigot - Unix domain socket support
+             } catch (IOException ioexception) {
+                 DedicatedServer.LOGGER.warn("**** FAILED TO BIND TO PORT!");
+                 DedicatedServer.LOGGER.warn("The exception was: {}", new Object[] { ioexception.toString()});
+diff --git a/src/main/java/net/minecraft/server/HandshakeListener.java b/src/main/java/net/minecraft/server/HandshakeListener.java
+index bd875fff..051f4e62 100644
+--- a/src/main/java/net/minecraft/server/HandshakeListener.java
++++ b/src/main/java/net/minecraft/server/HandshakeListener.java
+@@ -30,6 +30,7 @@ public class HandshakeListener implements PacketHandshakingInListener {
+ 
+             // CraftBukkit start - Connection throttle
+             try {
++                if (!(this.b.channel.localAddress() instanceof io.netty.channel.unix.DomainSocketAddress)) { // PandaSpigot - the connection throttle is useless when you have a Unix domain socket
+                 long currentTime = System.currentTimeMillis();
+                 long connectionThrottle = MinecraftServer.getServer().server.getConnectionThrottle();
+                 InetAddress address = ((java.net.InetSocketAddress) this.b.getSocketAddress()).getAddress();
+@@ -58,6 +59,7 @@ public class HandshakeListener implements PacketHandshakingInListener {
+                         }
+                     }
+                 }
++                } // PandaSpigot - add closing bracket for if check above
+             } catch (Throwable t) {
+                 org.apache.logging.log4j.LogManager.getLogger().debug("Failed to check connection throttle", t);
+             }
+@@ -77,8 +79,11 @@ public class HandshakeListener implements PacketHandshakingInListener {
+                 if (TitaniumConfig.get().spigot.settings.bungeecord) {
+                     String[] split = packethandshakinginsetprotocol.hostname.split("\00");
+                     if ( split.length == 3 || split.length == 4 ) {
++                        // PandaSpigot start - Unix domain socket support
++                        java.net.SocketAddress socketAddress = b.getSocketAddress();
+                         packethandshakinginsetprotocol.hostname = split[0];
+-                        b.l = new java.net.InetSocketAddress(split[1], ((java.net.InetSocketAddress) b.getSocketAddress()).getPort());
++                        b.l = new java.net.InetSocketAddress(split[1], socketAddress instanceof java.net.InetSocketAddress ? ((java.net.InetSocketAddress) socketAddress).getPort() : 0);
++                        // PandaSpigot end
+                         b.spoofedUUID = com.mojang.util.UUIDTypeAdapter.fromString( split[2] );
+                     } else
+                     {
+diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
+index e0df6f2f..7bd9e427 100644
+--- a/src/main/java/net/minecraft/server/NetworkManager.java
++++ b/src/main/java/net/minecraft/server/NetworkManager.java
+@@ -485,6 +485,11 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+     // Spigot Start
+     public SocketAddress getRawAddress()
+     {
++        // PandaSpigot start - This can be null in the case of a Unix domain socket, so if it is, fake something
++        if (this.channel.remoteAddress() == null) {
++            return new java.net.InetSocketAddress(java.net.InetAddress.getLoopbackAddress(), 0);
++        }
++        // PandaSpigot end
+         return this.channel.remoteAddress();
+     }
+     // Spigot End
+diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
+index 0ed82a88..91c44724 100644
+--- a/src/main/java/net/minecraft/server/ServerConnection.java
++++ b/src/main/java/net/minecraft/server/ServerConnection.java
+@@ -69,7 +69,12 @@ public class ServerConnection {
+         this.d = true;
+     }
+ 
++    // PandaSpigot start
+     public void a(InetAddress inetaddress, int i) throws IOException {
++        bind(new java.net.InetSocketAddress(inetaddress, i));
++    }
++    public void bind(java.net.SocketAddress address) throws IOException {
++        // PandaSpigot end
+         List list = this.g;
+ 
+         synchronized (this.g) {
+@@ -77,7 +82,13 @@ public class ServerConnection {
+             LazyInitVar lazyinitvar;
+ 
+             if (Epoll.isAvailable() && this.f.ai()) {
+-                oclass = EpollServerSocketChannel.class;
++                // PandaSpigot start - Unix domain socket support
++                if (address instanceof io.netty.channel.unix.DomainSocketAddress) {
++                    oclass = io.netty.channel.epoll.EpollServerDomainSocketChannel.class;
++                } else {
++                    oclass = EpollServerSocketChannel.class;
++                }
++                // PandaSpigot end
+                 lazyinitvar = ServerConnection.b;
+                 ServerConnection.e.info("Using epoll channel type");
+             } else {
+@@ -103,7 +114,7 @@ public class ServerConnection {
+                     networkmanager.isPending = false; // PandaSpigot
+                     networkmanager.a((PacketListener) (new HandshakeListener(ServerConnection.this.f, networkmanager)));
+                 }
+-            }).group((EventLoopGroup) lazyinitvar.c()).localAddress(inetaddress, i)).bind().syncUninterruptibly());
++            }).group((EventLoopGroup) lazyinitvar.c()).localAddress(address)).bind().syncUninterruptibly()); // PandaSpigot - Unix domain socket support
+         }
+     }
+ 
+-- 
+2.36.0.windows.1
+

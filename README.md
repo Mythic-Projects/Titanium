@@ -97,6 +97,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 
 [PandaSpigot-0005] Add internal setMaxStackSize method for materials
 [PandaSpigot-0006] Update to Netty 4.1.x
+[PandaSpigot-0007] Add Unix domain socket support
 [PandaSpigot-0008] Remove hacky stackable buckets code
 [PandaSpigot-0010] Optimize Network Manager and add advanced packet support
 
