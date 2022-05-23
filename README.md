@@ -108,6 +108,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [PandaSpigot-0011] Allow controlled flushing for network manager
 [PandaSpigot-0012] Consolidate flush calls for entity tracker packets
 [PandaSpigot-0013] Optimise non-flush packet sending
+[PandaSpigot-0028] Avoid blocking on Network Manager creation
 [PandaSpigot-0033] Configurable arrow trajectory
 
 [IonSpigot-0006] Fix Chunk Loading
