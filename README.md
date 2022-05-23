@@ -110,6 +110,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [PandaSpigot-0013] Optimise non-flush packet sending
 [PandaSpigot-0028] Avoid blocking on Network Manager creation
 [PandaSpigot-0033] Configurable arrow trajectory
+[PandaSpigot-0035] Cache user authenticator threads
 
 [IonSpigot-0006] Fix Chunk Loading
 [IonSpigot-0008] Reduce Chunk Hashing
