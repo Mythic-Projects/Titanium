@@ -82,6 +82,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [SportPaper-0027] Fix head rotation packet spam
 [SportPaper-0176] Use fast util collections
 [SportPaper-0185] Speed up chunk unloading
+[SportPaper-0198] Optimize head rotation patch
 [SportPaper-0204] Fix Teleport Invisibility
 
 [FlamePaper-0003] Fix chunk memory leak
