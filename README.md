@@ -79,6 +79,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Taco-0024] Optimize tnt entity and falling block movement
 [Taco-0025] Fix east west cannoning
 
+[SportPaper-0027] Fix head rotation packet spam
 [SportPaper-0176] Use fast util collections
 [SportPaper-0185] Speed up chunk unloading
 
