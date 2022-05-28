@@ -11,7 +11,7 @@ Currently, you have to build Titanium by yourself. In the future Download option
 ### Requirements
 
 If you want to build Titanium you will need these things to be installed and available from your shell:
-* [JDK 8](https://www.oracle.com/java/technologies/downloads/#java8)
+* [JDK 17](https://www.oracle.com/java/technologies/downloads/#java17)
 * [Git](https://git-scm.com/)
 * [Maven](https://maven.apache.org/)
 
