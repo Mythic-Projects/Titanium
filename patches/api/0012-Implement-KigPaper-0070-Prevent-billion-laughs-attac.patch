@@ -1,0 +1,89 @@
+From 6cf2d4e533ac8f84d6f977b9e62a1df3126c7ca3 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sat, 28 May 2022 20:50:31 +0200
+Subject: [PATCH] Implement [KigPaper-0070] Prevent billion laughs attacks
+
+
+diff --git a/pom.xml b/pom.xml
+index 2ff99a88..8dda4b49 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -87,7 +87,7 @@
+         <dependency>
+             <groupId>org.yaml</groupId>
+             <artifactId>snakeyaml</artifactId>
+-            <version>1.15</version>
++            <version>1.30</version> <!-- KigPaper - CVE-2017-18640 -->
+             <scope>compile</scope>
+         </dependency>
+         <dependency>
+diff --git a/src/main/java/org/bukkit/configuration/file/YamlConfiguration.java b/src/main/java/org/bukkit/configuration/file/YamlConfiguration.java
+index ea4c2b35..a50eb0c4 100644
+--- a/src/main/java/org/bukkit/configuration/file/YamlConfiguration.java
++++ b/src/main/java/org/bukkit/configuration/file/YamlConfiguration.java
+@@ -14,6 +14,7 @@ import org.bukkit.configuration.Configuration;
+ import org.bukkit.configuration.ConfigurationSection;
+ import org.bukkit.configuration.InvalidConfigurationException;
+ import org.yaml.snakeyaml.DumperOptions;
++import org.yaml.snakeyaml.LoaderOptions;
+ import org.yaml.snakeyaml.Yaml;
+ import org.yaml.snakeyaml.error.YAMLException;
+ import org.yaml.snakeyaml.representer.Representer;
+@@ -27,7 +28,12 @@ public class YamlConfiguration extends FileConfiguration {
+     protected static final String BLANK_CONFIG = "{}\n";
+     private final DumperOptions yamlOptions = new DumperOptions();
+     private final Representer yamlRepresenter = new YamlRepresenter();
+-    private final Yaml yaml = new Yaml(new YamlConstructor(), yamlRepresenter, yamlOptions);
++    // KigPaper start - CVE-2017-18640
++    LoaderOptions loaderOptions = new LoaderOptions();
++    private final Yaml yaml = new Yaml(new YamlConstructor(), yamlRepresenter, yamlOptions, loaderOptions); {
++        loaderOptions.setMaxAliasesForCollections(32);
++    }
++    // KigPaper end
+ 
+     @Override
+     public String saveToString() {
+diff --git a/src/main/java/org/bukkit/plugin/PluginDescriptionFile.java b/src/main/java/org/bukkit/plugin/PluginDescriptionFile.java
+index c82928ef..a104d728 100644
+--- a/src/main/java/org/bukkit/plugin/PluginDescriptionFile.java
++++ b/src/main/java/org/bukkit/plugin/PluginDescriptionFile.java
+@@ -15,6 +15,8 @@ import org.bukkit.plugin.java.JavaPlugin;
+ import org.bukkit.permissions.Permissible;
+ import org.bukkit.permissions.Permission;
+ import org.bukkit.permissions.PermissionDefault;
++import org.yaml.snakeyaml.DumperOptions;
++import org.yaml.snakeyaml.LoaderOptions;
+ import org.yaml.snakeyaml.Yaml;
+ import org.yaml.snakeyaml.constructor.AbstractConstruct;
+ import org.yaml.snakeyaml.constructor.SafeConstructor;
+@@ -24,6 +26,7 @@ import org.yaml.snakeyaml.nodes.Tag;
+ import com.google.common.collect.ImmutableList;
+ import com.google.common.collect.ImmutableMap;
+ import com.google.common.collect.ImmutableSet;
++import org.yaml.snakeyaml.representer.Representer;
+ 
+ /**
+  * This type is the runtime-container for the information in the plugin.yml.
+@@ -178,6 +181,10 @@ public final class PluginDescriptionFile {
+     private static final ThreadLocal<Yaml> YAML = new ThreadLocal<Yaml>() {
+         @Override
+         protected Yaml initialValue() {
++            // KigPaper start - CVE-2017-18640
++            LoaderOptions loadingConfig = new LoaderOptions();
++            loadingConfig.setMaxAliasesForCollections(32);
++            // KigPaper end
+             return new Yaml(new SafeConstructor() {
+                 {
+                     yamlConstructors.put(null, new AbstractConstruct() {
+@@ -205,7 +212,7 @@ public final class PluginDescriptionFile {
+                         });
+                     }
+                 }
+-            });
++            }, new Representer(), new DumperOptions(), loadingConfig); // KigPaper - CVE-2017-18640
+         }
+     };
+     String rawName = null;
+-- 
+2.36.0.windows.1
+

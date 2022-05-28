@@ -135,6 +135,8 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [MineTick-0017] Fix insane nether portal lag
 [MineTick-0023] Fix chunk coordinates miscalculations
 
+[KigPaper-0233/0070] Prevent billion laughs attacks
+
 [Akarin-0007] Avoid double I/O operation on load player file
 
 [Yatopia-0047] Smarter statistics ticking
