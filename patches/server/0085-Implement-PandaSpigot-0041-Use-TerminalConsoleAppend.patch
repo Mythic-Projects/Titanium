@@ -199,51 +199,6 @@ index 46faa202..816827af 100644
      }
  
      public boolean a(int i, String s) {
-diff --git a/src/main/java/net/minecraft/server/PacketCompressor.java b/src/main/java/net/minecraft/server/PacketCompressor.java
-index 639ae31a..d2bb0b66 100644
---- a/src/main/java/net/minecraft/server/PacketCompressor.java
-+++ b/src/main/java/net/minecraft/server/PacketCompressor.java
-@@ -46,7 +46,9 @@ public class PacketCompressor extends MessageToByteEncoder<ByteBuf> {
-         this.c = i;
-     }
- 
--    protected void encode(ChannelHandlerContext channelhandlercontext, Object object, ByteBuf bytebuf) throws Exception {
--        this.a(channelhandlercontext, (ByteBuf) object, bytebuf);
-+    @Override
-+    protected void encode(ChannelHandlerContext channelhandlercontext, ByteBuf bytebuf, ByteBuf bytebuf1) throws Exception {
-+        this.a(channelhandlercontext, bytebuf, bytebuf1);
-     }
-+
- }
-diff --git a/src/main/java/net/minecraft/server/PacketDecrypter.java b/src/main/java/net/minecraft/server/PacketDecrypter.java
-index aca93561..1f578c0d 100644
---- a/src/main/java/net/minecraft/server/PacketDecrypter.java
-+++ b/src/main/java/net/minecraft/server/PacketDecrypter.java
-@@ -18,7 +18,8 @@ public class PacketDecrypter extends MessageToMessageDecoder<ByteBuf> {
-         list.add(this.a.a(channelhandlercontext, bytebuf));
-     }
- 
--    protected void decode(ChannelHandlerContext channelhandlercontext, Object object, List list) throws Exception {
--        this.a(channelhandlercontext, (ByteBuf) object, list);
-+    @Override
-+    protected void decode(ChannelHandlerContext channelhandlercontext, ByteBuf bytebuf, List list) throws Exception {
-+        this.a(channelhandlercontext, bytebuf, list);
-     }
- }
-diff --git a/src/main/java/net/minecraft/server/PacketEncrypter.java b/src/main/java/net/minecraft/server/PacketEncrypter.java
-index bd972ebe..a5b44643 100644
---- a/src/main/java/net/minecraft/server/PacketEncrypter.java
-+++ b/src/main/java/net/minecraft/server/PacketEncrypter.java
-@@ -17,7 +17,7 @@ public class PacketEncrypter extends MessageToByteEncoder<ByteBuf> {
-         this.a.a(bytebuf, bytebuf1);
-     }
- 
--    protected void encode(ChannelHandlerContext channelhandlercontext, Object object, ByteBuf bytebuf) throws Exception {
--        this.a(channelhandlercontext, (ByteBuf) object, bytebuf);
-+    protected void encode(ChannelHandlerContext channelhandlercontext, ByteBuf bytebuf, ByteBuf bytebuf1) throws Exception {
-+        this.a(channelhandlercontext, bytebuf, bytebuf1);
-     }
- }
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
 index e81f5003..1c8cfacd 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
