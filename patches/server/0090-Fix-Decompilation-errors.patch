@@ -4,19 +4,6 @@ Date: Sun, 29 May 2022 22:05:20 +0200
 Subject: [PATCH] Fix Decompilation errors
 
 
-diff --git a/build.gradle b/build.gradle
-index 7ad5e0caf..e6c6978a1 100644
---- a/build.gradle
-+++ b/build.gradle
-@@ -67,7 +67,7 @@ jar {
-     manifest {
-         def details = versionDetails()
-         def gitHash = details.gitHash
--        def implementationVersion = System.getenv("GITHUB_RUN_NUMBER") ?: ""$gitHash""
-+        def implementationVersion = System.getenv("GITHUB_RUN_NUMBER") ?: gitHash
-         def gitBranch = details.branchName
-         attributes(
-                 "Main-Class": "org.bukkit.craftbukkit.Main",
 diff --git a/src/main/java/net/minecraft/server/Achievement.java b/src/main/java/net/minecraft/server/Achievement.java
 index a110a484f..09b69bb35 100644
 --- a/src/main/java/net/minecraft/server/Achievement.java

@@ -1,4 +1,4 @@
-From a6f6a765507edee19b1e24dc4adfe4bad1230b32 Mon Sep 17 00:00:00 2001
+From 576401fdc6ada8c8ab172b7aac2b68502e2237b0 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 29 May 2022 10:00:04 +0200
 Subject: [PATCH] Setup Gradle project
@@ -20,10 +20,10 @@ index 73c16b1d5..f92f6c5d7 100644
  
 diff --git a/build.gradle b/build.gradle
 new file mode 100644
-index 000000000..7ad5e0caf
+index 000000000..0f95fd509
 --- /dev/null
 +++ b/build.gradle
-@@ -0,0 +1,89 @@
+@@ -0,0 +1,88 @@
 +import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
 +
 +def minecraftVersion = "1_8_R3"
@@ -94,6 +94,7 @@ index 000000000..7ad5e0caf
 +        def details = versionDetails()
 +        def gitHash = details.gitHashFull
 +        def implementationVersion = System.getenv("GITHUB_RUN_NUMBER") ?: details.gitHash
++        def gitBranch = details.branchName
 +        attributes(
 +                "Main-Class": "org.bukkit.craftbukkit.Main",
 +                "Implementation-Title": "CraftBukkit",
