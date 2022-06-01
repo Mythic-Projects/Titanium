@@ -105,7 +105,18 @@ subprojects {
             maven {
                 name "snapshots"
                 url "https://repo.titanvale.net/snapshots"
-                credentials(PasswordCredentials)
+
+                String snapshotsUsername = System.getenv("SNAPSHOTS_USERNAME")
+                String snapshotsPassword = System.getenv("SNAPSHOTS_PASSWORD")
+                if (snapshotsUsername != null && snapshotsPassword != null) {
+                    credentials {
+                        username = snapshotsUsername
+                        password = snapshotsPassword
+                    }
+                } else {
+                    credentials(PasswordCredentials)
+                }
+
                 authentication {
                     basic(BasicAuthentication)
                 }
@@ -113,7 +124,18 @@ subprojects {
             maven {
                 name "releases"
                 url "https://repo.titanvale.net/releases"
-                credentials(PasswordCredentials)
+
+                String releasesUsername = System.getenv("RELEASES_USERNAME")
+                String releasesPassword = System.getenv("RELEASES_PASSWORD")
+                if (releasesUsername != null && releasesPassword != null) {
+                    credentials {
+                        username = releasesUsername
+                        password = releasesPassword
+                    }
+                } else {
+                    credentials(PasswordCredentials)
+                }
+
                 authentication {
                     basic(BasicAuthentication)
                 }

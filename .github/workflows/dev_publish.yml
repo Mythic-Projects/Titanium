@@ -16,11 +16,11 @@ jobs:
         with:
           java-version: "17"
           distribution: adopt
-          cache: maven
       - name: Setup Git
         run: |
           git config --global user.email "titanium@titanvale.net"
           git config --global user.name "Titanium CI"
+          git config --global init.defaultBranch main
       - name: Grant execute permissions
         run: |
           chmod -R +x ./base/
@@ -29,10 +29,6 @@ jobs:
         run: bash titanium upstream
       - name: Apply Titanium patches
         run: bash titanium apply
-      - name: Setup Maven Action
-        uses: s4u/maven-settings-action@v2.6.0
-        with:
-          servers: '[{"id": "titanvale-snapshots", "username": "${{ secrets.SNAPSHOTS_USERNAME }}", "password": "${{ secrets.SNAPSHOTS_PASSWORD }}"}]'
       - name: Publish Titanium JAR
         if: github.event_name == 'push'
         run: bash titanium deploy
