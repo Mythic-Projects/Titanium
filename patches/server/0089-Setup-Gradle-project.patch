@@ -92,19 +92,17 @@ index 000000000..7ad5e0caf
 +jar {
 +    manifest {
 +        def details = versionDetails()
-+        def gitHash = details.gitHash
-+        def implementationVersion = System.getenv("GITHUB_RUN_NUMBER") ?: ""$gitHash""
-+        def gitBranch = details.branchName
++        def gitHash = details.gitHashFull
++        def implementationVersion = System.getenv("GITHUB_RUN_NUMBER") ?: details.gitHash
 +        attributes(
 +                "Main-Class": "org.bukkit.craftbukkit.Main",
 +                "Implementation-Title": "CraftBukkit",
-+                "Implementation-Version": "git-Titanium-$implementationVersion",
++                "Implementation-Version": "git-Titanium-${implementationVersion}",
 +                "Implementation-Vendor": "Bukkit Team",
 +                "Specification-Title": "Bukkit",
 +                "Specification-Version": project.version,
 +                "Specification-Vendor": "Bukkit Team",
 +                "Multi-Release": "true", // PandaSpigot
-+                "Git-Branch": gitBranch,
 +                "Git-Commit": gitHash,
 +        )
 +    }
