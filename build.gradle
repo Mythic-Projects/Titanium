@@ -1,0 +1,123 @@
+plugins {
+    id "com.github.johnrengelman.shadow" version "7.1.2"
+    id 'com.palantir.git-version' version '0.15.0'
+}
+
+allprojects {
+    group = 'net.titanvale'
+    version = '1.8.8-R0.1-SNAPSHOT'
+
+    apply plugin: 'java-library'
+    apply plugin: 'maven-publish'
+    apply plugin: 'com.github.johnrengelman.shadow'
+
+    java {
+        withJavadocJar()
+        withSourcesJar()
+    }
+
+    repositories {
+        maven { url 'https://libraries.minecraft.net' }
+        maven { url 'https://oss.sonatype.org/content/groups/public' }
+        maven { url 'https://hub.spigotmc.org/nexus/content/groups/public' }
+        maven { url 'https://repo.titanvale.net/releases' }
+        maven { url 'https://repo.titanvale.net/snapshots' }
+        maven { url 'https://jitpack.io' }
+        maven { url 'https://storehouse.okaeri.eu/repository/maven-public' }
+    }
+
+    shadowJar {
+        mergeServiceFiles()
+        archiveFileName  = "${project.name}-${project.version}.jar"
+    }
+
+    javadoc {
+        options {
+            links 'https://guava.dev/releases/21.0/api/docs/'
+            links 'https://javadoc.io/doc/org.yaml/snakeyaml/1.30/'
+            links 'https://javadoc.io/doc/org.jetbrains/annotations-java5/21.0.1/'
+            links 'https://javadoc.io/doc/net.md-5/bungeecord-chat/1.16-R0.4/'
+        }
+        options.addStringOption('Xdoclint:none', '-quiet')
+        options.addStringOption('encoding', 'UTF-8')
+        options.addStringOption('charSet', 'UTF-8')
+    }
+}
+
+subprojects {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    compileJava.options.encoding = "UTF-8"
+    compileTestJava.options.encoding = "UTF-8"
+
+    java {
+        withSourcesJar()
+        withJavadocJar()
+    }
+
+    publishing {
+        publications {
+            libraries(MavenPublication) {
+                from components.java
+
+                versionMapping {
+                    usage('java-runtime'){
+                        fromResolutionOf("runtimeClasspath")
+                    }
+                }
+
+                pom {
+                    url = "https://github.com/TitanVale/Titanium"
+                    description = project.description
+                    name = project.name
+                    // if this is a CI build, set version as the run id
+                    def runNumber = System.getenv("GITHUB_RUN_NUMBER")
+                    if (runNumber != null && Integer.parseInt(runNumber) > 0) {
+                        version = runNumber
+                    }
+
+                    developers {
+                        developer {
+                            id = "peridot"
+                            name = "Peter"
+                            email = "peridot491@protonmail.com"
+                        }
+                    }
+
+                    scm {
+                        connection = "scm:git:git://github.com/TitanVale/Titanium.git"
+                        developerConnection = "scm:git:git://github.com/TitanVale/Titanium.git"
+                        url = "https://github.com/TitanVale/Titanium.git"
+                    }
+
+                    licenses {
+                        license {
+                            name = "GPL-v3.0"
+                            url  = "https://www.gnu.org/licenses/gpl-3.0.txt"
+                        }
+                    }
+                }
+            }
+        }
+
+        repositories {
+            maven {
+                name "snapshots"
+                url "https://repo.titanvale.net/snapshots"
+                credentials(PasswordCredentials)
+                authentication {
+                    basic(BasicAuthentication)
+                }
+            }
+            maven {
+                name "releases"
+                url "https://repo.titanvale.net/releases"
+                credentials(PasswordCredentials)
+                authentication {
+                    basic(BasicAuthentication)
+                }
+            }
+        }
+    }
+}

@@ -39,7 +39,7 @@ case "$1" in
         cd "$basedir"
         ./scripts/upstream.sh
         ./scripts/apply.sh "$basedir"
-        mvn clean install
+        ./gradlew build
 
         case "$2" in
           "paperclip" | "pc")
@@ -65,7 +65,7 @@ case "$1" in
     "j" | "jar")
     (
         set -e
-        mvn clean install
+        ./gradlew build
 
         case "$2" in
           "paperclip" | "pc")
@@ -78,19 +78,16 @@ case "$1" in
     (
       set -e
 
-      REPOSITORY='titanvale-snapshots::https://repo.titanvale.net/snapshots'
-
       case "$2" in
         "release")
-          REPOSITORY='titanvale-releases::https://repo.titanvale.net/releases'
+          echo "Deploying to Releases repository"
+          ./gradlew publishAllPublicationsToReleasesRepository
+        ;;
+        *)
+          echo "Deploying to Snapshots repository"
+          ./gradlew publishAllPublicationsToSnapshotsRepository
         ;;
       esac
-
-      echo "Deploying to $REPOSITORY"
-
-      basedir
-
-      mvn clean install deploy:deploy -DaltDeploymentRepository=$REPOSITORY
     )
     ;;
     *)
