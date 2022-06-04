@@ -108,6 +108,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [PandaSpigot-0006] Update to Netty 4.1.x
 [PandaSpigot-0007] Add Unix domain socket support
 [PandaSpigot-0008] Remove hacky stackable buckets code
+[PandaSpigot-0009] Improved plugins command
 [PandaSpigot-0010] Optimize Network Manager and add advanced packet support
 [PandaSpigot-0011] Allow controlled flushing for network manager
 [PandaSpigot-0012] Consolidate flush calls for entity tracker packets
