@@ -42,6 +42,7 @@ jobs:
           chmod -R +x ./base/
           chmod -R +x ./scripts/
           chmod +x gradlew
+          chmod +x titanium
       - name: Prepare Titanium upstream
         run: ./titanium upstream
       - name: Apply Titanium patches
