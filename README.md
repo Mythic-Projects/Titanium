@@ -116,6 +116,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [PandaSpigot-0028] Avoid blocking on Network Manager creation
 [PandaSpigot-0033] Configurable arrow trajectory
 [PandaSpigot-0035] Cache user authenticator threads
+[PandaSpigot-0039] Optimize VarInt reading and writing
 [PandaSpigot-0041] Use TerminalConsoleAppender for console improvements
 [PandaSpigot-0046] Performance improvement for Chunk.getEntities
 
