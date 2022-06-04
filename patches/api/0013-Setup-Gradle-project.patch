@@ -1,4 +1,4 @@
-From d98e927150cdb8f727c66f90543d3fb97710dde8 Mon Sep 17 00:00:00 2001
+From d1b8f1fd5000cf9eab61ae4af31e48c369664cb9 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 29 May 2022 10:00:11 +0200
 Subject: [PATCH] Setup Gradle project
@@ -20,10 +20,10 @@ index edf9e5c3..dfa15b1d 100644
  
 diff --git a/build.gradle b/build.gradle
 new file mode 100644
-index 00000000..d0af3065
+index 00000000..ea9cd55a
 --- /dev/null
 +++ b/build.gradle
-@@ -0,0 +1,51 @@
+@@ -0,0 +1,45 @@
 +dependencies {
 +    // Minecraft libraries start
 +    api 'commons-lang:commons-lang:2.6'
@@ -57,18 +57,12 @@ index 00000000..d0af3065
 +    file.write "version=${project.version}"
 +}
 +
-+shadowJar {
++jar {
 +    dependsOn generateApiVersioningFile
 +    from(layout.buildDirectory.file("pom.properties")) {
 +        into("META-INF/maven/${project.group}/${project.name.toLowerCase()}")
 +    }
-+}
 +
-+tasks.named("build") {
-+    dependsOn(tasks.named("shadowJar"))
-+}
-+
-+jar {
 +    manifest {
 +        attributes(
 +                "Automatic-Module-Name": "org.bukkit"
@@ -290,6 +284,18 @@ index 7e89b97b..56e932b8 100644
          } catch (Exception ignored) {}
  
          new AuthorNagException("Deprecated use of CustomTimingsHandler. Please Switch to Timings.of ASAP").printStackTrace();
+diff --git a/src/test/java/org/bukkit/DifficultyTest.java b/src/test/java/org/bukkit/DifficultyTest.java
+index 293e283a..9ef39817 100644
+--- a/src/test/java/org/bukkit/DifficultyTest.java
++++ b/src/test/java/org/bukkit/DifficultyTest.java
+@@ -2,6 +2,7 @@ package org.bukkit;
+ 
+ import static org.hamcrest.CoreMatchers.is;
+ import static org.junit.Assert.assertThat;
++import static org.junit.Assert.assertTrue;
+ 
+ import org.junit.Test;
+ 
 -- 
 2.36.0.windows.1
 

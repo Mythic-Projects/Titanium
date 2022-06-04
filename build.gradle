@@ -1,5 +1,5 @@
 plugins {
-    id "com.github.johnrengelman.shadow" version "7.1.2"
+    id 'com.github.johnrengelman.shadow' version "7.1.2"
     id 'com.palantir.git-version' version '0.15.0'
 }
 
@@ -9,12 +9,7 @@ allprojects {
 
     apply plugin: 'java-library'
     apply plugin: 'maven-publish'
-    apply plugin: 'com.github.johnrengelman.shadow'
-
-    java {
-        withJavadocJar()
-        withSourcesJar()
-    }
+    apply plugin: 'com.palantir.git-version'
 
     repositories {
         maven { url 'https://libraries.minecraft.net' }
@@ -24,23 +19,6 @@ allprojects {
         maven { url 'https://repo.titanvale.net/snapshots' }
         maven { url 'https://jitpack.io' }
         maven { url 'https://storehouse.okaeri.eu/repository/maven-public' }
-    }
-
-    shadowJar {
-        mergeServiceFiles()
-        archiveFileName  = "${project.name}-${project.version}.jar"
-    }
-
-    javadoc {
-        options {
-            links 'https://guava.dev/releases/21.0/api/docs/'
-            links 'https://javadoc.io/doc/org.yaml/snakeyaml/1.30/'
-            links 'https://javadoc.io/doc/org.jetbrains/annotations-java5/21.0.1/'
-            links 'https://javadoc.io/doc/net.md-5/bungeecord-chat/1.16-R0.4/'
-        }
-        options.addStringOption('Xdoclint:none', '-quiet')
-        options.addStringOption('encoding', 'UTF-8')
-        options.addStringOption('charSet', 'UTF-8')
     }
 }
 
@@ -54,6 +32,18 @@ subprojects {
     java {
         withSourcesJar()
         withJavadocJar()
+    }
+
+    javadoc {
+        options {
+            links 'https://guava.dev/releases/21.0/api/docs/'
+            links 'https://javadoc.io/doc/org.yaml/snakeyaml/1.30/'
+            links 'https://javadoc.io/doc/org.jetbrains/annotations-java5/21.0.1/'
+            links 'https://javadoc.io/doc/net.md-5/bungeecord-chat/1.16-R0.4/'
+        }
+        options.addStringOption('Xdoclint:none', '-quiet')
+        options.addStringOption('encoding', 'UTF-8')
+        options.addStringOption('charSet', 'UTF-8')
     }
 
     publishing {
