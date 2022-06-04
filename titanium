@@ -93,22 +93,22 @@ for var in "$@"; do
       set -e
        buildpaperclipjar
     ;;
-    "deploy" | "d")
+    "deploy" | "d" | "publish")
       PREVIOUS_COMMAND="deploy"
 
       set -e
     ;;
-    "release" | "snapshot")
+    "release" | "releases" | "snapshot" | "snapshots")
       if [ "$PREVIOUS_COMMAND" != "deploy" ]; then
         continue
       fi
       set -e
       case "$var" in
-        "release")
+        "release" | "releases")
           echo "Deploying to Releases repository"
           ./gradlew publishAllPublicationsToReleasesRepository
         ;;
-        "snapshot")
+        "snapshot" | "snapshots")
           echo "Deploying to Snapshots repository"
           ./gradlew publishAllPublicationsToSnapshotsRepository
         ;;

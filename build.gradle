@@ -9,7 +9,7 @@ allprojects {
 
     apply plugin: 'java-library'
     apply plugin: 'maven-publish'
-    apply plugin: 'com.palantir.git-version'
+    apply plugin: 'com.github.johnrengelman.shadow'
 
     repositories {
         maven { url 'https://libraries.minecraft.net' }
@@ -59,13 +59,7 @@ subprojects {
 
                 pom {
                     url = "https://github.com/TitanVale/Titanium"
-                    description = project.description
                     name = project.name
-                    // if this is a CI build, set version as the run id
-                    def runNumber = System.getenv("GITHUB_RUN_NUMBER")
-                    if (runNumber != null && Integer.parseInt(runNumber) > 0) {
-                        version = runNumber
-                    }
 
                     developers {
                         developer {
