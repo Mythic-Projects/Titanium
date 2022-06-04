@@ -1,0 +1,245 @@
+From 8ea0fc737adf82ed5883b548bf3d5714c2aa2234 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 5 Jun 2022 00:48:33 +0200
+Subject: [PATCH] Stop using custom AsynchronousExecutor for chunk IO
+
+
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+index a0f6ca64b..1edc78343 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+@@ -9,7 +9,7 @@ import java.util.Iterator;
+ import java.util.List;
+ import java.util.Set;
+ import java.util.concurrent.ConcurrentHashMap;
+-import net.titanium.chunk.io.ChunkIOExecutor;
++import org.bukkit.craftbukkit.chunkio.ChunkIOExecutor;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 837f6421a..ea1a91ea8 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -34,7 +34,7 @@ import java.util.concurrent.Callable;
+ import java.util.concurrent.Executors;
+ import java.util.concurrent.FutureTask;
+ import javax.imageio.ImageIO;
+-import net.titanium.chunk.io.ChunkIOExecutor;
++import org.bukkit.craftbukkit.chunkio.ChunkIOExecutor;
+ import net.titanium.config.TitaniumConfig;
+ import org.apache.commons.lang3.Validate;
+ import org.apache.logging.log4j.LogManager;
+diff --git a/src/main/java/net/minecraft/server/PlayerChunkMap.java b/src/main/java/net/minecraft/server/PlayerChunkMap.java
+index cbab0f6ce..4fbee7f16 100644
+--- a/src/main/java/net/minecraft/server/PlayerChunkMap.java
++++ b/src/main/java/net/minecraft/server/PlayerChunkMap.java
+@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
+ import java.util.ArrayList;
+ import java.util.Iterator;
+ import java.util.List;
+-import net.titanium.chunk.io.ChunkIOExecutor;
++import org.bukkit.craftbukkit.chunkio.ChunkIOExecutor;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
+diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
+index a94d060aa..426ee7c95 100644
+--- a/src/main/java/net/minecraft/server/PlayerList.java
++++ b/src/main/java/net/minecraft/server/PlayerList.java
+@@ -17,7 +17,7 @@ import java.util.Iterator;
+ import java.util.List;
+ import java.util.Map;
+ import java.util.UUID;
+-import net.titanium.chunk.io.ChunkIOExecutor;
++import org.bukkit.craftbukkit.chunkio.ChunkIOExecutor;
+ import net.titanium.config.TitaniumConfig;
+ import net.titanium.console.TitaniumConsoleCommandSender;
+ import org.apache.logging.log4j.LogManager;
+diff --git a/src/main/java/net/titanium/chunk/io/ChunkIOExecutor.java b/src/main/java/net/titanium/chunk/io/ChunkIOExecutor.java
+deleted file mode 100644
+index de6ddeab1..000000000
+--- a/src/main/java/net/titanium/chunk/io/ChunkIOExecutor.java
++++ /dev/null
+@@ -1,41 +0,0 @@
+-package net.titanium.chunk.io;
+-
+-import net.minecraft.server.Chunk;
+-import net.minecraft.server.ChunkProviderServer;
+-import net.minecraft.server.ChunkRegionLoader;
+-import net.minecraft.server.World;
+-import net.titanium.config.TitaniumConfig;
+-import net.titanium.util.async.executor.AsynchronousExecutor;
+-
+-public class ChunkIOExecutor {
+-
+-    static final int BASE_THREADS = TitaniumConfig.get().chunk.io.baseThreads; // PaperSpigot - Bumped value
+-    static final int PLAYERS_PER_THREAD = TitaniumConfig.get().chunk.io.playersPerThread;
+-
+-    private static final AsynchronousExecutor<QueuedChunk, Chunk, RuntimeException, ChunkIOProvider> EXECUTOR = new AsynchronousExecutor<>(BASE_THREADS, new ChunkIOProvider());
+-
+-    public static Chunk syncChunkLoad(World world, ChunkRegionLoader loader, ChunkProviderServer provider, int x, int z) {
+-        synchronized (EXECUTOR) { // Synchronize
+-            return EXECUTOR.skipQueue(new QueuedChunk(x, z, loader, world, provider));
+-        }
+-    }
+-
+-    public static void queueChunkLoad(World world, ChunkRegionLoader loader, ChunkProviderServer provider, int x, int z, Runnable runnable) {
+-        EXECUTOR.execute(new QueuedChunk(x, z, loader, world, provider), runnable);
+-    }
+-
+-    // Abuses the fact that hashCode and equals for QueuedChunk only use world and coords
+-    public static void dropQueuedChunkLoad(World world, int x, int z, Runnable runnable) {
+-        EXECUTOR.drop(new QueuedChunk(x, z, null, world, null), runnable);
+-    }
+-
+-    public static void adjustPoolSize(int players) {
+-        int size = Math.max(BASE_THREADS, (int) Math.ceil(players / PLAYERS_PER_THREAD));
+-        EXECUTOR.setActiveThreads(size);
+-    }
+-
+-    public static void tick() {
+-        EXECUTOR.finishActive();
+-    }
+-
+-}
+diff --git a/src/main/java/net/titanium/chunk/io/ChunkIOProvider.java b/src/main/java/net/titanium/chunk/io/ChunkIOProvider.java
+deleted file mode 100644
+index 34ebae4c0..000000000
+--- a/src/main/java/net/titanium/chunk/io/ChunkIOProvider.java
++++ /dev/null
+@@ -1,72 +0,0 @@
+-package net.titanium.chunk.io;
+-
+-import java.io.IOException;
+-import net.minecraft.server.Chunk;
+-import net.minecraft.server.ChunkRegionLoader;
+-import net.minecraft.server.NBTTagCompound;
+-import net.titanium.util.async.executor.CallbacksProvider;
+-import org.bukkit.Server;
+-import org.bukkit.craftbukkit.util.LongHash;
+-
+-public class ChunkIOProvider implements CallbacksProvider<QueuedChunk, Chunk, RuntimeException> {
+-
+-    @Override
+-    public Chunk asyncStage(QueuedChunk queuedChunk) throws RuntimeException {
+-        try {
+-            ChunkRegionLoader loader = queuedChunk.loader;
+-            Object[] data = loader.loadChunk(queuedChunk.world, queuedChunk.x, queuedChunk.z);
+-
+-            if (data != null) {
+-                queuedChunk.compound = (NBTTagCompound) data[1];
+-                return (Chunk) data[0];
+-            }
+-
+-            return null;
+-        } catch (IOException ex) {
+-            throw new RuntimeException(ex);
+-        }
+-    }
+-
+-    @Override
+-    public void syncStage(QueuedChunk queuedChunk, Chunk chunk) throws RuntimeException{
+-        if (chunk == null) {
+-            // If the chunk loading failed just do it synchronously (may generate)
+-            queuedChunk.provider.originalGetChunkAt(queuedChunk.x, queuedChunk.z);
+-            return;
+-        }
+-
+-        queuedChunk.loader.loadEntities(chunk, queuedChunk.compound.getCompound("Level"), queuedChunk.world);
+-        chunk.setLastSaved(queuedChunk.provider.world.getTime());
+-        queuedChunk.provider.chunks.put(LongHash.toLong(queuedChunk.x, queuedChunk.z), chunk);
+-        chunk.addEntities();
+-
+-        if (queuedChunk.provider.chunkProvider != null) {
+-            queuedChunk.provider.world.timings.syncChunkLoadStructuresTimer.startTiming(); // Spigot
+-            queuedChunk.provider.chunkProvider.recreateStructures(chunk, queuedChunk.x, queuedChunk.z);
+-            queuedChunk.provider.world.timings.syncChunkLoadStructuresTimer.stopTiming(); // Spigot
+-        }
+-
+-        Server server = queuedChunk.provider.world.getServer();
+-        if (server != null) {
+-            server.getPluginManager().callEvent(new org.bukkit.event.world.ChunkLoadEvent(chunk.bukkitChunk, false));
+-        }
+-
+-        // Update neighbor counts
+-        for (int x = -2; x < 3; x++) {
+-            for (int z = -2; z < 3; z++) {
+-                if (x == 0 && z == 0) {
+-                    continue;
+-                }
+-
+-                Chunk neighbor = queuedChunk.provider.getChunkIfLoaded(chunk.locX + x, chunk.locZ + z);
+-                if (neighbor != null) {
+-                    neighbor.setNeighborLoaded(-x, -z);
+-                    chunk.setNeighborLoaded(x, z);
+-                }
+-            }
+-        }
+-
+-        chunk.loadNearby(queuedChunk.provider, queuedChunk.provider, queuedChunk.x, queuedChunk.z);
+-    }
+-
+-}
+diff --git a/src/main/java/net/titanium/chunk/io/QueuedChunk.java b/src/main/java/net/titanium/chunk/io/QueuedChunk.java
+deleted file mode 100644
+index ef8aadd61..000000000
+--- a/src/main/java/net/titanium/chunk/io/QueuedChunk.java
++++ /dev/null
+@@ -1,38 +0,0 @@
+-package net.titanium.chunk.io;
+-
+-import net.minecraft.server.ChunkProviderServer;
+-import net.minecraft.server.ChunkRegionLoader;
+-import net.minecraft.server.NBTTagCompound;
+-import net.minecraft.server.World;
+-
+-class QueuedChunk {
+-    final int x;
+-    final int z;
+-    final ChunkRegionLoader loader;
+-    final World world;
+-    final ChunkProviderServer provider;
+-    NBTTagCompound compound;
+-
+-    public QueuedChunk(int x, int z, ChunkRegionLoader loader, World world, ChunkProviderServer provider) {
+-        this.x = x;
+-        this.z = z;
+-        this.loader = loader;
+-        this.world = world;
+-        this.provider = provider;
+-    }
+-
+-    @Override
+-    public int hashCode() {
+-        return (x * 31 + z * 29) ^ world.hashCode();
+-    }
+-
+-    @Override
+-    public boolean equals(Object object) {
+-        if (object instanceof QueuedChunk) {
+-            QueuedChunk other = (QueuedChunk) object;
+-            return x == other.x && z == other.z && world == other.world;
+-        }
+-
+-        return false;
+-    }
+-}
+diff --git a/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOExecutor.java b/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOExecutor.java
+index 3f39eda8d..f02cb1783 100644
+--- a/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOExecutor.java
++++ b/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOExecutor.java
+@@ -7,10 +7,6 @@ import net.minecraft.server.World;
+ import net.titanium.config.TitaniumConfig;
+ import org.bukkit.craftbukkit.util.AsynchronousExecutor;
+ 
+-/**
+- * @deprecated use {@link net.titanium.chunk.io.ChunkIOExecutor}
+- */
+-@Deprecated
+ public class ChunkIOExecutor {
+     static final int BASE_THREADS = TitaniumConfig.get().chunk.io.baseThreads; // PaperSpigot - Bumped value
+     static final int PLAYERS_PER_THREAD = TitaniumConfig.get().chunk.io.playersPerThread;
+-- 
+2.36.0.windows.1
+
