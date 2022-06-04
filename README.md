@@ -117,6 +117,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [PandaSpigot-0033] Configurable arrow trajectory
 [PandaSpigot-0035] Cache user authenticator threads
 [PandaSpigot-0041] Use TerminalConsoleAppender for console improvements
+[PandaSpigot-0046] Performance improvement for Chunk.getEntities
 
 [IonSpigot-0006] Fix Chunk Loading
 [IonSpigot-0008] Reduce Chunk Hashing
