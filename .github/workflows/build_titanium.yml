@@ -49,5 +49,4 @@ jobs:
       - name: Apply Titanium patches
         run: ./titanium apply
       - name: Build Titanium JAR
-        if: github.event_name == 'push'
         run: ./gradlew build --no-daemon

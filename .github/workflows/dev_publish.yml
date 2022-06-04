@@ -48,5 +48,4 @@ jobs:
       - name: Apply Titanium patches
         run: ./titanium apply
       - name: Publish Titanium JAR
-        if: github.event_name == 'push'
         run: ./gradlew publishAllPublicationsToSnapshotsRepository --no-daemon
