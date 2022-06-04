@@ -102,6 +102,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Nacho-0024] Do not create new BlockPosition when loading chunk
 [Nacho-0025] Disable random tickSpeed being modified
 [Nacho-????] Prevent most NBT related overflow exploits
+[Nacho-????] Async entity tracker by Rastrian
 
 [PandaSpigot-0003/0004] Setup Gradle project
 [PandaSpigot-0005] Add internal setMaxStackSize method for materials
