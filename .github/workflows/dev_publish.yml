@@ -49,3 +49,6 @@ jobs:
         run: ./titanium apply
       - name: Publish Titanium JAR
         run: ./gradlew publishAllPublicationsToSnapshotsRepository --no-daemon
+        env:
+          SNAPSHOTS_USERNAME: ${{ secrets.SNAPSHOTS_USERNAME }}
+          SNAPSHOTS_PASSWORD: ${{ secrets.SNAPSHOTS_PASSWORD }}
