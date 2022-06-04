@@ -30,8 +30,7 @@ jobs:
       - name: Setup Java 17
         uses: actions/setup-java@v2
         with:
-          java-version: "17"
-          distribution: adopt
+          java-version: 17
       - name: Setup Git
         run: |
           git config --global user.email "titanium@titanvale.net"
@@ -43,9 +42,9 @@ jobs:
           chmod -R +x ./scripts/
           chmod +x gradlew
       - name: Prepare Titanium upstream
-        run: bash titanium upstream
+        run: ./titanium upstream
       - name: Apply Titanium patches
-        run: bash titanium apply
+        run: ./titanium apply
       - name: Publish Titanium JAR
         if: github.event_name == 'push'
-        run: bash titanium deploy
+        run: ./gradlew publishAllPublicationsToSnapshotsRepository --no-daemon
