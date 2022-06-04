@@ -1,0 +1,2151 @@
+From f4caa7d76878e9e3a5ee6674605aa0b0bc68c759 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 29 May 2022 22:05:20 +0200
+Subject: [PATCH] Fix Decompilation errors
+
+
+diff --git a/src/main/java/net/minecraft/server/Achievement.java b/src/main/java/net/minecraft/server/Achievement.java
+index a110a484f..09b69bb35 100644
+--- a/src/main/java/net/minecraft/server/Achievement.java
++++ b/src/main/java/net/minecraft/server/Achievement.java
+@@ -23,13 +23,6 @@ public class Achievement extends Statistic {
+         this.k = "achievement." + s1 + ".desc";
+         this.a = i;
+         this.b = j;
+-        if (i < AchievementList.a) {
+-            a = i;
+-        }
+-
+-        if (j < AchievementList.b) {
+-            b = j;
+-        }
+ 
+         if (i > AchievementList.c) {
+             AchievementList.c = i;
+diff --git a/src/main/java/net/minecraft/server/AchievementSet.java b/src/main/java/net/minecraft/server/AchievementSet.java
+index 1291aa98c..584808803 100644
+--- a/src/main/java/net/minecraft/server/AchievementSet.java
++++ b/src/main/java/net/minecraft/server/AchievementSet.java
+@@ -45,11 +45,4 @@ public class AchievementSet extends ForwardingSet<String> implements IJsonStatis
+         return this.a;
+     }
+ 
+-    protected Collection delegate() {
+-        return this.delegate();
+-    }
+-
+-    protected Object delegate() {
+-        return this.delegate();
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/AttributeModifiable.java b/src/main/java/net/minecraft/server/AttributeModifiable.java
+index 93d993be4..6ed6b2faf 100644
+--- a/src/main/java/net/minecraft/server/AttributeModifiable.java
++++ b/src/main/java/net/minecraft/server/AttributeModifiable.java
+@@ -72,15 +72,10 @@ public class AttributeModifiable implements AttributeInstance {
+         if (this.a(attributemodifier.a()) != null) {
+             throw new IllegalArgumentException("Modifier is already applied on this attribute!");
+         } else {
+-            Object object = (Set) this.d.get(attributemodifier.b());
++            Set<AttributeModifier> object = this.d.computeIfAbsent(attributemodifier.b(), k -> Sets.newHashSet());
+ 
+-            if (object == null) {
+-                object = Sets.newHashSet();
+-                this.d.put(attributemodifier.b(), object);
+-            }
+-
+-            ((Set) this.c.get(Integer.valueOf(attributemodifier.c()))).add(attributemodifier);
+-            ((Set) object).add(attributemodifier);
++            this.c.get(Integer.valueOf(attributemodifier.c())).add(attributemodifier);
++            object.add(attributemodifier);
+             this.e.put(attributemodifier.a(), attributemodifier);
+             this.f();
+         }
+diff --git a/src/main/java/net/minecraft/server/BlockDataAbstract.java b/src/main/java/net/minecraft/server/BlockDataAbstract.java
+index 487ae01ec..77d2a078e 100644
+--- a/src/main/java/net/minecraft/server/BlockDataAbstract.java
++++ b/src/main/java/net/minecraft/server/BlockDataAbstract.java
+@@ -29,11 +29,11 @@ public abstract class BlockDataAbstract implements IBlockData {
+     public BlockDataAbstract() {}
+ 
+     public <T extends Comparable<T>> IBlockData a(IBlockState<T> iblockstate) {
+-        return this.set(iblockstate, (Comparable) a(iblockstate.c(), this.get(iblockstate)));
++        return this.set(iblockstate, a(iblockstate.c(), this.get(iblockstate)));
+     }
+ 
+     protected static <T> T a(Collection<T> collection, T t0) {
+-        Iterator iterator = collection.iterator();
++        Iterator<T> iterator = collection.iterator();
+ 
+         do {
+             if (!iterator.hasNext()) {
+diff --git a/src/main/java/net/minecraft/server/BlockPredicate.java b/src/main/java/net/minecraft/server/BlockPredicate.java
+index 3408e4e06..033575316 100644
+--- a/src/main/java/net/minecraft/server/BlockPredicate.java
++++ b/src/main/java/net/minecraft/server/BlockPredicate.java
+@@ -1,6 +1,7 @@
+ package net.minecraft.server;
+ 
+ import com.google.common.base.Predicate;
++import javax.annotation.Nullable;
+ 
+ public class BlockPredicate implements Predicate<IBlockData> {
+ 
+@@ -10,6 +11,11 @@ public class BlockPredicate implements Predicate<IBlockData> {
+         this.a = block;
+     }
+ 
++    @Override
++    public boolean apply(@Nullable IBlockData input) {
++        return this.a(input);
++    }
++
+     public static BlockPredicate a(Block block) {
+         return new BlockPredicate(block);
+     }
+@@ -18,7 +24,4 @@ public class BlockPredicate implements Predicate<IBlockData> {
+         return iblockdata != null && iblockdata.getBlock() == this.a;
+     }
+ 
+-    public boolean apply(Object object) {
+-        return this.a((IBlockData) object);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/BlockStateBoolean.java b/src/main/java/net/minecraft/server/BlockStateBoolean.java
+index 7fb09600e..69dba240c 100644
+--- a/src/main/java/net/minecraft/server/BlockStateBoolean.java
++++ b/src/main/java/net/minecraft/server/BlockStateBoolean.java
+@@ -23,7 +23,4 @@ public class BlockStateBoolean extends BlockState<Boolean> {
+         return obool.toString();
+     }
+ 
+-    public String a(Comparable comparable) {
+-        return this.a((Boolean) comparable);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/BlockStateEnum.java b/src/main/java/net/minecraft/server/BlockStateEnum.java
+index 0b555dff8..60baf6283 100644
+--- a/src/main/java/net/minecraft/server/BlockStateEnum.java
++++ b/src/main/java/net/minecraft/server/BlockStateEnum.java
+@@ -18,10 +18,10 @@ public class BlockStateEnum<T extends Enum<T> & INamable> extends BlockState<T>
+     protected BlockStateEnum(String s, Class<T> oclass, Collection<T> collection) {
+         super(s, oclass);
+         this.a = ImmutableSet.copyOf(collection);
+-        Iterator iterator = collection.iterator();
++        Iterator<T> iterator = collection.iterator();
+ 
+         while (iterator.hasNext()) {
+-            Enum oenum = (Enum) iterator.next();
++            T oenum = iterator.next();
+             String s1 = ((INamable) oenum).getName();
+ 
+             if (this.b.containsKey(s1)) {
+@@ -50,14 +50,11 @@ public class BlockStateEnum<T extends Enum<T> & INamable> extends BlockState<T>
+     }
+ 
+     public static <T extends Enum<T> & INamable> BlockStateEnum<T> of(String s, Class<T> oclass, T... at) {
+-        return a(s, oclass, (Collection) Lists.newArrayList(at));
++        return a(s, oclass, Lists.newArrayList(at));
+     }
+ 
+     public static <T extends Enum<T> & INamable> BlockStateEnum<T> a(String s, Class<T> oclass, Collection<T> collection) {
+         return new BlockStateEnum(s, oclass, collection);
+     }
+ 
+-    public String a(Comparable comparable) {
+-        return this.a((Enum) comparable);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/BlockStateInteger.java b/src/main/java/net/minecraft/server/BlockStateInteger.java
+index 4e7e489c2..8f40d2c2a 100644
+--- a/src/main/java/net/minecraft/server/BlockStateInteger.java
++++ b/src/main/java/net/minecraft/server/BlockStateInteger.java
+@@ -61,7 +61,4 @@ public class BlockStateInteger extends BlockState<Integer> {
+         return integer.toString();
+     }
+ 
+-    public String a(Comparable comparable) {
+-        return this.a((Integer) comparable);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/BlockStateList.java b/src/main/java/net/minecraft/server/BlockStateList.java
+index 8a815a64c..6559cc502 100644
+--- a/src/main/java/net/minecraft/server/BlockStateList.java
++++ b/src/main/java/net/minecraft/server/BlockStateList.java
+@@ -123,7 +123,7 @@ public class BlockStateList {
+             if (!this.b.containsKey(iblockstate)) {
+                 throw new IllegalArgumentException("Cannot get property " + iblockstate + " as it does not exist in " + this.a.P());
+             } else {
+-                return (Comparable) iblockstate.b().cast(this.b.get(iblockstate));
++                return iblockstate.b().cast(this.b.get(iblockstate));
+             }
+         }
+ 
+diff --git a/src/main/java/net/minecraft/server/BlockStatePredicate.java b/src/main/java/net/minecraft/server/BlockStatePredicate.java
+index a1a445aa1..b90afb542 100644
+--- a/src/main/java/net/minecraft/server/BlockStatePredicate.java
++++ b/src/main/java/net/minecraft/server/BlockStatePredicate.java
+@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
+ import java.util.Iterator;
+ import java.util.Map;
+ import java.util.Map.Entry;
++import javax.annotation.Nullable;
+ 
+ public class BlockStatePredicate implements Predicate<IBlockData> {
+ 
+@@ -15,6 +16,11 @@ public class BlockStatePredicate implements Predicate<IBlockData> {
+         this.a = blockstatelist;
+     }
+ 
++    @Override
++    public boolean apply(@Nullable IBlockData input) {
++        return this.a(input);
++    }
++
+     public static BlockStatePredicate a(Block block) {
+         return new BlockStatePredicate(block.P());
+     }
+@@ -50,7 +56,4 @@ public class BlockStatePredicate implements Predicate<IBlockData> {
+         }
+     }
+ 
+-    public boolean apply(Object object) {
+-        return this.a((IBlockData) object);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/ChatTypeAdapterFactory.java b/src/main/java/net/minecraft/server/ChatTypeAdapterFactory.java
+index bceccf341..0568b4eb0 100644
+--- a/src/main/java/net/minecraft/server/ChatTypeAdapterFactory.java
++++ b/src/main/java/net/minecraft/server/ChatTypeAdapterFactory.java
+@@ -22,17 +22,17 @@ public class ChatTypeAdapterFactory implements TypeAdapterFactory {
+         if (!oclass.isEnum()) {
+             return null;
+         } else {
+-            final HashMap hashmap = Maps.newHashMap();
++            final HashMap<String, T> hashmap = Maps.newHashMap();
+             Object[] aobject = oclass.getEnumConstants();
+             int i = aobject.length;
+ 
+             for (int j = 0; j < i; ++j) {
+                 Object object = aobject[j];
+ 
+-                hashmap.put(this.a(object), object);
++                hashmap.put(this.a(object), (T) object);
+             }
+ 
+-            return new TypeAdapter() {
++            return new TypeAdapter<T>() {
+                 public void write(JsonWriter jsonwriter, T t0) throws IOException {
+                     if (t0 == null) {
+                         jsonwriter.nullValue();
+diff --git a/src/main/java/net/minecraft/server/CommandAbstract.java b/src/main/java/net/minecraft/server/CommandAbstract.java
+index 8de31ea25..112188084 100644
+--- a/src/main/java/net/minecraft/server/CommandAbstract.java
++++ b/src/main/java/net/minecraft/server/CommandAbstract.java
+@@ -161,7 +161,7 @@ public abstract class CommandAbstract implements ICommand {
+     }
+ 
+     public static <T extends Entity> T a(ICommandListener icommandlistener, String s, Class<? extends T> oclass) throws ExceptionEntityNotFound {
+-        Object object = PlayerSelector.getEntity(icommandlistener, s, oclass);
++        Entity object = PlayerSelector.getEntity(icommandlistener, s, oclass);
+         MinecraftServer minecraftserver = MinecraftServer.getServer();
+ 
+         if (object == null) {
+@@ -182,7 +182,7 @@ public abstract class CommandAbstract implements ICommand {
+         }
+ 
+         if (object != null && oclass.isAssignableFrom(object.getClass())) {
+-            return (Entity) object;
++            return (T) object;
+         } else {
+             throw new ExceptionEntityNotFound();
+         }
+@@ -521,8 +521,8 @@ public abstract class CommandAbstract implements ICommand {
+         return this.getCommand().compareTo(icommand.getCommand());
+     }
+ 
+-    public int compareTo(Object object) {
+-        return this.a((ICommand) object);
++    public int compareTo(ICommand object) {
++        return this.a(object);
+     }
+ 
+     public static class CommandNumber {
+diff --git a/src/main/java/net/minecraft/server/CustomWorldSettingsFinal.java b/src/main/java/net/minecraft/server/CustomWorldSettingsFinal.java
+index 4948ad349..5f73006c1 100644
+--- a/src/main/java/net/minecraft/server/CustomWorldSettingsFinal.java
++++ b/src/main/java/net/minecraft/server/CustomWorldSettingsFinal.java
+@@ -365,12 +365,12 @@ public class CustomWorldSettingsFinal {
+             return jsonobject;
+         }
+ 
+-        public Object deserialize(JsonElement jsonelement, Type type, JsonDeserializationContext jsondeserializationcontext) throws JsonParseException {
++        public CustomWorldSettings deserialize(JsonElement jsonelement, Type type, JsonDeserializationContext jsondeserializationcontext) throws JsonParseException {
+             return this.a(jsonelement, type, jsondeserializationcontext);
+         }
+ 
+-        public JsonElement serialize(Object object, Type type, JsonSerializationContext jsonserializationcontext) {
+-            return this.a((CustomWorldSettingsFinal.CustomWorldSettings) object, type, jsonserializationcontext);
++        public JsonElement serialize(CustomWorldSettingsFinal.CustomWorldSettings object, Type type, JsonSerializationContext jsonserializationcontext) {
++            return this.a(object, type, jsonserializationcontext);
+         }
+     }
+ 
+diff --git a/src/main/java/net/minecraft/server/DedicatedPlayerList.java b/src/main/java/net/minecraft/server/DedicatedPlayerList.java
+index c5de460c6..e5328b65a 100644
+--- a/src/main/java/net/minecraft/server/DedicatedPlayerList.java
++++ b/src/main/java/net/minecraft/server/DedicatedPlayerList.java
+@@ -146,7 +146,4 @@ public class DedicatedPlayerList extends PlayerList {
+         return this.getOPs().b(gameprofile);
+     }
+ 
+-    public MinecraftServer getServer() {
+-        return this.getServer();
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/DemoWorldServer.java b/src/main/java/net/minecraft/server/DemoWorldServer.java
+index bef6f8c2a..de19f1002 100644
+--- a/src/main/java/net/minecraft/server/DemoWorldServer.java
++++ b/src/main/java/net/minecraft/server/DemoWorldServer.java
+@@ -5,8 +5,8 @@ public class DemoWorldServer extends WorldServer {
+     private static final long I = (long) "North Carolina".hashCode();
+     public static final WorldSettings a = (new WorldSettings(DemoWorldServer.I, WorldSettings.EnumGamemode.SURVIVAL, true, false, WorldType.NORMAL)).a();
+ 
+-    public DemoWorldServer(MinecraftServer minecraftserver, IDataManager idatamanager, WorldData worlddata, int i, MethodProfiler methodprofiler) {
+-        super(minecraftserver, idatamanager, worlddata, i, methodprofiler);
++    public DemoWorldServer(MinecraftServer minecraftserver, IDataManager idatamanager, WorldData worlddata, int i, MethodProfiler methodprofiler, org.bukkit.World.Environment env, org.bukkit.generator.ChunkGenerator gen) {
++        super(minecraftserver, idatamanager, worlddata, i, methodprofiler, env, gen);
+         this.worldData.a(DemoWorldServer.a);
+     }
+ }
+diff --git a/src/main/java/net/minecraft/server/EntityGuardian.java b/src/main/java/net/minecraft/server/EntityGuardian.java
+index bcac87081..4dfe5a68f 100644
+--- a/src/main/java/net/minecraft/server/EntityGuardian.java
++++ b/src/main/java/net/minecraft/server/EntityGuardian.java
+@@ -516,8 +516,8 @@ public class EntityGuardian extends EntityMonster {
+             return (entityliving instanceof EntityHuman || entityliving instanceof EntitySquid) && entityliving.h(this.a) > 9.0D;
+         }
+ 
+-        public boolean apply(Object object) {
+-            return this.a((EntityLiving) object);
++        public boolean apply(EntityLiving object) {
++            return this.a(object);
+         }
+     }
+ }
+diff --git a/src/main/java/net/minecraft/server/EntityTameableAnimal.java b/src/main/java/net/minecraft/server/EntityTameableAnimal.java
+index 2b170a15a..20c2919a9 100644
+--- a/src/main/java/net/minecraft/server/EntityTameableAnimal.java
++++ b/src/main/java/net/minecraft/server/EntityTameableAnimal.java
+@@ -165,7 +165,4 @@ public abstract class EntityTameableAnimal extends EntityAnimal implements Entit
+         super.die(damagesource);
+     }
+ 
+-    public Entity getOwner() {
+-        return this.getOwner();
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/EnumDirection.java b/src/main/java/net/minecraft/server/EnumDirection.java
+index 1284478d3..485dcd80e 100644
+--- a/src/main/java/net/minecraft/server/EnumDirection.java
++++ b/src/main/java/net/minecraft/server/EnumDirection.java
+@@ -275,8 +275,8 @@ public enum EnumDirection implements INamable {
+             return Iterators.forArray(this.a());
+         }
+ 
+-        public boolean apply(Object object) {
+-            return this.a((EnumDirection) object);
++        public boolean apply(EnumDirection object) {
++            return this.a(object);
+         }
+     }
+ 
+@@ -342,8 +342,8 @@ public enum EnumDirection implements INamable {
+             return this.e;
+         }
+ 
+-        public boolean apply(Object object) {
+-            return this.a((EnumDirection) object);
++        public boolean apply(EnumDirection object) {
++            return this.a(object);
+         }
+ 
+         static {
+diff --git a/src/main/java/net/minecraft/server/EnumProtocol.java b/src/main/java/net/minecraft/server/EnumProtocol.java
+index 7196025da..9d409007d 100644
+--- a/src/main/java/net/minecraft/server/EnumProtocol.java
++++ b/src/main/java/net/minecraft/server/EnumProtocol.java
+@@ -147,20 +147,15 @@ public enum EnumProtocol {
+     }
+ 
+     protected EnumProtocol a(EnumProtocolDirection enumprotocoldirection, Class<? extends Packet> oclass) {
+-        Object object = (BiMap) this.j.get(enumprotocoldirection);
++        BiMap<Integer, Class<? extends Packet>> object = this.j.computeIfAbsent(enumprotocoldirection, k -> HashBiMap.create());
+ 
+-        if (object == null) {
+-            object = HashBiMap.create();
+-            this.j.put(enumprotocoldirection, object);
+-        }
+-
+-        if (((BiMap) object).containsValue(oclass)) {
+-            String s = enumprotocoldirection + " packet " + oclass + " is already known to ID " + ((BiMap) object).inverse().get(oclass);
++        if (object.containsValue(oclass)) {
++            String s = enumprotocoldirection + " packet " + oclass + " is already known to ID " + object.inverse().get(oclass);
+ 
+             LogManager.getLogger().fatal(s);
+             throw new IllegalArgumentException(s);
+         } else {
+-            ((BiMap) object).put(Integer.valueOf(((BiMap) object).size()), oclass);
++            object.put(((BiMap<?, ?>) object).size(), oclass);
+             return this;
+         }
+     }
+diff --git a/src/main/java/net/minecraft/server/GameProfileBanList.java b/src/main/java/net/minecraft/server/GameProfileBanList.java
+index 737035bf4..daf6d0cbd 100644
+--- a/src/main/java/net/minecraft/server/GameProfileBanList.java
++++ b/src/main/java/net/minecraft/server/GameProfileBanList.java
+@@ -52,7 +52,4 @@ public class GameProfileBanList extends JsonList<GameProfile, GameProfileBanEntr
+         return (GameProfile) gameprofilebanentry.getKey();
+     }
+ 
+-    protected String a(Object object) {
+-        return this.b((GameProfile) object);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/IChatBaseComponent.java b/src/main/java/net/minecraft/server/IChatBaseComponent.java
+index b187a8518..851b377bc 100644
+--- a/src/main/java/net/minecraft/server/IChatBaseComponent.java
++++ b/src/main/java/net/minecraft/server/IChatBaseComponent.java
+@@ -217,14 +217,14 @@ public interface IChatBaseComponent extends Iterable<IChatBaseComponent> {
+         }
+ 
+         public static IChatBaseComponent a(String s) {
+-            return (IChatBaseComponent) IChatBaseComponent.ChatSerializer.a.fromJson(s, IChatBaseComponent.class);
++            return ChatSerializer.a.fromJson(s, IChatBaseComponent.class);
+         }
+ 
+-        public JsonElement serialize(Object object, Type type, JsonSerializationContext jsonserializationcontext) {
+-            return this.a((IChatBaseComponent) object, type, jsonserializationcontext);
++        public JsonElement serialize(IChatBaseComponent object, Type type, JsonSerializationContext jsonserializationcontext) {
++            return this.a(object, type, jsonserializationcontext);
+         }
+ 
+-        public Object deserialize(JsonElement jsonelement, Type type, JsonDeserializationContext jsondeserializationcontext) throws JsonParseException {
++        public IChatBaseComponent deserialize(JsonElement jsonelement, Type type, JsonDeserializationContext jsondeserializationcontext) throws JsonParseException {
+             return this.a(jsonelement, type, jsondeserializationcontext);
+         }
+ 
+diff --git a/src/main/java/net/minecraft/server/IEntitySelector.java b/src/main/java/net/minecraft/server/IEntitySelector.java
+index 81c45a95a..1dd636d25 100644
+--- a/src/main/java/net/minecraft/server/IEntitySelector.java
++++ b/src/main/java/net/minecraft/server/IEntitySelector.java
+@@ -61,8 +61,8 @@ public final class IEntitySelector {
+             }
+         }
+ 
+-        public boolean apply(Object object) {
+-            return this.a((Entity) object);
++        public boolean apply(Entity object) {
++            return this.a(object);
+         }
+     }
+ }
+diff --git a/src/main/java/net/minecraft/server/InsensitiveStringMap.java b/src/main/java/net/minecraft/server/InsensitiveStringMap.java
+index 2d34bed09..1d67b2877 100644
+--- a/src/main/java/net/minecraft/server/InsensitiveStringMap.java
++++ b/src/main/java/net/minecraft/server/InsensitiveStringMap.java
+@@ -47,7 +47,7 @@ public class InsensitiveStringMap<V> implements Map<String, V> {
+         while (iterator.hasNext()) {
+             Entry entry = (Entry) iterator.next();
+ 
+-            this.a((String) entry.getKey(), entry.getValue());
++            this.a((String) entry.getKey(), (V) entry.getValue());
+         }
+ 
+     }
+@@ -68,7 +68,7 @@ public class InsensitiveStringMap<V> implements Map<String, V> {
+         return this.a.entrySet();
+     }
+ 
+-    public Object put(Object object, Object object1) {
+-        return this.a((String) object, object1);
++    public V put(String object, V object1) {
++        return this.a(object, object1);
+     }
+ }
+diff --git a/src/main/java/net/minecraft/server/IntHashMap.java b/src/main/java/net/minecraft/server/IntHashMap.java
+index 2b627013c..f3dd9b577 100644
+--- a/src/main/java/net/minecraft/server/IntHashMap.java
++++ b/src/main/java/net/minecraft/server/IntHashMap.java
+@@ -21,7 +21,7 @@ public class IntHashMap<V> {
+     public V get(int i) {
+         int j = g(i);
+ 
+-        for (IntHashMap.IntHashMapEntry inthashmap_inthashmapentry = this.a[a(j, this.a.length)]; inthashmap_inthashmapentry != null; inthashmap_inthashmapentry = inthashmap_inthashmapentry.c) {
++        for (IntHashMap.IntHashMapEntry<V> inthashmap_inthashmapentry = this.a[a(j, this.a.length)]; inthashmap_inthashmapentry != null; inthashmap_inthashmapentry = inthashmap_inthashmapentry.c) {
+             if (inthashmap_inthashmapentry.a == i) {
+                 return inthashmap_inthashmapentry.b;
+             }
+@@ -101,7 +101,7 @@ public class IntHashMap<V> {
+     }
+ 
+     public V d(int i) {
+-        IntHashMap.IntHashMapEntry inthashmap_inthashmapentry = this.e(i);
++        IntHashMap.IntHashMapEntry<V> inthashmap_inthashmapentry = this.e(i);
+ 
+         return inthashmap_inthashmapentry == null ? null : inthashmap_inthashmapentry.b;
+     }
+diff --git a/src/main/java/net/minecraft/server/IpBanList.java b/src/main/java/net/minecraft/server/IpBanList.java
+index 617d326f0..e91b9648e 100644
+--- a/src/main/java/net/minecraft/server/IpBanList.java
++++ b/src/main/java/net/minecraft/server/IpBanList.java
+@@ -23,7 +23,7 @@ public class IpBanList extends JsonList<String, IpBanEntry> {
+     public IpBanEntry get(SocketAddress socketaddress) {
+         String s = this.c(socketaddress);
+ 
+-        return (IpBanEntry) this.get((Object) s);
++        return this.get(s);
+     }
+ 
+     private String c(SocketAddress socketaddress) {
+diff --git a/src/main/java/net/minecraft/server/ItemStep.java b/src/main/java/net/minecraft/server/ItemStep.java
+index 7eedbbd02..4a8437213 100644
+--- a/src/main/java/net/minecraft/server/ItemStep.java
++++ b/src/main/java/net/minecraft/server/ItemStep.java
+@@ -58,7 +58,8 @@ public class ItemStep extends ItemBlock {
+             Comparable comparable = iblockdata.get(this.b.n());
+ 
+             if (comparable == object) {
+-                IBlockData iblockdata1 = this.c.getBlockData().set(this.b.n(), comparable);
++                IBlockState state = this.b.n();
++                IBlockData iblockdata1 = this.c.getBlockData().set(state, comparable);
+ 
+                 if (world.b(this.c.a(world, blockposition, iblockdata1)) && world.setTypeAndData(blockposition, iblockdata1, 3)) {
+                     world.makeSound((double) ((float) blockposition.getX() + 0.5F), (double) ((float) blockposition.getY() + 0.5F), (double) ((float) blockposition.getZ() + 0.5F), this.c.stepSound.getPlaceSound(), (this.c.stepSound.getVolume1() + 1.0F) / 2.0F, this.c.stepSound.getVolume2() * 0.8F);
+diff --git a/src/main/java/net/minecraft/server/IteratorUtils.java b/src/main/java/net/minecraft/server/IteratorUtils.java
+index 3385f02ed..1a6cef89b 100644
+--- a/src/main/java/net/minecraft/server/IteratorUtils.java
++++ b/src/main/java/net/minecraft/server/IteratorUtils.java
+@@ -36,11 +36,11 @@ public class IteratorUtils {
+             arraylist.add(object);
+         }
+ 
+-        return (Object[]) arraylist.toArray(b(oclass, arraylist.size()));
++        return (T[]) arraylist.toArray(b(oclass, arraylist.size()));
+     }
+ 
+     private static <T> T[] b(Class<? super T> oclass, int i) {
+-        return (Object[]) ((Object[]) Array.newInstance(oclass, i));
++        return (T[]) Array.newInstance(oclass, i);
+     }
+ 
+     static class SyntheticClass_1 {    }
+@@ -140,11 +140,11 @@ public class IteratorUtils {
+                         ++this.a;
+                     }
+ 
+-                    return (Object[]) this.d.clone();
++                    return (T[]) this.d.clone();
+                 }
+             }
+ 
+-            public Object next() {
++            public T[] next() {
+                 return this.a();
+             }
+ 
+@@ -159,11 +159,11 @@ public class IteratorUtils {
+         private ArrayToList() {}
+ 
+         public List<T> a(Object[] aobject) {
+-            return Arrays.asList((Object[]) aobject);
++            return (List<T>) Arrays.asList(aobject);
+         }
+ 
+-        public Object apply(Object object) {
+-            return this.a((Object[]) object);
++        public List<T> apply(Object[] object) {
++            return this.a(object);
+         }
+ 
+         ArrayToList(IteratorUtils.SyntheticClass_1 iteratorutils_syntheticclass_1) {
+diff --git a/src/main/java/net/minecraft/server/LongHashMap.java b/src/main/java/net/minecraft/server/LongHashMap.java
+index 30bb28536..11f23a56d 100644
+--- a/src/main/java/net/minecraft/server/LongHashMap.java
++++ b/src/main/java/net/minecraft/server/LongHashMap.java
+@@ -33,7 +33,7 @@ public class LongHashMap<V> {
+     public V getEntry(long i) {
+         int j = g(i);
+ 
+-        for (LongHashMap.LongHashMapEntry longhashmap_longhashmapentry = this.entries[a(j, this.c)]; longhashmap_longhashmapentry != null; longhashmap_longhashmapentry = longhashmap_longhashmapentry.c) {
++        for (LongHashMap.LongHashMapEntry<V> longhashmap_longhashmapentry = this.entries[a(j, this.c)]; longhashmap_longhashmapentry != null; longhashmap_longhashmapentry = longhashmap_longhashmapentry.c) {
+             if (longhashmap_longhashmapentry.a == i) {
+                 return longhashmap_longhashmapentry.b;
+             }
+@@ -115,7 +115,7 @@ public class LongHashMap<V> {
+     }
+ 
+     public V remove(long i) {
+-        LongHashMap.LongHashMapEntry longhashmap_longhashmapentry = this.e(i);
++        LongHashMap.LongHashMapEntry<V> longhashmap_longhashmapentry = this.e(i);
+ 
+         return longhashmap_longhashmapentry == null ? null : longhashmap_longhashmapentry.b;
+     }
+diff --git a/src/main/java/net/minecraft/server/MapGeneratorUtils.java b/src/main/java/net/minecraft/server/MapGeneratorUtils.java
+index 4f5b45a57..5361446db 100644
+--- a/src/main/java/net/minecraft/server/MapGeneratorUtils.java
++++ b/src/main/java/net/minecraft/server/MapGeneratorUtils.java
+@@ -12,11 +12,11 @@ public class MapGeneratorUtils {
+     }
+ 
+     public static <K, V> Map<K, V> a(Iterable<K> iterable, Iterable<V> iterable1, Map<K, V> map) {
+-        Iterator iterator = iterable1.iterator();
+-        Iterator iterator1 = iterable.iterator();
++        Iterator<V> iterator = iterable1.iterator();
++        Iterator<K> iterator1 = iterable.iterator();
+ 
+         while (iterator1.hasNext()) {
+-            Object object = iterator1.next();
++            K object = iterator1.next();
+ 
+             map.put(object, iterator.next());
+         }
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 816827afe..8e7087a34 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -265,7 +265,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+                 }
+                 worlddata.checkName(s1); // CraftBukkit - Migration did not rewrite the level.dat; This forces 1.8 to take the last loaded world as respawn (in this case the end)
+                 if (this.X()) {
+-                    world = (WorldServer) (new DemoWorldServer(this, idatamanager, worlddata, dimension, this.methodProfiler)).b();
++                    world = (WorldServer) (new DemoWorldServer(this, idatamanager, worlddata, dimension, this.methodProfiler, org.bukkit.World.Environment.getEnvironment(dimension), gen)).b();
+                 } else {
+                     world = (WorldServer) (new WorldServer(this, idatamanager, worlddata, dimension, this.methodProfiler, org.bukkit.World.Environment.getEnvironment(dimension), gen)).b();
+                 }
+diff --git a/src/main/java/net/minecraft/server/OpList.java b/src/main/java/net/minecraft/server/OpList.java
+index a85ad5d40..7864fac34 100644
+--- a/src/main/java/net/minecraft/server/OpList.java
++++ b/src/main/java/net/minecraft/server/OpList.java
+@@ -54,7 +54,4 @@ public class OpList extends JsonList<GameProfile, OpListEntry> {
+         return (GameProfile) oplistentry.getKey();
+     }
+ 
+-    protected String a(Object object) {
+-        return this.c((GameProfile) object);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketCompressor.java b/src/main/java/net/minecraft/server/PacketCompressor.java
+index 639ae31a9..4e5f193db 100644
+--- a/src/main/java/net/minecraft/server/PacketCompressor.java
++++ b/src/main/java/net/minecraft/server/PacketCompressor.java
+@@ -46,7 +46,7 @@ public class PacketCompressor extends MessageToByteEncoder<ByteBuf> {
+         this.c = i;
+     }
+ 
+-    protected void encode(ChannelHandlerContext channelhandlercontext, Object object, ByteBuf bytebuf) throws Exception {
+-        this.a(channelhandlercontext, (ByteBuf) object, bytebuf);
++    protected void encode(ChannelHandlerContext channelhandlercontext, ByteBuf bytebuf, ByteBuf bytebuf1) throws Exception {
++        this.a(channelhandlercontext, bytebuf, bytebuf1);
+     }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketDecrypter.java b/src/main/java/net/minecraft/server/PacketDecrypter.java
+index aca935611..6a9f0c68f 100644
+--- a/src/main/java/net/minecraft/server/PacketDecrypter.java
++++ b/src/main/java/net/minecraft/server/PacketDecrypter.java
+@@ -18,7 +18,7 @@ public class PacketDecrypter extends MessageToMessageDecoder<ByteBuf> {
+         list.add(this.a.a(channelhandlercontext, bytebuf));
+     }
+ 
+-    protected void decode(ChannelHandlerContext channelhandlercontext, Object object, List list) throws Exception {
+-        this.a(channelhandlercontext, (ByteBuf) object, list);
++    protected void decode(ChannelHandlerContext channelhandlercontext, ByteBuf bytebuf, List list) throws Exception {
++        this.a(channelhandlercontext, bytebuf, list);
+     }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketEncoder.java b/src/main/java/net/minecraft/server/PacketEncoder.java
+index 5c9161043..2b4da9001 100644
+--- a/src/main/java/net/minecraft/server/PacketEncoder.java
++++ b/src/main/java/net/minecraft/server/PacketEncoder.java
+@@ -46,7 +46,7 @@ public class PacketEncoder extends MessageToByteEncoder<Packet> {
+         }
+     }
+ 
+-    protected void encode(ChannelHandlerContext channelhandlercontext, Object object, ByteBuf bytebuf) throws Exception {
+-        this.a(channelhandlercontext, (Packet) object, bytebuf);
++    protected void encode(ChannelHandlerContext channelhandlercontext, Packet packet, ByteBuf bytebuf) throws Exception {
++        this.a(channelhandlercontext, packet, bytebuf);
+     }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketEncrypter.java b/src/main/java/net/minecraft/server/PacketEncrypter.java
+index bd972ebeb..85dbabd1d 100644
+--- a/src/main/java/net/minecraft/server/PacketEncrypter.java
++++ b/src/main/java/net/minecraft/server/PacketEncrypter.java
+@@ -17,7 +17,7 @@ public class PacketEncrypter extends MessageToByteEncoder<ByteBuf> {
+         this.a.a(bytebuf, bytebuf1);
+     }
+ 
+-    protected void encode(ChannelHandlerContext channelhandlercontext, Object object, ByteBuf bytebuf) throws Exception {
+-        this.a(channelhandlercontext, (ByteBuf) object, bytebuf);
++    protected void encode(ChannelHandlerContext channelhandlercontext,  ByteBuf bytebuf, ByteBuf bytebuf1) throws Exception {
++        this.a(channelhandlercontext, bytebuf, bytebuf1);
+     }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketLoginInStart.java b/src/main/java/net/minecraft/server/PacketLoginInStart.java
+index ec0e642ac..923676012 100644
+--- a/src/main/java/net/minecraft/server/PacketLoginInStart.java
++++ b/src/main/java/net/minecraft/server/PacketLoginInStart.java
+@@ -29,8 +29,4 @@ public class PacketLoginInStart implements Packet<PacketLoginInListener> {
+     public GameProfile a() {
+         return this.a;
+     }
+-
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketLoginInListener) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketLoginOutDisconnect.java b/src/main/java/net/minecraft/server/PacketLoginOutDisconnect.java
+index 09195a993..a7eb098f4 100644
+--- a/src/main/java/net/minecraft/server/PacketLoginOutDisconnect.java
++++ b/src/main/java/net/minecraft/server/PacketLoginOutDisconnect.java
+@@ -24,7 +24,4 @@ public class PacketLoginOutDisconnect implements Packet<PacketLoginOutListener>
+         packetloginoutlistener.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketLoginOutListener) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketLoginOutEncryptionBegin.java b/src/main/java/net/minecraft/server/PacketLoginOutEncryptionBegin.java
+index 703fca1f3..b889d1927 100644
+--- a/src/main/java/net/minecraft/server/PacketLoginOutEncryptionBegin.java
++++ b/src/main/java/net/minecraft/server/PacketLoginOutEncryptionBegin.java
+@@ -33,7 +33,4 @@ public class PacketLoginOutEncryptionBegin implements Packet<PacketLoginOutListe
+         packetloginoutlistener.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketLoginOutListener) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketLoginOutSetCompression.java b/src/main/java/net/minecraft/server/PacketLoginOutSetCompression.java
+index 1b2289394..8ed1a6ad4 100644
+--- a/src/main/java/net/minecraft/server/PacketLoginOutSetCompression.java
++++ b/src/main/java/net/minecraft/server/PacketLoginOutSetCompression.java
+@@ -24,7 +24,4 @@ public class PacketLoginOutSetCompression implements Packet<PacketLoginOutListen
+         packetloginoutlistener.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketLoginOutListener) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketLoginOutSuccess.java b/src/main/java/net/minecraft/server/PacketLoginOutSuccess.java
+index 7bd71e39d..93f914153 100644
+--- a/src/main/java/net/minecraft/server/PacketLoginOutSuccess.java
++++ b/src/main/java/net/minecraft/server/PacketLoginOutSuccess.java
+@@ -33,7 +33,4 @@ public class PacketLoginOutSuccess implements Packet<PacketLoginOutListener> {
+         packetloginoutlistener.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketLoginOutListener) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayInAbilities.java b/src/main/java/net/minecraft/server/PacketPlayInAbilities.java
+index 62ee79317..def47d0f6 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayInAbilities.java
++++ b/src/main/java/net/minecraft/server/PacketPlayInAbilities.java
+@@ -101,7 +101,4 @@ public class PacketPlayInAbilities implements Packet<PacketListenerPlayIn> {
+         this.f = f;
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayIn) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayInBlockDig.java b/src/main/java/net/minecraft/server/PacketPlayInBlockDig.java
+index f56dd1706..5b5e7a7ca 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayInBlockDig.java
++++ b/src/main/java/net/minecraft/server/PacketPlayInBlockDig.java
+@@ -38,10 +38,6 @@ public class PacketPlayInBlockDig implements Packet<PacketListenerPlayIn> {
+         return this.c;
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayIn) packetlistener);
+-    }
+-
+     public static enum EnumPlayerDigType {
+ 
+         START_DESTROY_BLOCK, ABORT_DESTROY_BLOCK, STOP_DESTROY_BLOCK, DROP_ALL_ITEMS, DROP_ITEM, RELEASE_USE_ITEM;
+diff --git a/src/main/java/net/minecraft/server/PacketPlayInClientCommand.java b/src/main/java/net/minecraft/server/PacketPlayInClientCommand.java
+index 530db6160..eea677c29 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayInClientCommand.java
++++ b/src/main/java/net/minecraft/server/PacketPlayInClientCommand.java
+@@ -28,10 +28,6 @@ public class PacketPlayInClientCommand implements Packet<PacketListenerPlayIn> {
+         return this.a;
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayIn) packetlistener);
+-    }
+-
+     public static enum EnumClientCommand {
+ 
+         PERFORM_RESPAWN, REQUEST_STATS, OPEN_INVENTORY_ACHIEVEMENT;
+diff --git a/src/main/java/net/minecraft/server/PacketPlayInCustomPayload.java b/src/main/java/net/minecraft/server/PacketPlayInCustomPayload.java
+index 24c6f3f70..6275b46e9 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayInCustomPayload.java
++++ b/src/main/java/net/minecraft/server/PacketPlayInCustomPayload.java
+@@ -38,7 +38,4 @@ public class PacketPlayInCustomPayload implements Packet<PacketListenerPlayIn> {
+         return this.b;
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayIn) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayInEnchantItem.java b/src/main/java/net/minecraft/server/PacketPlayInEnchantItem.java
+index eb67ee307..a82e1db66 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayInEnchantItem.java
++++ b/src/main/java/net/minecraft/server/PacketPlayInEnchantItem.java
+@@ -31,7 +31,4 @@ public class PacketPlayInEnchantItem implements Packet<PacketListenerPlayIn> {
+         return this.b;
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayIn) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayInEntityAction.java b/src/main/java/net/minecraft/server/PacketPlayInEntityAction.java
+index 71b3caa5a..d98ef823d 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayInEntityAction.java
++++ b/src/main/java/net/minecraft/server/PacketPlayInEntityAction.java
+@@ -34,10 +34,6 @@ public class PacketPlayInEntityAction implements Packet<PacketListenerPlayIn> {
+         return this.c;
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayIn) packetlistener);
+-    }
+-
+     public static enum EnumPlayerAction {
+ 
+         START_SNEAKING, STOP_SNEAKING, STOP_SLEEPING, START_SPRINTING, STOP_SPRINTING, RIDING_JUMP, OPEN_INVENTORY;
+diff --git a/src/main/java/net/minecraft/server/PacketPlayInFlying.java b/src/main/java/net/minecraft/server/PacketPlayInFlying.java
+index 4252b700a..69d9da3c3 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayInFlying.java
++++ b/src/main/java/net/minecraft/server/PacketPlayInFlying.java
+@@ -63,10 +63,6 @@ public class PacketPlayInFlying implements Packet<PacketListenerPlayIn> {
+         this.hasPos = flag;
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayIn) packetlistener);
+-    }
+-
+     public static class PacketPlayInLook extends PacketPlayInFlying {
+ 
+         public PacketPlayInLook() {
+@@ -85,9 +81,6 @@ public class PacketPlayInFlying implements Packet<PacketListenerPlayIn> {
+             super.b(packetdataserializer);
+         }
+ 
+-        public void a(PacketListener packetlistener) {
+-            super.a((PacketListenerPlayIn) packetlistener);
+-        }
+     }
+ 
+     public static class PacketPlayInPosition extends PacketPlayInFlying {
+@@ -110,9 +103,6 @@ public class PacketPlayInFlying implements Packet<PacketListenerPlayIn> {
+             super.b(packetdataserializer);
+         }
+ 
+-        public void a(PacketListener packetlistener) {
+-            super.a((PacketListenerPlayIn) packetlistener);
+-        }
+     }
+ 
+     public static class PacketPlayInPositionLook extends PacketPlayInFlying {
+@@ -140,8 +130,5 @@ public class PacketPlayInFlying implements Packet<PacketListenerPlayIn> {
+             super.b(packetdataserializer);
+         }
+ 
+-        public void a(PacketListener packetlistener) {
+-            super.a((PacketListenerPlayIn) packetlistener);
+-        }
+     }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayInHeldItemSlot.java b/src/main/java/net/minecraft/server/PacketPlayInHeldItemSlot.java
+index 76cefbf1b..1e91b57b9 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayInHeldItemSlot.java
++++ b/src/main/java/net/minecraft/server/PacketPlayInHeldItemSlot.java
+@@ -24,7 +24,4 @@ public class PacketPlayInHeldItemSlot implements Packet<PacketListenerPlayIn> {
+         return this.itemInHandIndex;
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayIn) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayInKeepAlive.java b/src/main/java/net/minecraft/server/PacketPlayInKeepAlive.java
+index b017c560e..d8f9d0fc8 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayInKeepAlive.java
++++ b/src/main/java/net/minecraft/server/PacketPlayInKeepAlive.java
+@@ -24,7 +24,4 @@ public class PacketPlayInKeepAlive implements Packet<PacketListenerPlayIn> {
+         return this.a;
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayIn) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayInSetCreativeSlot.java b/src/main/java/net/minecraft/server/PacketPlayInSetCreativeSlot.java
+index 5e171d8be..c5f948430 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayInSetCreativeSlot.java
++++ b/src/main/java/net/minecraft/server/PacketPlayInSetCreativeSlot.java
+@@ -31,7 +31,4 @@ public class PacketPlayInSetCreativeSlot implements Packet<PacketListenerPlayIn>
+         return this.b;
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayIn) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayInSettings.java b/src/main/java/net/minecraft/server/PacketPlayInSettings.java
+index 6e5fb18fa..8249aacc8 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayInSettings.java
++++ b/src/main/java/net/minecraft/server/PacketPlayInSettings.java
+@@ -48,7 +48,4 @@ public class PacketPlayInSettings implements Packet<PacketListenerPlayIn> {
+         return this.e;
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayIn) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayInSpectate.java b/src/main/java/net/minecraft/server/PacketPlayInSpectate.java
+index 2c41a1e02..15cf58821 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayInSpectate.java
++++ b/src/main/java/net/minecraft/server/PacketPlayInSpectate.java
+@@ -29,7 +29,4 @@ public class PacketPlayInSpectate implements Packet<PacketListenerPlayIn> {
+         return worldserver.getEntity(this.a);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayIn) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayInSteerVehicle.java b/src/main/java/net/minecraft/server/PacketPlayInSteerVehicle.java
+index d346d1f20..c526adc52 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayInSteerVehicle.java
++++ b/src/main/java/net/minecraft/server/PacketPlayInSteerVehicle.java
+@@ -56,7 +56,4 @@ public class PacketPlayInSteerVehicle implements Packet<PacketListenerPlayIn> {
+         return this.d;
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayIn) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayInTabComplete.java b/src/main/java/net/minecraft/server/PacketPlayInTabComplete.java
+index 237f66557..9a9c2de8c 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayInTabComplete.java
++++ b/src/main/java/net/minecraft/server/PacketPlayInTabComplete.java
+@@ -52,7 +52,4 @@ public class PacketPlayInTabComplete implements Packet<PacketListenerPlayIn> {
+         return this.b;
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayIn) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayInTransaction.java b/src/main/java/net/minecraft/server/PacketPlayInTransaction.java
+index 8fa1d1985..a802559b6 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayInTransaction.java
++++ b/src/main/java/net/minecraft/server/PacketPlayInTransaction.java
+@@ -34,7 +34,4 @@ public class PacketPlayInTransaction implements Packet<PacketListenerPlayIn> {
+         return this.b;
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayIn) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayInUpdateSign.java b/src/main/java/net/minecraft/server/PacketPlayInUpdateSign.java
+index 331e6000f..2ea2107ce 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayInUpdateSign.java
++++ b/src/main/java/net/minecraft/server/PacketPlayInUpdateSign.java
+@@ -46,7 +46,4 @@ public class PacketPlayInUpdateSign implements Packet<PacketListenerPlayIn> {
+         return this.b;
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayIn) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayInWindowClick.java b/src/main/java/net/minecraft/server/PacketPlayInWindowClick.java
+index 9b780572f..2bf7e6ee2 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayInWindowClick.java
++++ b/src/main/java/net/minecraft/server/PacketPlayInWindowClick.java
+@@ -59,7 +59,4 @@ public class PacketPlayInWindowClick implements Packet<PacketListenerPlayIn> {
+         return this.shift;
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayIn) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutAbilities.java b/src/main/java/net/minecraft/server/PacketPlayOutAbilities.java
+index 4eab9595b..f544258a3 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutAbilities.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutAbilities.java
+@@ -101,7 +101,4 @@ public class PacketPlayOutAbilities implements Packet<PacketListenerPlayOut> {
+         this.f = f;
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutAnimation.java b/src/main/java/net/minecraft/server/PacketPlayOutAnimation.java
+index 39a058770..945c67c10 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutAnimation.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutAnimation.java
+@@ -28,7 +28,4 @@ public class PacketPlayOutAnimation implements Packet<PacketListenerPlayOut> {
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutBed.java b/src/main/java/net/minecraft/server/PacketPlayOutBed.java
+index fd44293a8..8277ff405 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutBed.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutBed.java
+@@ -28,7 +28,4 @@ public class PacketPlayOutBed implements Packet<PacketListenerPlayOut> {
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutBlockAction.java b/src/main/java/net/minecraft/server/PacketPlayOutBlockAction.java
+index 55855675c..cfb92ead8 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutBlockAction.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutBlockAction.java
+@@ -36,7 +36,4 @@ public class PacketPlayOutBlockAction implements Packet<PacketListenerPlayOut> {
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutBlockBreakAnimation.java b/src/main/java/net/minecraft/server/PacketPlayOutBlockBreakAnimation.java
+index 3d52199b6..279f14b2b 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutBlockBreakAnimation.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutBlockBreakAnimation.java
+@@ -32,7 +32,4 @@ public class PacketPlayOutBlockBreakAnimation implements Packet<PacketListenerPl
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutBlockChange.java b/src/main/java/net/minecraft/server/PacketPlayOutBlockChange.java
+index 52a39a61a..fae8704b5 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutBlockChange.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutBlockChange.java
+@@ -28,7 +28,4 @@ public class PacketPlayOutBlockChange implements Packet<PacketListenerPlayOut> {
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutCamera.java b/src/main/java/net/minecraft/server/PacketPlayOutCamera.java
+index e0622812e..106f51a88 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutCamera.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutCamera.java
+@@ -24,7 +24,4 @@ public class PacketPlayOutCamera implements Packet<PacketListenerPlayOut> {
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutCloseWindow.java b/src/main/java/net/minecraft/server/PacketPlayOutCloseWindow.java
+index e6e8facd3..89d8589f2 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutCloseWindow.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutCloseWindow.java
+@@ -24,7 +24,4 @@ public class PacketPlayOutCloseWindow implements Packet<PacketListenerPlayOut> {
+         packetdataserializer.writeByte(this.a);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutCollect.java b/src/main/java/net/minecraft/server/PacketPlayOutCollect.java
+index 95ba85628..0ea9c9bff 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutCollect.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutCollect.java
+@@ -28,7 +28,4 @@ public class PacketPlayOutCollect implements Packet<PacketListenerPlayOut> {
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutCombatEvent.java b/src/main/java/net/minecraft/server/PacketPlayOutCombatEvent.java
+index ca74f2d5e..a540ac3dc 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutCombatEvent.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutCombatEvent.java
+@@ -60,10 +60,6 @@ public class PacketPlayOutCombatEvent implements Packet<PacketListenerPlayOut> {
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+-
+     static class SyntheticClass_1 {
+ 
+         static final int[] a = new int[PacketPlayOutCombatEvent.EnumCombatEventType.values().length];
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutCustomPayload.java b/src/main/java/net/minecraft/server/PacketPlayOutCustomPayload.java
+index e736c16b9..8f080155e 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutCustomPayload.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutCustomPayload.java
+@@ -38,7 +38,4 @@ public class PacketPlayOutCustomPayload implements Packet<PacketListenerPlayOut>
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutEntity.java b/src/main/java/net/minecraft/server/PacketPlayOutEntity.java
+index 42b54396f..5d4087807 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutEntity.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutEntity.java
+@@ -35,10 +35,6 @@ public class PacketPlayOutEntity implements Packet<PacketListenerPlayOut> {
+         return "Entity_" + super.toString();
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+-
+     public static class PacketPlayOutEntityLook extends PacketPlayOutEntity {
+ 
+         public PacketPlayOutEntityLook() {
+@@ -67,9 +63,6 @@ public class PacketPlayOutEntity implements Packet<PacketListenerPlayOut> {
+             packetdataserializer.writeBoolean(this.g);
+         }
+ 
+-        public void a(PacketListener packetlistener) {
+-            super.a((PacketListenerPlayOut) packetlistener);
+-        }
+     }
+ 
+     public static class PacketPlayOutRelEntityMove extends PacketPlayOutEntity {
+@@ -100,9 +93,6 @@ public class PacketPlayOutEntity implements Packet<PacketListenerPlayOut> {
+             packetdataserializer.writeBoolean(this.g);
+         }
+ 
+-        public void a(PacketListener packetlistener) {
+-            super.a((PacketListenerPlayOut) packetlistener);
+-        }
+     }
+ 
+     public static class PacketPlayOutRelEntityMoveLook extends PacketPlayOutEntity {
+@@ -142,8 +132,5 @@ public class PacketPlayOutEntity implements Packet<PacketListenerPlayOut> {
+             packetdataserializer.writeBoolean(this.g);
+         }
+ 
+-        public void a(PacketListener packetlistener) {
+-            super.a((PacketListenerPlayOut) packetlistener);
+-        }
+     }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutEntityDestroy.java b/src/main/java/net/minecraft/server/PacketPlayOutEntityDestroy.java
+index 9c58311db..34343455f 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutEntityDestroy.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutEntityDestroy.java
+@@ -34,7 +34,4 @@ public class PacketPlayOutEntityDestroy implements Packet<PacketListenerPlayOut>
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutEntityEffect.java b/src/main/java/net/minecraft/server/PacketPlayOutEntityEffect.java
+index 5c3e84334..17bd44682 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutEntityEffect.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutEntityEffect.java
+@@ -45,7 +45,4 @@ public class PacketPlayOutEntityEffect implements Packet<PacketListenerPlayOut>
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutEntityEquipment.java b/src/main/java/net/minecraft/server/PacketPlayOutEntityEquipment.java
+index 8336a08da..b66fb53a4 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutEntityEquipment.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutEntityEquipment.java
+@@ -32,7 +32,4 @@ public class PacketPlayOutEntityEquipment implements Packet<PacketListenerPlayOu
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutEntityHeadRotation.java b/src/main/java/net/minecraft/server/PacketPlayOutEntityHeadRotation.java
+index 50acff642..e783f2267 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutEntityHeadRotation.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutEntityHeadRotation.java
+@@ -28,7 +28,4 @@ public class PacketPlayOutEntityHeadRotation implements Packet<PacketListenerPla
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutEntityStatus.java b/src/main/java/net/minecraft/server/PacketPlayOutEntityStatus.java
+index 251dfb11e..5bcc49cbd 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutEntityStatus.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutEntityStatus.java
+@@ -28,7 +28,4 @@ public class PacketPlayOutEntityStatus implements Packet<PacketListenerPlayOut>
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutEntityTeleport.java b/src/main/java/net/minecraft/server/PacketPlayOutEntityTeleport.java
+index fe3002dab..0e74c6e13 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutEntityTeleport.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutEntityTeleport.java
+@@ -58,7 +58,4 @@ public class PacketPlayOutEntityTeleport implements Packet<PacketListenerPlayOut
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutEntityVelocity.java b/src/main/java/net/minecraft/server/PacketPlayOutEntityVelocity.java
+index e7df1db5d..adc941f02 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutEntityVelocity.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutEntityVelocity.java
+@@ -66,7 +66,4 @@ public class PacketPlayOutEntityVelocity implements Packet<PacketListenerPlayOut
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutExperience.java b/src/main/java/net/minecraft/server/PacketPlayOutExperience.java
+index 1ba15e344..aeffdf7b7 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutExperience.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutExperience.java
+@@ -32,7 +32,4 @@ public class PacketPlayOutExperience implements Packet<PacketListenerPlayOut> {
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutExplosion.java b/src/main/java/net/minecraft/server/PacketPlayOutExplosion.java
+index 0db929d28..3cbb17250 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutExplosion.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutExplosion.java
+@@ -88,7 +88,4 @@ public class PacketPlayOutExplosion implements Packet<PacketListenerPlayOut> {
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutGameStateChange.java b/src/main/java/net/minecraft/server/PacketPlayOutGameStateChange.java
+index 8f1add2ef..368d52a61 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutGameStateChange.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutGameStateChange.java
+@@ -29,7 +29,4 @@ public class PacketPlayOutGameStateChange implements Packet<PacketListenerPlayOu
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutHeldItemSlot.java b/src/main/java/net/minecraft/server/PacketPlayOutHeldItemSlot.java
+index 688380f6a..668f3beb5 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutHeldItemSlot.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutHeldItemSlot.java
+@@ -24,7 +24,4 @@ public class PacketPlayOutHeldItemSlot implements Packet<PacketListenerPlayOut>
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutKeepAlive.java b/src/main/java/net/minecraft/server/PacketPlayOutKeepAlive.java
+index 51711a4eb..79aecbb54 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutKeepAlive.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutKeepAlive.java
+@@ -24,7 +24,4 @@ public class PacketPlayOutKeepAlive implements Packet<PacketListenerPlayOut> {
+         packetdataserializer.b(this.a);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutKickDisconnect.java b/src/main/java/net/minecraft/server/PacketPlayOutKickDisconnect.java
+index 844050bef..7830fdce2 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutKickDisconnect.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutKickDisconnect.java
+@@ -24,7 +24,4 @@ public class PacketPlayOutKickDisconnect implements Packet<PacketListenerPlayOut
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutLogin.java b/src/main/java/net/minecraft/server/PacketPlayOutLogin.java
+index f9d76c8c5..7a1433d97 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutLogin.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutLogin.java
+@@ -65,7 +65,4 @@ public class PacketPlayOutLogin implements Packet<PacketListenerPlayOut> {
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutMap.java b/src/main/java/net/minecraft/server/PacketPlayOutMap.java
+index e7c11e1d7..3d171b6fd 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutMap.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutMap.java
+@@ -84,7 +84,4 @@ public class PacketPlayOutMap implements Packet<PacketListenerPlayOut> {
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutMultiBlockChange.java b/src/main/java/net/minecraft/server/PacketPlayOutMultiBlockChange.java
+index ed4b7a698..40a60fe05 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutMultiBlockChange.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutMultiBlockChange.java
+@@ -49,10 +49,6 @@ public class PacketPlayOutMultiBlockChange implements Packet<PacketListenerPlayO
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+-
+     public class MultiBlockChangeInfo {
+ 
+         private final short b;
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutNamedSoundEffect.java b/src/main/java/net/minecraft/server/PacketPlayOutNamedSoundEffect.java
+index 8f462209d..45e6b7b19 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutNamedSoundEffect.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutNamedSoundEffect.java
+@@ -47,7 +47,4 @@ public class PacketPlayOutNamedSoundEffect implements Packet<PacketListenerPlayO
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutOpenSignEditor.java b/src/main/java/net/minecraft/server/PacketPlayOutOpenSignEditor.java
+index 22c1f0ae9..9a6496e91 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutOpenSignEditor.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutOpenSignEditor.java
+@@ -24,7 +24,4 @@ public class PacketPlayOutOpenSignEditor implements Packet<PacketListenerPlayOut
+         packetdataserializer.a(this.a);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutPosition.java b/src/main/java/net/minecraft/server/PacketPlayOutPosition.java
+index e612df34e..ce0d872de 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutPosition.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutPosition.java
+@@ -47,10 +47,6 @@ public class PacketPlayOutPosition implements Packet<PacketListenerPlayOut> {
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+-
+     public static enum EnumPlayerTeleportFlags {
+ 
+         X(0), Y(1), Z(2), Y_ROT(3), X_ROT(4);
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutRemoveEntityEffect.java b/src/main/java/net/minecraft/server/PacketPlayOutRemoveEntityEffect.java
+index 3d961ead0..fce05e507 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutRemoveEntityEffect.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutRemoveEntityEffect.java
+@@ -28,7 +28,4 @@ public class PacketPlayOutRemoveEntityEffect implements Packet<PacketListenerPla
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutResourcePackSend.java b/src/main/java/net/minecraft/server/PacketPlayOutResourcePackSend.java
+index 3b8ec2f15..9cf1669c0 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutResourcePackSend.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutResourcePackSend.java
+@@ -31,7 +31,4 @@ public class PacketPlayOutResourcePackSend implements Packet<PacketListenerPlayO
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutRespawn.java b/src/main/java/net/minecraft/server/PacketPlayOutRespawn.java
+index 52b43a782..e7ee5a0c2 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutRespawn.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutRespawn.java
+@@ -40,7 +40,4 @@ public class PacketPlayOutRespawn implements Packet<PacketListenerPlayOut> {
+         packetdataserializer.a(this.d.name());
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutScoreboardDisplayObjective.java b/src/main/java/net/minecraft/server/PacketPlayOutScoreboardDisplayObjective.java
+index 5b4a6b70a..3a47ff185 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutScoreboardDisplayObjective.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutScoreboardDisplayObjective.java
+@@ -33,7 +33,4 @@ public class PacketPlayOutScoreboardDisplayObjective implements Packet<PacketLis
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutScoreboardObjective.java b/src/main/java/net/minecraft/server/PacketPlayOutScoreboardObjective.java
+index c552fd712..e61f68e7f 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutScoreboardObjective.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutScoreboardObjective.java
+@@ -42,7 +42,4 @@ public class PacketPlayOutScoreboardObjective implements Packet<PacketListenerPl
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutScoreboardScore.java b/src/main/java/net/minecraft/server/PacketPlayOutScoreboardScore.java
+index c5064c494..73227da44 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutScoreboardScore.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutScoreboardScore.java
+@@ -56,10 +56,6 @@ public class PacketPlayOutScoreboardScore implements Packet<PacketListenerPlayOu
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+-
+     public static enum EnumScoreboardAction {
+ 
+         CHANGE, REMOVE;
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutServerDifficulty.java b/src/main/java/net/minecraft/server/PacketPlayOutServerDifficulty.java
+index 74d94607e..ae90edd0a 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutServerDifficulty.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutServerDifficulty.java
+@@ -26,7 +26,4 @@ public class PacketPlayOutServerDifficulty implements Packet<PacketListenerPlayO
+         packetdataserializer.writeByte(this.a.a());
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutSetCompression.java b/src/main/java/net/minecraft/server/PacketPlayOutSetCompression.java
+index 1431901ce..21f3ff699 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutSetCompression.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutSetCompression.java
+@@ -20,7 +20,4 @@ public class PacketPlayOutSetCompression implements Packet<PacketListenerPlayOut
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutSetSlot.java b/src/main/java/net/minecraft/server/PacketPlayOutSetSlot.java
+index dd6610cbe..140dc6ff8 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutSetSlot.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutSetSlot.java
+@@ -32,7 +32,4 @@ public class PacketPlayOutSetSlot implements Packet<PacketListenerPlayOut> {
+         packetdataserializer.a(this.c);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntityExperienceOrb.java b/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntityExperienceOrb.java
+index 4814d6bae..62c256093 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntityExperienceOrb.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntityExperienceOrb.java
+@@ -40,7 +40,4 @@ public class PacketPlayOutSpawnEntityExperienceOrb implements Packet<PacketListe
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntityPainting.java b/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntityPainting.java
+index 42006a97d..cecafc205 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntityPainting.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntityPainting.java
+@@ -36,7 +36,4 @@ public class PacketPlayOutSpawnEntityPainting implements Packet<PacketListenerPl
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntityWeather.java b/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntityWeather.java
+index 62afc64e6..f730312a0 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntityWeather.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntityWeather.java
+@@ -43,7 +43,4 @@ public class PacketPlayOutSpawnEntityWeather implements Packet<PacketListenerPla
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutSpawnPosition.java b/src/main/java/net/minecraft/server/PacketPlayOutSpawnPosition.java
+index bb726a9ac..5e0a49e70 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutSpawnPosition.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutSpawnPosition.java
+@@ -24,7 +24,4 @@ public class PacketPlayOutSpawnPosition implements Packet<PacketListenerPlayOut>
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutStatistic.java b/src/main/java/net/minecraft/server/PacketPlayOutStatistic.java
+index d54921019..a668ca0f7 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutStatistic.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutStatistic.java
+@@ -49,7 +49,4 @@ public class PacketPlayOutStatistic implements Packet<PacketListenerPlayOut> {
+ 
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutTabComplete.java b/src/main/java/net/minecraft/server/PacketPlayOutTabComplete.java
+index 675961ef9..8acc208a3 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutTabComplete.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutTabComplete.java
+@@ -38,7 +38,4 @@ public class PacketPlayOutTabComplete implements Packet<PacketListenerPlayOut> {
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutTileEntityData.java b/src/main/java/net/minecraft/server/PacketPlayOutTileEntityData.java
+index 605438d2d..09785de2d 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutTileEntityData.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutTileEntityData.java
+@@ -32,7 +32,4 @@ public class PacketPlayOutTileEntityData implements Packet<PacketListenerPlayOut
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutTransaction.java b/src/main/java/net/minecraft/server/PacketPlayOutTransaction.java
+index ed9e46370..1988a9eae 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutTransaction.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutTransaction.java
+@@ -32,7 +32,4 @@ public class PacketPlayOutTransaction implements Packet<PacketListenerPlayOut> {
+         packetdataserializer.writeBoolean(this.c);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutUpdateAttributes.java b/src/main/java/net/minecraft/server/PacketPlayOutUpdateAttributes.java
+index 627b8fc67..acd1ea0b8 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutUpdateAttributes.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutUpdateAttributes.java
+@@ -76,10 +76,6 @@ public class PacketPlayOutUpdateAttributes implements Packet<PacketListenerPlayO
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+-
+     public class AttributeSnapshot {
+ 
+         private final String b;
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutUpdateEntityNBT.java b/src/main/java/net/minecraft/server/PacketPlayOutUpdateEntityNBT.java
+index 4273e36ff..7fbecede6 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutUpdateEntityNBT.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutUpdateEntityNBT.java
+@@ -28,7 +28,4 @@ public class PacketPlayOutUpdateEntityNBT implements Packet<PacketListenerPlayOu
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutUpdateHealth.java b/src/main/java/net/minecraft/server/PacketPlayOutUpdateHealth.java
+index 1f2bce1f5..ffca0ebf8 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutUpdateHealth.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutUpdateHealth.java
+@@ -32,7 +32,4 @@ public class PacketPlayOutUpdateHealth implements Packet<PacketListenerPlayOut>
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutUpdateSign.java b/src/main/java/net/minecraft/server/PacketPlayOutUpdateSign.java
+index 50e9686dd..ccb57f94a 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutUpdateSign.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutUpdateSign.java
+@@ -39,7 +39,4 @@ public class PacketPlayOutUpdateSign implements Packet<PacketListenerPlayOut> {
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutUpdateTime.java b/src/main/java/net/minecraft/server/PacketPlayOutUpdateTime.java
+index 38fec4aee..f365203be 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutUpdateTime.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutUpdateTime.java
+@@ -35,7 +35,4 @@ public class PacketPlayOutUpdateTime implements Packet<PacketListenerPlayOut> {
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutWindowData.java b/src/main/java/net/minecraft/server/PacketPlayOutWindowData.java
+index 18b89c603..d06efd4a2 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutWindowData.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutWindowData.java
+@@ -32,7 +32,4 @@ public class PacketPlayOutWindowData implements Packet<PacketListenerPlayOut> {
+         packetdataserializer.writeShort(this.c);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutWindowItems.java b/src/main/java/net/minecraft/server/PacketPlayOutWindowItems.java
+index 22472c093..cd8f40dcc 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutWindowItems.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutWindowItems.java
+@@ -52,7 +52,4 @@ public class PacketPlayOutWindowItems implements Packet<PacketListenerPlayOut> {
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutWorldBorder.java b/src/main/java/net/minecraft/server/PacketPlayOutWorldBorder.java
+index 53b0302b7..b4d40afe5 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutWorldBorder.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutWorldBorder.java
+@@ -110,10 +110,6 @@ public class PacketPlayOutWorldBorder implements Packet<PacketListenerPlayOut> {
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+-
+     static class SyntheticClass_1 {
+ 
+         static final int[] a = new int[PacketPlayOutWorldBorder.EnumWorldBorderAction.values().length];
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutWorldEvent.java b/src/main/java/net/minecraft/server/PacketPlayOutWorldEvent.java
+index 167bb6b99..ea3caddb2 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutWorldEvent.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutWorldEvent.java
+@@ -36,7 +36,4 @@ public class PacketPlayOutWorldEvent implements Packet<PacketListenerPlayOut> {
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutWorldParticles.java b/src/main/java/net/minecraft/server/PacketPlayOutWorldParticles.java
+index db8af7daa..9232337f7 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutWorldParticles.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutWorldParticles.java
+@@ -80,7 +80,4 @@ public class PacketPlayOutWorldParticles implements Packet<PacketListenerPlayOut
+         packetlistenerplayout.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketListenerPlayOut) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketPrepender.java b/src/main/java/net/minecraft/server/PacketPrepender.java
+index e09ede5bf..0030f0a15 100644
+--- a/src/main/java/net/minecraft/server/PacketPrepender.java
++++ b/src/main/java/net/minecraft/server/PacketPrepender.java
+@@ -23,7 +23,7 @@ public class PacketPrepender extends MessageToByteEncoder<ByteBuf> {
+         }
+     }
+ 
+-    protected void encode(ChannelHandlerContext channelhandlercontext, Object object, ByteBuf bytebuf) throws Exception {
+-        this.a(channelhandlercontext, (ByteBuf) object, bytebuf);
++    protected void encode(ChannelHandlerContext channelhandlercontext, ByteBuf bytebuf, ByteBuf bytebuf1) throws Exception {
++        this.a(channelhandlercontext, bytebuf, bytebuf1);
+     }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketStatusInPing.java b/src/main/java/net/minecraft/server/PacketStatusInPing.java
+index 97e5f50ae..e0e7e028d 100644
+--- a/src/main/java/net/minecraft/server/PacketStatusInPing.java
++++ b/src/main/java/net/minecraft/server/PacketStatusInPing.java
+@@ -24,7 +24,4 @@ public class PacketStatusInPing implements Packet<PacketStatusInListener> {
+         return this.a;
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketStatusInListener) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketStatusInStart.java b/src/main/java/net/minecraft/server/PacketStatusInStart.java
+index d3b9b323b..3b2d0f7ff 100644
+--- a/src/main/java/net/minecraft/server/PacketStatusInStart.java
++++ b/src/main/java/net/minecraft/server/PacketStatusInStart.java
+@@ -14,7 +14,4 @@ public class PacketStatusInStart implements Packet<PacketStatusInListener> {
+         packetstatusinlistener.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketStatusInListener) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketStatusOutPong.java b/src/main/java/net/minecraft/server/PacketStatusOutPong.java
+index 3a341e236..dcd226ba7 100644
+--- a/src/main/java/net/minecraft/server/PacketStatusOutPong.java
++++ b/src/main/java/net/minecraft/server/PacketStatusOutPong.java
+@@ -24,7 +24,4 @@ public class PacketStatusOutPong implements Packet<PacketStatusOutListener> {
+         packetstatusoutlistener.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketStatusOutListener) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PacketStatusOutServerInfo.java b/src/main/java/net/minecraft/server/PacketStatusOutServerInfo.java
+index 0d9e640f1..043412ed2 100644
+--- a/src/main/java/net/minecraft/server/PacketStatusOutServerInfo.java
++++ b/src/main/java/net/minecraft/server/PacketStatusOutServerInfo.java
+@@ -27,7 +27,4 @@ public class PacketStatusOutServerInfo implements Packet<PacketStatusOutListener
+         packetstatusoutlistener.a(this);
+     }
+ 
+-    public void a(PacketListener packetlistener) {
+-        this.a((PacketStatusOutListener) packetlistener);
+-    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PathfinderGoalAvoidTarget.java b/src/main/java/net/minecraft/server/PathfinderGoalAvoidTarget.java
+index f29fac4ff..475170637 100644
+--- a/src/main/java/net/minecraft/server/PathfinderGoalAvoidTarget.java
++++ b/src/main/java/net/minecraft/server/PathfinderGoalAvoidTarget.java
+@@ -47,7 +47,7 @@ public class PathfinderGoalAvoidTarget<T extends Entity> extends PathfinderGoal
+         if (list.isEmpty()) {
+             return false;
+         } else {
+-            this.b = (Entity) list.get(0);
++            this.b = (T) list.get(0);
+             Vec3D vec3d = RandomPositionGenerator.b(this.a, 16, 7, new Vec3D(this.b.locX, this.b.locY, this.b.locZ));
+ 
+             if (vec3d == null) {
+diff --git a/src/main/java/net/minecraft/server/PlayerConnectionUtils.java b/src/main/java/net/minecraft/server/PlayerConnectionUtils.java
+index f74b06794..87c066c5c 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnectionUtils.java
++++ b/src/main/java/net/minecraft/server/PlayerConnectionUtils.java
+@@ -2,7 +2,7 @@ package net.minecraft.server;
+ 
+ public class PlayerConnectionUtils {
+ 
+-    public static <T extends PacketListener> void ensureMainThread(final Packet<T> packet, final T t0, IAsyncTaskHandler iasynctaskhandler) throws CancelledPacketHandleException {
++    public static <T extends PacketListener> void ensureMainThread(final Packet<T> packet, final T packetlistener, IAsyncTaskHandler iasynctaskhandler) throws CancelledPacketHandleException {
+         if (!iasynctaskhandler.isMainThread()) {
+             iasynctaskhandler.postToMainThread(new Runnable() {
+                 public void run() {
+diff --git a/src/main/java/net/minecraft/server/PlayerSelector.java b/src/main/java/net/minecraft/server/PlayerSelector.java
+index 6437ea63e..2d7bfbbde 100644
+--- a/src/main/java/net/minecraft/server/PlayerSelector.java
++++ b/src/main/java/net/minecraft/server/PlayerSelector.java
+@@ -30,9 +30,9 @@ public class PlayerSelector {
+     }
+ 
+     public static <T extends Entity> T getEntity(ICommandListener icommandlistener, String s, Class<? extends T> oclass) {
+-        List list = getPlayers(icommandlistener, s, oclass);
++        List<T> list = getPlayers(icommandlistener, s, oclass);
+ 
+-        return list.size() == 1 ? (Entity) list.get(0) : null;
++        return list.size() == 1 ? list.get(0) : null;
+     }
+ 
+     public static IChatBaseComponent getPlayerNames(ICommandListener icommandlistener, String s) {
+@@ -41,7 +41,7 @@ public class PlayerSelector {
+         if (list.isEmpty()) {
+             return null;
+         } else {
+-            ArrayList arraylist = Lists.newArrayList();
++            ArrayList<IChatBaseComponent> arraylist = Lists.newArrayList();
+             Iterator iterator = list.iterator();
+ 
+             while (iterator.hasNext()) {
+@@ -50,7 +50,7 @@ public class PlayerSelector {
+                 arraylist.add(entity.getScoreboardDisplayName());
+             }
+ 
+-            return CommandAbstract.a((List) arraylist);
++            return CommandAbstract.a(arraylist);
+         }
+     }
+ 
+@@ -123,7 +123,7 @@ public class PlayerSelector {
+ 
+     private static List<Predicate<Entity>> a(Map<String, String> map, String s) {
+         ArrayList arraylist = Lists.newArrayList();
+-        final String s1 = b(map, "type");
++        String s1 = b(map, "type");
+         final boolean flag = s1 != null && s1.startsWith("!");
+ 
+         if (flag) {
+@@ -213,12 +213,14 @@ public class PlayerSelector {
+ 
+     private static List<Predicate<Entity>> d(Map<String, String> map) {
+         ArrayList arraylist = Lists.newArrayList();
+-        final String s = b(map, "team");
++        String s = b(map, "team");
+         final boolean flag = s != null && s.startsWith("!");
+ 
+         if (flag) {
+             s = s.substring(1);
+         }
++        final String sFinal = s; // required to use in anonymous class below
++
+ 
+         if (s != null) {
+             arraylist.add(new Predicate() {
+@@ -228,9 +230,9 @@ public class PlayerSelector {
+                     } else {
+                         EntityLiving entityliving = (EntityLiving) entity;
+                         ScoreboardTeamBase scoreboardteambase = entityliving.getScoreboardTeam();
+-                        String s = scoreboardteambase == null ? "" : scoreboardteambase.getName();
++                        String s1 = scoreboardteambase == null ? "" : scoreboardteambase.getName();
+ 
+-                        return s.equals(s1) != flag;
++                        return sFinal.equals(s1) != flag;
+                     }
+                 }
+ 
+@@ -305,17 +307,18 @@ public class PlayerSelector {
+ 
+     private static List<Predicate<Entity>> f(Map<String, String> map) {
+         ArrayList arraylist = Lists.newArrayList();
+-        final String s = b(map, "name");
++        String s = b(map, "name");
+         final boolean flag = s != null && s.startsWith("!");
+ 
+         if (flag) {
+             s = s.substring(1);
+         }
++        final String sFinal = s; // required to use in anonymous class below
+ 
+         if (s != null) {
+             arraylist.add(new Predicate() {
+                 public boolean a(Entity entity) {
+-                    return entity.getName().equals(s) != flag;
++                    return entity.getName().equals(sFinal) != flag;
+                 }
+ 
+                 public boolean apply(Object object) {
+@@ -338,7 +341,7 @@ public class PlayerSelector {
+ 
+             arraylist.add(new Predicate() {
+                 public boolean a(Entity entity) {
+-                    int i = (int) entity.c(blockposition);
++                    int i1 = (int) entity.c(blockposition);
+ 
+                     return (j < 0 || i >= k) && (l < 0 || i <= i1);
+                 }
+@@ -354,12 +357,10 @@ public class PlayerSelector {
+ 
+     private static List<Predicate<Entity>> g(Map<String, String> map) {
+         ArrayList arraylist = Lists.newArrayList();
+-        final int i;
+-        final int j;
+ 
+         if (map.containsKey("rym") || map.containsKey("ry")) {
+-            i = a(a(map, "rym", 0));
+-            j = a(a(map, "ry", 359));
++            final int k = a(a(map, "rym", 0));
++            final int j = a(a(map, "ry", 359));
+             arraylist.add(new Predicate() {
+                 public boolean a(Entity entity) {
+                     int i = PlayerSelector.a((int) Math.floor((double) entity.yaw));
+@@ -374,8 +375,8 @@ public class PlayerSelector {
+         }
+ 
+         if (map.containsKey("rxm") || map.containsKey("rx")) {
+-            i = a(a(map, "rxm", 0));
+-            j = a(a(map, "rx", 359));
++            final int k = a(a(map, "rxm", 0));;
++            final int j = a(a(map, "rx", 359));
+             arraylist.add(new Predicate() {
+                 public boolean a(Entity entity) {
+                     int i = PlayerSelector.a((int) Math.floor((double) entity.pitch));
+@@ -478,7 +479,7 @@ public class PlayerSelector {
+         Entity entity = icommandlistener.f();
+ 
+         if (entity != null && oclass.isAssignableFrom(entity.getClass()) && i == 1 && ((List) list).contains(entity) && !"r".equals(s)) {
+-            list = Lists.newArrayList(new Entity[] { entity});
++            list = (List<T>) Lists.newArrayList(new Entity[] { entity});
+         }
+ 
+         if (i != 0) {
+diff --git a/src/main/java/net/minecraft/server/RegistryBlocks.java b/src/main/java/net/minecraft/server/RegistryBlocks.java
+index dbf9cb453..fa0c45082 100644
+--- a/src/main/java/net/minecraft/server/RegistryBlocks.java
++++ b/src/main/java/net/minecraft/server/RegistryBlocks.java
+@@ -24,13 +24,13 @@ public class RegistryBlocks<K, V> extends RegistryMaterials<K, V> {
+     }
+ 
+     public V get(K k0) {
+-        Object object = super.get(k0);
++        V object = super.get(k0);
+ 
+         return object == null ? this.e : object;
+     }
+ 
+     public V a(int i) {
+-        Object object = super.a(i);
++        V object = super.a(i);
+ 
+         return object == null ? this.e : object;
+     }
+diff --git a/src/main/java/net/minecraft/server/RegistryDefault.java b/src/main/java/net/minecraft/server/RegistryDefault.java
+index 041d83372..098861752 100644
+--- a/src/main/java/net/minecraft/server/RegistryDefault.java
++++ b/src/main/java/net/minecraft/server/RegistryDefault.java
+@@ -9,7 +9,7 @@ public class RegistryDefault<K, V> extends RegistrySimple<K, V> {
+     }
+ 
+     public V get(K k0) {
+-        Object object = super.get(k0);
++        V object = super.get(k0);
+ 
+         return object == null ? this.a : object;
+     }
+diff --git a/src/main/java/net/minecraft/server/RegistryID.java b/src/main/java/net/minecraft/server/RegistryID.java
+index 0e2dac3d6..d9d458239 100644
+--- a/src/main/java/net/minecraft/server/RegistryID.java
++++ b/src/main/java/net/minecraft/server/RegistryID.java
+@@ -18,7 +18,7 @@ public class RegistryID<T> implements Registry<T> {
+         this.a.put(t0, Integer.valueOf(i));
+ 
+         while (this.b.size() <= i) {
+-            this.b.add((Object) null);
++            this.b.add(null);
+         }
+ 
+         this.b.set(i, t0);
+diff --git a/src/main/java/net/minecraft/server/Scoreboard.java b/src/main/java/net/minecraft/server/Scoreboard.java
+index c547cc490..451f9c5e2 100644
+--- a/src/main/java/net/minecraft/server/Scoreboard.java
++++ b/src/main/java/net/minecraft/server/Scoreboard.java
+@@ -35,14 +35,9 @@ public class Scoreboard {
+                 throw new IllegalArgumentException("An objective with the name \'" + s + "\' already exists!");
+             } else {
+                 scoreboardobjective = new ScoreboardObjective(this, s, iscoreboardcriteria);
+-                Object object = (List) this.objectivesByCriteria.get(iscoreboardcriteria);
++                List<ScoreboardObjective> object = this.objectivesByCriteria.computeIfAbsent(iscoreboardcriteria, k -> Lists.newArrayList());
+ 
+-                if (object == null) {
+-                    object = Lists.newArrayList();
+-                    this.objectivesByCriteria.put(iscoreboardcriteria, object);
+-                }
+-
+-                ((List) object).add(scoreboardobjective);
++                object.add(scoreboardobjective);
+                 this.objectivesByName.put(s, scoreboardobjective);
+                 this.handleObjectiveAdded(scoreboardobjective);
+                 return scoreboardobjective;
+@@ -72,18 +67,13 @@ public class Scoreboard {
+         if (s.length() > 40) {
+             throw new IllegalArgumentException("The player name \'" + s + "\' is too long!");
+         } else {
+-            Object object = (Map) this.playerScores.get(s);
+-
+-            if (object == null) {
+-                object = Maps.newHashMap();
+-                this.playerScores.put(s, object);
+-            }
++            Map<ScoreboardObjective, ScoreboardScore> object = this.playerScores.computeIfAbsent(s, k -> Maps.newHashMap());
+ 
+-            ScoreboardScore scoreboardscore = (ScoreboardScore) ((Map) object).get(scoreboardobjective);
++            ScoreboardScore scoreboardscore = object.get(scoreboardobjective);
+ 
+             if (scoreboardscore == null) {
+                 scoreboardscore = new ScoreboardScore(this, scoreboardobjective, s);
+-                ((Map) object).put(scoreboardobjective, scoreboardscore);
++                object.put(scoreboardobjective, scoreboardscore);
+             }
+ 
+             return scoreboardscore;
+diff --git a/src/main/java/net/minecraft/server/ShapeDetector.java b/src/main/java/net/minecraft/server/ShapeDetector.java
+index 325dcc6ae..7b29cc7d1 100644
+--- a/src/main/java/net/minecraft/server/ShapeDetector.java
++++ b/src/main/java/net/minecraft/server/ShapeDetector.java
+@@ -164,8 +164,9 @@ public class ShapeDetector {
+             return new ShapeDetectorBlock(this.a, blockposition, this.b);
+         }
+ 
+-        public Object load(Object object) throws Exception {
+-            return this.a((BlockPosition) object);
++        public ShapeDetectorBlock load(BlockPosition object) throws Exception {
++            return this.a(object);
+         }
++
+     }
+ }
+diff --git a/src/main/java/net/minecraft/server/ShapeDetectorBuilder.java b/src/main/java/net/minecraft/server/ShapeDetectorBuilder.java
+index 1f89acc52..b6ce45b9e 100644
+--- a/src/main/java/net/minecraft/server/ShapeDetectorBuilder.java
++++ b/src/main/java/net/minecraft/server/ShapeDetectorBuilder.java
+@@ -53,7 +53,7 @@ public class ShapeDetectorBuilder {
+                         char c0 = achar[l];
+ 
+                         if (!this.c.containsKey(Character.valueOf(c0))) {
+-                            this.c.put(Character.valueOf(c0), (Object) null);
++                            this.c.put(Character.valueOf(c0), null);
+                         }
+                     }
+                 }
+diff --git a/src/main/java/net/minecraft/server/SourceBlock.java b/src/main/java/net/minecraft/server/SourceBlock.java
+index c64b427d3..739067810 100644
+--- a/src/main/java/net/minecraft/server/SourceBlock.java
++++ b/src/main/java/net/minecraft/server/SourceBlock.java
+@@ -37,6 +37,6 @@ public class SourceBlock implements ISourceBlock {
+     }
+ 
+     public <T extends TileEntity> T getTileEntity() {
+-        return this.a.getTileEntity(this.b);
++        return (T) this.a.getTileEntity(this.b);
+     }
+ }
+diff --git a/src/main/java/net/minecraft/server/StatisticWrapper.java b/src/main/java/net/minecraft/server/StatisticWrapper.java
+index 63fbf9447..1857076e1 100644
+--- a/src/main/java/net/minecraft/server/StatisticWrapper.java
++++ b/src/main/java/net/minecraft/server/StatisticWrapper.java
+@@ -15,7 +15,7 @@ public class StatisticWrapper {
+         this.a = i;
+     }
+ 
+-    public <T extends IJsonStatistic> T b() {
++    public IJsonStatistic b() {
+         return this.b;
+     }
+ 
+diff --git a/src/main/java/net/minecraft/server/WeightedRandom.java b/src/main/java/net/minecraft/server/WeightedRandom.java
+index 2bbcfa3c7..58789a31e 100644
+--- a/src/main/java/net/minecraft/server/WeightedRandom.java
++++ b/src/main/java/net/minecraft/server/WeightedRandom.java
+@@ -29,16 +29,16 @@ public class WeightedRandom {
+     }
+ 
+     public static <T extends WeightedRandom.WeightedRandomChoice> T a(Collection<T> collection, int i) {
+-        Iterator iterator = collection.iterator();
++        Iterator<T> iterator = collection.iterator();
+ 
+-        WeightedRandom.WeightedRandomChoice weightedrandom_weightedrandomchoice;
++        T weightedrandom_weightedrandomchoice;
+ 
+         do {
+             if (!iterator.hasNext()) {
+                 return null;
+             }
+ 
+-            weightedrandom_weightedrandomchoice = (WeightedRandom.WeightedRandomChoice) iterator.next();
++            weightedrandom_weightedrandomchoice = iterator.next();
+             i -= weightedrandom_weightedrandomchoice.a;
+         } while (i >= 0);
+ 
+diff --git a/src/main/java/net/minecraft/server/WhiteList.java b/src/main/java/net/minecraft/server/WhiteList.java
+index 85085d545..dee85e5da 100644
+--- a/src/main/java/net/minecraft/server/WhiteList.java
++++ b/src/main/java/net/minecraft/server/WhiteList.java
+@@ -52,7 +52,4 @@ public class WhiteList extends JsonList<GameProfile, WhiteListEntry> {
+         return (GameProfile) whitelistentry.getKey();
+     }
+ 
+-    protected String a(Object object) {
+-        return this.b((GameProfile) object);
+-    }
+ }
+-- 
+2.36.0.windows.1
+

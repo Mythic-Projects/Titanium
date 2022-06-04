@@ -1,0 +1,9 @@
+rootProject.name = "titanium"
+
+this.setupSubproject("titanium-server", "Titanium-Server")
+this.setupSubproject("titanium-api", "Titanium-API")
+
+def setupSubproject(String name, String dir) {
+    include "$name"
+    project(":$name").projectDir = file(dir)
+}
