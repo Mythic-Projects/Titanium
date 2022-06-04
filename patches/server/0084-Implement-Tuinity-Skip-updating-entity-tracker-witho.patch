@@ -1,11 +1,12 @@
-From d2efe7b84c3645adc077360a3171697567b74787 Mon Sep 17 00:00:00 2001
+From 8051823b83fd5dafef3946c75f13ee41ed243bc6 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 25 May 2022 22:17:14 +0200
-Subject: [PATCH] Skip updating entity tracker without players
+Subject: [PATCH] Implement [Tuinity-????] Skip updating entity tracker without
+ players
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 17a1629a..46faa202 100644
+index 17a1629a9..c2bf4fc79 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -901,7 +901,9 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
@@ -13,29 +14,12 @@ index 17a1629a..46faa202 100644
                  try {
                      // PandaSpigot end
 -                    worldserver.getTracker().updatePlayers();
-+                    if (this.getPlayerList().isEmpty()) {
++                    if (this.getPlayerList().getPlayerCount() != 0) { // Tuinity
 +                        worldserver.getTracker().updatePlayers();
 +                    }
                      // PandaSpigot start - controlled flush for entity tracker packets
                  } finally {
                      for (NetworkManager networkManager : disabledFlushes) {
-diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index e2e4625b..e81f5003 100644
---- a/src/main/java/net/minecraft/server/PlayerList.java
-+++ b/src/main/java/net/minecraft/server/PlayerList.java
-@@ -1134,6 +1134,12 @@ public abstract class PlayerList {
-         entityplayer.playerConnection.sendPacket(new PacketPlayOutHeldItemSlot(entityplayer.inventory.itemInHandIndex));
-     }
- 
-+    // Titanium start
-+    public boolean isEmpty() {
-+        return this.players.isEmpty();
-+    }
-+    // Titanium end
-+
-     public int getPlayerCount() {
-         return this.players.size();
-     }
 -- 
 2.36.0.windows.1
 

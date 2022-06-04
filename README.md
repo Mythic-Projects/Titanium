@@ -143,6 +143,8 @@ Titanium implements patches from other engines as well. **All credits go to the 
 
 [Akarin-0007] Avoid double I/O operation on load player file
 
+[Tuinity-????] Skip updating entity tracker without players
+
 [Yatopia-0047] Smarter statistics ticking
 
 [InsanePaper-269] Cache Chunk Coordinations
