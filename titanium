@@ -3,9 +3,9 @@
 # get base dir regardless of execution location
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
-    DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-    SOURCE="$(readlink "$SOURCE")"
-    [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+  DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
 SOURCE=$([[ "$SOURCE" = /* ]] && echo "$SOURCE" || echo "$PWD/${SOURCE#./}")
 basedir=$(dirname "$SOURCE")
@@ -13,98 +13,109 @@ basedir=$(dirname "$SOURCE")
 . "$basedir/scripts/init.sh"
 
 paperstash() {
-    STASHED=$(git stash)
+  STASHED=$(git stash)
 }
 
 paperunstash() {
-    if [[ "$STASHED" != "No local changes to save" ]] ; then
-        git stash pop
-    fi
+  if [[ "$STASHED" != "No local changes to save" ]]; then
+    git stash pop
+  fi
 }
 
 buildpaperclipjar() {
-    cp -f ./scripts/base/basepaperclip.sh ./base/Paper/paperclip.sh
-    cd ./base/Paper
-    ./paperclip.sh
-    basedir
+  cp -f ./scripts/base/basepaperclip.sh ./base/Paper/paperclip.sh
+  cd ./base/Paper
+  ./paperclip.sh
+  basedir
 }
 
-case "$1" in
-    "setup" | "s" | "upstream")
-        cd "$basedir"
-        scripts/upstream.sh
+if [ -z "$1" ]; then
+  echo "Titanium build tool."
+  echo ""
+  echo " Commands:"
+  echo "  * setup, s, upstream, up   | Setup the build environment"
+  echo "  * patch, p, apply          | Apply patches"
+  echo "  * rebuild, rb              | Rebuild patches"
+  echo "  * jar, j                   | Create a runnable JAR"
+  echo "    * (papeprclip, pc)       | Create runnable JAR with Paperclip"
+  echo "  * build, b                 | Setup the build environment, apply patches, and create a runnable JAR"
+  echo "    * (papeprclip, pc)       | Setup the build environment, apply patches, and create a runnable JAR with Paperclip"
+  echo "  * deploy                   | Deploy to maven repository"
+  echo "    * release, snapshot      | Define if deploy to releases or snapshots repository"
+fi
+
+PREVIOUS_COMMAND=""
+
+for var in "$@"; do
+  case "$var" in
+    "setup" | "s" | "upstream" | "up")
+      PREVIOUS_COMMAND="setup"
+
+      cd "$basedir"
+      ./scripts/upstream.sh
+    ;;
+    "patch" | "p" | "apply" )
+      PREVIOUS_COMMAND="patch"
+
+      set -e
+      cd "$basedir"
+      ./scripts/apply.sh "$basedir"
+
+      log_info "    Run './titanium jar' to create a runnable JAR."
+    ;;
+    "rebuild" | "rb")
+      PREVIOUS_COMMAND="rebuild"
+
+      set -e
+      cd "$basedir"
+      ./scripts/rebuildpatches.sh "$basedir"
+    ;;
+    "jar" | "j")
+      PREVIOUS_COMMAND="jar"
+
+      set -e
+      ./gradlew build
     ;;
     "build" | "b")
-        log_info "Preparing to build Titanium"
-        cd "$basedir"
-        ./scripts/upstream.sh
-        ./scripts/apply.sh "$basedir"
-        ./gradlew build
+      PREVIOUS_COMMAND="build"
 
-        case "$2" in
-          "paperclip" | "pc")
-            buildpaperclipjar
-          ;;
-        esac
-    ;;
-    "rb" | "rbp" | "rebuild")
-    (
-        set -e
-        cd "$basedir"
-        ./scripts/rebuildpatches.sh "$basedir"
-    )
-    ;;
-    "p" | "patch" | "apply")
-    (
-        set -e
-        cd "$basedir"
-        ./scripts/apply.sh "$basedir"
-        log_info "    Run './titanium jar' to create a runnable JAR."
-    )
-    ;;
-    "j" | "jar")
-    (
-        set -e
-        ./gradlew build
+      log_info "Preparing to build Titanium"
 
-        case "$2" in
-          "paperclip" | "pc")
-            buildpaperclipjar
-          ;;
-        esac
-    )
+      cd "$basedir"
+      ./scripts/upstream.sh
+      ./scripts/apply.sh "$basedir"
+      ./gradlew build
     ;;
-    "deploy")
-    (
+    "paperclip" | "pc")
+      if [ "$PREVIOUS_COMMAND" != "build" ] && [ "$PREVIOUS_COMMAND" != "jar" ]; then
+        continue
+      fi
       set -e
+       buildpaperclipjar
+    ;;
+    "deploy" | "d")
+      PREVIOUS_COMMAND="deploy"
 
-      case "$2" in
+      set -e
+    ;;
+    "release" | "snapshot")
+      if [ "$PREVIOUS_COMMAND" != "deploy" ]; then
+        continue
+      fi
+      set -e
+      case "$var" in
         "release")
           echo "Deploying to Releases repository"
           ./gradlew publishAllPublicationsToReleasesRepository
         ;;
-        *)
+        "snapshot")
           echo "Deploying to Snapshots repository"
           ./gradlew publishAllPublicationsToSnapshotsRepository
         ;;
-      esac
-    )
+        esac
     ;;
-    *)
-        echo "Titanium build tool."
-        echo ""
-        echo " Commands:"
-        echo "  * setup              | Setup the build environment"
-        echo "  * build              | Setup the build environment, apply patches, and create a runnable JAR"
-        echo "    * (pc, papeprclip) | Setup the build environment, apply patches, and create a runnable JAR with Paperclip"
-        echo "  * p, patch           | Apply patches"
-        echo "  * rb, rebuild        | Rebuild patches"
-        echo "  * j, jar             | Create a runnable JAR"
-        echo "    * (pc, papeprclip) | Create runnable JAR with Paperclip"
-        echo "  * deploy             | Deploy to maven repository"
-        echo "    * (release)        | Define if deploy to releases repository, empty deploy to snapshots"
-    ;;
-esac
+    esac
+done
 
 unset -f paperstash
 unset -f paperunstash
