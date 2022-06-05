@@ -117,6 +117,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [PandaSpigot-0033] Configurable arrow trajectory by hpfxd
 [PandaSpigot-0034] Prevent fishing hooks from using portals by hpfxd
 [PandaSpigot-0035] Cache user authenticator threads by hpfxd
+[PandaSpigot-0010/0037] Backport PlayerProfile API by hpfxd
 [PandaSpigot-0039] Optimize VarInt reading and writing by hpfxd
 [PandaSpigot-0040] Various micro-optimizations for PacketDataSerializer by hpfxd
 [PandaSpigot-0041] Use TerminalConsoleAppender for console improvements by hpfxd
