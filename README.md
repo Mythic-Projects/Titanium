@@ -104,6 +104,8 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Nacho-0025] Disable random tickSpeed being modified
 [Nacho-????] Prevent most NBT related overflow exploits
 
+[WindSpigot-0054] Modern tick loop by windcolor-dev
+
 [PandaSpigot-0003/0004] Setup Gradle project by hpfxd
 [PandaSpigot-0005] Add internal setMaxStackSize method for materials by hpfxd
 [PandaSpigot-0006] Update to Netty 4.1.x by hpfxd 
