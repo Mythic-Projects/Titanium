@@ -1,4 +1,4 @@
-From 607678dd79dc0bfb26dada2a22c52bb7ab55dce2 Mon Sep 17 00:00:00 2001
+From e06b05c7dbd635b062bfa94899f7a48655557e82 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 5 Jun 2022 02:53:00 +0200
 Subject: [PATCH] Implement [PandaSpigot-0034] Prevent fishing hooks from using

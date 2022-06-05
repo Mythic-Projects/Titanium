@@ -1,11 +1,11 @@
-From 8a74ac34c51450e4d635dbf9308565a9ee069ab8 Mon Sep 17 00:00:00 2001
+From a5352bd3b3b8f26d602f4119ae384bea79245867 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 5 Jun 2022 02:40:01 +0200
 Subject: [PATCH] Add more informations to /tps command
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index ae530e59d..25e6fc382 100644
+index 56e73e37d..833cfd974 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -23,6 +23,7 @@ import java.io.File;
