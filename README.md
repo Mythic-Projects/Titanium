@@ -122,6 +122,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [PandaSpigot-0041] Use TerminalConsoleAppender for console improvements by hpfxd
 [PandaSpigot-0046] Performance improvement for Chunk.getEntities by hpfxd
 [PandaSpigot-0050] Metrics by hpfxd
+[PandaSpigot-0056] Faster redstone torch rapid clock removal by uRyanxD
 [PandaSpigot-0060] Optimise removeQueue by hpfxd
 
 [IonSpigot-0006] Fix Chunk Loading by SuicidalKids
