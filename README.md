@@ -104,22 +104,23 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Nacho-????] Prevent most NBT related overflow exploits
 [Nacho-????] Async entity tracker by Rastrian
 
-[PandaSpigot-0003/0004] Setup Gradle project
-[PandaSpigot-0005] Add internal setMaxStackSize method for materials
-[PandaSpigot-0006] Update to Netty 4.1.x
-[PandaSpigot-0007] Add Unix domain socket support
-[PandaSpigot-0008] Remove hacky stackable buckets code
-[PandaSpigot-0009] Improved plugins command
-[PandaSpigot-0010] Optimize Network Manager and add advanced packet support
-[PandaSpigot-0011] Allow controlled flushing for network manager
-[PandaSpigot-0012] Consolidate flush calls for entity tracker packets
-[PandaSpigot-0013] Optimise non-flush packet sending
-[PandaSpigot-0028] Avoid blocking on Network Manager creation
-[PandaSpigot-0033] Configurable arrow trajectory
-[PandaSpigot-0035] Cache user authenticator threads
-[PandaSpigot-0039] Optimize VarInt reading and writing
-[PandaSpigot-0041] Use TerminalConsoleAppender for console improvements
-[PandaSpigot-0046] Performance improvement for Chunk.getEntities
+[PandaSpigot-0003/0004] Setup Gradle project by hpfxd
+[PandaSpigot-0005] Add internal setMaxStackSize method for materials by hpfxd
+[PandaSpigot-0006] Update to Netty 4.1.x by hpfxd
+[PandaSpigot-0007] Add Unix domain socket support by hpfxd
+[PandaSpigot-0008] Remove hacky stackable buckets code by hpfxd
+[PandaSpigot-0009] Improved plugins command by hpfxd
+[PandaSpigot-0010] Optimize Network Manager and add advanced packet support by hpfxd
+[PandaSpigot-0011] Allow controlled flushing for network manager by hpfxd
+[PandaSpigot-0012] Consolidate flush calls for entity tracker packets by hpfxd
+[PandaSpigot-0013] Optimise non-flush packet sending by hpfxd
+[PandaSpigot-0028] Avoid blocking on Network Manager creation by hpfxd
+[PandaSpigot-0033] Configurable arrow trajectory by hpfxd
+[PandaSpigot-0034] Prevent fishing hooks from using portals by hpfxd
+[PandaSpigot-0035] Cache user authenticator threads by hpfxd
+[PandaSpigot-0039] Optimize VarInt reading and writing by hpfxd
+[PandaSpigot-0041] Use TerminalConsoleAppender for console improvements by hpfxd
+[PandaSpigot-0046] Performance improvement for Chunk.getEntities by hpfxd
 
 [IonSpigot-0006] Fix Chunk Loading
 [IonSpigot-0008] Reduce Chunk Hashing
