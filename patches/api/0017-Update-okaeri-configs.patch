@@ -1,0 +1,24 @@
+From ef3fe643e08aa0dcd1a7825feefa3fcf3c2881c8 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 5 Jun 2022 16:10:58 +0200
+Subject: [PATCH] Update okaeri-configs
+
+
+diff --git a/build.gradle b/build.gradle
+index 5a96c2b1..21e0a504 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -14,8 +14,8 @@ dependencies {
+     // Minecraft libraries end
+ 
+     // Titanium start - Use okaeri-configs for server configuration
+-    api 'eu.okaeri:okaeri-configs-yaml-bukkit:4.0.0-beta23'
+-    api 'eu.okaeri:okaeri-configs-serdes-commons:4.0.0-beta23'
++    api 'eu.okaeri:okaeri-configs-yaml-bukkit:4.0.1'
++    api 'eu.okaeri:okaeri-configs-serdes-commons:4.0.1'
+     // Titanium end
+ 
+     testImplementation 'junit:junit:4.13.2' // Titanium - Updated junit to 4.13.2
+-- 
+2.36.0.windows.1
+
