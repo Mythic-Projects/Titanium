@@ -103,7 +103,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Nacho-0024] Do not create new BlockPosition when loading chunk
 [Nacho-0025] Disable random tickSpeed being modified
 [Nacho-????] Prevent most NBT related overflow exploits
-[Nacho-???] Async TNT by Sculas
+[Nacho-????] Async TNT by Sculas
 
 [WindSpigot-0054] Modern tick loop by windcolor-dev
 
