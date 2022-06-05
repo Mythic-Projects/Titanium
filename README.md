@@ -105,7 +105,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 
 [PandaSpigot-0003/0004] Setup Gradle project by hpfxd
 [PandaSpigot-0005] Add internal setMaxStackSize method for materials by hpfxd
-[PandaSpigot-0006] Update to Netty 4.1.x by hpfxd
+[PandaSpigot-0006] Update to Netty 4.1.x by hpfxd 
 [PandaSpigot-0007] Add Unix domain socket support by hpfxd
 [PandaSpigot-0008] Remove hacky stackable buckets code by hpfxd
 [PandaSpigot-0009] Improved plugins command by hpfxd
@@ -122,6 +122,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [PandaSpigot-0041] Use TerminalConsoleAppender for console improvements by hpfxd
 [PandaSpigot-0046] Performance improvement for Chunk.getEntities by hpfxd
 [PandaSpigot-0050] Metrics by hpfxd
+[PandaSpigot-0060] Optimise removeQueue by hpfxd
 
 [IonSpigot-0006] Fix Chunk Loading by SuicidalKids
 [IonSpigot-0008] Reduce Chunk Hashing by SuicidalKids 
