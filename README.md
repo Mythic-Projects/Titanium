@@ -121,6 +121,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [PandaSpigot-0039] Optimize VarInt reading and writing by hpfxd
 [PandaSpigot-0041] Use TerminalConsoleAppender for console improvements by hpfxd
 [PandaSpigot-0046] Performance improvement for Chunk.getEntities by hpfxd
+[PandaSpigot-0050] Metrics by hpfxd
 
 [IonSpigot-0006] Fix Chunk Loading
 [IonSpigot-0008] Reduce Chunk Hashing
