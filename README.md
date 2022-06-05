@@ -121,6 +121,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [PandaSpigot-0040] Various micro-optimizations for PacketDataSerializer by hpfxd
 [PandaSpigot-0041] Use TerminalConsoleAppender for console improvements by hpfxd
 [PandaSpigot-0046] Performance improvement for Chunk.getEntities by hpfxd
+[PandaSpigot-0048] Only process BlockPhysicsEvent if a plugin has a listener by Aikar
 [PandaSpigot-0050] Metrics by hpfxd
 [PandaSpigot-0056] Faster redstone torch rapid clock removal by uRyanxD
 [PandaSpigot-0060] Optimise removeQueue by hpfxd
