@@ -123,14 +123,15 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [PandaSpigot-0046] Performance improvement for Chunk.getEntities by hpfxd
 [PandaSpigot-0050] Metrics by hpfxd
 
-[IonSpigot-0006] Fix Chunk Loading
-[IonSpigot-0008] Reduce Chunk Hashing
-[IonSpigot-0009] Reduce Unload Queue Complexity
-[IonSpigot-0011] Async Spawn Chunks
-[IonSpigot-0012] Movement Cache
-[IonSpigot-0014] Faster Chunk Entity List
-[IonSpigot-0020] Faster EntityTracker Collections
-[IonSpigot-0023] Implement PandaWire
+[IonSpigot-0006] Fix Chunk Loading by SuicidalKids
+[IonSpigot-0008] Reduce Chunk Hashing by SuicidalKids 
+[IonSpigot-0009] Reduce Unload Queue Complexity by SuicidalKids
+[IonSpigot-0011] Async Spawn Chunks by SuicidalKids
+[IonSpigot-0012] Movement Cache by SuicidalKids
+[IonSpigot-0014] Faster Chunk Entity List by SuicidalKids
+[IonSpigot-0020] Faster EntityTracker Collections by SuicidalKids
+[IonSpigot-0023] Implement PandaWire by SuicidalKids
+[IonSpigot-0037] Fast Cannon Entity Tracker by SuicidalKids
 
 [Migot-0005] Fix Occasional Client Side Unloading of Chunk 0 0
 [Migot-0009] Prevent creature spawning in unloaded chunks
