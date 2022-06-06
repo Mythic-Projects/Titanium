@@ -109,6 +109,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 
 [PandaSpigot-0003/0004] Setup Gradle project by hpfxd
 [PandaSpigot-0005] Add internal setMaxStackSize method for materials by hpfxd
+[PandaSpigot-0004/0005] Backport PlayerHandshakeEvent from Paper by hpfxd
 [PandaSpigot-0006] Update to Netty 4.1.x by hpfxd 
 [PandaSpigot-0007] Add Unix domain socket support by hpfxd
 [PandaSpigot-0008] Remove hacky stackable buckets code by hpfxd
