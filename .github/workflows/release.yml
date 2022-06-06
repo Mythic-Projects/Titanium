@@ -69,7 +69,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          body_path: ${{ github.workspace }}-CHANGELOG.txt
+          body_path: ${{ steps.build_changelog.outputs.changelog }}
           tag_name: ${{ steps.create_tag.outputs.new_tag }}
           files: |
             Titanium-Server/build/libs/titanium.jar
