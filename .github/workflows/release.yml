@@ -71,8 +71,8 @@ jobs:
         with:
           name: Titanium Release - ${{ steps.create_tag.outputs.new_tag }}
           tag_name: ${{ steps.create_tag.outputs.new_tag }}
-          body_path: ${{ steps.build_changelog.outputs.changelog }}
+          body: ${{steps.build_changelog.outputs.changelog}}
           files: |
             Titanium-Server/build/libs/titanium.jar
         env:
-          GITHUB_REPOSITORY: TitanVale/Titanium
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
