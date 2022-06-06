@@ -6,7 +6,9 @@ Titanium is [Paper](https://github.com/PaperMC/Paper) fork which aims to improve
 
 ## Getting Titanium
 
-Currently, you have to build Titanium by yourself. In the future Download option will be available.
+You can download the latest version of Titanium from [Releases](https://github.com/TitanVale/Titanium/releases).
+
+But also you can build it yourself. See [How To Build](https://github.com/TitanVale/Titanium#how-to-build).
 
 ### Requirements
 
@@ -19,7 +21,7 @@ If you want to build Titanium you will need these things to be installed and ava
 
 To patching, compiling and building Titanium you will use `titanium` script.
 
-To just build Titanium clone this repository and run `titanium build paperclip` in the root directory. Then you will find your server jar in `Titanium-Server/target`, it should be named `titanium-paperclip.jar`.
+To just build Titanium clone this repository and run `titanium build paperclip` in the root directory. Then you will find your server jar in `Titanium-Server/build/libs`, it should be named `titanium.jar`.
 
 ## Maven
 
