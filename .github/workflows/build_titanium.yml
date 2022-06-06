@@ -36,7 +36,7 @@ jobs:
       - name: Setup Git
         run: |
           git config --global user.email "titanium@titanvale.net"
-          git config --global user.name "Titanium CI"
+          git config --global user.name "Titanium CI/CD"
           git config --global init.defaultBranch main
       - name: Grant execute permissions
         run: |
