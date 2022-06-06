@@ -133,6 +133,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [PandaSpigot-0048] Only process BlockPhysicsEvent if a plugin has a listener by Aikar
 [PandaSpigpt-0049] Add setting for proxy online mode status by hpfxd
 [PandaSpigot-0050] Metrics by hpfxd
+[PandaSpigot-0054] Disconnect for payload errors by uRyanxD
 [PandaSpigot-0056] Faster redstone torch rapid clock removal by uRyanxD
 [PandaSpigot-0060] Optimise removeQueue by hpfxd
 
