@@ -129,6 +129,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [PandaSpigot-0041] Use TerminalConsoleAppender for console improvements by hpfxd
 [PandaSpigot-0012/0045] Ability to change PlayerProfile in AsyncPreLoginEvent by Aikar
 [PandaSpigot-0046] Performance improvement for Chunk.getEntities by hpfxd
+[PandaSpigot-0013/0047] Add Raw Byte ItemStack Serialization
 [PandaSpigot-0048] Only process BlockPhysicsEvent if a plugin has a listener by Aikar
 [PandaSpigpt-0049] Add setting for proxy online mode status by hpfxd
 [PandaSpigot-0050] Metrics by hpfxd
