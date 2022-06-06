@@ -23,7 +23,7 @@ paperunstash() {
 }
 
 buildpaperclipjar() {
-  cp -f ./scripts/base/basepaperclip.sh ./base/Paper/paperclip.sh
+  cp -f ./scripts/basepaperclip.sh ./base/Paper/paperclip.sh
   cd ./base/Paper
   ./paperclip.sh
   basedir
@@ -87,11 +87,13 @@ for var in "$@"; do
       ./gradlew build
     ;;
     "paperclip" | "pc")
-      if [ "$PREVIOUS_COMMAND" != "build" ] && [ "$PREVIOUS_COMMAND" != "jar" ]; then
+      PREVIOUS_COMMAND="paperclip"
+      if ! ( test -f "Titanium-Server/build/libs/titanium-1.8.8-R0.1-SNAPSHOT.jar" ); then
+        log_info "Built server jar doesn't exist. Run ./titanium build or ./titanium jar before running this command."
         continue
       fi
       set -e
-       buildpaperclipjar
+      buildpaperclipjar
     ;;
     "deploy" | "d" | "publish")
       PREVIOUS_COMMAND="deploy"
