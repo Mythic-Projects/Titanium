@@ -78,6 +78,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0347] Don't go below 0 for pickupDelay, breaks picking up items by Aikar
 [Paper-0350] Use a Queue for Queueing Commands
 [Paper-0352] Optimize BlockPosition helper methods by Spottedleaf
+[Paper-0797] Use Velocity compression and cipher natives by Elier"
 
 [Taco-0024] Optimize tnt entity and falling block movement
 [Taco-0025] Fix east west cannoning
