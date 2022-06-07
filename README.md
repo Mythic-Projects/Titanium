@@ -2,7 +2,7 @@
 
 Titanium is [Paper](https://github.com/PaperMC/Paper) fork which aims to improve performance, fix exploits and bugs, improve API, and provide better configuration for server administrators. 
 
-*Titanium officially supports JDK **8**, **11** & **17*** - but we are recommending to use *Java 17*.
+*Titanium officially supports JDK **8**, **11** & **17*** - but we recommend to use *Java 17*.
 
 ## Getting Titanium
 
@@ -78,6 +78,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0347] Don't go below 0 for pickupDelay, breaks picking up items by Aikar
 [Paper-0350] Use a Queue for Queueing Commands
 [Paper-0352] Optimize BlockPosition helper methods by Spottedleaf
+[Paper-0353] Send nearby packets from world player list not server by Mystiflow
 [Paper-0797] Use Velocity compression and cipher natives by Elier"
 
 [Taco-0024] Optimize tnt entity and falling block movement
