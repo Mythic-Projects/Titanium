@@ -1,11 +1,10 @@
-From 1862ff8c9d43927dd29456a6d8f9b5f6b0610a83 Mon Sep 17 00:00:00 2001
+From 3b369d49763c8c870041cb0b59f61f324116fe1e Mon Sep 17 00:00:00 2001
 From: Elier <elierrrlg@outlook.com>
 Date: Tue, 7 Jun 2022 14:58:12 +0200
 Subject: [PATCH] Implement [Paper-0797] Use Velocity compression and cipher
  natives by Elier
 
  We could achieve this thanks NachoSpigot especially Elier, author of this patch (https://github.com/CobbleSword/NachoSpigot/commit/94fc540c)
-
 
 diff --git a/build.gradle b/build.gradle
 index dea6d8db4..52513d121 100644
