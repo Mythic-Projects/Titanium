@@ -1,6 +1,6 @@
 # Titanium ![Titanium CI](https://github.com/TitanVale/Titanium/actions/workflows/build_titanium.yml/badge.svg)
 
-Titanium is [Paper](https://github.com/PaperMC/Paper) fork which aims to improve performance, fix exploits and bugs, improve API, and provide better configuration for server administrators. 
+Titanium is 1.8.8 [Paper](https://github.com/PaperMC/Paper) fork which aims to improve performance, fix exploits and bugs, improve API, and provide better configuration for server administrators. 
 
 *Titanium officially supports JDK **8**, **11** & **17*** - but we recommend to use *Java 17*.
 
