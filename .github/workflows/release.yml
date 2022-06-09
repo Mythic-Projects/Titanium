@@ -64,3 +64,4 @@ jobs:
           artifacts: "Titanium-Server/build/libs/titanium.jar"
           name: Titanium (${{ steps.create_tag.outputs.new_tag }})
           tag: ${{ steps.create_tag.outputs.new_tag }}
+          generateReleaseNotes: true
