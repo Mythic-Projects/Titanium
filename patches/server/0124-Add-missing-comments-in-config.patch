@@ -1,11 +1,24 @@
-From a64aba9d462022e2be439f57157e1a34d950b39f Mon Sep 17 00:00:00 2001
+From be831cd327f59281b1bfe441a97a1fbb132a1b5b Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 10 Jun 2022 23:08:26 +0200
 Subject: [PATCH] Add missing comments in config
 
 
+diff --git a/src/main/java/net/titanium/config/PaperConfig.java b/src/main/java/net/titanium/config/PaperConfig.java
+index a0560a509..9d55dcbeb 100644
+--- a/src/main/java/net/titanium/config/PaperConfig.java
++++ b/src/main/java/net/titanium/config/PaperConfig.java
+@@ -39,7 +39,7 @@ public class PaperConfig extends TitaniumConfigSection {
+         public int playerAutoSaveRate = -1;
+ 
+         @Comment("Maximum number of player data to save per tick.")
+-        @CustomKey("max-players-auto-save-per-tic")
++        @CustomKey("max-players-auto-save-per-tick")
+         public int maxPlayersAutoSavePerTick_ = 10;
+         @Exclude
+         public int maxPlayersAutoSavePerTick = 10;
 diff --git a/src/main/java/net/titanium/config/SpigotConfig.java b/src/main/java/net/titanium/config/SpigotConfig.java
-index fbac6bd5b..fdad93e11 100644
+index fbac6bd5b..19ae5ed01 100644
 --- a/src/main/java/net/titanium/config/SpigotConfig.java
 +++ b/src/main/java/net/titanium/config/SpigotConfig.java
 @@ -189,7 +189,7 @@ public class SpigotConfig extends TitaniumConfigSection {
@@ -13,7 +26,7 @@ index fbac6bd5b..fdad93e11 100644
                  .build();
  
 -        //TODO comment
-+        @Comment("Which commands should be excluded from spamming disconnect (if player use commands to often server disconnect him).")
++        @Comment("Which commands should be excluded from spamming disconnect (if player use commands to often servers disconnect him).")
          public Set<String> spamExclusions = ImmutableSet.<String>builder()
                  .add("/skill")
                  .build();
