@@ -100,6 +100,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [FlamePaper-0017] Pearl through blocks
 [FlamePaper-0024] Disable Unloaded Chunk Movement
 [FlamePaper-0030] Adaptive chunk GC
+[FlamePaper-0033] Dont check occluding hoppers by LinsaFTW
 [FlamePaper-0034] Hopper item lookup optimization by LinsaFTW
 
 [Nacho-0009] Remove an extra file io call within world credit bob7l"
