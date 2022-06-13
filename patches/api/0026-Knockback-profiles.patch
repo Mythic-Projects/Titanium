@@ -1,0 +1,308 @@
+From 6faff1e319e82f41c3466dbf08661fc43f7c14e3 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Mon, 13 Jun 2022 17:56:32 +0200
+Subject: [PATCH] Knockback profiles
+
+
+diff --git a/src/main/java/dev/cobblesword/nachospigot/knockback/KnockbackProfile.java b/src/main/java/dev/cobblesword/nachospigot/knockback/KnockbackProfile.java
+new file mode 100644
+index 00000000..8c1506db
+--- /dev/null
++++ b/src/main/java/dev/cobblesword/nachospigot/knockback/KnockbackProfile.java
+@@ -0,0 +1,110 @@
++package dev.cobblesword.nachospigot.knockback;
++
++import org.bukkit.Server;
++
++/**
++ * @deprecated Use {@link net.titanium.knockback.KnockbackProfile}
++ */
++@Deprecated
++public interface KnockbackProfile {
++
++    void save();
++    void save(boolean projectiles);
++
++    String getName();
++
++    void setName(String name);
++
++    double getHorizontal();
++
++    void setHorizontal(double horizontal);
++
++    double getVertical();
++
++    void setVertical(double vertical);
++
++    double getVerticalMin();
++
++    void setVerticalMin(double verticalMin);
++
++    double getVerticalMax();
++
++    void setVerticalMax(double verticalMax);
++
++    double getExtraHorizontal();
++
++    void setExtraHorizontal(double extraHorizontal);
++
++    double getExtraVertical();
++
++    void setExtraVertical(double extraVertical);
++
++    double getFrictionHorizontal();
++
++    void setFrictionHorizontal(double frictionHorizontal);
++
++    double getFrictionVertical();
++
++    void setFrictionVertical(double frictionVertical);
++
++    boolean isStopSprint();
++
++    void setStopSprint(boolean stopSprint);
++
++    double getRodHorizontal();
++
++    void setRodHorizontal(double rodHorizontal);
++
++    double getRodVertical();
++
++    void setRodVertical(double rodVertical);
++
++    double getArrowHorizontal();
++
++    void setArrowHorizontal(double arrowHorizontal);
++
++    double getArrowVertical();
++
++    void setArrowVertical(double arrowVertical);
++
++    double getPearlHorizontal();
++
++    void setPearlHorizontal(double pearlHorizontal) ;
++
++    double getPearlVertical();
++
++    void setPearlVertical(double pearlVertical);
++
++    double getSnowballHorizontal();
++
++    void setSnowballHorizontal(double snowballHorizontal);
++
++    double getSnowballVertical();
++
++    void setSnowballVertical(double snowballVertical);
++
++    double getEggHorizontal();
++
++    void setEggHorizontal(double eggHorizontal);
++
++    double getEggVertical();
++
++    void setEggVertical(double eggVertical);
++
++    // Titanium start
++    /**
++     * @deprecated this method is left only for compatibility with NachoSpigot
++     */
++    @Deprecated
++    // Titanium end
++    String[] getKnockbackValues();
++
++    // Titanium start
++    /**
++     * @deprecated this method is left only for compatibility with NachoSpigot
++     */
++    // Titanium end
++    @Deprecated
++    String[] getProjectilesValues();
++
++}
+\ No newline at end of file
+diff --git a/src/main/java/net/titanium/knockback/KnockbackProfile.java b/src/main/java/net/titanium/knockback/KnockbackProfile.java
+new file mode 100644
+index 00000000..c3b8a1ef
+--- /dev/null
++++ b/src/main/java/net/titanium/knockback/KnockbackProfile.java
+@@ -0,0 +1,5 @@
++package net.titanium.knockback;
++
++public interface KnockbackProfile extends dev.cobblesword.nachospigot.knockback.KnockbackProfile { // We extend nacho KnockbackProfile to not modify their KnockbackProfile if we'd like to add our custom functionality
++
++}
+diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
+index 2ba2788e..7696b6f7 100644
+--- a/src/main/java/org/bukkit/Bukkit.java
++++ b/src/main/java/org/bukkit/Bukkit.java
+@@ -1203,4 +1203,5 @@ public final class Bukkit {
+     public static Server.Titanium titanium() {
+         return server.titanium();
+     }
++
+ }
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index 4d9d066f..0242faa4 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -1,5 +1,7 @@
+ package org.bukkit;
+ 
++import com.avaje.ebean.config.ServerConfig;
++import com.google.common.collect.ImmutableList;
+ import eu.okaeri.configs.OkaeriConfig;
+ import java.awt.image.BufferedImage;
+ import java.io.File;
+@@ -14,7 +16,7 @@ import java.util.Map;
+ import java.util.Set;
+ import java.util.UUID;
+ import java.util.logging.Logger;
+-
++import net.titanium.knockback.KnockbackProfile;
+ import org.bukkit.Warning.WarningState;
+ import org.bukkit.command.CommandException;
+ import org.bukkit.command.CommandMap;
+@@ -25,11 +27,14 @@ import org.bukkit.entity.Entity;
+ import org.bukkit.entity.Player;
+ import org.bukkit.event.inventory.InventoryType;
+ import org.bukkit.event.server.ServerListPingEvent;
++import org.bukkit.generator.ChunkGenerator;
+ import org.bukkit.help.HelpMap;
+ import org.bukkit.inventory.Inventory;
+ import org.bukkit.inventory.InventoryHolder;
++import org.bukkit.inventory.ItemFactory;
+ import org.bukkit.inventory.ItemStack;
+ import org.bukkit.inventory.Recipe;
++import org.bukkit.inventory.meta.ItemMeta;
+ import org.bukkit.map.MapView;
+ import org.bukkit.permissions.Permissible;
+ import org.bukkit.plugin.PluginManager;
+@@ -39,13 +44,7 @@ import org.bukkit.plugin.messaging.PluginMessageRecipient;
+ import org.bukkit.scheduler.BukkitScheduler;
+ import org.bukkit.scoreboard.ScoreboardManager;
+ import org.bukkit.util.CachedServerIcon;
+-
+-import com.avaje.ebean.config.ServerConfig;
+-import com.google.common.collect.ImmutableList;
+-import org.bukkit.generator.ChunkGenerator;
+-
+-import org.bukkit.inventory.ItemFactory;
+-import org.bukkit.inventory.meta.ItemMeta;
++import org.jetbrains.annotations.Nullable;
+ 
+ /**
+  * Represents a server implementation.
+@@ -1077,15 +1076,74 @@ public interface Server extends PluginMessageRecipient {
+     public class Titanium {
+ 
+         public OkaeriConfig getServerConfig() {
+-            throw new UnsupportedOperationException( "Not supported yet." );
++            throw new UnsupportedOperationException("Not supported yet.");
+         }
+ 
++        /**
++         * @return time when the server was started
++         */
+         public Instant getStartTime() {
+-            throw new UnsupportedOperationException( "Not supported yet." );
++            throw new UnsupportedOperationException("Not supported yet.");
+         }
+ 
++        /**
++         * @return time which elapsed since the server was started
++         */
+         public Duration getUptime() {
+-            return Duration.between( getStartTime(), Instant.now() );
++            return Duration.between(getStartTime(), Instant.now());
++        }
++
++        /**
++         * Gets the global knockback profile
++         */
++        public KnockbackProfile getKnockbackProfile() {
++            throw new UnsupportedOperationException("Not supported yet.");
++        }
++
++        /**
++         * Sets the global knockback profile
++         */
++        public void setKnockbackProfile(KnockbackProfile profile) {
++            throw new UnsupportedOperationException("Not supported yet.");
++        }
++
++        /**
++         * @return all loaded profiles from config
++         */
++        public Set<KnockbackProfile> getKnockbackProfiles() {
++            throw new UnsupportedOperationException("Not supported yet.");
++        }
++
++        /**
++         * Finds profile loaded from config
++         *
++         * @param name name of the profile
++         * @return the profile, or null if not found
++         */
++        @Nullable
++        public KnockbackProfile findKnockbackProfile(String name) {
++            throw new UnsupportedOperationException("Not supported yet.");
++        }
++
++        /**
++         * Create new knockback profile
++         *
++         * @param name name of the profile
++         * @param save whether to save the profile to the config, if not the profile will be only in server memory and will be lost after restart
++         * @return the new knockback profile
++         */
++        public KnockbackProfile createKnockbackProfile(String name, boolean save) {
++            throw new UnsupportedOperationException("Not supported yet.");
++        }
++
++        /**
++         * Create new knockback profile
++         *
++         * @param name name of the profile
++         * @return the new knockback profile
++         */
++        public KnockbackProfile createKnockbackProfile(String name) {
++            return this.createKnockbackProfile(name, false);
+         }
+ 
+     }
+diff --git a/src/main/java/org/bukkit/entity/LivingEntity.java b/src/main/java/org/bukkit/entity/LivingEntity.java
+index 48e25089..6ea3cbd8 100644
+--- a/src/main/java/org/bukkit/entity/LivingEntity.java
++++ b/src/main/java/org/bukkit/entity/LivingEntity.java
+@@ -5,6 +5,7 @@ import java.util.HashSet;
+ import java.util.List;
+ import java.util.Set;
+ 
++import net.titanium.knockback.KnockbackProfile;
+ import org.bukkit.Location;
+ import org.bukkit.Material;
+ import org.bukkit.block.Block;
+@@ -252,6 +253,19 @@ public interface LivingEntity extends Entity, Damageable, ProjectileSource {
+      */
+     public void setNoDamageTicks(int ticks);
+ 
++    // Titanium start
++    /**
++     * Gets the knockback profile of this player.
++     */
++    KnockbackProfile getKnockbackProfile();
++
++    /**
++     * Sets the knockback profile of this player. The player's knockback
++     * profile overrides the global knockback profile.
++     */
++    void setKnockbackProfile(KnockbackProfile profile);
++    // Titanium end
++
+     /**
+      * Gets the player identified as the killer of the living entity.
+      * <p>
+-- 
+2.36.0.windows.1
+
