@@ -93,6 +93,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 
 [FlamePaper-0003] Fix chunk memory leak
 [FlamePaper-0005] Fix multiple memory leaks
+[FlamePaper-0008] Do not load chunks for light check by Aikar
 [FlamePaper-0010] Fix NullPointerException exploits for invalid logins
 [FlamePaper-0013] Check channel before reading
 [FlamePaper-0015] Fix Book Exploits
