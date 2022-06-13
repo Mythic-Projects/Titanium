@@ -85,6 +85,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Taco-0025] Fix east west cannoning
 
 [SportPaper-0027] Fix head rotation packet spam
+[SportPaper-0134] Improved Async Task Scheduler by cswhite2000
 [SportPaper-0176] Use fast util collections
 [SportPaper-0185] Speed up chunk unloading
 [SportPaper-0198] Optimize head rotation patch
