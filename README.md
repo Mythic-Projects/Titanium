@@ -129,6 +129,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [PandaSpigot-0011] Allow controlled flushing for network manager by hpfxd
 [PandaSpigot-0012] Consolidate flush calls for entity tracker packets by hpfxd
 [PandaSpigot-0013] Optimise non-flush packet sending by hpfxd
+[PandaSpigot-0008/0024] Player Chunk Load/Unload Events by ysl3000
 [PandaSpigot-0028] Avoid blocking on Network Manager creation by hpfxd
 [PandaSpigot-0033] Configurable arrow trajectory by hpfxd
 [PandaSpigot-0034] Prevent fishing hooks from using portals by hpfxd
