@@ -106,6 +106,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Nacho-0023] Optimize EntityTracker for the chunk updater
 [Nacho-0024] Do not create new BlockPosition when loading chunk
 [Nacho-0025] Disable random tickSpeed being modified
+[Nacho-0050] Custom knockback
 [Nacho-????] Prevent most NBT related overflow exploits
 [Nacho-????] Async TNT by Sculas
 
