@@ -1,0 +1,67 @@
+From fce4481913ce43d48e749bb28d7c81a949384680 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Mon, 13 Jun 2022 18:44:12 +0200
+Subject: [PATCH] More fast util
+
+
+diff --git a/src/main/java/net/minecraft/server/PlayerChunkMap.java b/src/main/java/net/minecraft/server/PlayerChunkMap.java
+index 632653801..0767949cb 100644
+--- a/src/main/java/net/minecraft/server/PlayerChunkMap.java
++++ b/src/main/java/net/minecraft/server/PlayerChunkMap.java
+@@ -1,6 +1,7 @@
+ package net.minecraft.server;
+ 
+ import com.google.common.collect.Lists;
++import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+ import it.unimi.dsi.fastutil.shorts.Short2ShortArrayMap;
+ import it.unimi.dsi.fastutil.shorts.Short2ShortMap;
+@@ -9,6 +10,7 @@ import it.unimi.dsi.fastutil.shorts.ShortList;
+ import java.util.ArrayList;
+ import java.util.Iterator;
+ import java.util.List;
++import java.util.Map;
+ import org.bukkit.craftbukkit.chunkio.ChunkIOExecutor;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+@@ -356,7 +358,7 @@ public class PlayerChunkMap {
+ 
+     class PlayerChunk {
+ 
+-        private final List<EntityPlayer> b = Lists.newArrayList();
++        private final List<EntityPlayer> b = new ObjectArrayList<>(); // Titanium - ArrayList -> ObjectArrayList
+         private final ChunkCoordIntPair location;
+         private final Short2ShortMap dirtyBlocks = new Short2ShortArrayMap(64); // Titanium - use fast util
+         private int dirtyCount;
+@@ -364,13 +366,9 @@ public class PlayerChunkMap {
+         private long g;
+ 
+         // CraftBukkit start - add fields
+-        private final HashMap<EntityPlayer, Runnable> players = new HashMap<EntityPlayer, Runnable>();
++        private final Map<EntityPlayer, Runnable> players = new Object2ObjectOpenHashMap<>();
+         private boolean loaded = false;
+-        private Runnable loadedRunnable = new Runnable() {
+-            public void run() {
+-                PlayerChunk.this.loaded = true;
+-            }
+-        };
++        private Runnable loadedRunnable = () -> PlayerChunk.this.loaded = true;
+         // CraftBukkit end
+ 
+         public PlayerChunk(int i, int j) {
+diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
+index 9cd5e936d..15406a0e2 100644
+--- a/src/main/java/net/minecraft/server/PlayerList.java
++++ b/src/main/java/net/minecraft/server/PlayerList.java
+@@ -54,7 +54,7 @@ public abstract class PlayerList {
+     private static final SimpleDateFormat g = new SimpleDateFormat("yyyy-MM-dd \'at\' HH:mm:ss z");
+     private final MinecraftServer server;
+     public final List<EntityPlayer> players = new java.util.concurrent.CopyOnWriteArrayList(); // CraftBukkit - ArrayList -> CopyOnWriteArrayList: Iterator safety
+-    private final Map<UUID, EntityPlayer> j = new Object2ObjectOpenHashMap<>();
++    private final Map<UUID, EntityPlayer> j = new Object2ObjectOpenHashMap<>(); // Titanium - Use fastutil
+     private final GameProfileBanList k;
+     private final IpBanList l;
+     private final OpList operators;
+-- 
+2.36.0.windows.1
+
