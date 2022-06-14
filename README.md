@@ -21,7 +21,7 @@ If you want to build Titanium you will need these things to be installed and ava
 
 To patching, compiling and building Titanium you will use `titanium` script.
 
-To just build Titanium clone this repository and run `titanium build paperclip` in the root directory. Then you will find your server jar in `Titanium-Server/build/libs`, it should be named `titanium.jar`.
+To just build Titanium clone this repository and run `./titanium build paperclip` in the root directory. Then you will find your server jar in `Titanium-Server/build/libs`, it should be named `titanium.jar`.
 
 ## Maven
 
@@ -183,8 +183,6 @@ Titanium implements patches from other engines as well. **All credits go to the 
 
 ## Contributing
 
-**This section came from [SportPaper](https://github.com/Electroid/SportPaper#contributing)**
-
-* Before contributing to Titanium, make sure you have run `./titanium build` and that you have the latest version of git installed
-* To add patches to Titanium simply make your changes in `Titanium-API` and `Titanium-Server` and commit them. Then run `./titanium rebuild`.
-* To modify nms files not currently imported into Titanium, you must add an import for that file in `scripts/importmcdev.sh` and then run `./titanium build` for those files to show up in `Titanium-Server`
+* To start contributing to Titanium, make sure you meet the [Requirements](https://github.com/TitanVale/Titanium#requirements). Then you can run `./titanium build` to prepare upstream and apply patches.
+* To add patches to Titanium simply make your changes in `Titanium-API` and `Titanium-Server`, then just commit them. Then run `./titanium rebuild`.
+* After modifing code to for eg. test it run `./titanium jar`.
