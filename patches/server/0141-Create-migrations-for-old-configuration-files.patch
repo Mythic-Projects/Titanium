@@ -1,4 +1,4 @@
-From 8a7f55f72f4073ec358c81cbf17dd4c07319650b Mon Sep 17 00:00:00 2001
+From e5c038805014956fe9c57195ac0452550767a126 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 16 Jun 2022 23:40:42 +0200
 Subject: [PATCH] Create migrations for old configuration files
@@ -196,7 +196,7 @@ index 000000000..f6ff399b9
 +
 +}
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 555f3dfa6..264995817 100644
+index a192a9a24..6ffddc386 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -9,7 +9,10 @@ import eu.okaeri.configs.annotation.Header;
@@ -219,7 +219,7 @@ index 555f3dfa6..264995817 100644
  
  @Header("This is the main configuration file for Titanium.")
  @Header("It's collect all the settings from bukkit.yml, spigot.yml etc.")
-@@ -175,6 +176,12 @@ TitaniumConfig extends TitaniumConfigSection {
+@@ -197,6 +198,12 @@ TitaniumConfig extends TitaniumConfigSection {
  
      }
  
@@ -232,7 +232,7 @@ index 555f3dfa6..264995817 100644
      @Comment("When this option is enabled, the server will create a directory `legacy_configs` with files like bukkit.yml, spigot.yml etc.")
      @Comment("Changing option there will not affect the server, it's only mirror of this file.")
      @Comment("Enable this option only if some of your plugins are not compatible with the new configs.")
-@@ -194,15 +201,49 @@ TitaniumConfig extends TitaniumConfigSection {
+@@ -216,15 +223,49 @@ TitaniumConfig extends TitaniumConfigSection {
  
      }
  
@@ -283,7 +283,7 @@ index 555f3dfa6..264995817 100644
          if (enableLegacyConfigFiles) {
              if (this.bukkitConfigHelper == null) {
                  this.bukkitConfigHelper = new LegacyConfigHelper(this.bukkit, "bukkit");
-@@ -345,4 +386,8 @@ TitaniumConfig extends TitaniumConfigSection {
+@@ -367,4 +408,8 @@ TitaniumConfig extends TitaniumConfigSection {
          log(Level.INFO, log, params);
      }
  
