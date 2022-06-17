@@ -1,4 +1,4 @@
-From 399d81d86420c01e8a6515ec169b7bb7dde8c7cf Mon Sep 17 00:00:00 2001
+From 0c4c3e5b0693da6c88427a566da333eed842fd99 Mon Sep 17 00:00:00 2001
 From: Rastrian <me@rastrian.dev>
 Date: Fri, 17 Jun 2022 01:57:00 +0200
 Subject: [PATCH] Async Entity Tracker
@@ -186,69 +186,33 @@ index 000000000..8f291fe84
 +    }
 +
 +}
-diff --git a/src/main/java/ga/windpvp/windspigot/commons/InternalPlayerMap.java b/src/main/java/ga/windpvp/windspigot/commons/InternalPlayerMap.java
-new file mode 100644
-index 000000000..7728ca07a
---- /dev/null
-+++ b/src/main/java/ga/windpvp/windspigot/commons/InternalPlayerMap.java
-@@ -0,0 +1,25 @@
-+package ga.windpvp.windspigot.commons;
-+
-+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-+
-+import static ga.windpvp.windspigot.async.AsyncUtil.runSynchronized;
-+
-+public class InternalPlayerMap<V> extends Long2ObjectOpenHashMap<V> {
-+
-+	private static final long serialVersionUID = -4787568198041966835L;
-+
-+	@Override
-+	public V put(final long k, final V v) {
-+		return runSynchronized(this, () -> super.put(k, v));
-+	}
-+
-+	@Override
-+	public V remove(final long k) {
-+		return runSynchronized(this, () -> super.remove(k));
-+	}
-+
-+	@Override
-+	public V get(final long k) {
-+		return runSynchronized(this, () -> super.get(k));
-+	}
-+}
-\ No newline at end of file
 diff --git a/src/main/java/me/rastrian/dev/PlayerMap.java b/src/main/java/me/rastrian/dev/PlayerMap.java
 new file mode 100644
-index 000000000..3a4eed97f
+index 000000000..835eeabef
 --- /dev/null
 +++ b/src/main/java/me/rastrian/dev/PlayerMap.java
-@@ -0,0 +1,232 @@
+@@ -0,0 +1,206 @@
 +package me.rastrian.dev;
 +
++import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 +import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-+import net.minecraft.server.EntityHuman;
++import java.util.ArrayList;
++import java.util.List;
++import java.util.function.Consumer;
 +import net.minecraft.server.EntityPlayer;
 +import net.minecraft.server.MathHelper;
 +import net.minecraft.server.Packet;
 +
-+import java.util.ArrayList;
-+import java.util.List;
-+import java.util.function.Consumer;
-+import java.util.function.Function;
-+import java.util.function.Predicate;
-+
 +public class PlayerMap {
 +
 +    private static final int CHUNK_BITS = 5;
-+    private final Long2ObjectMap<List<EntityPlayer>> map = new Long2ObjectOpenHashMap<>();
++    private final Long2ObjectMap<List<EntityPlayer>> map = new Long2ObjectArrayMap<>();
 +
 +    private static long xzToKey(long x, long z) {
 +        return (x << 32) + z - Integer.MIN_VALUE;
 +    }
 +
-+    public void add(EntityPlayer player) {
++    public synchronized void add(EntityPlayer player) {
 +        int x = MathHelper.floor(player.locX) >> CHUNK_BITS;
 +        int z = MathHelper.floor(player.locZ) >> CHUNK_BITS;
 +        long key = xzToKey(x, z);
@@ -262,7 +226,7 @@ index 000000000..3a4eed97f
 +        player.playerMapZ = z;
 +    }
 +
-+    public void move(EntityPlayer player) {
++    public synchronized void move(EntityPlayer player) {
 +        int x = MathHelper.floor(player.locX) >> CHUNK_BITS;
 +        int z = MathHelper.floor(player.locZ) >> CHUNK_BITS;
 +
@@ -291,11 +255,12 @@ index 000000000..3a4eed97f
 +        player.playerMapZ = z;
 +    }
 +
-+    public void remove(EntityPlayer player) {
++    public synchronized void remove(EntityPlayer player) {
 +        long key = xzToKey(player.playerMapX, player.playerMapZ);
 +        List<EntityPlayer> list = map.get(key);
 +        if (list == null) {
-+            // player has not yet been added to this playermap, this happens when teleporting to another world during PlayerJoinEvent
++            // player has not yet been added to this playermap, this happens when
++            // teleporting to another world during PlayerJoinEvent
 +            return;
 +        }
 +        list.remove(player);
@@ -304,9 +269,13 @@ index 000000000..3a4eed97f
 +        }
 +    }
 +
-+    public void forEachNearby(double x, double y, double z, double distance, boolean useRadius, Consumer<EntityPlayer> function) {
-+        for (int chunkX = MathHelper.floor(x - distance) >> CHUNK_BITS; chunkX <= MathHelper.floor(x + distance) >> CHUNK_BITS; chunkX++) {
-+            for (int chunkZ = MathHelper.floor(z - distance) >> CHUNK_BITS; chunkZ <= MathHelper.floor(z + distance) >> CHUNK_BITS; chunkZ++) {
++    public synchronized void forEachNearby(double x, double y, double z, double distance, boolean useRadius, Consumer<EntityPlayer> function) {
++
++        int chunkXMax = MathHelper.floor(x + distance) >> CHUNK_BITS;
++        int chunkZMax = MathHelper.floor(z + distance) >> CHUNK_BITS;
++
++        for (int chunkX = MathHelper.floor(x - distance) >> CHUNK_BITS; chunkX <= chunkXMax; chunkX++) {
++            for (int chunkZ = MathHelper.floor(z - distance) >> CHUNK_BITS; chunkZ <= chunkZMax; chunkZ++) {
 +                List<EntityPlayer> players = map.get(xzToKey(chunkX, chunkZ));
 +                if (players != null) {
 +                    for (EntityPlayer player : players) {
@@ -319,17 +288,21 @@ index 000000000..3a4eed97f
 +        }
 +    }
 +
-+    public EntityPlayer getNearestPlayer(double x, double y, double z, double distance) {
++    public synchronized EntityPlayer getNearestPlayer(double x, double y, double z, double distance) {
 +        double bestDistanceSqrd = -1.0;
 +        EntityPlayer bestPlayer = null;
 +
-+        for (int chunkX = MathHelper.floor(x - distance) >> CHUNK_BITS; chunkX <= MathHelper.floor(x + distance) >> CHUNK_BITS; chunkX++) {
-+            for (int chunkZ = MathHelper.floor(z - distance) >> CHUNK_BITS; chunkZ <= MathHelper.floor(z + distance) >> CHUNK_BITS; chunkZ++) {
++        int chunkXMax = MathHelper.floor(x + distance) >> CHUNK_BITS;
++        int chunkZMax = MathHelper.floor(z + distance) >> CHUNK_BITS;
++
++        for (int chunkX = MathHelper.floor(x - distance) >> CHUNK_BITS; chunkX <= chunkXMax; chunkX++) {
++            for (int chunkZ = MathHelper.floor(z - distance) >> CHUNK_BITS; chunkZ <= chunkZMax; chunkZ++) {
 +                List<EntityPlayer> players = map.get(xzToKey(chunkX, chunkZ));
 +                if (players != null) {
 +                    for (EntityPlayer player : players) {
 +                        double playerDistSqrd = player.e(x, y, z);
-+                        if (playerDistSqrd < distance * distance && (bestDistanceSqrd == -1.0 || playerDistSqrd < bestDistanceSqrd)) {
++                        if (playerDistSqrd < distance * distance
++                                && (bestDistanceSqrd == -1.0 || playerDistSqrd < bestDistanceSqrd)) {
 +                            bestDistanceSqrd = playerDistSqrd;
 +                            bestPlayer = player;
 +                        }
@@ -340,9 +313,13 @@ index 000000000..3a4eed97f
 +        return bestPlayer;
 +    }
 +
-+    public boolean isPlayerNearby(double x, double y, double z, double distance, boolean respectSpawningApi) {
-+        for (int chunkX = MathHelper.floor(x - distance) >> CHUNK_BITS; chunkX <= MathHelper.floor(x + distance) >> CHUNK_BITS; chunkX++) {
-+            for (int chunkZ = MathHelper.floor(z - distance) >> CHUNK_BITS; chunkZ <= MathHelper.floor(z + distance) >> CHUNK_BITS; chunkZ++) {
++    public synchronized boolean isPlayerNearby(double x, double y, double z, double distance, boolean respectSpawningApi) {
++
++        int chunkXMax = MathHelper.floor(x + distance) >> CHUNK_BITS;
++        int chunkZMax = MathHelper.floor(z + distance) >> CHUNK_BITS;
++
++        for (int chunkX = MathHelper.floor(x - distance) >> CHUNK_BITS; chunkX <= chunkXMax; chunkX++) {
++            for (int chunkZ = MathHelper.floor(z - distance) >> CHUNK_BITS; chunkZ <= chunkZMax; chunkZ++) {
 +                List<EntityPlayer> players = map.get(xzToKey(chunkX, chunkZ));
 +                if (players != null) {
 +                    for (EntityPlayer player : players) {
@@ -359,18 +336,22 @@ index 000000000..3a4eed97f
 +        return false;
 +    }
 +
-+    public EntityPlayer getNearbyPlayer(double x, double y, double z, double distance, boolean respectSpawningApi) {
++    public synchronized EntityPlayer getNearbyPlayer(double x, double y, double z, double distance, boolean respectSpawningApi) {
 +        double bestDistanceSqrd = -1.0;
 +        EntityPlayer bestPlayer = null;
 +
-+        for (int chunkX = MathHelper.floor(x - distance) >> CHUNK_BITS; chunkX <= MathHelper.floor(x + distance) >> CHUNK_BITS; chunkX++) {
-+            for (int chunkZ = MathHelper.floor(z - distance) >> CHUNK_BITS; chunkZ <= MathHelper.floor(z + distance) >> CHUNK_BITS; chunkZ++) {
++        int chunkXMax = MathHelper.floor(x + distance) >> CHUNK_BITS;
++        int chunkZMax = MathHelper.floor(z + distance) >> CHUNK_BITS;
++
++        for (int chunkX = MathHelper.floor(x - distance) >> CHUNK_BITS; chunkX <= chunkXMax; chunkX++) {
++            for (int chunkZ = MathHelper.floor(z - distance) >> CHUNK_BITS; chunkZ <= chunkZMax; chunkZ++) {
 +                List<EntityPlayer> players = map.get(xzToKey(chunkX, chunkZ));
 +                if (players != null) {
 +                    for (EntityPlayer player : players) {
 +                        if (player != null && !player.dead && (!respectSpawningApi || player.affectsSpawning)) {
 +                            double playerDistSqrd = player.e(x, y, z);
-+                            if (playerDistSqrd < distance * distance && (bestDistanceSqrd == -1.0 || playerDistSqrd < bestDistanceSqrd)) {
++                            if (playerDistSqrd < distance * distance
++                                    && (bestDistanceSqrd == -1.0 || playerDistSqrd < bestDistanceSqrd)) {
 +                                bestDistanceSqrd = playerDistSqrd;
 +                                bestPlayer = player;
 +                            }
@@ -383,54 +364,14 @@ index 000000000..3a4eed97f
 +        return bestPlayer;
 +    }
 +
-+    public EntityPlayer getNearestAttackablePlayer(double x, double y, double z, double maxXZ, double maxY, Function<EntityHuman, Double> visibility) {
-+        return getNearestAttackablePlayer(x, y, z, maxXZ, maxY, visibility, null);
-+    }
++    public synchronized void sendPacketNearby(EntityPlayer source, double x, double y, double z, double distance, Packet<?> packet, boolean self) {
 +
-+    public EntityPlayer getNearestAttackablePlayer(double x, double y, double z, double maxXZ, double maxY, Function<EntityHuman, Double> visibility, Predicate<EntityHuman> condition) {
-+        double bestDistanceSqrd = -1.0;
-+        EntityPlayer bestPlayer = null;
++        double distanceSqrd = distance * distance;
++        int chunkXMax = MathHelper.floor(x + distance) >> CHUNK_BITS;
++        int chunkZMax = MathHelper.floor(z + distance) >> CHUNK_BITS;
 +
-+        for (int chunkX = MathHelper.floor(x - maxXZ) >> CHUNK_BITS; chunkX <= MathHelper.floor(x + maxXZ) >> CHUNK_BITS; chunkX++) {
-+            for (int chunkZ = MathHelper.floor(z - maxXZ) >> CHUNK_BITS; chunkZ <= MathHelper.floor(z + maxXZ) >> CHUNK_BITS; chunkZ++) {
-+                List<EntityPlayer> players = map.get(xzToKey(chunkX, chunkZ));
-+                if (players != null) {
-+                    for (EntityPlayer player : players) {
-+                        if (!player.abilities.isInvulnerable && player.isAlive() && (condition == null || condition.test(player))) {
-+                            double dx = player.locX - x;
-+                            double dz = player.locZ - z;
-+                            double playerDistSqrd = dx * dx + dz * dz;
-+                            double dy = Math.abs(player.locY - y);
-+                            double distForPlayer = maxXZ;
-+
-+                            if (player.isSneaking()) {
-+                                distForPlayer *= 0.8;
-+                            }
-+
-+                            if (visibility != null) {
-+                                Double v = visibility.apply(player);
-+                                if (v != null) {
-+                                    distForPlayer *= v;
-+                                }
-+                            }
-+
-+                            // mojang mistake squaring maxY?
-+                            if ((maxY < 0.0 || dy < maxY * maxY) && playerDistSqrd < distForPlayer * distForPlayer && (bestDistanceSqrd == -1.0 || playerDistSqrd < bestDistanceSqrd)) {
-+                                bestDistanceSqrd = playerDistSqrd;
-+                                bestPlayer = player;
-+                            }
-+                        }
-+                    }
-+                }
-+            }
-+        }
-+
-+        return bestPlayer;
-+    }
-+
-+    public void sendPacketNearby(EntityPlayer source, double x, double y, double z, double distance, Packet<?> packet, boolean self) {
-+        for (int chunkX = MathHelper.floor(x - distance) >> CHUNK_BITS; chunkX <= MathHelper.floor(x + distance) >> CHUNK_BITS; chunkX++) {
-+            for (int chunkZ = MathHelper.floor(z - distance) >> CHUNK_BITS; chunkZ <= MathHelper.floor(z + distance) >> CHUNK_BITS; chunkZ++) {
++        for (int chunkX = MathHelper.floor(x - distance) >> CHUNK_BITS; chunkX <= chunkXMax; chunkX++) {
++            for (int chunkZ = MathHelper.floor(z - distance) >> CHUNK_BITS; chunkZ <= chunkZMax; chunkZ++) {
 +                List<EntityPlayer> players = map.get(xzToKey(chunkX, chunkZ));
 +                if (players != null) {
 +                    for (EntityPlayer player : players) {
@@ -447,7 +388,7 @@ index 000000000..3a4eed97f
 +                        }
 +
 +                        double playerDistSqrd = player.e(x, y, z);
-+                        if (playerDistSqrd < distance * distance) {
++                        if (playerDistSqrd < distanceSqrd) {
 +                            player.playerConnection.sendPacket(packet);
 +                        }
 +                    }
@@ -455,6 +396,7 @@ index 000000000..3a4eed97f
 +            }
 +        }
 +    }
++
 +}
 \ No newline at end of file
 diff --git a/src/main/java/me/rastrian/dev/utils/IndexedLinkedHashSet.java b/src/main/java/me/rastrian/dev/utils/IndexedLinkedHashSet.java
