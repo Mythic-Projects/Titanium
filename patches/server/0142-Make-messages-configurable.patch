@@ -1,7 +1,7 @@
-From bcca4759fa976e5b261057212cda7e6a2a4d2c0c Mon Sep 17 00:00:00 2001
+From c1800fb8754dfeaf81f5190df90d04d95b3d4896 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 17 Jun 2022 21:02:02 +0200
-Subject: [PATCH] Messages
+Subject: [PATCH] Make messages configurable
 
 
 diff --git a/src/main/java/net/minecraft/server/CommandAbstract.java b/src/main/java/net/minecraft/server/CommandAbstract.java
@@ -65,7 +65,7 @@ index d80fef6e9..74e0fd86e 100644
              SpigotTimings.playerCommandTimer.stopTiming(); // Spigot
              return;
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index 35305cb8f..0befea0c1 100644
+index 624156800..72260e493 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -17,6 +17,7 @@ import java.util.Iterator;
@@ -76,7 +76,7 @@ index 35305cb8f..0befea0c1 100644
  import org.bukkit.craftbukkit.chunkio.ChunkIOExecutor;
  import net.titanium.config.TitaniumConfig;
  import net.titanium.console.TitaniumConsoleCommandSender;
-@@ -455,7 +456,7 @@ public abstract class PlayerList {
+@@ -456,7 +457,7 @@ public abstract class PlayerList {
              if (!gameprofilebanentry.hasExpired()) event.disallow(PlayerLoginEvent.Result.KICK_BANNED, s); // Spigot
          } else if (!this.isWhitelisted(gameprofile)) {
              // return "You are not white-listed on this server!";
@@ -85,7 +85,7 @@ index 35305cb8f..0befea0c1 100644
          } else if (getIPBans().isBanned(socketaddress) && !getIPBans().get(socketaddress).hasExpired()) {
              IpBanEntry ipbanentry = this.l.get(socketaddress);
  
-@@ -469,7 +470,7 @@ public abstract class PlayerList {
+@@ -470,7 +471,7 @@ public abstract class PlayerList {
          } else {
              // return this.players.size() >= this.maxPlayers && !this.f(gameprofile) ? "The server is full!" : null;
              if (this.players.size() >= this.maxPlayers && !this.f(gameprofile)) {
@@ -360,10 +360,10 @@ index d25c9541c..dd47b50c5 100644
  
      public static class Commands extends TitaniumConfigSection {
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 555f3dfa6..591e2b3b3 100644
+index 6ffddc386..0706450e4 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
-@@ -29,8 +29,7 @@ import org.spigotmc.TicksPerSecondCommand;
+@@ -30,8 +30,7 @@ import org.bukkit.command.Command;
  @Header("It's collect all the settings from bukkit.yml, spigot.yml etc.")
  @Header("Command aliases also go in this file, just put what you would normally put in commands.yml under a commands: tag")
  @Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
@@ -373,7 +373,7 @@ index 555f3dfa6..591e2b3b3 100644
  
      // For tests to work properly
      @Exclude
-@@ -230,8 +229,8 @@ TitaniumConfig extends TitaniumConfigSection {
+@@ -293,8 +292,8 @@ TitaniumConfig extends TitaniumConfigSection {
              this.ionConfigHelper.saveSectionToFile();
          }
  
@@ -386,10 +386,10 @@ index 555f3dfa6..591e2b3b3 100644
      }
 diff --git a/src/main/java/net/titanium/config/message/MessageConfig.java b/src/main/java/net/titanium/config/message/MessageConfig.java
 new file mode 100644
-index 000000000..a1093dea2
+index 000000000..c0c84785b
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/message/MessageConfig.java
-@@ -0,0 +1,102 @@
+@@ -0,0 +1,111 @@
 +package net.titanium.config.message;
 +
 +import eu.okaeri.configs.OkaeriConfig;
@@ -405,6 +405,7 @@ index 000000000..a1093dea2
 +import net.titanium.config.TitaniumConfigSection;
 +import net.titanium.util.range.RangeFormatting;
 +import org.bukkit.Server;
++import org.spigotmc.TicksPerSecondCommand;
 +
 +@Header("Various messages sent to clients.")
 +@Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
@@ -430,7 +431,7 @@ index 000000000..a1093dea2
 +
 +    public static class Errors extends TitaniumConfigSection {
 +
-+        @Comment("You can use <permission> to insert the permission that is missing.")
++        @Comment("Supported placeholders: {PERMISSION}")
 +        public String missingPermission = "&cI'm sorry, but you do not have permission to perform this command. Please contact the server administrators if you believe that this is in error.";
 +        public String missingPlayer = "&cYou must specify which player you wish to perform this action on.";
 +        @Comment("Supported placeholders: {PLAYER}")
@@ -439,6 +440,14 @@ index 000000000..a1093dea2
 +        public String correctUsage = "&cUsage: &f{USAGE}";
 +
 +    }
++
++    @Comment("Supported placeholders: {TPS_AVG}, {TPS_1M}, {TPS_5M}, {TPS_15M}, {MEMORY_USED}, {FREE_MEMORY}, {MAX_MEMORY}, {UPTIME}")
++    public List<String> ticksPerSeconds = Arrays.asList(
++            "&6TPS from last 1m, 5m, 15m: &f{TPS_AVG}",
++            " ",
++            "&6Memory usage: &a{MEMORY_USED}&a/{MEMORY_MAX} MB",
++            "&6Uptime: &a{UPTIME}"
++    );
 +
 +    public Ping ping = new Ping();
 +
@@ -665,6 +674,85 @@ index e2828dfa2..c34de5946 100644
                  }
                  // Give the socket a chance to send the packets
                  try
+diff --git a/src/main/java/org/spigotmc/TicksPerSecondCommand.java b/src/main/java/org/spigotmc/TicksPerSecondCommand.java
+index 5da2b2148..f775f05f4 100644
+--- a/src/main/java/org/spigotmc/TicksPerSecondCommand.java
++++ b/src/main/java/org/spigotmc/TicksPerSecondCommand.java
+@@ -1,6 +1,9 @@
+ package org.spigotmc;
+ 
+ import java.util.Arrays;
++import java.util.List;
++import java.util.stream.Collectors;
++import net.titanium.config.message.MessageConfig;
+ import org.apache.commons.lang3.time.DurationFormatUtils;
+ import org.bukkit.Bukkit;
+ import org.bukkit.ChatColor;
+@@ -34,11 +37,37 @@ public class TicksPerSecondCommand extends Command
+         for (int i = 0; i < tps.length; i++) {
+             tpsAvg[i] = formatTps(tps[i]);
+         }
++
++        // Titanium start - make messages configurable
++        List<String> message = MessageConfig.get().ticksPerSeconds;
++
++        Runtime runtime = Runtime.getRuntime();
++
++        message.stream()
++                .map(messageLine -> {
++                    // TPS
++                    messageLine = messageLine.replace("{TPS_AVG}", "{TPS_1M}, {TPS_5M}, {TPS_15M}");
++                    messageLine = messageLine.replace("{TPS_1M}", tpsAvg[0]);
++                    messageLine = messageLine.replace("{TPS_5M}", tpsAvg[1]);
++                    messageLine = messageLine.replace("{TPS_15M}", tpsAvg[2]);
++                    // MEMORY
++                    messageLine = messageLine.replace("{MEMORY_USED}", formatMemoryUsage(runtime.totalMemory() - runtime.freeMemory(), runtime.maxMemory()));
++                    messageLine = messageLine.replace("{MEMORY_FREE}", formatFreeMemory(runtime.freeMemory(), runtime.maxMemory()));
++                    messageLine = messageLine.replace("{MEMORY_MAX}", String.valueOf(runtime.maxMemory() / 1024 / 1024));
++                    // UPTIME
++                    messageLine = messageLine.replace("{UPTIME}", formatUptime(Bukkit.titanium().getUptime().toMillis()));
++
++                    return messageLine;
++                })
++                .forEach(sender::sendMessage);
++        // Titanium end
++        /* // Titanium - make messages configurable
+         sender.sendMessage(ChatColor.GOLD + "TPS from last 1m, 5m, 15m: " + org.apache.commons.lang.StringUtils.join(tpsAvg, ", "));
+-        // Titanium start
++        // Titanium start - add memory usage and uptime
+         Runtime runtime = Runtime.getRuntime();
+         sender.sendMessage(ChatColor.GOLD + "Memory Usage: " + formatMemoryUsage(runtime.totalMemory() - runtime.freeMemory(), runtime.maxMemory()));
+         sender.sendMessage(ChatColor.GOLD + "Uptime: " + ChatColor.GREEN + formatUptime(Bukkit.titanium().getUptime().toMillis()));
++         */
+         // Titanium end
+ 
+         return true;
+@@ -56,12 +85,23 @@ public class TicksPerSecondCommand extends Command
+         max = max / 1024 / 1024;
+ 
+         double usagePer = (double) usage / (double) max;
+-        String usageFormated = ((usagePer > 0.8) ?
++        return ((usagePer > 0.8) ?
+                 ChatColor.RED
+                 : (usagePer > 0.6)
+                 ? ChatColor.YELLOW
+                 : ChatColor.GREEN) + String.valueOf(usage);
+-        return usageFormated + ChatColor.GREEN + "/" + max + " MB";
++    }
++
++    private static String formatFreeMemory(long free, long max) {
++        free = free / 1024 / 1024;
++        max = max / 1024 / 1024;
++
++        double freePer = (double) free / (double) max;
++        return ((freePer > 0.8) ?
++                ChatColor.GREEN
++                : (freePer > 0.6)
++                ? ChatColor.YELLOW
++                : ChatColor.RED) + String.valueOf(free);
+     }
+ 
+     private static String formatUptime(long uptime) {
 -- 
 2.36.0.windows.1
 
