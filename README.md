@@ -171,11 +171,12 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [MineTick-0017] Fix insane nether portal lag
 [MineTick-0023] Fix chunk coordinates miscalculations
 
-[KigPaper-0233/0070] Prevent billion laughs attacks
+[KigPaper-0070/0233] Prevent billion laughs attacks
 
 [Tuinity-????] Skip updating entity tracker without players
 
 [Akarin-0007] Avoid double I/O operation on load player file
+[Akarin-0010] Save Json list asynchronously
 
 [Purpur-0150] Tick fluids config
 
@@ -188,4 +189,4 @@ Titanium implements patches from other engines as well. **All credits go to the 
 
 * To start contributing to Titanium, make sure you meet the [Requirements](https://github.com/TitanVale/Titanium#requirements). Then you can run `./titanium build` to prepare upstream and apply patches.
 * To add patches to Titanium simply make your changes in `Titanium-API` and `Titanium-Server`, then just commit them. Then run `./titanium rebuild`.
-* After modifing code to for eg. test it run `./titanium jar`.
+* After modifying code to for eg. test it, run `./titanium jar`.
