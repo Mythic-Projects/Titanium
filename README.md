@@ -161,6 +161,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [IonSpigot-0023] Implement PandaWire by SuicidalKids
 [IonSpigot-0037] Fast Cannon Entity Tracker by SuicidalKids
 
+[Migot-0004] Non Blocking Auto Save by Poweruser
 [Migot-0005] Fix Occasional Client Side Unloading of Chunk 0 0
 [Migot-0009] Prevent creature spawning in unloaded chunks
 [Migot-0027] Enable Concurrent Chunk Decoration
