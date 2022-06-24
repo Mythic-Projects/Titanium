@@ -116,6 +116,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Nacho-????] Prevent most NBT related overflow exploits
 [Nacho-????] Async TNT by Sculas
 [Nacho-????] Async Entity Tracker by Rastrian
+[Nacho-????] Async knockback and hit detection packets by Rastrian
 
 [WindSpigot-0001] Thread affinity by windcolor-dev
 [WindSpigot-0017] Async entity tracking by windcolor-dev
