@@ -15,7 +15,6 @@ But also you can build it yourself. See [How To Build](https://github.com/TitanV
 If you want to build Titanium you will need these things to be installed and available from your shell:
 * [JDK 17](https://www.oracle.com/java/technologies/downloads/#java17)
 * [Git](https://git-scm.com/)
-* [Maven](https://maven.apache.org/)
 
 ### How to build
 
@@ -53,7 +52,7 @@ Server:
 
 ## Patches
 
-Titanium implements patches from other engines as well. **All credits go to the people which created them.**
+Titanium implements patches from other engines as well. **All credits go to the people who created them.**
 ```
 [Spigot-0138] Branchless NibbleArray by md5
 [Spigot-2380] Hitting in the air will always load the chunk at 0,0 by md_5
@@ -80,7 +79,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0350] Use a Queue for Queueing Commands
 [Paper-0352] Optimize BlockPosition helper methods by Spottedleaf
 [Paper-0353] Send nearby packets from world player list not server by Mystiflow
-[Paper-0797] Use Velocity compression and cipher natives by Elier"
+[Paper-0797] Use Velocity compression and cipher natives by Elier
 
 [Taco-0024] Optimize tnt entity and falling block movement
 [Taco-0025] Fix east west cannoning
@@ -105,7 +104,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [FlamePaper-0033] Dont check occluding hoppers by LinsaFTW
 [FlamePaper-0034] Hopper item lookup optimization by LinsaFTW
 
-[Nacho-0009] Remove an extra file io call within world credit bob7l"
+[Nacho-0009] Remove an extra file io call within world credit bob7l
 [Nacho-0010] Use jchambers' FAST UUID methods
 [Nacho-0012] Don't load chunks for physics
 [Nacho-0019] Avoid lock every packet send
