@@ -83,6 +83,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0797] Use Velocity compression and cipher natives by Elier
 
 [Taco-0006] Fix hopper lag by making entities look for hoppers by Techcable
+[Taco-0011] Add a flag to disable InventoryMoveItemEvent by Techcable
 [Taco-0024] Optimize tnt entity and falling block movement
 [Taco-0025] Fix east west cannoning
 
