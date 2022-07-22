@@ -183,6 +183,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 
 [Purpur-0150] Tick fluids config
 
+[Yatopia-0030] Don't save Fireworks and Arrows by tr7zw
 [Yatopia-0047] Smarter statistics ticking
 
 [InsanePaper-269] Cache Chunk Coordinations
