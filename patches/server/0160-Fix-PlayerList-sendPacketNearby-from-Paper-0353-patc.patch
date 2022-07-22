@@ -1,4 +1,4 @@
-From adee701df01a30b2242321bb17c3f3635518a45e Mon Sep 17 00:00:00 2001
+From 4b0ec68517cebe26b5cf98ff2c0fe4819dcc6eea Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 22 Jul 2022 12:55:42 +0200
 Subject: [PATCH] Fix PlayerList#sendPacketNearby from Paper-0353 patch
