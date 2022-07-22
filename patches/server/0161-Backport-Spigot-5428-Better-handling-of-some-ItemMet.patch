@@ -1,4 +1,4 @@
-From 4e8362f0aaf7d3b58d67b3d0b398d19ac6ab74bc Mon Sep 17 00:00:00 2001
+From 629bc9d32a419ec87cd0bea31b237955cea1a388 Mon Sep 17 00:00:00 2001
 From: Mathias <mail@mathias.is>
 Date: Mon, 16 Dec 2019 19:11:10 +0200
 Subject: [PATCH] Backport [Spigot-5428] Better handling of some ItemMeta by
