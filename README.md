@@ -56,6 +56,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 ```
 [Spigot-0138] Branchless NibbleArray by md5
 [Spigot-2380] Hitting in the air will always load the chunk at 0,0 by md_5
+[Spigot-5428] Better handling of some ItemMeta by Mathias
 
 [Paper-0022] Further improve server tick loop by Aikar
 [Paper-0044] Use UserCache for player heads
