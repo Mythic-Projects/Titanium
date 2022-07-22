@@ -82,6 +82,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0353] Send nearby packets from world player list not server by Mystiflow
 [Paper-0797] Use Velocity compression and cipher natives by Elier
 
+[Taco-0006] Fix hopper lag by making entities look for hoppers by Techcable
 [Taco-0024] Optimize tnt entity and falling block movement
 [Taco-0025] Fix east west cannoning
 
