@@ -1,0 +1,48 @@
+From 54bda75a69ba1965d9881242c56d693d6ff3c663 Mon Sep 17 00:00:00 2001
+From: frash23 <jacob@bytesizedpacket.com>
+Date: Thu, 24 Mar 2016 04:07:04 +0100
+Subject: [PATCH] Implement [Taco-0017] Add option to stop redstone firing
+ BlockPhysicsEvent by frash23
+
+
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index 2df6fa3d7..73511b21e 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -614,7 +614,7 @@ public abstract class World implements IBlockAccess {
+             try {
+                 // CraftBukkit start
+                 CraftWorld world = ((WorldServer) this).getWorld();
+-                if (world != null && ((WorldServer) this).hasPhysicsEvent) { // PandaSpigot - hasPhysicsEvent
++                if (world != null && ((WorldServer) this).hasPhysicsEvent && (this.tacoConfigTitanium.redstoneFireBlockPhysicsEvent || !(block instanceof BlockRedstoneWire || block instanceof BlockRedstoneTorch || block instanceof BlockRepeater)))  { // PandaSpigot - hasPhysicsEvent // TacoSpigot - Add config to disable redstone firing BlockPhysicsEvent
+                     BlockPhysicsEvent event = new BlockPhysicsEvent(world.getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ()), CraftMagicNumbers.getId(block));
+                     this.getServer().getPluginManager().callEvent(event);
+ 
+diff --git a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
+index 18aa8c7c7..8773f724e 100644
+--- a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
++++ b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
+@@ -26,6 +26,11 @@ public class TacoSpigotWorldConfig extends TitaniumConfigSection {
+ 
+     }
+ 
++    @Comment("Whether to fire BlockPhysicsEvent for redstone wires, torches and repeaters.")
++    @Comment("Disabling this could increase performance, but also break some plugins (for eg. cuboids, region protection, etc.).")
++    @CustomKey("redstone-fire-BlockPhysicsEvent")
++    public boolean redstoneFireBlockPhysicsEvent = true;
++
+     public Hopper hopper = new Hopper();
+ 
+     public static class Hopper extends TitaniumConfigSection {
+@@ -35,7 +40,7 @@ public class TacoSpigotWorldConfig extends TitaniumConfigSection {
+         public boolean pushBased = false;
+ 
+         @Comment("Whether to fire InventoryMoveEvent for hoppers.")
+-        @Comment("Disabling this could increase performance, but also breaks some plugins (for eg. cuboids, region protection, etc.).")
++        @Comment("Disabling this could increase performance, but also break some plugins (for eg. cuboids, region protection, etc.).")
+         @CustomKey("fire-InventoryMoveItemEvent")
+         public boolean fireInventoryMoveItemEvent = true;
+ 
+-- 
+2.36.0.windows.1
+
