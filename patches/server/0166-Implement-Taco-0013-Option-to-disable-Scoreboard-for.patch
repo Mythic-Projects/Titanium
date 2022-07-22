@@ -1,0 +1,46 @@
+From 87514de575c05c1ba08af9e07ee6331a256ee047 Mon Sep 17 00:00:00 2001
+From: Aikar <aikar@aikar.co>
+Date: Tue, 8 Mar 2016 23:25:45 -0500
+Subject: [PATCH] Implement [Taco-0013] Option to disable Scoreboard for non
+ players by Aikar
+
+
+diff --git a/src/main/java/net/minecraft/server/CommandScoreboard.java b/src/main/java/net/minecraft/server/CommandScoreboard.java
+index 27d08a7de..fdbf259a7 100644
+--- a/src/main/java/net/minecraft/server/CommandScoreboard.java
++++ b/src/main/java/net/minecraft/server/CommandScoreboard.java
+@@ -471,6 +471,7 @@ public class CommandScoreboard extends CommandAbstract {
+ 
+                     while (iterator.hasNext()) {
+                         Entity entity = (Entity) iterator.next();
++                        if (!entity.world.tacoConfigTitanium.allowNonPlayerEntitiesOnScoreboard && !(entity instanceof EntityPlayer)) continue; // TacoSpigot
+                         String s2 = e(icommandlistener, entity.getUniqueID().toString());
+ 
+                         if (scoreboard.addPlayerToTeam(s2, s)) {
+diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
+index 9852a986b..75e8a29c3 100644
+--- a/src/main/java/net/minecraft/server/EntityLiving.java
++++ b/src/main/java/net/minecraft/server/EntityLiving.java
+@@ -1892,6 +1892,7 @@ public abstract class EntityLiving extends Entity {
+     }
+ 
+     public ScoreboardTeamBase getScoreboardTeam() {
++        if (!this.world.tacoConfigTitanium.allowNonPlayerEntitiesOnScoreboard && !(this instanceof EntityPlayer)) return null; // TacoSpigot
+         return this.world.getScoreboard().getPlayerTeam(this.getUniqueID().toString());
+     }
+ 
+diff --git a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
+index 48343b8ba..18aa8c7c7 100644
+--- a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
++++ b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
+@@ -41,4 +41,7 @@ public class TacoSpigotWorldConfig extends TitaniumConfigSection {
+ 
+     }
+ 
++    @Comment("Whether to allow non-players (animals, monsters etc.) to be on scoreboard.")
++    public boolean allowNonPlayerEntitiesOnScoreboard = true;
++
+ }
+-- 
+2.36.0.windows.1
+
