@@ -1,4 +1,4 @@
-From 4b4907165001042fae97a6824cb8addf532b6590 Mon Sep 17 00:00:00 2001
+From 2d06e5ba82113d248150797d564c10d3b11c3b6a Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 24 Jul 2022 19:58:10 +0200
 Subject: [PATCH] Fix loading worlds generators
@@ -47,10 +47,10 @@ index b2b824c3b..aae6a657c 100644
 +
  }
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index c60750266..0faaabc75 100644
+index c60750266..ada8e2434 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-@@ -1408,11 +1408,17 @@ public final class CraftServer implements Server {
+@@ -1408,11 +1408,15 @@ public final class CraftServer implements Server {
      }
  
      public ChunkGenerator getGenerator(String world) {
@@ -62,8 +62,6 @@ index c60750266..0faaabc75 100644
 +        }
          ChunkGenerator result = null;
  
-+        System.out.println("name = " + name);
-+
          /* Titanium start
 -        ConfigurationSection section = BukkitConfig.getConfigurationSection("worlds"); //TODO Move this somewhere
 +        ConfigurationSection section = BukkitConfig.getConfigurationSection("worlds");
