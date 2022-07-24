@@ -190,6 +190,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 
 [Purpur-0150] Tick fluids config
 [Purpur-0046/0280] Spark Profiler
+[Purpur-0049/0290] Remove Timings
 
 [Yatopia-0030] Don't save Fireworks and Arrows by tr7zw
 [Yatopia-0047] Smarter statistics ticking
