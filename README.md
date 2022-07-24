@@ -58,6 +58,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Spigot-2380] Hitting in the air will always load the chunk at 0,0 by md_5
 [Spigot-5428] Better handling of some ItemMeta by Mathias
 
+[Paper-0008/0013] Add command line option to load extra plugin jars not in the plugins folder by Jason Penilla
 [Paper-0022] Further improve server tick loop by Aikar
 [Paper-0044] Use UserCache for player heads
 [Paper-0072] Fix Furnace cook time bug when lagging by Aikar
@@ -188,6 +189,9 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Akarin-0010] Save Json list asynchronously
 
 [Purpur-0150] Tick fluids config
+[Purpur-0046/0280] Spark Profiler by BillyGalbreath
+[Purpur-0049/0290] Remove Timings by BillyGalbreath
+[Purpur-0291] Remove Mojang Profiler by BillyGalbreath
 
 [Yatopia-0030] Don't save Fireworks and Arrows by tr7zw
 [Yatopia-0047] Smarter statistics ticking
