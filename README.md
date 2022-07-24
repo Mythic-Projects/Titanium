@@ -189,8 +189,8 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Akarin-0010] Save Json list asynchronously
 
 [Purpur-0150] Tick fluids config
-[Purpur-0046/0280] Spark Profiler
-[Purpur-0049/0290] Remove Timings
+[Purpur-0046/0280] Spark Profiler by BillyGalbreath
+[Purpur-0049/0290] Remove Timings by BillyGalbreath
 [Purpur-0291] Remove Mojang Profiler by BillyGalbreath
 
 [Yatopia-0030] Don't save Fireworks and Arrows by tr7zw
