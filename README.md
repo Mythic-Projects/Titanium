@@ -189,6 +189,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Akarin-0010] Save Json list asynchronously
 
 [Purpur-0150] Tick fluids config
+[Purpur-0046/0280] Spark Profiler
 
 [Yatopia-0030] Don't save Fireworks and Arrows by tr7zw
 [Yatopia-0047] Smarter statistics ticking
