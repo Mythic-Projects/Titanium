@@ -1,4 +1,4 @@
-From 2f75669fe05b749c18b520537acb1942e4499b5d Mon Sep 17 00:00:00 2001
+From f784a05ec55fe5abd11185f658490b63b3379ef5 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 24 Jul 2022 19:21:47 +0200
 Subject: [PATCH] Remove Timings from server configuration

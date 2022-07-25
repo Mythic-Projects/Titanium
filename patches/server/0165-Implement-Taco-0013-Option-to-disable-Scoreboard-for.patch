@@ -1,4 +1,4 @@
-From 87514de575c05c1ba08af9e07ee6331a256ee047 Mon Sep 17 00:00:00 2001
+From a919bb8fddbc2f103f62427be40aabf9c1b494c4 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Tue, 8 Mar 2016 23:25:45 -0500
 Subject: [PATCH] Implement [Taco-0013] Option to disable Scoreboard for non

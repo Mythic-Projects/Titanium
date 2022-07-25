@@ -1,4 +1,4 @@
-From 54bda75a69ba1965d9881242c56d693d6ff3c663 Mon Sep 17 00:00:00 2001
+From 7c58ecab3d3b623a0d670ba2f0312f4bd563ccaa Mon Sep 17 00:00:00 2001
 From: frash23 <jacob@bytesizedpacket.com>
 Date: Thu, 24 Mar 2016 04:07:04 +0100
 Subject: [PATCH] Implement [Taco-0017] Add option to stop redstone firing

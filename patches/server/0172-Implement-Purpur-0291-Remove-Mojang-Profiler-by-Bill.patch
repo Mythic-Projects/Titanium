@@ -1,4 +1,4 @@
-From 27619bb0bffaf918e291cd23c0f890b865a6a6ec Mon Sep 17 00:00:00 2001
+From 82e06615518ed65a001aaf2589bd5bb78a617e36 Mon Sep 17 00:00:00 2001
 From: BillyGalbreath <blake.galbreath@gmail.com>
 Date: Sat, 16 Jul 2022 21:37:10 -0500
 Subject: [PATCH] Implement [Purpur-0291] Remove Mojang Profiler by

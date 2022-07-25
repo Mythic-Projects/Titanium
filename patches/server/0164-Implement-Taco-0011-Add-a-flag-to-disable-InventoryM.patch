@@ -1,4 +1,4 @@
-From e3f53d8dc940329f49c4feef984446014231ba34 Mon Sep 17 00:00:00 2001
+From c7c6804fb08d2772337e2be2448e1c9806110378 Mon Sep 17 00:00:00 2001
 From: Techcable <techcable@outlook.com>
 Date: Wed, 3 Feb 2016 11:27:34 -0700
 Subject: [PATCH] Implement [Taco-0011] Add a flag to disable
