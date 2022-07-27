@@ -1,0 +1,611 @@
+From d02e955ccc8a20a13cc55129882f4df7650d25c9 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Wed, 27 Jul 2022 18:06:49 +0200
+Subject: [PATCH] Use custom AsynchronousExecutor for ChunkIO
+
+
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+index aad1b39f4..cd70d0a13 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+@@ -9,7 +9,7 @@ import java.util.Iterator;
+ import java.util.List;
+ import java.util.Set;
+ import java.util.concurrent.ConcurrentHashMap;
+-import org.bukkit.craftbukkit.chunkio.ChunkIOExecutor;
++import net.titanium.chunk.io.ChunkIOExecutor; // Titanium - use custom AsynchronousExecutor
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 1acb6c330..b8cf85fa0 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -48,7 +48,8 @@ import net.titanium.job.AutoSaveJob.JobDetail;
+ import org.apache.commons.lang3.Validate;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+-import org.bukkit.craftbukkit.chunkio.ChunkIOExecutor;
++import net.titanium.chunk.io.ChunkIOExecutor; // Titanium - use custom AsynchronousExecutor
++import org.bukkit.event.world.ChunkLoadEvent;
+ // CraftBukkit end
+ 
+ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTick> implements Runnable, ICommandListener, IAsyncTaskHandler, IMojangStatistics {
+diff --git a/src/main/java/net/minecraft/server/PlayerChunkMap.java b/src/main/java/net/minecraft/server/PlayerChunkMap.java
+index 347daf918..3058817f8 100644
+--- a/src/main/java/net/minecraft/server/PlayerChunkMap.java
++++ b/src/main/java/net/minecraft/server/PlayerChunkMap.java
+@@ -11,7 +11,7 @@ import java.util.ArrayList;
+ import java.util.Iterator;
+ import java.util.List;
+ import java.util.Map;
+-import org.bukkit.craftbukkit.chunkio.ChunkIOExecutor;
++import net.titanium.chunk.io.ChunkIOExecutor; // Titanium - use custom AsynchronousExecutor
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
+diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
+index d3c0eefd1..60cb0f036 100644
+--- a/src/main/java/net/minecraft/server/PlayerList.java
++++ b/src/main/java/net/minecraft/server/PlayerList.java
+@@ -18,8 +18,7 @@ import java.util.List;
+ import java.util.Map;
+ import java.util.UUID;
+ import net.titanium.config.message.MessageConfig;
+-import org.bukkit.craftbukkit.chunkio.ChunkIOExecutor;
+-import net.titanium.config.TitaniumConfig;
++import net.titanium.chunk.io.ChunkIOExecutor; // Titanium - use custom AsynchronousExecutor
+ import net.titanium.console.TitaniumConsoleCommandSender;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+diff --git a/src/main/java/net/titanium/chunk/io/ChunkIOExecutor.java b/src/main/java/net/titanium/chunk/io/ChunkIOExecutor.java
+new file mode 100644
+index 000000000..f1c6e3665
+--- /dev/null
++++ b/src/main/java/net/titanium/chunk/io/ChunkIOExecutor.java
+@@ -0,0 +1,39 @@
++package net.titanium.chunk.io;
++
++import net.minecraft.server.Chunk;
++import net.minecraft.server.ChunkProviderServer;
++import net.minecraft.server.ChunkRegionLoader;
++import net.minecraft.server.World;
++import net.titanium.config.TitaniumConfig;
++import net.titanium.util.async.executor.AsynchronousExecutor;
++
++public class ChunkIOExecutor {
++
++    static final int BASE_THREADS = TitaniumConfig.get().chunk.io.baseThreads; // PaperSpigot - Bumped value
++    static final int PLAYERS_PER_THREAD = TitaniumConfig.get().chunk.io.playersPerThread;
++
++    private static final AsynchronousExecutor<QueuedChunk, Chunk, Runnable, RuntimeException, ChunkIOProvider> INSTANCE = new AsynchronousExecutor<QueuedChunk, Chunk, Runnable, RuntimeException, ChunkIOProvider>(BASE_THREADS, new ChunkIOProvider());
++
++    public static Chunk syncChunkLoad(World world, ChunkRegionLoader loader, ChunkProviderServer provider, int x, int z) {
++        return INSTANCE.skipQueue(new QueuedChunk(x, z, loader, world, provider));
++    }
++
++    public static void queueChunkLoad(World world, ChunkRegionLoader loader, ChunkProviderServer provider, int x, int z, Runnable runnable) {
++        INSTANCE.execute(new QueuedChunk(x, z, loader, world, provider), runnable);
++    }
++
++    // Abuses the fact that hashCode and equals for QueuedChunk only use world and coords
++    public static void dropQueuedChunkLoad(World world, int x, int z, Runnable runnable) {
++        INSTANCE.drop(new QueuedChunk(x, z, null, world, null), runnable);
++    }
++
++    public static void adjustPoolSize(int players) {
++        int size = Math.max(BASE_THREADS, (int) Math.ceil(players / PLAYERS_PER_THREAD));
++        INSTANCE.setActiveThreads(size);
++    }
++
++    public static void tick() {
++        INSTANCE.finishActive();
++    }
++
++}
+diff --git a/src/main/java/net/titanium/chunk/io/ChunkIOProvider.java b/src/main/java/net/titanium/chunk/io/ChunkIOProvider.java
+new file mode 100644
+index 000000000..47dfecb14
+--- /dev/null
++++ b/src/main/java/net/titanium/chunk/io/ChunkIOProvider.java
+@@ -0,0 +1,87 @@
++package net.titanium.chunk.io;
++
++import java.io.IOException;
++import java.util.concurrent.atomic.AtomicInteger;
++import net.minecraft.server.Chunk;
++import net.minecraft.server.ChunkRegionLoader;
++import net.minecraft.server.NBTTagCompound;
++import net.titanium.util.async.executor.CallbackProvider;
++import org.bukkit.Server;
++import org.bukkit.craftbukkit.util.LongHash;
++
++class ChunkIOProvider implements CallbackProvider<QueuedChunk, Chunk, Runnable, RuntimeException> {
++
++    private final AtomicInteger threadNumber = new AtomicInteger(1);
++
++    @Override
++    public Chunk asyncStage(QueuedChunk queuedChunk) throws RuntimeException {
++        try {
++            ChunkRegionLoader loader = queuedChunk.loader;
++            Object[] data = loader.loadChunk(queuedChunk.world, queuedChunk.x, queuedChunk.z);
++
++            if (data != null) {
++                queuedChunk.compound = (NBTTagCompound) data[1];
++                return (Chunk) data[0];
++            }
++
++            return null;
++        } catch (IOException ex) {
++            throw new RuntimeException(ex);
++        }
++    }
++
++    @Override
++    public void syncStage(QueuedChunk queuedChunk, Chunk chunk) throws RuntimeException {
++        if (chunk == null) {
++            // If the chunk loading failed just do it synchronously (may generate)
++            queuedChunk.provider.originalGetChunkAt(queuedChunk.x, queuedChunk.z);
++            return;
++        }
++
++        queuedChunk.loader.loadEntities(chunk, queuedChunk.compound.getCompound("Level"), queuedChunk.world);
++        chunk.setLastSaved(queuedChunk.provider.world.getTime());
++        queuedChunk.provider.chunks.put(LongHash.toLong(queuedChunk.x, queuedChunk.z), chunk);
++        chunk.addEntities();
++
++        if (queuedChunk.provider.chunkProvider != null) {
++            //queuedChunk.provider.world.timings.syncChunkLoadStructuresTimer.startTiming(); // Spigot // Purpur
++            queuedChunk.provider.chunkProvider.recreateStructures(chunk, queuedChunk.x, queuedChunk.z);
++            //queuedChunk.provider.world.timings.syncChunkLoadStructuresTimer.stopTiming(); // Spigot // Purpur
++        }
++
++        Server server = queuedChunk.provider.world.getServer();
++        if (server != null) {
++            server.getPluginManager().callEvent(new org.bukkit.event.world.ChunkLoadEvent(chunk.bukkitChunk, false));
++        }
++
++        // Update neighbor counts
++        for (int x = -2; x < 3; x++) {
++            for (int z = -2; z < 3; z++) {
++                if (x == 0 && z == 0) {
++                    continue;
++                }
++
++                Chunk neighbor = queuedChunk.provider.getChunkIfLoaded(chunk.locX + x, chunk.locZ + z);
++                if (neighbor != null) {
++                    neighbor.setNeighborLoaded(-x, -z);
++                    chunk.setNeighborLoaded(x, z);
++                }
++            }
++        }
++
++        chunk.loadNearby(queuedChunk.provider, queuedChunk.provider, queuedChunk.x, queuedChunk.z);
++    }
++
++    @Override
++    public void finalStage(QueuedChunk queuedChunk, Chunk chunk, Runnable runnable) throws RuntimeException {
++        runnable.run();
++    }
++
++    @Override
++    public Thread newThread(Runnable runnable) {
++        Thread thread = new Thread(runnable, "Chunk I/O Executor Thread-" + this.threadNumber.getAndIncrement());
++        thread.setDaemon(true);
++        return thread;
++    }
++
++}
+diff --git a/src/main/java/net/titanium/chunk/io/QueuedChunk.java b/src/main/java/net/titanium/chunk/io/QueuedChunk.java
+new file mode 100644
+index 000000000..ef8aadd61
+--- /dev/null
++++ b/src/main/java/net/titanium/chunk/io/QueuedChunk.java
+@@ -0,0 +1,38 @@
++package net.titanium.chunk.io;
++
++import net.minecraft.server.ChunkProviderServer;
++import net.minecraft.server.ChunkRegionLoader;
++import net.minecraft.server.NBTTagCompound;
++import net.minecraft.server.World;
++
++class QueuedChunk {
++    final int x;
++    final int z;
++    final ChunkRegionLoader loader;
++    final World world;
++    final ChunkProviderServer provider;
++    NBTTagCompound compound;
++
++    public QueuedChunk(int x, int z, ChunkRegionLoader loader, World world, ChunkProviderServer provider) {
++        this.x = x;
++        this.z = z;
++        this.loader = loader;
++        this.world = world;
++        this.provider = provider;
++    }
++
++    @Override
++    public int hashCode() {
++        return (x * 31 + z * 29) ^ world.hashCode();
++    }
++
++    @Override
++    public boolean equals(Object object) {
++        if (object instanceof QueuedChunk) {
++            QueuedChunk other = (QueuedChunk) object;
++            return x == other.x && z == other.z && world == other.world;
++        }
++
++        return false;
++    }
++}
+diff --git a/src/main/java/net/titanium/util/async/executor/AsynchronousExecutor.java b/src/main/java/net/titanium/util/async/executor/AsynchronousExecutor.java
+index f011fd28b..208ba5f5e 100644
+--- a/src/main/java/net/titanium/util/async/executor/AsynchronousExecutor.java
++++ b/src/main/java/net/titanium/util/async/executor/AsynchronousExecutor.java
+@@ -1,16 +1,16 @@
+ package net.titanium.util.async.executor;
+ 
+ import java.util.HashMap;
++import java.util.LinkedList;
++import java.util.List;
+ import java.util.Map;
+ import java.util.Queue;
+-import java.util.Set;
+-import java.util.concurrent.ConcurrentHashMap;
+ import java.util.concurrent.ConcurrentLinkedQueue;
+ import java.util.concurrent.LinkedBlockingQueue;
+ import java.util.concurrent.ThreadPoolExecutor;
+ import java.util.concurrent.TimeUnit;
+ 
+-public class AsynchronousExecutor<I, O, E extends Throwable, P extends CallbacksProvider<I, O, E>> {
++public class AsynchronousExecutor<I, O, C, E extends Throwable, P extends CallbackProvider<I, O, C, E>> {
+ 
+     private final ThreadPoolExecutor pool;
+     private final P provider;
+@@ -28,41 +28,67 @@ public class AsynchronousExecutor<I, O, E extends Throwable, P extends Callbacks
+      * <p>
+      * This should always be synchronous.
+      */
+-    public void execute(I input, Runnable callback) {
+-        Task task = runningTasks.get(input);
++    public void execute(I input, C callback) {
++        Task task = this.runningTasks.get(input);
+         if (task == null) {
+-            runningTasks.put(input, task = new Task(input));
+-            pool.execute(task);
++            this.runningTasks.put(input, task = new Task(input));
++            this.pool.execute(task);
+         }
+         task.callbacks.add(callback);
+     }
+ 
++    /**
++     * This method attempts to skip the waiting period for said parameter.
++     * <p>
++     * This should always be synchronous.
++     *
++     * @throws IllegalStateException if the parameter is not in the queue anymore, or sometimes if called from asynchronous thread
++     */
++    public O get(I input) throws E, IllegalStateException {
++        Task task = this.runningTasks.get(input);
++        if (task == null) {
++            throw new IllegalStateException("Unknown " + input);
++        }
++        return task.get();
++    }
++
+     /**
+      * Processes a parameter as if it was in the queue, without ever passing to another thread.
+      */
++    public O getSkipQueue(I input, Iterable<C> callbacks) throws E {
++        O output = this.skipQueue(input);
++        for (C callback : callbacks) {
++            this.provider.finalStage(input, output, callback);
++        }
++        return output;
++    }
++
+     public O skipQueue(I input) throws E {
+-        Task task = runningTasks.get(input);
++        Task task = this.runningTasks.get(input);
+         if (task != null) {
+-            return task.finish();
++            return task.get();
+         }
+-        O object = provider.asyncStage(input);
+-        provider.syncStage(input, object);
+-        return object;
++        
++        O output = this.provider.asyncStage(input);
++        this.provider.syncStage(input, output);
++        
++        return output;
+     }
+ 
+     /**
+      * This is the 'heartbeat' that should be called synchronously to finish any pending tasks
+      */
+-    public void finishActive() {
+-        while (!this.finishedTasks.isEmpty()) {
+-            finishedTasks.poll().startSyncStage();
++    public void finishActive() throws E {
++        Queue<Task> finishedTasks = this.finishedTasks;
++        while (!finishedTasks.isEmpty()) {
++            finishedTasks.poll().finish();
+         }
+     }
+ 
+     /**
+      * This removes a particular callback from the specified parameter.
+      * <p>
+-     * If no callbacks remain for a given parameter, then the {@link net.titanium.util.async.executor.CallbacksProvider CallBackProvider's} stages may be omitted from execution.
++     * If no callbacks remain for a given parameter, then the {@link CallbackProvider CallBackProvider's} stages may be omitted from execution.
+      * Stage 3 will have no callbacks, stage 2 will be skipped unless a {@link #get(Object)} is used, and stage 1 will be avoided on a best-effort basis.
+      * <p>
+      * Subsequent calls to {@link #skipQueue(Object)} will always work.
+@@ -70,47 +96,37 @@ public class AsynchronousExecutor<I, O, E extends Throwable, P extends Callbacks
+      * Subsequent calls to {@link #get(Object)} might work.
+      * <p>
+      * This should always be synchronous
++     *
+      * @return true if no further execution for the parameter is possible, such that, no exceptions will be thrown in {@link #finishActive()} for the parameter, and {@link #get(Object)} will throw an {@link IllegalStateException}, false otherwise
+      * @throws IllegalStateException if parameter is not in the queue anymore
+      * @throws IllegalStateException if the callback was not specified for given parameter
+      */
+-    public boolean drop(I input, Runnable callback) {
+-        Task task = runningTasks.get(input);
++    public boolean drop(I input, C callback) throws IllegalStateException {
++        Task task = this.runningTasks.get(input);
+         if (task == null) {
+             return true;
+         }
++
+         if (!task.callbacks.remove(callback)) {
+             throw new IllegalStateException("Unknown " + callback + " for " + input);
+         }
++
+         if (task.callbacks.isEmpty()) {
+             return task.drop();
+         }
+-        return false;
+-    }
+ 
+-    /**
+-     * This method attempts to skip the waiting period for said parameter.
+-     * <p>
+-     * This should always be synchronous.
+-     * @throws IllegalStateException if the parameter is not in the queue anymore, or sometimes if called from asynchronous thread
+-     */
+-    public O get(I input) throws E, IllegalStateException {
+-        Task task = runningTasks.get(input);
+-        if (task == null) {
+-            throw new IllegalStateException("Unknown " + input);
+-        }
+-        return task.finish();
++        return false;
+     }
+-
++    
+     public void setActiveThreads(final int coreSize) {
+-        pool.setCorePoolSize(coreSize);
++        this.pool.setCorePoolSize(coreSize);
+     }
+ 
+     private class Task implements Runnable {
+ 
+         private final I input;
+         private O output;
+-        private final Set<Runnable> callbacks = ConcurrentHashMap.newKeySet();
++        private final List<C> callbacks = new LinkedList<>();
+         private E throwable;
+ 
+         private Stage asyncStage = Stage.PENDING;
+@@ -122,21 +138,21 @@ public class AsynchronousExecutor<I, O, E extends Throwable, P extends Callbacks
+ 
+         @Override
+         public void run() {
+-            if (this.startAsyncStage()) {
+-                finishedTasks.add(this);
++            if (this.initAsync()) {
++                AsynchronousExecutor.this.finishedTasks.add(this);
+             }
+         }
+ 
+-        public boolean startAsyncStage() {
+-            asyncStage = Stage.STARTED;
++        boolean initAsync() {
++            this.asyncStage = Stage.STARTED;
+ 
+             try {
+-                this.output = provider.asyncStage(input);
++                this.output = AsynchronousExecutor.this.provider.asyncStage(this.input);
+             } catch (Throwable ex) {
+                 this.throwable = (E) ex;
+             } finally {
+                 synchronized (this) {
+-                    asyncStage = Stage.COMPLETED;
++                    this.asyncStage = Stage.COMPLETED;
+                     this.notifyAll();
+                 }
+             }
+@@ -144,59 +160,59 @@ public class AsynchronousExecutor<I, O, E extends Throwable, P extends Callbacks
+             return true;
+         }
+ 
+-        public void startSyncStage() {
++        void initSync() {
++            this.syncStage = Stage.STARTED;
+             synchronized (this) {
+-                while (asyncStage != Stage.COMPLETED) {
++                while (this.asyncStage != Stage.COMPLETED) {
+                     try {
+                         this.wait();
+                     } catch (InterruptedException ex) {
+                         Thread.currentThread().interrupt();
+-                        throw new RuntimeException("Unable to handle interruption on " + Thread.currentThread());
++                        throw new RuntimeException("Unable to handle interruption on " + this.input, ex);
+                     }
+                 }
++            }
++        }
+ 
+-                try {
+-                    syncStage = Stage.STARTED;
+ 
+-                    provider.syncStage(this.input, this.output);
+-                    for (Runnable callback : callbacks) {
+-                        if (callback != null) {
+-                            callback.run();
+-                        }
+-                    }
+-                } catch (Throwable ex) {
+-                    this.throwable = (E) ex;
+-                } finally {
+-                    runningTasks.remove(input);
+-                    syncStage = Stage.COMPLETED;
+-                }
+-            }
++        O get() throws E {
++            this.initSync();
++            this.finish();
++            return this.output;
+         }
+ 
+-        public O finish() throws E {
+-            this.asyncStage = Stage.STARTED;
+-            this.output = provider.asyncStage(input);
+-            if (this.throwable != null) {
+-                throw this.throwable;
++        void finish() throws E {
++            if (this.asyncStage != Stage.COMPLETED) {
++                throw new IllegalStateException("Attempting to finish unprepared (" + this.asyncStage + ") task (" + this.input + ")");
+             }
+-            this.asyncStage = Stage.COMPLETED;
+ 
+-            this.syncStage = Stage.STARTED;
+-            provider.syncStage(this.input, this.output);
+-            for (Runnable callback : callbacks) {
+-                callback.run();
+-            }
+-            if (this.throwable != null) {
+-                throw this.throwable;
+-            }
+-            this.syncStage = Stage.COMPLETED;
++            try {
++                if (this.throwable != null) {
++                    throw this.throwable;
++                }
+ 
+-            return this.output;
++                if (this.callbacks.isEmpty()) {
++                    return;
++                }
++
++                this.syncStage = Stage.STARTED;
++                AsynchronousExecutor.this.provider.syncStage(this.input, this.output);
++                for (C callback : this.callbacks) {
++                    if (callback == this) {
++                        continue;
++                    }
++
++                    AsynchronousExecutor.this.provider.finalStage(this.input, this.output, callback);
++                }
++            } finally {
++                AsynchronousExecutor.this.runningTasks.remove(this.input);
++                this.syncStage = Stage.COMPLETED;
++            }
+         }
+ 
+-        public boolean drop() {
+-            if (asyncStage == Stage.PENDING || asyncStage == Stage.STARTED) {
+-                runningTasks.remove(this.input);
++        boolean drop() {
++            if (this.asyncStage == Stage.PENDING || this.asyncStage == Stage.STARTED) {
++                AsynchronousExecutor.this.runningTasks.remove(this.input);
+                 return true;
+             }
+             return false;
+diff --git a/src/main/java/net/titanium/util/async/executor/CallbackProvider.java b/src/main/java/net/titanium/util/async/executor/CallbackProvider.java
+new file mode 100644
+index 000000000..aa2c6a7aa
+--- /dev/null
++++ b/src/main/java/net/titanium/util/async/executor/CallbackProvider.java
+@@ -0,0 +1,13 @@
++package net.titanium.util.async.executor;
++
++import java.util.concurrent.ThreadFactory;
++
++public interface CallbackProvider<I, O, C, E extends Throwable> extends ThreadFactory {
++
++    O asyncStage(I input) throws E;
++
++    void syncStage(I input, O processedInput) throws E;
++
++    void finalStage(I input, O processedInput, C callback) throws E;
++
++}
+diff --git a/src/main/java/net/titanium/util/async/executor/CallbacksProvider.java b/src/main/java/net/titanium/util/async/executor/CallbacksProvider.java
+deleted file mode 100644
+index bc3071fd1..000000000
+--- a/src/main/java/net/titanium/util/async/executor/CallbacksProvider.java
++++ /dev/null
+@@ -1,9 +0,0 @@
+-package net.titanium.util.async.executor;
+-
+-public interface CallbacksProvider<I, O, E extends Throwable> {
+-
+-    O asyncStage(I input) throws E;
+-
+-    void syncStage(I input, O output) throws E;
+-
+-}
+diff --git a/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOExecutor.java b/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOExecutor.java
+index f02cb1783..54a367ad3 100644
+--- a/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOExecutor.java
++++ b/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOExecutor.java
+@@ -7,6 +7,10 @@ import net.minecraft.server.World;
+ import net.titanium.config.TitaniumConfig;
+ import org.bukkit.craftbukkit.util.AsynchronousExecutor;
+ 
++/**
++ * @deprecated in favour of {@link net.titanium.chunk.io.ChunkIOExecutor}
++ */
++@Deprecated
+ public class ChunkIOExecutor {
+     static final int BASE_THREADS = TitaniumConfig.get().chunk.io.baseThreads; // PaperSpigot - Bumped value
+     static final int PLAYERS_PER_THREAD = TitaniumConfig.get().chunk.io.playersPerThread;
+diff --git a/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOProvider.java b/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOProvider.java
+index c7e2b561f..5b43d557c 100644
+--- a/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOProvider.java
++++ b/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOProvider.java
+@@ -15,6 +15,10 @@ import java.util.logging.Logger;
+ import net.minecraft.server.Entity;
+ import net.minecraft.server.EntitySlice;
+ 
++/**
++ * @deprecated in favour of {@link net.titanium.chunk.io.ChunkIOExecutor}
++ */
++@Deprecated
+ class ChunkIOProvider implements AsynchronousExecutor.CallBackProvider<QueuedChunk, Chunk, Runnable, RuntimeException> {
+     private final AtomicInteger threadNumber = new AtomicInteger(1);
+ 
+diff --git a/src/main/java/org/bukkit/craftbukkit/chunkio/QueuedChunk.java b/src/main/java/org/bukkit/craftbukkit/chunkio/QueuedChunk.java
+index 842d424f6..14ddf2286 100644
+--- a/src/main/java/org/bukkit/craftbukkit/chunkio/QueuedChunk.java
++++ b/src/main/java/org/bukkit/craftbukkit/chunkio/QueuedChunk.java
+@@ -5,6 +5,10 @@ import net.minecraft.server.ChunkRegionLoader;
+ import net.minecraft.server.NBTTagCompound;
+ import net.minecraft.server.World;
+ 
++/**
++ * @deprecated in favour of {@link net.titanium.chunk.io.ChunkIOExecutor}
++ */
++@Deprecated
+ class QueuedChunk {
+     final int x;
+     final int z;
+-- 
+2.36.0.windows.1
+
