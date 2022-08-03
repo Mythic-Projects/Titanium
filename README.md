@@ -22,7 +22,14 @@ To patching, compiling and building Titanium you will use `titanium` script.
 
 To just build Titanium clone this repository and run `./titanium build paperclip` in the root directory. Then you will find your server jar in `Titanium-Server/build/libs`, it should be named `titanium.jar`.
 
-## Maven
+## API
+
+### JavaDocs
+
+API - [Link](https://repo.titanvale.net/javadoc/snapshots/net/titanvale/titanium-api/1.8.8-R0.1-SNAPSHOT) <br>
+Server - [Link](https://repo.titanvale.net/javadoc/snapshots/net/titanvale/titanium-server/1.8.8-R0.1-SNAPSHOT) <br>
+
+### Maven
 
 Repository:
 ```xml
