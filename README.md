@@ -205,6 +205,8 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Yatopia-0047] Smarter statistics ticking
 
 [InsanePaper-269] Cache Chunk Coordinations
+
+[PaperBin-????] Optimise WorldServer#everyoneDeeplySleeping
 ```
 
 ## Contributing
