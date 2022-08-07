@@ -59,7 +59,7 @@ subprojects {
                 }
 
                 pom {
-                    url = "https://github.com/TitanVale/Titanium"
+                    url = "https://github.com/TitanVale/TitaniumMC"
                     name = project.name
 
                     developers {
@@ -101,10 +101,6 @@ subprojects {
                 } else {
                     credentials(PasswordCredentials)
                 }
-
-                authentication {
-                    basic(BasicAuthentication)
-                }
             }
             maven {
                 name "releases"
@@ -120,10 +116,10 @@ subprojects {
                 } else {
                     credentials(PasswordCredentials)
                 }
+            }
 
-                authentication {
-                    basic(BasicAuthentication)
-                }
+            authentication {
+                basic(BasicAuthentication)
             }
         }
     }
