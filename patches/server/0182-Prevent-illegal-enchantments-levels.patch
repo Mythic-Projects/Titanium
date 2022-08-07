@@ -1,0 +1,366 @@
+From a9332015333a3f6e91192fd96b0ccebbb56dfe1b Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 7 Aug 2022 20:47:07 +0200
+Subject: [PATCH] Prevent illegal enchantments levels
+
+
+diff --git a/src/main/java/net/minecraft/server/Enchantment.java b/src/main/java/net/minecraft/server/Enchantment.java
+index 0f61eeccf..909873bb2 100644
+--- a/src/main/java/net/minecraft/server/Enchantment.java
++++ b/src/main/java/net/minecraft/server/Enchantment.java
+@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
+ import java.util.ArrayList;
+ import java.util.Map;
+ import java.util.Set;
++import net.titanium.config.TitaniumConfig;
+ 
+ public abstract class Enchantment {
+ 
+@@ -41,6 +42,7 @@ public abstract class Enchantment {
+     private final int weight;
+     public EnchantmentSlotType slot;
+     protected String name;
++    private short maxLevel = -1; // Titanium - prevent illegal enchantment levels
+ 
+     public static Enchantment getById(int i) {
+         return i >= 0 && i < Enchantment.byId.length ? Enchantment.byId[i] : null;
+@@ -80,6 +82,22 @@ public abstract class Enchantment {
+         return 1;
+     }
+ 
++    // Titanium start - prevent illegal enchantment levels
++    public short getTitaniumMaxLevel() {
++        if (this.maxLevel == -1) {
++            short globalMaxLevel = TitaniumConfig.get().exploits.illegalLevels.enchantments.globalMaxLevel;
++            this.maxLevel = globalMaxLevel != -1
++                    ? globalMaxLevel
++                    : (short) this.getMaxLevel();
++        }
++        return this.maxLevel;
++    }
++
++    public void setTitaniumMaxLevel(short maxLevel) {
++        this.maxLevel = maxLevel;
++    }
++    // Titanium end
++
+     public int a(int i) {
+         return 1 + i * 10;
+     }
+diff --git a/src/main/java/net/minecraft/server/EnchantmentManager.java b/src/main/java/net/minecraft/server/EnchantmentManager.java
+index 07c72dc40..19efaa0b6 100644
+--- a/src/main/java/net/minecraft/server/EnchantmentManager.java
++++ b/src/main/java/net/minecraft/server/EnchantmentManager.java
+@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
+ import java.util.List;
+ import java.util.Map;
+ import java.util.Random;
++import net.titanium.config.TitaniumConfig;
+ 
+ public class EnchantmentManager {
+ 
+@@ -32,7 +33,10 @@ public class EnchantmentManager {
+                     short short1 = nbttaglist.get(j).getShort("lvl");
+ 
+                     if (short0 == i) {
+-                        return short1;
++                        // Titanium start - prevent illegal enchantments level
++                        return getMaxLevel(itemstack, short0, short1);
++                        //return short1;
++                        // Titanium end
+                     }
+                 }
+ 
+@@ -50,7 +54,7 @@ public class EnchantmentManager {
+                 short short0 = nbttaglist.get(i).getShort("id");
+                 short short1 = nbttaglist.get(i).getShort("lvl");
+ 
+-                linkedhashmap.put(Integer.valueOf(short0), Integer.valueOf(short1));
++                linkedhashmap.put(Integer.valueOf(short0), /*Integer.valueOf(short1)*/ getMaxLevel(itemstack, short0, short1)); // Titanium - prevent illegal enchantments level
+             }
+         }
+ 
+@@ -66,13 +70,14 @@ public class EnchantmentManager {
+             Enchantment enchantment = Enchantment.getById(i);
+ 
+             if (enchantment != null) {
++                short level = getMaxLevel(itemstack, enchantment, map.get(i).shortValue()); // Titanium - prevent illegal enchantments level
+                 NBTTagCompound nbttagcompound = new NBTTagCompound();
+ 
+                 nbttagcompound.setShort("id", (short) i);
+-                nbttagcompound.setShort("lvl", (short) ((Integer) map.get(Integer.valueOf(i))).intValue());
++                nbttagcompound.setShort("lvl", /*(short) ((Integer) map.get(i)).intValue()*/ level); // Titanium - prevent illegal enchantments level
+                 nbttaglist.add(nbttagcompound);
+                 if (itemstack.getItem() == Items.ENCHANTED_BOOK) {
+-                    Items.ENCHANTED_BOOK.a(itemstack, new WeightedRandomEnchant(enchantment, ((Integer) map.get(Integer.valueOf(i))).intValue()));
++                    Items.ENCHANTED_BOOK.a(itemstack, new WeightedRandomEnchant(enchantment, /*((Integer) map.get(Integer.valueOf(i))).intValue()*/ level));  // Titanium - prevent illegal enchantments level
+                 }
+             }
+         }
+@@ -118,7 +123,7 @@ public class EnchantmentManager {
+                     short short1 = nbttaglist.get(i).getShort("lvl");
+ 
+                     if (Enchantment.getById(short0) != null) {
+-                        enchantmentmanager_enchantmentmodifier.a(Enchantment.getById(short0), short1);
++                        enchantmentmanager_enchantmentmodifier.a(Enchantment.getById(short0), /*short1*/ getMaxLevel(itemstack, short0, short1)); // Titanium - prevent illegal enchantments level
+                     }
+                 }
+ 
+@@ -383,6 +388,62 @@ public class EnchantmentManager {
+         return hashmap;
+     }
+ 
++    // Titanium start - prevent illegal enchantments level
++    public static short getMaxLevel(ItemStack itemStack, Enchantment enchantment, short level) {
++        if (enchantment == null) {
++            return level;
++        }
++
++        TitaniumConfig.Exploits.IllegalLevels.Enchantments enchantmentsConfig = TitaniumConfig.get().exploits.illegalLevels.enchantments;
++        if (!enchantmentsConfig.enabled) {
++            return level;
++        }
++
++        if (level > 0 && level <= enchantment.getTitaniumMaxLevel()) {
++            removeInvalidToolEnchantment(enchantmentsConfig, itemStack, enchantment);
++            return level;
++        }
++
++        if (enchantmentsConfig.preventNegative && level < 0) {
++            level = (short) Math.abs(level);
++        }
++
++        level = (short) Math.min(level, enchantment.getTitaniumMaxLevel());
++        if (itemStack != null) {
++            if (!removeInvalidToolEnchantment(enchantmentsConfig, itemStack, enchantment) && level != 0) {
++                itemStack.addEnchantment(enchantment, level);
++            }
++        }
++        return level;
++    }
++
++    public static short getMaxLevel(Enchantment enchantment, short level) {
++        return getMaxLevel(null, enchantment, level);
++    }
++
++    public static short getMaxLevel(ItemStack itemStack, short enchantmentId, short level) {
++        Enchantment enchantment = Enchantment.getById(enchantmentId);
++        return getMaxLevel(itemStack, enchantment, level);
++    }
++
++    public static short getMaxLevel(short enchantmentId, short level) {
++        return getMaxLevel(null, enchantmentId, level);
++    }
++
++    public static boolean removeInvalidToolEnchantment(TitaniumConfig.Exploits.IllegalLevels.Enchantments enchantmentsConfig, ItemStack itemStack, Enchantment enchantment) {
++        if (itemStack == null || enchantment == null) {
++            return false;
++        }
++
++        if (!enchantmentsConfig.preventInvalidTools || enchantment.canEnchant(itemStack)) {
++            return false;
++        }
++
++        itemStack.removeEnchantment(enchantment);
++        return true;
++    }
++    // Titanium end
++
+     static class SyntheticClass_1 {    }
+ 
+     static final class EnchantmentModifierArthropods implements EnchantmentManager.EnchantmentModifier {
+diff --git a/src/main/java/net/minecraft/server/ItemStack.java b/src/main/java/net/minecraft/server/ItemStack.java
+index d9e2185c8..5a84c613e 100644
+--- a/src/main/java/net/minecraft/server/ItemStack.java
++++ b/src/main/java/net/minecraft/server/ItemStack.java
+@@ -623,10 +623,33 @@ public final class ItemStack {
+         NBTTagCompound nbttagcompound = new NBTTagCompound();
+ 
+         nbttagcompound.setShort("id", (short) enchantment.id);
+-        nbttagcompound.setShort("lvl", (short) ((byte) i));
++        nbttagcompound.setShort("lvl", /*(short) ((byte) i)*/ EnchantmentManager.getMaxLevel(this, enchantment, (short) i)); // Titanium - prevent illegal enchantments levels
+         nbttaglist.add(nbttagcompound);
+     }
+ 
++    // Titanium start - prevent illegal enchantments levels
++    public void removeEnchantment(Enchantment enchantment) {
++        if (this.tag == null) {
++            this.setTag(new NBTTagCompound());
++        }
++
++        if (!this.tag.hasKeyOfType("ench", 9)) {
++            this.tag.set("ench", new NBTTagList());
++        }
++
++        NBTTagList nbttaglist = this.tag.getList("ench", 10);
++
++        for (int ii = 0; ii < nbttaglist.size(); ii++) {
++            NBTTagCompound nbttagcompound = nbttaglist.get(ii);
++            if (nbttagcompound.getShort("id") != enchantment.id) {
++                continue;
++            }
++            nbttaglist.remove(ii);
++            return;
++        }
++    }
++    // Titanium end
++
+     public boolean hasEnchantments() {
+         return this.tag != null && this.tag.hasKeyOfType("ench", 9);
+     }
+diff --git a/src/main/java/net/minecraft/server/NBTTagList.java b/src/main/java/net/minecraft/server/NBTTagList.java
+index a0e6b0ff5..97ea2b3a0 100644
+--- a/src/main/java/net/minecraft/server/NBTTagList.java
++++ b/src/main/java/net/minecraft/server/NBTTagList.java
+@@ -109,6 +109,7 @@ public class NBTTagList extends NBTBase {
+         }
+     }
+ 
++    public NBTBase remove(int index) { return this.a(index); } // Titanium - OBFHELPER
+     public NBTBase a(int i) {
+         return (NBTBase) this.list.remove(i);
+     }
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index 21e82d265..c03f87b36 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
+ import com.google.common.collect.ImmutableSet;
+ import eu.okaeri.configs.OkaeriConfig;
+ import eu.okaeri.configs.annotation.Comment;
++import eu.okaeri.configs.annotation.CustomKey;
+ import eu.okaeri.configs.annotation.Exclude;
+ import eu.okaeri.configs.annotation.Header;
+ import eu.okaeri.configs.annotation.NameModifier;
+@@ -20,9 +21,11 @@ import java.util.List;
+ import java.util.Map;
+ import java.util.Set;
+ import java.util.logging.Level;
++import net.minecraft.server.Enchantment;
+ import net.minecraft.server.MinecraftServer;
+ import net.titanium.command.PingCommand;
+ import net.titanium.command.SetSlotsCommand;
++import net.titanium.util.EnchantmentHelper;
+ import net.titanium.util.Pair;
+ import org.bukkit.Bukkit;
+ import org.bukkit.ChatColor;
+@@ -157,6 +160,50 @@ public class TitaniumConfig extends TitaniumConfigSection {
+ 
+         }
+ 
++        public IllegalLevels illegalLevels = new IllegalLevels();
++
++        public static class IllegalLevels extends TitaniumConfigSection {
++
++            public Enchantments enchantments = new Enchantments();
++
++            public static class Enchantments extends TitaniumConfigSection {
++
++                @Comment("Whether to prevent illegal enchantments levels (like sharpness 1000).")
++                public boolean enabled = false;
++
++                @Comment("Whether to prevent negative (or zero) enchantments levels (like sharpness -1).")
++                public boolean preventNegative = false;
++
++                @Comment("Whether to prevent applying enchantments on invalid tools (for eg. sharpness on pickaxe).")
++                public boolean preventInvalidTools = false;
++
++                @Comment("List of enchantments with max level that they can have.")
++                @CustomKey("max-levels")
++                public List<String> maxLevels_ = Arrays.asList(
++                    "efficiency:6"
++                );
++
++                @Comment("Global max level for all enchantments (for eg. we want to allow all enchantments to have maximum level of 10).")
++                @Comment("Set to -1 to disable this feature (and only use max-levels).")
++                @Comment("Values in max-levels have higher priority, so if we set max-level for efficiency to 6 and global-max-level to 10, efficiency will have maximum level of 6.")
++                public short globalMaxLevel = -1;
++
++                @Override
++                public void loadProcessedProperties() {
++                    for (String value : this.maxLevels_) {
++                        String[] split = value.split(":");
++                        Enchantment enchantment = EnchantmentHelper.findEnchantment(split[0]);
++                        if (enchantment == null) {
++                            continue;
++                        }
++                        enchantment.setTitaniumMaxLevel(Short.parseShort(split[1]));
++                    }
++                }
++
++            }
++
++        }
++
+     }
+ 
+     @Comment("Whether saving of fireworks and arrows should be disabled.")
+@@ -291,7 +338,9 @@ public class TitaniumConfig extends TitaniumConfigSection {
+             if (!exists) {
+                 this.forceMigration = true;
+             }
+-            return exists ? this : this.save();
++            return exists
++                    ? this
++                    : this.save();
+         }
+     }
+ 
+@@ -350,7 +399,7 @@ public class TitaniumConfig extends TitaniumConfigSection {
+         }
+ 
+         this.registerCommand("ping", new PingCommand("ping"));
+-        this.registerCommand("setslots", new SetSlotsCommand( "setslots"));
++        this.registerCommand("setslots", new SetSlotsCommand("setslots"));
+ 
+         return this;
+     }
+diff --git a/src/main/java/net/titanium/util/EnchantmentHelper.java b/src/main/java/net/titanium/util/EnchantmentHelper.java
+new file mode 100644
+index 000000000..3df756c10
+--- /dev/null
++++ b/src/main/java/net/titanium/util/EnchantmentHelper.java
+@@ -0,0 +1,23 @@
++package net.titanium.util;
++
++import net.minecraft.server.Enchantment;
++import org.jetbrains.annotations.Nullable;
++
++public final class EnchantmentHelper {
++
++    private EnchantmentHelper() {
++    }
++
++    @Nullable
++    public static Enchantment findEnchantment(String string) {
++        Enchantment enchantment = Enchantment.getByName(string);
++        if (enchantment == null) {
++            try {
++                enchantment = Enchantment.getById(Integer.parseInt(string));
++            } catch (NumberFormatException ignored) {
++            }
++        }
++        return enchantment;
++    }
++
++}
+diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java
+index 95277e375..c6264c0ee 100644
+--- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java
++++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java
+@@ -197,10 +197,12 @@ public final class CraftItemStack extends ItemStack {
+             NBTTagCompound tag = (NBTTagCompound) list.get(i);
+             short id = tag.getShort(ENCHANTMENTS_ID.NBT);
+             if (id == ench.getId()) {
++                level = EnchantmentManager.getMaxLevel(this.handle, id, (short) level); // Titanium - prevent illegal enchantments levels
+                 tag.setShort(ENCHANTMENTS_LVL.NBT, (short) level);
+                 return;
+             }
+         }
++        level = EnchantmentManager.getMaxLevel(this.handle, (short) ench.getId(), (short) level); // Titanium - prevent illegal enchantments levels
+         NBTTagCompound tag = new NBTTagCompound();
+         tag.setShort(ENCHANTMENTS_ID.NBT, (short) ench.getId());
+         tag.setShort(ENCHANTMENTS_LVL.NBT, (short) level);
+-- 
+2.36.0.windows.1
+
