@@ -190,6 +190,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [MineTick-0023] Fix chunk coordinates miscalculations
 
 [KigPaper-0070/0233] Prevent billion laughs attacks
+[KigPaper-0112] Only trigger PlayerConnection#disconnect once by RoccoDev
 
 [Tuinity-????] Skip updating entity tracker without players
 
