@@ -133,6 +133,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Nacho-????] Async knockback and hit detection packets by Rastrian
 
 [WindSpigot-0001] Thread affinity by windcolor-dev
+[WindSpigot-0014] Async entity path searching by windcolor-dev
 [WindSpigot-0017] Async entity tracking by windcolor-dev
 [WindSpigot-0054] Modern tick loop by windcolor-dev
 [WindSpigot-????] Use concurrent entity tracking collections by windcolor-dev
