@@ -71,6 +71,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0072] Fix Furnace cook time bug when lagging by Aikar
 [Paper-0076] Optimized light level comaprsions by Aikar
 [Paper-0085] Use a Shared Random for Entities
+[Paper-0090] Improve Maps (in item frames) performance and bug fixes by Aikar
 [Paper-0121] Reduce IO ops opening a new region
 [Paper-0144] Improve Minecraft Hopper Performance
 [Paper-0168] Disable ticking of snow blocks
