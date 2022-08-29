@@ -83,6 +83,20 @@ subprojects {
                         }
                     }
                 }
+
+                // Add external repositories to published artifacts
+                // ~ btw: pls don't touch this
+                pom.withXml {
+                    def repositories = asNode().appendNode('repositories')
+
+                    project.getRepositories().findAll { repo ->
+                        if (repo.getUrl().toString().startsWith('http')) {
+                            def repository = repositories.appendNode('repository')
+                            repository.appendNode('id', repo.getDisplayName())
+                            repository.appendNode('url', repo.getUrl().toString())
+                        }
+                    }
+                }
             }
         }
 
