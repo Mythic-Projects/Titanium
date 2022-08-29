@@ -1,17 +1,17 @@
-From f92920e32154dee5cbd11a151d1e4d239488a9e0 Mon Sep 17 00:00:00 2001
+From 825a4851af3ae5fa6d03616e81d3c97653a2c9b7 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
-Date: Mon, 29 Aug 2022 15:25:25 +0200
-Subject: [PATCH] Backport some modern getNearXXX API
+Date: Mon, 29 Aug 2022 15:18:41 +0200
+Subject: [PATCH] Backport some modern Location and World API
 
 
 diff --git a/src/main/java/org/bukkit/Location.java b/src/main/java/org/bukkit/Location.java
-index 6312f4b0..3aea533c 100644
+index e7af316d..1ac9652e 100644
 --- a/src/main/java/org/bukkit/Location.java
 +++ b/src/main/java/org/bukkit/Location.java
-@@ -1,15 +1,21 @@
+@@ -1,13 +1,21 @@
  package org.bukkit;
  
- import com.google.common.base.Preconditions;
++import com.google.common.base.Preconditions;
 +import java.util.Collection;
  import java.util.HashMap;
  import java.util.Map;
@@ -25,15 +25,100 @@ index 6312f4b0..3aea533c 100644
  import org.bukkit.util.NumberConversions;
  import static org.bukkit.util.NumberConversions.checkFinite;
  import org.bukkit.util.Vector;
- import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.NotNull;
 +import org.jetbrains.annotations.Nullable;
  
  /**
   * Represents a 3-dimensional position in a world
-@@ -576,6 +582,250 @@ public class Location implements Cloneable, ConfigurationSerializable {
+@@ -487,6 +495,335 @@ public class Location implements Cloneable, ConfigurationSerializable {
+         return this;
      }
-     // Paper end
  
++    // Paper start
++    /**
++     * Sets the position of this Location and returns itself
++     *
++     * This mutates this object, clone first.
++     * @param x X coordinate
++     * @param y Y coordinate
++     * @param z Z coordinate
++     * @return self (not cloned)
++     */
++    @NotNull
++    public Location set(double x, double y, double z) {
++        this.x = x;
++        this.y = y;
++        this.z = z;
++        return this;
++    }
++
++    /**
++     * Takes the x/y/z from base and adds the specified x/y/z to it and returns self
++     *
++     * This mutates this object, clone first.
++     * @param base The base coordinate to modify
++     * @param x X coordinate to add to base
++     * @param y Y coordinate to add to base
++     * @param z Z coordinate to add to base
++     * @return self (not cloned)
++     */
++    @NotNull
++    public Location add(@NotNull Location base, double x, double y, double z) {
++        return this.set(base.x + x, base.y + y, base.z + z);
++    }
++
++    /**
++     * Takes the x/y/z from base and subtracts the specified x/y/z to it and returns self
++     *
++     * This mutates this object, clone first.
++     * @param base The base coordinate to modify
++     * @param x X coordinate to subtract from base
++     * @param y Y coordinate to subtract from base
++     * @param z Z coordinate to subtract from base
++     * @return self (not cloned)
++     */
++    @NotNull
++    public Location subtract(@NotNull Location base, double x, double y, double z) {
++        return this.set(base.x - x, base.y - y, base.z - z);
++    }
++
++    /**
++     * @return A new location where X/Y/Z are on the Block location (integer value of X/Y/Z)
++     */
++    @NotNull
++    public Location toBlockLocation() {
++        Location blockLoc = this.clone();
++        blockLoc.setX(this.getBlockX());
++        blockLoc.setY(this.getBlockY());
++        blockLoc.setZ(this.getBlockZ());
++        return blockLoc;
++    }
++
++    /**
++     * @return A new location where X/Y/Z are the center of the block
++     */
++    @NotNull
++    public Location toCenterLocation() {
++        Location centerLoc = clone();
++        centerLoc.setX(getBlockX() + 0.5);
++        centerLoc.setY(getBlockY() + 0.5);
++        centerLoc.setZ(getBlockZ() + 0.5);
++        return centerLoc;
++    }
++
++    /**
++     * Returns a copy of this location except with y = getWorld().getHighestBlockYAt(this.getBlockX(), this.getBlockZ())
++     * @return A copy of this location except with y = getWorld().getHighestBlockYAt(this.getBlockX(), this.getBlockZ())
++     * @throws NullPointerException if {{@link #getWorld()}} is {@code null}
++     */
++    @NotNull
++    public Location toHighestLocation() {
++        Location ret = this.clone();
++        ret.setY(this.getWorld().getHighestBlockYAt(this));
++        return ret;
++    }
++    // Paper end
++
 +    // Paper start
 +    /**
 +     * Returns a list of entities within a bounding box centered around a Location.
