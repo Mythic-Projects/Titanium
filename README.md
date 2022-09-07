@@ -171,6 +171,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [PandaSpigot-0056] Faster redstone torch rapid clock removal by uRyanxD
 [PandaSpigot-0060] Optimise removeQueue by hpfxd
 
+[IonSpigot-0003] Explosion Improvements by SuicidalKids
 [IonSpigot-0006] Fix Chunk Loading by SuicidalKids
 [IonSpigot-0008] Reduce Chunk Hashing by SuicidalKids 
 [IonSpigot-0009] Reduce Unload Queue Complexity by SuicidalKids
