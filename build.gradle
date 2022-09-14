@@ -59,7 +59,7 @@ subprojects {
                 }
 
                 pom {
-                    url = "https://github.com/TitanVale/Titanium"
+                    url = "https://github.com/TitaniumMC/Titanium"
                     name = project.name
 
                     developers {
@@ -71,9 +71,9 @@ subprojects {
                     }
 
                     scm {
-                        connection = "scm:git:git://github.com/TitanVale/Titanium.git"
-                        developerConnection = "scm:git:git://github.com/TitanVale/Titanium.git"
-                        url = "https://github.com/TitanVale/Titanium.git"
+                        connection = "scm:git:git://github.com/TitaniumMC/Titanium.git"
+                        developerConnection = "scm:git:git://github.com/TitaniumMC/Titanium.git"
+                        url = "https://github.com/TitaniumMC/Titanium.git"
                     }
 
                     licenses {
