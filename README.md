@@ -102,6 +102,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Taco-0025] Fix east west cannoning
 
 [SportPaper-0027] Fix head rotation packet spam
+[SportPaper-0086] Prevent Fire from loading chunks by cswhite2000
 [SportPaper-0134] Improved Async Task Scheduler by cswhite2000
 [SportPaper-0162] Fix PlayerInteractEvent not cancelling properly by cswhite2000
 [SportPaper-0176] Use fast util collections
