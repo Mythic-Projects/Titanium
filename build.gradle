@@ -86,6 +86,7 @@ subprojects {
 
                 // Add external repositories to published artifacts
                 // ~ btw: pls don't touch this
+                // Original code: https://github.com/FunnyGuilds/FunnyGuilds/blob/master/build.gradle
                 pom.withXml {
                     def repositories = asNode().appendNode('repositories')
 
