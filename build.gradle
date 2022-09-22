@@ -20,6 +20,7 @@ allprojects {
         maven { url 'https://repo.titanvale.net/snapshots' }
         maven { url 'https://jitpack.io' }
         maven { url 'https://storehouse.okaeri.eu/repository/maven-public' }
+        maven { url 'https://repo.glaremasters.me/repository/concuncan/' }
     }
 }
 
