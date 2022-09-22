@@ -195,8 +195,9 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [MineTick-0017] Fix insane nether portal lag
 [MineTick-0023] Fix chunk coordinates miscalculations
 
-[KigPaper-0070/0233] Prevent billion laughs attacks
+[KigPaper-0108] Fix CraftPlayer setFlying not working by RoccoDev
 [KigPaper-0112] Only trigger PlayerConnection#disconnect once by RoccoDev
+[KigPaper-0070/0233] Prevent billion laughs attacks
 
 [Tuinity-????] Skip updating entity tracker without players
 
