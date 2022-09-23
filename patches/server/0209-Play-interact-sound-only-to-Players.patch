@@ -1,0 +1,24 @@
+From 87ce5826ca8e9371dc5dcdd107cbfcaef2f472f5 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 23 Sep 2022 21:34:36 +0200
+Subject: [PATCH] Play interact sound only to Players
+
+
+diff --git a/src/main/java/net/minecraft/server/ItemBlock.java b/src/main/java/net/minecraft/server/ItemBlock.java
+index 0cd417549..10e1edd0b 100644
+--- a/src/main/java/net/minecraft/server/ItemBlock.java
++++ b/src/main/java/net/minecraft/server/ItemBlock.java
+@@ -36,7 +36,9 @@ public class ItemBlock extends Item {
+                     this.a.postPlace(world, blockposition, iblockdata1, entityhuman, itemstack);
+                 }
+ 
+-                world.makeSound((double) ((float) blockposition.getX() + 0.5F), (double) ((float) blockposition.getY() + 0.5F), (double) ((float) blockposition.getZ() + 0.5F), this.a.stepSound.getPlaceSound(), (this.a.stepSound.getVolume1() + 1.0F) / 2.0F, this.a.stepSound.getVolume2() * 0.8F);
++                if (entityhuman instanceof EntityPlayer) { // Titanium - Send sound only to players
++                    world.makeSound((double) ((float) blockposition.getX() + 0.5F), (double) ((float) blockposition.getY() + 0.5F), (double) ((float) blockposition.getZ() + 0.5F), this.a.stepSound.getPlaceSound(), (this.a.stepSound.getVolume1() + 1.0F) / 2.0F, this.a.stepSound.getVolume2() * 0.8F);
++                }
+                 --itemstack.count;
+             }
+ 
+-- 
+2.36.0.windows.1
+
