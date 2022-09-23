@@ -1,4 +1,4 @@
-From be7d2f88c4c2efe63f925edeb56b6f5bc99e8f86 Mon Sep 17 00:00:00 2001
+From 0b81e43234a9f0526c4caedf5d0c616ac8a87109 Mon Sep 17 00:00:00 2001
 From: Minecrell <minecrell@minecrell.net>
 Date: Thu, 22 Sep 2022 22:19:40 +0200
 Subject: [PATCH] Implement [Paper-0192] Make legacy ping handler more reliable

@@ -63,6 +63,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 ```
 [Spigot-0138] Branchless NibbleArray by md5
 [Spigot-2380] Hitting in the air will always load the chunk at 0,0 by md_5
+[Spigot-5294] Cancelled EntityPickupItemEvent and PlayerPickupItemEvent alter on-ground stacks by md_5
 [Spigot-5428] Better handling of some ItemMeta by Mathias
 
 [Paper-0008/0013] Add command line option to load extra plugin jars not in the plugins folder by Jason Penilla
@@ -77,6 +78,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0168] Disable ticking of snow blocks
 [Paper-0173] Optimize World.isLoaded(BlockPosition)
 [Paper-0180] Server Tick Events
+[Paper-0192] Make legacy ping handler more reliable by Minecrell
 [Paper-0196] Fix block break desync by Michael Himing
 [Paper-0202] Shame on you Mojang moves chunk loading off https thread
 [Paper-0302] Don't load chunks for villager door check by Aikar
