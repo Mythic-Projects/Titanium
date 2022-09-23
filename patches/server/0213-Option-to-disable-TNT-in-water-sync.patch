@@ -1,4 +1,4 @@
-From 8301fba7435c7cf101de6750f42db662a80b3894 Mon Sep 17 00:00:00 2001
+From cf5c1df543fdea48062773e56c09bdf3a7258a0b Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 23 Sep 2022 22:17:59 +0200
 Subject: [PATCH] Option to disable TNT in water sync

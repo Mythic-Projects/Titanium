@@ -1,4 +1,4 @@
-From 625cf2d9d9579441474dd94f7a3fc19a5c9cc2c0 Mon Sep 17 00:00:00 2001
+From 51706155ac8aea76e44a51f63abaf98163ad124d Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 23 Sep 2022 21:56:36 +0200
 Subject: [PATCH] Option to disable chunk ticking
