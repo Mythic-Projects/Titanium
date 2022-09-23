@@ -1,0 +1,28 @@
+From 7ea876d024b336a8fdaaf45702d4dfd1719d368f Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 23 Sep 2022 22:00:56 +0200
+Subject: [PATCH] Don't look for chunk twice
+
+
+diff --git a/src/main/java/org/spigotmc/ActivationRange.java b/src/main/java/org/spigotmc/ActivationRange.java
+index 8b5b679d6..3cf264f72 100644
+--- a/src/main/java/org/spigotmc/ActivationRange.java
++++ b/src/main/java/org/spigotmc/ActivationRange.java
+@@ -128,9 +128,12 @@ public class ActivationRange
+             {
+                 for ( int j1 = k; j1 <= l; ++j1 )
+                 {
+-                    if ( world.getWorld().isChunkLoaded( i1, j1 ) )
++                    // Titanium start - don't look for chunk twice
++                    Chunk chunk = world.getChunkIfLoaded(i1, j1);
++                    if (chunk != null)
+                     {
+-                        activateChunkEntities( world.getChunkAt( i1, j1 ) );
++                        activateChunkEntities(chunk);
++                        // Titanium end
+                     }
+                 }
+             }
+-- 
+2.36.0.windows.1
+
