@@ -1,0 +1,220 @@
+From 8b7eee8fd0fd27ba765e07eaa5caac3ea91702e9 Mon Sep 17 00:00:00 2001
+From: Poweruser <poweruser.rs@hotmail.com>
+Date: Sat, 15 Aug 2015 01:25:53 +0200
+Subject: [PATCH] Implement [Migot-0004] Non Blocking Auto Save by Poweruser
+
+
+diff --git a/src/main/java/net/minecraft/server/FileIOThread.java b/src/main/java/net/minecraft/server/FileIOThread.java
+index c9b3bf45c..4476f3b3a 100644
+--- a/src/main/java/net/minecraft/server/FileIOThread.java
++++ b/src/main/java/net/minecraft/server/FileIOThread.java
+@@ -12,6 +12,16 @@ public class FileIOThread implements Runnable {
+     private volatile long d;
+     private volatile boolean e;
+ 
++    // Migot start
++    public boolean isDone() {
++        return this.c == this.d;
++    }
++
++    public void setNoDelay(boolean active) {
++        this.e = active;
++    }
++    // Migot end
++
+     private FileIOThread() {
+         Thread thread = new Thread(this, "File IO Thread");
+ 
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 655954c83..bd367af6b 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -27,6 +27,7 @@ import java.util.ArrayList;
+ import java.util.Arrays;
+ import java.util.Collections;
+ import java.util.Date;
++import java.util.LinkedList;
+ import java.util.List;
+ import java.util.Queue;
+ import java.util.Random;
+@@ -42,6 +43,8 @@ import javax.imageio.ImageIO;
+ import joptsimple.OptionSet;
+ import net.openhft.affinity.AffinityLock;
+ import net.titanium.config.TitaniumConfig;
++import net.titanium.job.AutoSaveJob;
++import net.titanium.job.AutoSaveJob.JobDetail;
+ import org.apache.commons.lang3.Validate;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+@@ -145,6 +148,44 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+     }
+     // WindSpigot end
+ 
++    // Migot start - non-blocking auto save
++    private LinkedList<AutoSaveJob> autoSaveWorlds = new LinkedList<AutoSaveJob>();
++    private int autoSaveDelay = 0;
++    private boolean autoSaveOrdered = false;
++
++    private void queueWorldsForAutoSave() {
++        if (!this.N) {
++            this.autoSaveWorlds.clear();
++            for (int j = 0; j < this.worlds.size(); ++j) {
++                WorldServer worldserver = this.worlds.get(j);
++                if (worldserver != null) {
++                    this.autoSaveWorlds.add(new AutoSaveJob(JobDetail.WORLD_SAVE, worldserver));
++                    this.autoSaveWorlds.add(new AutoSaveJob(JobDetail.WORLD_SAVEEVENT, worldserver));
++                }
++            }
++            int queuesize = this.autoSaveWorlds.size() / 2;
++            this.autoSaveDelay = 0;
++            this.autoSaveOrdered = true;
++            this.info("[AutoSave] " + queuesize + " worlds - Starting ...");
++        }
++    }
++
++    private void autoSaveNextWorld() throws ExceptionWorldConflict {
++        if (!this.autoSaveWorlds.isEmpty()) {
++            if (this.autoSaveDelay++ > 20) { // delay of 1 seconds between checks of the auto-save job queue
++                this.autoSaveDelay = 0;
++                if (this.autoSaveWorlds.getFirst().process()) {
++                    this.autoSaveWorlds.removeFirst();
++                }
++            }
++        } else if (this.autoSaveOrdered) {
++            this.info("[AutoSave] Done.");
++            this.autoSaveOrdered = false;
++            server.playerCommandState = false;
++        }
++    }
++    // Migot end
++
+     public MinecraftServer(OptionSet options, Proxy proxy, File file1, Thread thread) {
+         super("Server"); // WindSpigot - backport modern tick loop
+         io.netty.util.ResourceLeakDetector.setEnabled( false ); // Spigot - disable
+@@ -876,23 +917,42 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+         }
+ 
+         if (autosavePeriod > 0 && this.ticks % autosavePeriod == 0) { // CraftBukkit
+-            SpigotTimings.worldSaveTimer.startTiming(); // Spigot
++            if (autosavePeriod <= 1000) { // Titanium - use non-blocking auto save only for large periods
++                SpigotTimings.worldSaveTimer.startTiming(); // Spigot
++            }
+             this.methodProfiler.a("save");
+             this.v.savePlayers();
+-            // Spigot Start
+-            // We replace this with saving each individual world as this.saveChunks(...) is broken,
+-            // and causes the main thread to sleep for random amounts of time depending on chunk activity
+-            // Also pass flag to only save modified chunks
+-            server.playerCommandState = true;
+-            for (World world : worlds) {
+-                world.getWorld().save(false);
++
++            // Migot start - non-blocking auto save
++            if (autosavePeriod > 1000) { // Titanium - use non-blocking auto save only for large periods
++                server.playerCommandState = true;
++                this.queueWorldsForAutoSave();
++                // Migot end
++            } else {
++                SpigotTimings.worldSaveTimer.startTiming(); // Spigot
++                // Spigot Start
++                // We replace this with saving each individual world as this.saveChunks(...) is broken,
++                // and causes the main thread to sleep for random amounts of time depending on chunk activity
++                // Also pass flag to only save modified chunks
++                server.playerCommandState = true;
++                for (World world : worlds) {
++                    world.getWorld().save(false);
++                }
++                server.playerCommandState = false;
++                // this.saveChunks(true);
++                // Spigot End
+             }
+-            server.playerCommandState = false;
+-            // this.saveChunks(true);
+-            // Spigot End
+             this.methodProfiler.b();
+-            SpigotTimings.worldSaveTimer.stopTiming(); // Spigot
++            if (autosavePeriod <= 1000) { // Titanium - use non-blocking auto save only for large periods
++                SpigotTimings.worldSaveTimer.stopTiming(); // Spigot
++            }
++        }
++
++        // Migot start - non-blocking auto save
++        if (autosavePeriod > 1000 && this.autoSaveOrdered) { // Titanium - use non-blocking auto save only for large periods
++            this.autoSaveNextWorld();
+         }
++        // Migot end
+ 
+         // WindSpigot start - backport modern tick loop
+         // Paper start
+diff --git a/src/main/java/net/titanium/job/AutoSaveJob.java b/src/main/java/net/titanium/job/AutoSaveJob.java
+new file mode 100644
+index 000000000..650692182
+--- /dev/null
++++ b/src/main/java/net/titanium/job/AutoSaveJob.java
+@@ -0,0 +1,63 @@
++package net.titanium.job;
++
++import co.aikar.timings.SpigotTimings;
++import net.minecraft.server.ExceptionWorldConflict;
++import net.minecraft.server.FileIOThread;
++import net.minecraft.server.IProgressUpdate;
++import net.minecraft.server.MinecraftServer;
++import net.minecraft.server.RegionFileCache;
++import net.minecraft.server.WorldServer;
++import org.bukkit.Bukkit;
++import org.bukkit.event.world.WorldSaveEvent;
++
++public class AutoSaveJob {
++
++    public enum JobDetail {
++        WORLD_SAVE,
++        WORLD_SAVEEVENT,
++    }
++
++    private WorldServer worldserver;
++    private JobDetail jobDetail;
++
++    public AutoSaveJob(JobDetail detail, WorldServer worldserver) {
++        this.jobDetail = detail;
++        this.worldserver = worldserver;
++    }
++
++    /**
++     *
++     * @return true if the job shall be removed from the autosave queue
++     * @throws ExceptionWorldConflict
++     */
++    public boolean process() throws ExceptionWorldConflict {
++        if (this.isJob(JobDetail.WORLD_SAVE) && this.worldserver != null) {
++            SpigotTimings.worldSaveTimer.startTiming();
++            MinecraftServer.getServer().info("[AutoSave] Saving world " + this.worldserver.getWorld().getName());
++            this.worldserver.save(true, (IProgressUpdate) null);
++            FileIOThread.a().setNoDelay(true);
++            SpigotTimings.worldSaveTimer.stopTiming();
++        } else if (this.isJob(JobDetail.WORLD_SAVEEVENT) && this.worldserver != null) {
++            if (FileIOThread.a().isDone()) {
++                SpigotTimings.worldSaveTimer.startTiming();
++                FileIOThread.a().setNoDelay(false);
++                RegionFileCache.a();
++                Bukkit.getPluginManager().callEvent(new WorldSaveEvent(this.worldserver.getWorld()));
++                SpigotTimings.worldSaveTimer.stopTiming();
++            } else {
++                return false;
++            }
++        }
++        this.worldserver = null;
++        return true;
++    }
++
++
++    private boolean isJob(JobDetail detail) {
++        if (this.jobDetail != null) {
++            return this.jobDetail.equals(detail);
++        }
++        return false;
++    }
++
++}
+-- 
+2.36.0.windows.1
+

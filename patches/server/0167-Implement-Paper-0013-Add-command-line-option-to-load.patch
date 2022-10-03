@@ -1,0 +1,106 @@
+From 5ee53bcc42dbc1c30403bcb72bca796a72fe2b73 Mon Sep 17 00:00:00 2001
+From: Jason Penilla <11360596+jpenilla@users.noreply.github.com>
+Date: Tue, 18 May 2021 14:39:44 -0700
+Subject: [PATCH] Implement [Paper-0013] Add command line option to load extra
+ plugin jars not in the plugins folder by Jason Penilla
+
+ex: java -jar paperclip.jar nogui -add-plugin=/path/to/plugin.jar -add-plugin=/path/to/another/plugin_jar.jar
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 899b9d764..0ac1762ef 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -159,6 +159,7 @@ import org.bukkit.potion.PotionEffectType;
+ import org.bukkit.scheduler.BukkitWorker;
+ import org.bukkit.util.StringUtil;
+ import org.bukkit.util.permissions.DefaultPermissions;
++import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
+ import org.yaml.snakeyaml.DumperOptions;
+ import org.yaml.snakeyaml.LoaderOptions;
+@@ -178,7 +179,7 @@ public final class CraftServer implements Server {
+     private final SimpleCommandMap commandMap = new SimpleCommandMap(this);
+     private final SimpleHelpMap helpMap = new SimpleHelpMap(this);
+     private final StandardMessenger messenger = new StandardMessenger();
+-    private final PluginManager pluginManager = new SimplePluginManager(this, commandMap);
++    private final SimplePluginManager pluginManager = new SimplePluginManager(this, commandMap);
+     protected final MinecraftServer console;
+     protected final DedicatedPlayerList playerList;
+     private final Map<String, World> worlds = new LinkedHashMap<String, World>();
+@@ -355,10 +356,15 @@ public final class CraftServer implements Server {
+     public void loadPlugins() {
+         pluginManager.registerInterface(JavaPluginLoader.class);
+ 
+-        File pluginFolder = (File) console.options.valueOf("plugins");
++        File pluginFolder = this.getPluginsFolder(); // Paper
+ 
+-        if (pluginFolder.exists()) {
+-            Plugin[] plugins = pluginManager.loadPlugins(pluginFolder);
++        // Paper start
++        if (true || pluginFolder.exists()) {
++            if (!pluginFolder.exists()) {
++                pluginFolder.mkdirs();
++            }
++            Plugin[] plugins = this.pluginManager.loadPlugins(pluginFolder, this.extraPluginJars());
++            // Paper end
+             for (Plugin plugin : plugins) {
+                 try {
+                     String message = String.format("Loading %s", plugin.getDescription().getFullName());
+@@ -373,6 +379,35 @@ public final class CraftServer implements Server {
+         }
+     }
+ 
++    // Paper start
++    @Override
++    public File getPluginsFolder() {
++        return (File) console.options.valueOf("plugins");
++    }
++
++    private List<File> extraPluginJars() {
++        @SuppressWarnings("unchecked")
++        final List<File> jars = (List<File>) this.console.options.valuesOf("add-plugin");
++        final List<File> list = new ArrayList<>();
++        for (final File file : jars) {
++            if (!file.exists()) {
++                net.minecraft.server.MinecraftServer.LOGGER.warn("File '{}' specified through 'add-plugin' argument does not exist, cannot load a plugin from it!", file.getAbsolutePath());
++                continue;
++            }
++            if (!file.isFile()) {
++                net.minecraft.server.MinecraftServer.LOGGER.warn("File '{}' specified through 'add-plugin' argument is not a file, cannot load a plugin from it!", file.getAbsolutePath());
++                continue;
++            }
++            if (!file.getName().endsWith(".jar")) {
++                net.minecraft.server.MinecraftServer.LOGGER.warn("File '{}' specified through 'add-plugin' argument is not a jar file, cannot load a plugin from it!", file.getAbsolutePath());
++                continue;
++            }
++            list.add(file);
++        }
++        return list;
++    }
++    // Paper end
++
+     public void enablePlugins(PluginLoadOrder type) {
+         if (type == PluginLoadOrder.STARTUP) {
+             helpMap.clear();
+diff --git a/src/main/java/org/bukkit/craftbukkit/Main.java b/src/main/java/org/bukkit/craftbukkit/Main.java
+index ed4453c99..47d248521 100644
+--- a/src/main/java/org/bukkit/craftbukkit/Main.java
++++ b/src/main/java/org/bukkit/craftbukkit/Main.java
+@@ -160,6 +160,14 @@ public class Main {
+                         .defaultsTo(new File("knockback.yml"))
+                         .describedAs("Yml file");
+                 // Titanium end
++
++                // Paper start
++                acceptsAll(asList("add-plugin", "add-extra-plugin-jar"), "Specify paths to extra plugin jars to be loaded in addition to those in the plugins folder. This argument can be specified multiple times, once for each extra plugin jar path.")
++                        .withRequiredArg()
++                        .ofType(File.class)
++                        .defaultsTo(new File[] {})
++                        .describedAs("Jar file");
++                // Paper end
+             }
+         };
+ 
+-- 
+2.36.0.windows.1
+

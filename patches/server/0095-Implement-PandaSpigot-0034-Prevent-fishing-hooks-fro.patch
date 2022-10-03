@@ -1,0 +1,22 @@
+From aa39cb0a87e081d9e0b8e7ffead296c5f23365bf Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 5 Jun 2022 02:53:00 +0200
+Subject: [PATCH] Implement [PandaSpigot-0034] Prevent fishing hooks from using
+ portals by hpfxd
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityFishingHook.java b/src/main/java/net/minecraft/server/EntityFishingHook.java
+index 3717ca30c..b320b1301 100644
+--- a/src/main/java/net/minecraft/server/EntityFishingHook.java
++++ b/src/main/java/net/minecraft/server/EntityFishingHook.java
+@@ -360,6 +360,7 @@ public class EntityFishingHook extends Entity {
+                 this.motY *= (double) f2;
+                 this.motZ *= (double) f2;
+                 this.setPosition(this.locX, this.locY, this.locZ);
++                if (this.ak) this.die(); // PandaSpigot - Prevent going through portals
+             }
+         }
+     }
+-- 
+2.36.0.windows.1
+

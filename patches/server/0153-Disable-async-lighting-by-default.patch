@@ -1,0 +1,22 @@
+From b4268a697b7707d720f4152bffdd267001d7bdf1 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Wed, 6 Jul 2022 11:20:41 +0200
+Subject: [PATCH] Disable async lighting by default
+
+
+diff --git a/src/main/java/net/titanium/config/PaperWorldConfig.java b/src/main/java/net/titanium/config/PaperWorldConfig.java
+index 42c30e289..9897a8ece 100644
+--- a/src/main/java/net/titanium/config/PaperWorldConfig.java
++++ b/src/main/java/net/titanium/config/PaperWorldConfig.java
+@@ -219,7 +219,7 @@ public class PaperWorldConfig extends TitaniumConfigSection {
+     public boolean disableMoodSounds = false;
+ 
+     @Comment("Whether to use asynchronous lighting for better performance.")
+-    public boolean useAsyncLightning = true;
++    public boolean useAsyncLightning = false;
+ 
+     @Comment("Maximum number of blocks to search for a nether portal before generating a new one.")
+     public int portalSearchRadius = 128;
+-- 
+2.36.0.windows.1
+
