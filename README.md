@@ -51,7 +51,7 @@ Server:
 ```xml
 <dependency>
   <groupId>net.titanvale</groupId>
-  <artifactId>titanium</artifactId>
+  <artifactId>titanium-server</artifactId>
   <version>1.8.8-R0.1-SNAPSHOT</version>
   <scope>provided</scope>
 </dependency>
