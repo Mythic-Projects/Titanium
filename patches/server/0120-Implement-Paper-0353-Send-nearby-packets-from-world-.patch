@@ -1,0 +1,132 @@
+From c6b4052808ac8c3d2642380ed8d40efe360d7368 Mon Sep 17 00:00:00 2001
+From: Mystiflow <mystiflow@gmail.com>
+Date: Fri, 6 Jul 2018 13:21:30 +0100
+Subject: [PATCH] Implement [Paper-0353] Send nearby packets from world player
+ list not server by Mystiflow
+
+
+diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
+index ecca9e9eb..5399f2cd4 100644
+--- a/src/main/java/net/minecraft/server/PlayerList.java
++++ b/src/main/java/net/minecraft/server/PlayerList.java
+@@ -40,6 +40,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
+ import org.bukkit.event.player.PlayerRespawnEvent;
+ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
+ import org.bukkit.util.Vector;
++import org.jetbrains.annotations.Nullable;
+ import org.spigotmc.event.player.PlayerSpawnLocationEvent;
+ // CraftBukkit end
+ 
+@@ -1054,12 +1055,29 @@ public abstract class PlayerList {
+         this.sendPacketNearby((EntityHuman) null, d0, d1, d2, d3, i, packet);
+     }
+ 
+-    public void sendPacketNearby(EntityHuman entityhuman, double d0, double d1, double d2, double d3, int i, Packet packet) {
+-        for (int j = 0; j < this.players.size(); ++j) {
+-            EntityPlayer entityplayer = (EntityPlayer) this.players.get(j);
++    public void sendPacketNearby(EntityHuman entityhuman, double d0, double d1, double d2, double d3, int i, Packet<?> packet) {
++        // Paper start - Use world list instead of server list where preferable
++        sendPacketNearby(entityhuman, d0, d1, d2, d3, i, null, packet); // Retained for compatibility
++    }
++
++    public void sendPacketNearby(@Nullable EntityHuman entityhuman, double d0, double d1, double d2, double d3, WorldServer world, Packet<?> packet) {
++        sendPacketNearby(entityhuman, d0, d1, d2, d3, world.dimension, world, packet);
++    }
++
++    public void sendPacketNearby(@Nullable EntityHuman entityhuman, double d0, double d1, double d2, double d3, int i, @Nullable WorldServer world, Packet<?> packet) {
++        if (world == null && entityhuman != null && entityhuman.world instanceof WorldServer) {
++            world = (WorldServer) entityhuman.world;
++        }
++
++        List<? extends EntityHuman> players1 = world == null ? players : world.players;
++        for (int j = 0; j < players1.size(); ++j) {
++            EntityHuman entity = players1.get(j);
++            if (!(entity instanceof EntityPlayer)) continue;
++            EntityPlayer entityplayer = (EntityPlayer) players1.get(j);
++            // Paper end
+ 
+             // CraftBukkit start - Test if player receiving packet can see the source of the packet
+-            if (entityhuman != null && entityhuman instanceof EntityPlayer && !entityplayer.getBukkitEntity().canSee(((EntityPlayer) entityhuman).getBukkitEntity())) {
++            if (entityplayer != entityhuman && (world != null || entityplayer.dimension == i)) { // Paper
+                continue;
+             }
+             // CraftBukkit end
+diff --git a/src/main/java/net/minecraft/server/WorldManager.java b/src/main/java/net/minecraft/server/WorldManager.java
+index 98164f253..7a9027fc6 100644
+--- a/src/main/java/net/minecraft/server/WorldManager.java
++++ b/src/main/java/net/minecraft/server/WorldManager.java
+@@ -29,8 +29,8 @@ public class WorldManager implements IWorldAccess {
+     }
+ 
+     public void a(EntityHuman entityhuman, String s, double d0, double d1, double d2, float f, float f1) {
+-        // CraftBukkit - this.world.dimension
+-        this.a.getPlayerList().sendPacketNearby(entityhuman, d0, d1, d2, f > 1.0F ? (double) (16.0F * f) : 16.0D, this.world.dimension, new PacketPlayOutNamedSoundEffect(s, d0, d1, d2, f, f1));
++        // CraftBukkit - this.world.dimension, // Paper - this.world.dimension -> this.world
++        this.a.getPlayerList().sendPacketNearby(entityhuman, d0, d1, d2, f > 1.0F ? (double) (16.0F * f) : 16.0D, this.world, new PacketPlayOutNamedSoundEffect(s, d0, d1, d2, f, f1));
+     }
+ 
+     public void a(int i, int j, int k, int l, int i1, int j1) {}
+@@ -45,7 +45,7 @@ public class WorldManager implements IWorldAccess {
+ 
+     public void a(EntityHuman entityhuman, int i, BlockPosition blockposition, int j) {
+         // CraftBukkit - this.world.dimension
+-        this.a.getPlayerList().sendPacketNearby(entityhuman, (double) blockposition.getX(), (double) blockposition.getY(), (double) blockposition.getZ(), 64.0D, this.world.dimension, new PacketPlayOutWorldEvent(i, blockposition, j, false));
++        this.a.getPlayerList().sendPacketNearby(entityhuman, (double) blockposition.getX(), (double) blockposition.getY(), (double) blockposition.getZ(), 64.0D, this.world, new PacketPlayOutWorldEvent(i, blockposition, j, false));
+     }
+ 
+     public void a(int i, BlockPosition blockposition, int j) {
+@@ -53,19 +53,25 @@ public class WorldManager implements IWorldAccess {
+     }
+ 
+     public void b(int i, BlockPosition blockposition, int j) {
+-        Iterator iterator = this.a.getPlayerList().v().iterator();
+-
++        // Iterator iterator = this.a.getPlayerList().v().iterator(); // Paper
+         // CraftBukkit start
+         EntityHuman entityhuman = null;
+         Entity entity = world.a(i); // PAIL Rename getEntity
+         if (entity instanceof EntityHuman) entityhuman = (EntityHuman) entity;
+         // CraftBukkit end
+ 
++        // Paper start
++        java.util.List<? extends EntityHuman> list = entity != null ? entity.world.players : this.a.getPlayerList().v();
++        Iterator<? extends EntityHuman> iterator = list.iterator();
++
+         PacketPlayOutBlockBreakAnimation packet = null; // SportPaper - cache packet
+         while (iterator.hasNext()) {
+-            EntityPlayer entityplayer = (EntityPlayer) iterator.next();
++            EntityHuman human = iterator.next();
++            if (!(human instanceof EntityPlayer)) continue;
++            EntityPlayer entityplayer = (EntityPlayer) human;
++            // Paper end
+ 
+-            if (entityplayer != null && entityplayer.world == this.world && entityplayer.getId() != i) {
++            if (entityplayer.world == this.world && entityplayer.getId() != i) {
+                 double d0 = (double) blockposition.getX() - entityplayer.locX;
+                 double d1 = (double) blockposition.getY() - entityplayer.locY;
+                 double d2 = (double) blockposition.getZ() - entityplayer.locZ;
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index 1220ac309..7c004dd77 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -1044,7 +1044,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+             return false;
+         }
+         if (super.strikeLightning(entity)) {
+-            this.server.getPlayerList().sendPacketNearby(entity.locX, entity.locY, entity.locZ, 512.0D, dimension, new PacketPlayOutSpawnEntityWeather(entity));
++            this.server.getPlayerList().sendPacketNearby((EntityHuman) null,entity.locX, entity.locY, entity.locZ, 512.0D,this, new PacketPlayOutSpawnEntityWeather(entity)); // Paper - use world instead of dimension
+             // CraftBukkit end
+             return true;
+         } else {
+@@ -1117,7 +1117,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+ 
+                 if (this.a(blockactiondata)) {
+                     // CraftBukkit - this.worldProvider.dimension -> this.dimension
+-                    this.server.getPlayerList().sendPacketNearby((double) blockactiondata.a().getX(), (double) blockactiondata.a().getY(), (double) blockactiondata.a().getZ(), 64.0D, dimension, new PacketPlayOutBlockAction(blockactiondata.a(), blockactiondata.d(), blockactiondata.b(), blockactiondata.c()));
++                    this.server.getPlayerList().sendPacketNearby((EntityHuman) null, (double) blockactiondata.a().getX(), (double) blockactiondata.a().getY(), (double) blockactiondata.a().getZ(), 64.0D, this, new PacketPlayOutBlockAction(blockactiondata.a(), blockactiondata.d(), blockactiondata.b(), blockactiondata.c())); // Paper - this.world.dimension -> this.world
+                 }
+             }
+ 
+-- 
+2.36.0.windows.1
+

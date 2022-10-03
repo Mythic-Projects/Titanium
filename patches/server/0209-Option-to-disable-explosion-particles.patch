@@ -1,0 +1,77 @@
+From 4eb1a2355cddd2f288f519ec491fa4d52dd3f5dd Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 23 Sep 2022 22:12:12 +0200
+Subject: [PATCH] Option to disable explosion particles
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityTNTPrimed.java b/src/main/java/net/minecraft/server/EntityTNTPrimed.java
+index e3f989481..f99cd3a61 100644
+--- a/src/main/java/net/minecraft/server/EntityTNTPrimed.java
++++ b/src/main/java/net/minecraft/server/EntityTNTPrimed.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import net.titanium.config.TitaniumConfig;
+ import org.bukkit.event.entity.ExplosionPrimeEvent; // CraftBukkit
+ 
+ public class EntityTNTPrimed extends Entity {
+@@ -90,6 +91,7 @@ public class EntityTNTPrimed extends Entity {
+             // CraftBukkit end
+         } else {
+             this.W();
++            if (TitaniumConfig.get().gameMechanics.disableExplosionParticles) return; // Titanium - Option to disable explosion particles
+             this.world.addParticle(EnumParticle.SMOKE_NORMAL, this.locX, this.locY + 0.5D, this.locZ, 0.0D, 0.0D, 0.0D, new int[0]);
+         }
+ 
+diff --git a/src/main/java/net/minecraft/server/Explosion.java b/src/main/java/net/minecraft/server/Explosion.java
+index ee4cd2c6e..e6a8cbfb9 100644
+--- a/src/main/java/net/minecraft/server/Explosion.java
++++ b/src/main/java/net/minecraft/server/Explosion.java
+@@ -239,11 +239,13 @@ public class Explosion {
+         float volume = source instanceof EntityTNTPrimed ? world.paperConfigTitanium.tntExplosionVolume : 4.0F;
+         this.world.makeSound(this.posX, this.posY, this.posZ, "random.explode", volume, (1.0F + (this.world.random.nextFloat() - this.world.random.nextFloat()) * 0.2F) * 0.7F);
+         // PaperSpigot end
++        if (!TitaniumConfig.get().gameMechanics.disableExplosionParticles) { // Titanium - Option to disable explosion particles
+         if (this.size >= 2.0F && this.b) {
+             this.world.addParticle(EnumParticle.EXPLOSION_HUGE, this.posX, this.posY, this.posZ, 1.0D, 0.0D, 0.0D, new int[0]);
+         } else {
+             this.world.addParticle(EnumParticle.EXPLOSION_LARGE, this.posX, this.posY, this.posZ, 1.0D, 0.0D, 0.0D, new int[0]);
+         }
++        }
+ 
+         Iterator iterator;
+         BlockPosition blockposition;
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index 566b46b56..0ca4bb063 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -1103,6 +1103,11 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+             explosion.clearBlocks();
+         }
+ 
++        // Titanium start - Option to disable explosion particles
++        if (this.server.server.titaniumServer.getServerConfig().gameMechanics.disableExplosionParticles) {
++            return explosion;
++        }
++        // Titanium end
+         Iterator iterator = this.players.iterator();
+ 
+         while (iterator.hasNext()) {
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index 9918f22d3..e88bf134e 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -112,6 +112,10 @@ public class TitaniumConfig extends TitaniumConfigSection {
+         @Comment("Be careful with this option and use it only if you know what are you doing.")
+         public boolean disableChunkTicking = false;
+ 
++        @Comment("Whether to disable explosion particles.")
++        @Comment("Mostly optimization for clients.")
++        public boolean disableExplosionParticles = false;
++
+     }
+ 
+     @Comment("The max NBT size in bytes. The default value is 2097152 which is ~2Mb - it's insane big.")
+-- 
+2.36.0.windows.1
+

@@ -1,0 +1,73 @@
+From 8583743b5b458c51fcf0f92ae712eebea5aa47ce Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 24 Jul 2022 19:58:10 +0200
+Subject: [PATCH] Fix loading worlds generators
+
+
+diff --git a/src/main/java/net/titanium/config/BukkitConfig.java b/src/main/java/net/titanium/config/BukkitConfig.java
+index b2b824c3b..aae6a657c 100644
+--- a/src/main/java/net/titanium/config/BukkitConfig.java
++++ b/src/main/java/net/titanium/config/BukkitConfig.java
+@@ -1,10 +1,15 @@
+ package net.titanium.config;
+ 
++import com.google.common.collect.ImmutableMap;
+ import eu.okaeri.configs.annotation.Comment;
+ import eu.okaeri.configs.annotation.NameModifier;
+ import eu.okaeri.configs.annotation.NameStrategy;
+ import eu.okaeri.configs.annotation.Names;
++import java.util.HashMap;
++import java.util.LinkedHashMap;
++import java.util.Map;
+ import org.bukkit.Warning;
++import org.bukkit.World;
+ 
+ @Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
+ 
+@@ -109,4 +114,21 @@ public class BukkitConfig extends TitaniumConfigSection {
+ 
+     }
+ 
++    @Comment("Worlds generators settings (see https://bukkit.fandom.com/wiki/Bukkit.yml#*OPTIONAL*_worlds).")
++    public Map<String, WorldConfig> worlds = new LinkedHashMap<>();
++
++    public static class WorldConfig extends TitaniumConfigSection {
++
++        private String generator;
++
++        public WorldConfig(String generator) {
++            this.generator = generator;
++        }
++
++        public String getGenerator() {
++            return generator;
++        }
++
++    }
++
+ }
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index c60750266..ada8e2434 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -1408,11 +1408,15 @@ public final class CraftServer implements Server {
+     }
+ 
+     public ChunkGenerator getGenerator(String world) {
+-        String name = serverConfig.bukkit.get("worlds." + world + ".generator", String.class);
++        BukkitConfig.WorldConfig worldConfig = serverConfig.bukkit.worlds.get(world);
++        String name = null;
++        if (worldConfig != null) {
++            name = worldConfig.getGenerator();
++        }
+         ChunkGenerator result = null;
+ 
+         /* Titanium start
+-        ConfigurationSection section = BukkitConfig.getConfigurationSection("worlds"); //TODO Move this somewhere
++        ConfigurationSection section = BukkitConfig.getConfigurationSection("worlds");
+ 
+         if (section != null) {
+             section = section.getConfigurationSection(world);
+-- 
+2.36.0.windows.1
+

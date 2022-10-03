@@ -1,0 +1,283 @@
+From 704a4823674378752a61e362acaa71828b52d9e0 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 28 Aug 2022 15:26:28 +0200
+Subject: [PATCH] Some cleanup and improvements
+
+
+diff --git a/src/main/java/ga/windpvp/windspigot/async/entitytracker/AsyncEntityTracker.java b/src/main/java/ga/windpvp/windspigot/async/entitytracker/AsyncEntityTracker.java
+index d8f1f7136..848f149ff 100644
+--- a/src/main/java/ga/windpvp/windspigot/async/entitytracker/AsyncEntityTracker.java
++++ b/src/main/java/ga/windpvp/windspigot/async/entitytracker/AsyncEntityTracker.java
+@@ -2,7 +2,7 @@ package ga.windpvp.windspigot.async.entitytracker;
+ 
+ import com.google.common.collect.Lists;
+ import com.google.common.util.concurrent.ThreadFactoryBuilder;
+-import ga.windpvp.windspigot.async.AsyncUtil;
++import net.titanium.util.async.AsyncUtil;
+ import ga.windpvp.windspigot.async.ResettableLatch;
+ import java.util.List;
+ import java.util.concurrent.ExecutorService;
+@@ -36,7 +36,6 @@ public class AsyncEntityTracker extends EntityTracker {
+                 }
+                 latch.decrement();
+             }, trackingThreadExecutor);
+-
+         }
+         try {
+             latch.waitTillZero();
+diff --git a/src/main/java/ga/windpvp/windspigot/async/netty/Spigot404Write.java b/src/main/java/ga/windpvp/windspigot/async/netty/Spigot404Write.java
+index 19c858cb1..c7d31d48a 100644
+--- a/src/main/java/ga/windpvp/windspigot/async/netty/Spigot404Write.java
++++ b/src/main/java/ga/windpvp/windspigot/async/netty/Spigot404Write.java
+@@ -20,10 +20,15 @@ public class Spigot404Write {
+     }
+ 
+     public static void writeThenFlush(Channel channel, Packet<?> value, GenericFutureListener<? extends Future<? super Void>>[] listener) {
+-        Spigot404Write writer = new Spigot404Write(channel);
+         queue.add(new PacketQueue(value, listener));
+-        if (tasks.addTask()) {
++        if (!tasks.addTask()) {
++            return;
++        }
++
++        try {
++            Spigot404Write writer = new Spigot404Write(channel);
+             channel.pipeline().lastContext().executor().execute(writer::writeQueueAndFlush);
++        } catch (NullPointerException ignored) { // Sometimes player could leave just before packet send
+         }
+     }
+ 
+diff --git a/src/main/java/ga/windpvp/windspigot/async/netty/Tasks.java b/src/main/java/ga/windpvp/windspigot/async/netty/Tasks.java
+index a14b10475..35a11277e 100644
+--- a/src/main/java/ga/windpvp/windspigot/async/netty/Tasks.java
++++ b/src/main/java/ga/windpvp/windspigot/async/netty/Tasks.java
+@@ -25,7 +25,7 @@ public class Tasks {
+         return old == State.WAITING.ordinal();
+     }
+ 
+-    private static enum State {
++    private enum State {
+         WAITING,
+         RUNNING_NO_TASKS,
+         RUNNING_GOT_TASKS;
+diff --git a/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java b/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java
+index 79a7340e4..dd1276c28 100644
+--- a/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java
++++ b/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java
+@@ -1,7 +1,7 @@
+ package ga.windpvp.windspigot.async.pathsearch;
+ 
+ import com.google.common.util.concurrent.ThreadFactoryBuilder;
+-import ga.windpvp.windspigot.async.AsyncUtil;
++import net.titanium.util.async.AsyncUtil;
+ import ga.windpvp.windspigot.async.pathsearch.cache.SearchCacheEntryEntity;
+ import ga.windpvp.windspigot.async.pathsearch.cache.SearchCacheEntryPosition;
+ import java.util.concurrent.ExecutorService;
+diff --git a/src/main/java/ga/windpvp/windspigot/async/thread/AsyncPacketThread.java b/src/main/java/ga/windpvp/windspigot/async/thread/AsyncPacketThread.java
+index 34b0e4695..dbe2d5059 100644
+--- a/src/main/java/ga/windpvp/windspigot/async/thread/AsyncPacketThread.java
++++ b/src/main/java/ga/windpvp/windspigot/async/thread/AsyncPacketThread.java
+@@ -15,7 +15,6 @@ import org.apache.logging.log4j.Logger;
+ 
+ public abstract class AsyncPacketThread {
+ 
+-    private static final Logger LOGGER = LogManager.getLogger("AsyncThread");
+     private static final long SEC_IN_NANO = 1000000000;
+ 
+     private final String name;
+diff --git a/src/main/java/ga/windpvp/windspigot/commons/ConcurrentIntHashMap.java b/src/main/java/ga/windpvp/windspigot/commons/ConcurrentIntHashMap.java
+index eca816bed..8b8744db6 100644
+--- a/src/main/java/ga/windpvp/windspigot/commons/ConcurrentIntHashMap.java
++++ b/src/main/java/ga/windpvp/windspigot/commons/ConcurrentIntHashMap.java
+@@ -1,7 +1,7 @@
+ package ga.windpvp.windspigot.commons;
+ 
+ import net.minecraft.server.IntHashMap;
+-import static ga.windpvp.windspigot.async.AsyncUtil.runSynchronized;
++import static net.titanium.util.async.AsyncUtil.runSynchronized;
+ 
+ public class ConcurrentIntHashMap<V> extends IntHashMap<V> {
+ 	
+@@ -24,4 +24,5 @@ public class ConcurrentIntHashMap<V> extends IntHashMap<V> {
+ 	public void c() {
+ 		runSynchronized(this, super::c);
+ 	}
++
+ }
+diff --git a/src/main/java/me/rastrian/dev/utils/IndexedLinkedHashSet.java b/src/main/java/me/rastrian/dev/utils/IndexedLinkedHashSet.java
+deleted file mode 100644
+index 519eed777..000000000
+--- a/src/main/java/me/rastrian/dev/utils/IndexedLinkedHashSet.java
++++ /dev/null
+@@ -1,102 +0,0 @@
+-package me.rastrian.dev.utils;
+-
+-import com.google.common.collect.Lists;
+-import com.google.common.collect.Sets;
+-import java.util.ArrayList;
+-import java.util.Collection;
+-import java.util.HashSet;
+-import java.util.Iterator;
+-import java.util.List;
+-import java.util.Set;
+-
+-public final class IndexedLinkedHashSet<E> implements Set<E> {
+-
+-    private final List<E> list = Lists.newCopyOnWriteArrayList();
+-    private final Set<E> set = Sets.newConcurrentHashSet();
+-
+-    public boolean add(E e) {
+-        if (set.add(e)) {
+-            return list.add(e);
+-        }
+-        return false;
+-    }
+-
+-    public boolean remove(Object o) {
+-        if (set.remove(o)) {
+-            return list.remove(o);
+-        }
+-        return false;
+-    }
+-
+-    @Override
+-    public boolean containsAll(Collection<?> c) {
+-        return set.containsAll(c);
+-    }
+-
+-    public void clear() {
+-        set.clear();
+-        list.clear();
+-    }
+-
+-    public E get(int index) {
+-        return list.get(index);
+-    }
+-
+-    public boolean removeAll(Collection<?> c) {
+-        if (set.removeAll(c)) {
+-            return list.removeAll(c);
+-        }
+-        return true;
+-    }
+-
+-    public boolean retainAll(Collection<?> c) {
+-        if (set.retainAll(c)) {
+-            return list.retainAll(c);
+-        }
+-        return false;
+-    }
+-
+-    public boolean addAll(Collection<? extends E> c) {
+-        boolean modified = false;
+-        for (E e : c) {
+-            if (add(e)) {
+-                modified = true;
+-            }
+-        }
+-        return modified;
+-    }
+-
+-    @Override
+-    public int size() {
+-        return set.size();
+-    }
+-
+-    @Override
+-    public boolean isEmpty() {
+-        return set.isEmpty();
+-    }
+-
+-    @Override
+-    public boolean contains(Object o) {
+-        return set.contains(o);
+-    }
+-
+-    @Override
+-    public Iterator<E> iterator() {
+-        return list.iterator();
+-    }
+-
+-    @Override
+-    public Object[] toArray() {
+-        return list.toArray();
+-    }
+-
+-    @Override
+-    public <T> T[] toArray(T[] a) {
+-        return list.toArray(a);
+-    }
+-
+-    public int indexOf(Object o) {
+-        return list.indexOf(o);
+-    }
+-}
+\ No newline at end of file
+diff --git a/src/main/java/net/minecraft/server/EntityTracker.java b/src/main/java/net/minecraft/server/EntityTracker.java
+index 80f96838a..d098ab348 100644
+--- a/src/main/java/net/minecraft/server/EntityTracker.java
++++ b/src/main/java/net/minecraft/server/EntityTracker.java
+@@ -1,9 +1,10 @@
+ package net.minecraft.server;
+ 
++import com.google.common.collect.Lists;
+ import ga.windpvp.windspigot.commons.ConcurrentIntHashMap;
+ import java.util.Iterator;
++import java.util.List;
+ import java.util.concurrent.Callable;
+-import me.rastrian.dev.utils.IndexedLinkedHashSet;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
+@@ -12,8 +13,7 @@ public class EntityTracker {
+     private static final Logger a = LogManager.getLogger();
+     private final WorldServer world;
+     // Nacho start - Async entity tracker
+-    public IndexedLinkedHashSet<EntityTrackerEntry> c = new IndexedLinkedHashSet<>();
+-    public IndexedLinkedHashSet<EntityTrackerEntry> getTrackedEntities() { return c; }
++    public List<EntityTrackerEntry> c = Lists.newCopyOnWriteArrayList();
+     /*
+     private Set<EntityTrackerEntry> c = new io.papermc.paper.util.maplist.ObjectMapList<>(); // IonSpigot - HashSet -> ObjectMapList
+      */
+diff --git a/src/main/java/net/minecraft/server/Explosion.java b/src/main/java/net/minecraft/server/Explosion.java
+index 9b267e871..560d15777 100644
+--- a/src/main/java/net/minecraft/server/Explosion.java
++++ b/src/main/java/net/minecraft/server/Explosion.java
+@@ -3,7 +3,7 @@ package net.minecraft.server;
+ import com.google.common.collect.Lists;
+ import com.google.common.collect.Maps;
+ import com.google.common.collect.Sets;
+-import ga.windpvp.windspigot.async.AsyncUtil;
++import net.titanium.util.async.AsyncUtil;
+ import java.util.HashSet;
+ import java.util.Iterator;
+ import java.util.List;
+diff --git a/src/main/java/net/minecraft/server/JsonList.java b/src/main/java/net/minecraft/server/JsonList.java
+index fd371f03a..8a064e90a 100644
+--- a/src/main/java/net/minecraft/server/JsonList.java
++++ b/src/main/java/net/minecraft/server/JsonList.java
+@@ -13,7 +13,7 @@ import com.google.gson.JsonObject;
+ import com.google.gson.JsonParseException;
+ import com.google.gson.JsonSerializationContext;
+ import com.google.gson.JsonSerializer;
+-import ga.windpvp.windspigot.async.AsyncUtil;
++import net.titanium.util.async.AsyncUtil;
+ import java.io.BufferedReader;
+ import java.io.BufferedWriter;
+ import java.io.File;
+diff --git a/src/main/java/ga/windpvp/windspigot/async/AsyncUtil.java b/src/main/java/net/titanium/util/async/AsyncUtil.java
+similarity index 98%
+rename from src/main/java/ga/windpvp/windspigot/async/AsyncUtil.java
+rename to src/main/java/net/titanium/util/async/AsyncUtil.java
+index 8bbd109e1..b4dce733c 100644
+--- a/src/main/java/ga/windpvp/windspigot/async/AsyncUtil.java
++++ b/src/main/java/net/titanium/util/async/AsyncUtil.java
+@@ -1,4 +1,4 @@
+-package ga.windpvp.windspigot.async;
++package net.titanium.util.async;
+ 
+ import java.util.concurrent.Executor;
+ import java.util.concurrent.ForkJoinPool;
+-- 
+2.36.0.windows.1
+
