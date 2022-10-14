@@ -15,6 +15,7 @@ But also you can build it yourself. See [How To Build](https://github.com/TitanV
 If you want to build Titanium you will need these things to be installed and available from your shell:
 * [JDK 17](https://www.oracle.com/java/technologies/downloads/#java17)
 * [Git](https://git-scm.com/)
+* [Maven](https://maven.apache.org/)
 
 ### How to build
 
