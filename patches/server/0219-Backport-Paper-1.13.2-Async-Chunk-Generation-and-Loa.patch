@@ -1,4 +1,4 @@
-From 1b6bf24c77b0b8360457860227c005bb4e498ca4 Mon Sep 17 00:00:00 2001
+From 10b0047a551c791f47fd2499e617ce105c23aba6 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Fri, 14 Oct 2022 11:59:49 +0200
 Subject: [PATCH] Backport Paper 1.13.2 Async Chunk Generation (and Loading)
@@ -510,7 +510,7 @@ index 1a386ad77..67e0e9ceb 100644
      public Chunk getChunkAt(BlockPosition blockposition) {
          return this.getOrCreateChunk(blockposition.getX() >> 4, blockposition.getZ() >> 4);
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index a34910099..068bac407 100644
+index a34910099..c5714e1be 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
 @@ -1,38 +1,35 @@
@@ -634,7 +634,7 @@ index a34910099..068bac407 100644
      // CraftBukkit start - Add async variant, provide compatibility
      public Chunk getChunkIfLoaded(int x, int z) {
          return chunks.get(LongHash.toLong(x, z));
-@@ -126,7 +183,14 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -126,7 +183,13 @@ public class ChunkProviderServer implements IChunkProvider {
          return getChunkAt(i, j, null);
      }
  
@@ -644,12 +644,11 @@ index a34910099..068bac407 100644
 +    }
 +
 +    public Chunk getChunkAt(int i, int j, boolean load, boolean gen, Runnable runnable) {
-+        AsyncCatcher.catchOp("chunk load/gen");
 +        // Titanium end
          long key = LongHash.toLong(i, j); // IonSpigot - Only create key once
          Chunk chunk = chunks.get(key);
          ChunkRegionLoader loader = null;
-@@ -136,15 +200,17 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -136,15 +199,17 @@ public class ChunkProviderServer implements IChunkProvider {
  
          }
          // We can only use the queue for already generated chunks
@@ -669,11 +668,9 @@ index a34910099..068bac407 100644
          }
  
          unloadQueue.remove(key); // SportPaper
-@@ -156,13 +222,13 @@ public class ChunkProviderServer implements IChunkProvider {
-         return chunk;
+@@ -157,12 +222,11 @@ public class ChunkProviderServer implements IChunkProvider {
      }
      public Chunk originalGetChunkAt(int i, int j) {
-+        AsyncCatcher.catchOp("chunk load/gen"); // Titanium
          long key = LongHash.toLong(i, j); // IonSpigot - Only create key once
 -        Chunk chunk = (Chunk) this.chunks.get(key);
 +        Chunk chunk = this.chunks.get(key);
@@ -685,7 +682,7 @@ index a34910099..068bac407 100644
              chunk = this.loadChunk(i, j);
              if (chunk == null) {
                  if (this.chunkProvider == null) {
-@@ -171,50 +237,14 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -171,50 +235,14 @@ public class ChunkProviderServer implements IChunkProvider {
                      try {
                          chunk = this.chunkProvider.getOrCreateChunk(i, j);
                      } catch (Throwable throwable) {
@@ -738,15 +735,7 @@ index a34910099..068bac407 100644
          }
  
          unloadQueue.remove(key); // SportPaper
-@@ -244,6 +274,7 @@ public class ChunkProviderServer implements IChunkProvider {
-     }
- 
-     public Chunk loadChunk(int i, int j) {
-+        AsyncCatcher.catchOp("chunk load"); // Titanium
-         if (this.chunkLoader == null) {
-             return null;
-         } else {
-@@ -271,6 +302,60 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -271,6 +299,58 @@ public class ChunkProviderServer implements IChunkProvider {
          }
      }
  
@@ -763,8 +752,6 @@ index a34910099..068bac407 100644
 +    }
 +
 +    public void postChunk(Chunk chunk, boolean isNew, boolean recreateStructures) {
-+        AsyncCatcher.catchOp("chunk post-processing");
-+
 +        if (chunk == null || chunk == emptyChunk) {
 +            return;
 +        }
@@ -807,7 +794,7 @@ index a34910099..068bac407 100644
      public void saveChunkNOP(Chunk chunk) {
          if (canSave() && this.chunkLoader != null) {
              try {
-@@ -326,7 +411,7 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -326,7 +406,7 @@ public class ChunkProviderServer implements IChunkProvider {
                  BlockSand.instaFall = false;
                  this.world.getServer().getPluginManager().callEvent(new org.bukkit.event.world.ChunkPopulateEvent(chunk.bukkitChunk));
                  // CraftBukkit end
@@ -816,7 +803,7 @@ index a34910099..068bac407 100644
                  chunk.e();
              }
          }
-@@ -394,16 +479,17 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -394,16 +474,17 @@ public class ChunkProviderServer implements IChunkProvider {
                  server.getPluginManager().callEvent(event);
                  if (!event.isCancelled()) {
  
@@ -837,7 +824,7 @@ index a34910099..068bac407 100644
                      for (int x = -2; x < 3; x++) {
                          for (int z = -2; z < 3; z++) {
                              if (x == 0 && z == 0) {
-@@ -416,7 +502,8 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -416,7 +497,8 @@ public class ChunkProviderServer implements IChunkProvider {
                                  chunk.setNeighborUnloaded(x, z);
                              }
                          }
@@ -962,10 +949,10 @@ index fbd30bb5f..ad5350c78 100644
                  //this.methodProfiler.a(worldserver.getWorldData().getName()); // Purpur
 diff --git a/src/main/java/net/minecraft/server/PaperAsyncChunkProvider.java b/src/main/java/net/minecraft/server/PaperAsyncChunkProvider.java
 new file mode 100644
-index 000000000..91603102d
+index 000000000..e207f0fab
 --- /dev/null
 +++ b/src/main/java/net/minecraft/server/PaperAsyncChunkProvider.java
-@@ -0,0 +1,636 @@
+@@ -0,0 +1,632 @@
 +package net.minecraft.server;
 +
 +import com.destroystokyo.paper.util.PriorityQueuedExecutor;
@@ -983,8 +970,6 @@ index 000000000..91603102d
 +import net.titanium.config.TitaniumConfig;
 +import org.bukkit.craftbukkit.generator.CustomChunkGenerator;
 +import org.bukkit.craftbukkit.util.LongHash;
-+import org.checkerframework.checker.units.qual.N;
-+import org.spigotmc.AsyncCatcher;
 +
 +// Titanium - Backported from Paper 1.13.2
 +public class PaperAsyncChunkProvider extends ChunkProviderServer {
@@ -1083,7 +1068,6 @@ index 000000000..91603102d
 +    }
 +
 +    public Chunk getChunkAt(int i, int j, Runnable runnable) {
-+        AsyncCatcher.catchOp("chunk load/gen");
 +        if (runnable != null) {
 +            return this.getChunkAt(i, j, true, true, chunk -> runnable.run());
 +        }
@@ -1101,7 +1085,6 @@ index 000000000..91603102d
 +    @Nullable
 +    @Override
 +    public Chunk getChunkAt(int x, int z, boolean load, boolean gen, AsyncPriority priority, Consumer<Chunk> consumer) {
-+        AsyncCatcher.catchOp("chunk load/gen");
 +        long key = LongHash.toLong(x, z);
 +        Chunk chunk = this.chunks.get(key);
 +        this.unloadQueue.remove(key);
