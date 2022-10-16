@@ -1,4 +1,4 @@
-From 10b0047a551c791f47fd2499e617ce105c23aba6 Mon Sep 17 00:00:00 2001
+From 2f36e0ebe75c2050697823c3f76692e39eef8b5e Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Fri, 14 Oct 2022 11:59:49 +0200
 Subject: [PATCH] Backport Paper 1.13.2 Async Chunk Generation (and Loading)
@@ -949,10 +949,10 @@ index fbd30bb5f..ad5350c78 100644
                  //this.methodProfiler.a(worldserver.getWorldData().getName()); // Purpur
 diff --git a/src/main/java/net/minecraft/server/PaperAsyncChunkProvider.java b/src/main/java/net/minecraft/server/PaperAsyncChunkProvider.java
 new file mode 100644
-index 000000000..e207f0fab
+index 000000000..cec0c9ea3
 --- /dev/null
 +++ b/src/main/java/net/minecraft/server/PaperAsyncChunkProvider.java
-@@ -0,0 +1,632 @@
+@@ -0,0 +1,643 @@
 +package net.minecraft.server;
 +
 +import com.destroystokyo.paper.util.PriorityQueuedExecutor;
@@ -976,12 +976,8 @@ index 000000000..e207f0fab
 +
 +    private static final int GEN_THREAD_PRIORITY = Integer.getInteger("paper.genThreadPriority", 3);
 +    private static final int LOAD_THREAD_PRIORITY = Integer.getInteger("paper.loadThreadPriority", 4);
-+    private static final PriorityQueuedExecutor LOAD_EXECUTOR = new PriorityQueuedExecutor("Titanium - Chunk Loading - Shared", TitaniumConfig.get().chunk.async.enabled
-+            ? TitaniumConfig.get().chunk.async.loadThreads
-+            : 0, LOAD_THREAD_PRIORITY);
-+    private static final PriorityQueuedExecutor SINGLE_GEN_EXECUTOR = new PriorityQueuedExecutor("Titanium - Chunk Generation - Shared", TitaniumConfig.get().chunk.async.enabled && TitaniumConfig.get().chunk.async.generation && !TitaniumConfig.get().chunk.async.generationThreadPerWorld
-+            ? 1
-+            : 0, GEN_THREAD_PRIORITY);
++    private static final PriorityQueuedExecutor LOAD_EXECUTOR;
++    private static final PriorityQueuedExecutor SINGLE_GEN_EXECUTOR;
 +    private static final ConcurrentLinkedDeque<Runnable> MAIN_THREAD_QUEUE = new ConcurrentLinkedDeque<>();
 +
 +    private final PriorityQueuedExecutor loadExecutor;
@@ -997,16 +993,31 @@ index 000000000..e207f0fab
 +        this.server = worldserver.getMinecraftServer();
 +        String worldName = this.world.getWorld().getName();
 +
-+        this.loadExecutor = TitaniumConfig.get().chunk.async.loadExecutorPerWorld
-+                ? new PriorityQueuedExecutor("Titanium - Chunk Loading - " + worldName, TitaniumConfig.get().chunk.async.loadThreads, LOAD_THREAD_PRIORITY)
++        TitaniumConfig.Chunk.Async config = TitaniumConfig.get().chunk.async;
++
++        this.loadExecutor = config.loadExecutorPerWorld
++                ? new PriorityQueuedExecutor("Titanium - Chunk Loading - " + worldName, config.loadThreads, LOAD_THREAD_PRIORITY)
 +                : LOAD_EXECUTOR;
 +
-+        this.shouldGenSync = ichunkprovider instanceof CustomChunkGenerator && !(((CustomChunkGenerator) ichunkprovider).asyncSupported) || !TitaniumConfig.get().chunk.async.generation;
-+        this.generationExecutor = TitaniumConfig.get().chunk.async.generationThreadPerWorld
++        boolean forceAsyncChunkGen = config.forceAsyncGeneration || config.forceAsyncGenerationWorlds.contains(worldName);
++        this.shouldGenSync = ichunkprovider instanceof CustomChunkGenerator && !(((CustomChunkGenerator) ichunkprovider).asyncSupported) && !forceAsyncChunkGen || !config.generation;
++        this.generationExecutor = config.generationThreadPerWorld
 +                ? new PriorityQueuedExecutor("Titanium - Chunk Generation - " + worldName, 1, GEN_THREAD_PRIORITY)
 +                : SINGLE_GEN_EXECUTOR;
 +    }
 +
++    static {
++        TitaniumConfig.Chunk.Async config = TitaniumConfig.get().chunk.async;
++        boolean asyncEnabled = config.enabled;
++
++        LOAD_EXECUTOR = new PriorityQueuedExecutor("Titanium - Chunk Loading - Shared", asyncEnabled && !config.loadExecutorPerWorld
++                ? config.loadThreads
++                : 0, LOAD_THREAD_PRIORITY);
++
++        SINGLE_GEN_EXECUTOR = new PriorityQueuedExecutor("Titanium - Chunk Generation - Shared", asyncEnabled && config.generation && !config.generationThreadPerWorld
++                ? 1
++                : 0, GEN_THREAD_PRIORITY);
++    }
 +
 +    private static PriorityQueuedExecutor.Priority calculatePriority(boolean isBlockingMain, AsyncPriority priority) {
 +        if (isBlockingMain) {
@@ -1926,7 +1937,7 @@ index 000000000..a8be075f4
 +
 +}
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 3d3b00cae..10edc3120 100644
+index 3d3b00cae..a6259530e 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -2,7 +2,6 @@ package net.titanium.config;
@@ -1937,7 +1948,7 @@ index 3d3b00cae..10edc3120 100644
  import eu.okaeri.configs.OkaeriConfig;
  import eu.okaeri.configs.annotation.Comment;
  import eu.okaeri.configs.annotation.Exclude;
-@@ -238,6 +237,28 @@ public class TitaniumConfig extends TitaniumConfigSection {
+@@ -238,6 +237,32 @@ public class TitaniumConfig extends TitaniumConfigSection {
  
          }
  
@@ -1960,6 +1971,10 @@ index 3d3b00cae..10edc3120 100644
 +            public boolean generation = true;
 +            @Comment("Whether to use gen executor per world or one shared executor.")
 +            public boolean generationThreadPerWorld = true;
++            @Comment("Whether to force async generation (for eg. when custom world generator is used).")
++            public boolean forceAsyncGeneration = false;
++            @Comment("List of worlds that should use async generation (even if they're using custom world generator, that doesn't support it). This option works independently from force-async-generation.")
++            public Set<String> forceAsyncGenerationWorlds = new HashSet<>();
 +
 +        }
 +
