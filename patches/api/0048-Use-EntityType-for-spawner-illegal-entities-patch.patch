@@ -1,0 +1,25 @@
+From 76a6efbed749c2d51cffa12d673df74690002208 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 16 Oct 2022 22:52:58 +0200
+Subject: [PATCH] Use EntityType for spawner illegal entities patch
+
+
+diff --git a/src/main/java/org/bukkit/entity/EntityType.java b/src/main/java/org/bukkit/entity/EntityType.java
+index 7c6ca475..8a1fc2d9 100644
+--- a/src/main/java/org/bukkit/entity/EntityType.java
++++ b/src/main/java/org/bukkit/entity/EntityType.java
+@@ -274,6 +274,11 @@ public enum EntityType {
+         if (name == null) {
+             return null;
+         }
++        // Titanium start
++        if (name.equals("Minecart")) {
++            return MINECART;
++        }
++        // Titanium end
+         return NAME_MAP.get(name.toLowerCase());
+     }
+ 
+-- 
+2.36.0.windows.1
+
