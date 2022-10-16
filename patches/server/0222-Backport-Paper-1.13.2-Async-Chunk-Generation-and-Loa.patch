@@ -1,4 +1,4 @@
-From 2f36e0ebe75c2050697823c3f76692e39eef8b5e Mon Sep 17 00:00:00 2001
+From f41a0bded20155bee782b1cbb3815b1b1d9e7228 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Fri, 14 Oct 2022 11:59:49 +0200
 Subject: [PATCH] Backport Paper 1.13.2 Async Chunk Generation (and Loading)
@@ -1937,18 +1937,10 @@ index 000000000..a8be075f4
 +
 +}
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 3d3b00cae..a6259530e 100644
+index 1786dad27..3c1d0951d 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
-@@ -2,7 +2,6 @@ package net.titanium.config;
- 
- import com.google.common.collect.ImmutableMap;
- import com.google.common.collect.ImmutableSet;
--import com.google.common.collect.Lists;
- import eu.okaeri.configs.OkaeriConfig;
- import eu.okaeri.configs.annotation.Comment;
- import eu.okaeri.configs.annotation.Exclude;
-@@ -238,6 +237,32 @@ public class TitaniumConfig extends TitaniumConfigSection {
+@@ -266,6 +266,32 @@ public class TitaniumConfig extends TitaniumConfigSection {
  
          }
  
