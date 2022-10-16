@@ -4,21 +4,21 @@ Titanium is 1.8.8 [Paper](https://github.com/PaperMC/Paper) fork which aims to i
 
 *Titanium officially supports JDK **8**, **11** & **17*** - but we recommend to use *Java 17*.
 
-## Getting Titanium
+## Download
 
-You can download the latest version of Titanium from [Releases](https://github.com/TitanVale/Titanium/releases).
+Latest version of Titanium - [Releases page](https://github.com/TitanVale/Titanium/releases). <br>
+Dev versions (less stable, but with newer patches) - [Jenkins](https://jenkins.titanvale.net/job/Titanium/job/dev)
 
-But also you can build it yourself. See [How To Build](https://github.com/TitanVale/Titanium#how-to-build).
+## Building
 
-### Requirements
+#### Requirements
 
 If you want to build Titanium you will need these things to be installed and available from your shell:
 * [JDK 17](https://www.oracle.com/java/technologies/downloads/#java17)
 * [Git](https://git-scm.com/)
 * [Maven](https://maven.apache.org/)
 
-### How to build
-
+#### How to
 To patching, compiling and building Titanium you will use `titanium` script.
 
 To just build Titanium clone this repository and run `./titanium build paperclip` in the root directory. Then you will find your server jar in `Titanium-Server/build/libs`, it should be named `titanium.jar`.
