@@ -1,0 +1,49 @@
+From ef96062c0ab9f1322764df915dd348735e8bf8dc Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 16 Oct 2022 22:14:27 +0200
+Subject: [PATCH] Make async JsonList saving configurable
+
+
+diff --git a/src/main/java/net/minecraft/server/JsonList.java b/src/main/java/net/minecraft/server/JsonList.java
+index 8a064e90a..eb2f5e19f 100644
+--- a/src/main/java/net/minecraft/server/JsonList.java
++++ b/src/main/java/net/minecraft/server/JsonList.java
+@@ -13,6 +13,7 @@ import com.google.gson.JsonObject;
+ import com.google.gson.JsonParseException;
+ import com.google.gson.JsonSerializationContext;
+ import com.google.gson.JsonSerializer;
++import net.titanium.config.TitaniumConfig;
+ import net.titanium.util.async.AsyncUtil;
+ import java.io.BufferedReader;
+ import java.io.BufferedWriter;
+@@ -165,7 +166,11 @@ public class JsonList<K, V extends JsonListEntry<K>> {
+                 IOUtils.closeQuietly(bufferedwriter);
+             }
+         }; // Akarin
+-        AsyncUtil.run(runnable); // Akarin
++        if (TitaniumConfig.get().asynchronousJsonSaving) {
++            AsyncUtil.run(runnable);
++        } else {
++            runnable.run();
++        }
+     }
+ 
+     public void load() throws FileNotFoundException {
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index 3d3b00cae..29096ebb7 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -206,6 +206,10 @@ public class TitaniumConfig extends TitaniumConfigSection {
+     @Comment("Whether saving of fireworks and arrows should be disabled.")
+     public boolean disableFireworksAndArrowsSaving = false;
+ 
++    @Comment("Whether to save json files (ops, banned players, banned ips, and whitelist) asynchronously.")
++    @Comment("In most cases it can be enabled, but in certain cases it can cause issues.")
++    public boolean asynchronousJsonSaving = false;
++
+     @Comment("Allocates an entire cpu to the server - improves performance, but uses more cpu.")
+     @Comment("Enable it only if your OS is configured properly - see https://github.com/OpenHFT/Java-Thread-Affinity#isolcpus")
+     public boolean threadAffinity = false;
+-- 
+2.36.0.windows.1
+
