@@ -1,4 +1,4 @@
-From f41a0bded20155bee782b1cbb3815b1b1d9e7228 Mon Sep 17 00:00:00 2001
+From f4511a63ed2af63eb7daee0d54defd986e6d9728 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Fri, 14 Oct 2022 11:59:49 +0200
 Subject: [PATCH] Backport Paper 1.13.2 Async Chunk Generation (and Loading)
@@ -421,7 +421,7 @@ index 652c07975..c6920fcca 100644
          return (long) i & 4294967295L | ((long) j & 4294967295L) << 32;
      }
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderGenerate.java b/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
-index 1a386ad77..67e0e9ceb 100644
+index 1a386ad77..d3f5ee8b0 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
 @@ -164,25 +164,7 @@ public class ChunkProviderGenerate implements IChunkProvider {
@@ -451,23 +451,16 @@ index 1a386ad77..67e0e9ceb 100644
  
          Chunk chunk = new Chunk(this.m, chunksnapshot, i, j);
          byte[] abyte = chunk.getBiomeIndex();
-@@ -319,6 +301,7 @@ public class ChunkProviderGenerate implements IChunkProvider {
+@@ -395,7 +377,7 @@ public class ChunkProviderGenerate implements IChunkProvider {
          boolean flag = false;
-         ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(i, j);
  
-+        synchronized (this) { // Titanium - synchronize
-         if (this.r.w && this.n && this.m.paperConfigTitanium.generatorSettings.mineshaft) { // PaperSpigot
-             this.x.a(this.m, this.h, chunkcoordintpair);
+         if (this.r.y && this.n && chunk.w() < 3600L) {
+-            flag |= this.A.a(this.m, this.h, new ChunkCoordIntPair(i, j));
++            flag |= this.A.a(this.m, this.h, chunk.j()); // Titanium - don't create new ChunkCoordIntPair
          }
-@@ -338,6 +321,7 @@ public class ChunkProviderGenerate implements IChunkProvider {
-         if (this.r.y && this.n && this.m.paperConfigTitanium.generatorSettings.monument) { // PaperSpigot
-             this.A.a(this.m, this.h, chunkcoordintpair);
-         }
-+        }
  
-         int k1;
-         int l1;
-@@ -443,28 +427,35 @@ public class ChunkProviderGenerate implements IChunkProvider {
+         return flag;
+@@ -443,28 +425,33 @@ public class ChunkProviderGenerate implements IChunkProvider {
          return 0;
      }
  
@@ -477,7 +470,6 @@ index 1a386ad77..67e0e9ceb 100644
 +    }
 +
 +    public void recreateStructures(Chunk chunk, int i, int j, ChunkSnapshot chunksnapshot) {
-+        synchronized (this) { // Titanium - synchronize
          if (this.r.w && this.n && this.m.paperConfigTitanium.generatorSettings.mineshaft) { // PaperSpigot
 -            this.x.a(this, this.m, i, j, (ChunkSnapshot) null);
 +            this.x.a(this, this.m, i, j, chunksnapshot);
@@ -501,7 +493,6 @@ index 1a386ad77..67e0e9ceb 100644
          if (this.r.y && this.n && this.m.paperConfigTitanium.generatorSettings.monument) { // PaperSpigot
 -            this.A.a(this, this.m, i, j, (ChunkSnapshot) null);
 +            this.A.a(this, this.m, i, j, chunksnapshot);
-+        }
          }
 -
      }
@@ -949,7 +940,7 @@ index fbd30bb5f..ad5350c78 100644
                  //this.methodProfiler.a(worldserver.getWorldData().getName()); // Purpur
 diff --git a/src/main/java/net/minecraft/server/PaperAsyncChunkProvider.java b/src/main/java/net/minecraft/server/PaperAsyncChunkProvider.java
 new file mode 100644
-index 000000000..cec0c9ea3
+index 000000000..6dcfdb990
 --- /dev/null
 +++ b/src/main/java/net/minecraft/server/PaperAsyncChunkProvider.java
 @@ -0,0 +1,643 @@
@@ -1475,7 +1466,7 @@ index 000000000..cec0c9ea3
 +                    }
 +                }
 +
-+                PaperAsyncChunkProvider.this.postChunk(this.chunk, false, this.source == ChunkSource.LOAD);
++                PaperAsyncChunkProvider.this.postChunk(this.chunk, this.source == ChunkSource.GENERATE, this.source == ChunkSource.LOAD);
 +
 +                this.completeFutures(this.chunk);
 +                return this.chunk;
