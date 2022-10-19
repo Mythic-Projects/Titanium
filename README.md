@@ -205,9 +205,6 @@ Titanium implements patches from other engines as well. **All credits go to the 
 
 [Tuinity-????] Skip updating entity tracker without players
 
-[Akarin-0007] Avoid double I/O operation on load player file
-[Akarin-0010] Save Json list asynchronously
-
 [Purpur-0150] Tick fluids config
 [Purpur-0046/0280] Spark Profiler by BillyGalbreath
 [Purpur-0049/0290] Remove Timings by BillyGalbreath
@@ -215,6 +212,9 @@ Titanium implements patches from other engines as well. **All credits go to the 
 
 [Yatopia-0030] Don't save Fireworks and Arrows by tr7zw
 [Yatopia-0047] Smarter statistics ticking
+
+[Akarin-0007] Avoid double I/O operation on load player file
+[Akarin-0010] Save Json list asynchronously
 
 [InsanePaper-269] Cache Chunk Coordinations
 
