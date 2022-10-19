@@ -1,4 +1,4 @@
-From b029654c4e96c56e561d269eddca7b7a2d3b1237 Mon Sep 17 00:00:00 2001
+From d4437d2d3f833fd3e63386b3309779c572c94795 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Fri, 14 Oct 2022 11:59:49 +0200
 Subject: [PATCH] Backport Paper 1.13.2 Async Chunk Generation (and Loading)
@@ -374,7 +374,7 @@ index 000000000..ee0b44984
 +
 +}
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index 155c61f44..3e540342e 100644
+index 155c61f44..eee8537e2 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
 @@ -19,7 +19,7 @@ import org.apache.logging.log4j.Logger;
@@ -402,6 +402,96 @@ index 155c61f44..3e540342e 100644
      }
  
      public org.bukkit.Chunk bukkitChunk;
+@@ -1123,6 +1125,89 @@ public class Chunk {
+         //world.timings.syncChunkLoadPostTimer.stopTiming(); // Spigot // Purpur
+     }
+ 
++    // Titanium start - micro optimizations for Chunk#loadNearby
++    public void loadNearby(ChunkProviderServer chunkProvider, IChunkProvider chunkGenerator) {
++        Chunk chunk = chunkProvider.getChunkIfLoaded(this.locX, this.locZ -1);
++        Chunk chunk1 = chunkProvider.getChunkIfLoaded(this.locX + 1, this.locZ);
++        Chunk chunk2 = chunkProvider.getChunkIfLoaded(this.locX, this.locZ + 1);
++        Chunk chunk3 = chunkProvider.getChunkIfLoaded(this.locX - 1, this.locZ);
++
++        if (chunk1 != null && chunk2 != null && chunkProvider.isChunkLoaded(this.locX + 1, this.locZ +1 )) {
++            this.decorate(chunkProvider, chunkGenerator);
++        }
++
++        if (chunk3 != null && chunk2 != null && chunkProvider.isChunkLoaded(this.locX - 1, this.locZ + 1)) {
++            chunk3.decorate(chunkProvider, chunkGenerator);
++        }
++
++        if (chunk != null && chunk1 != null && chunkProvider.isChunkLoaded(this.locX + 1, this.locZ - 1)) {
++            chunk.decorate(chunkProvider, chunkGenerator);
++        }
++
++        if (chunk != null && chunk3 != null) {
++            Chunk chunk4 = chunkProvider.getChunkIfLoaded(this.locX - 1, this.locZ - 1);
++            if (chunk4 != null) {
++                chunk4.decorate(chunkProvider, chunkGenerator);
++            }
++        }
++    }
++
++    public void decorate(ChunkProviderServer chunkProvider, IChunkProvider chunkGenerator) {
++        if (this.done) {
++            this.decorateStructures(chunkProvider, chunkGenerator);
++        } else {
++            this.populate(chunkProvider, chunkGenerator);
++        }
++    }
++
++    public boolean decorateStructures(ChunkProviderServer chunkProvider, IChunkProvider chunkGenerator) {
++        if (chunkGenerator == null) {
++            return false;
++        }
++
++        if (chunkGenerator.a(chunkProvider, this, this.locX, this.locZ)) {
++            this.e();
++            return true;
++        }
++
++        return false;
++    }
++
++    public void populate(ChunkProviderServer chunkProvider, IChunkProvider chunkGenerator) {
++        this.n();
++
++        if (chunkGenerator == null) {
++            return;
++        }
++
++        chunkGenerator.getChunkAt(chunkProvider, this.locX, this.locZ);
++
++        BlockSand.instaFall = true;
++        Random random = new Random();
++        random.setSeed(this.world.getSeed());
++        long xRand = random.nextLong() / 2L * 2L + 1L;
++        long zRand = random.nextLong() / 2L * 2L + 1L;
++        random.setSeed((long) this.locX * xRand + (long) this.locZ * zRand ^ this.world.getSeed());
++
++        org.bukkit.World world = this.world.getWorld();
++        if (world != null) {
++            this.world.populating = true;
++            try {
++                for (org.bukkit.generator.BlockPopulator populator : world.getPopulators()) {
++                    populator.populate(world, random, this.bukkitChunk);
++                }
++            } finally {
++                this.world.populating = false;
++            }
++        }
++        BlockSand.instaFall = false;
++        this.world.getServer().getPluginManager().callEvent(new org.bukkit.event.world.ChunkPopulateEvent(this.bukkitChunk));
++        // CraftBukkit end
++
++        this.e();
++    }
++    // Titanium end
++
+     public BlockPosition h(BlockPosition blockposition) {
+         int i = blockposition.getX() & 15;
+         int j = blockposition.getZ() & 15;
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderGenerate.java b/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
 index 1a386ad77..d9e157343 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
@@ -474,7 +564,7 @@ index 1a386ad77..d9e157343 100644
      public Chunk getChunkAt(BlockPosition blockposition) {
          return this.getOrCreateChunk(blockposition.getX() >> 4, blockposition.getZ() >> 4);
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index a34910099..ebe5ef061 100644
+index a34910099..c9e94fee4 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
 @@ -1,35 +1,29 @@
@@ -745,23 +835,70 @@ index a34910099..ebe5ef061 100644
 +            }
 +        }
 +
-+        chunk.loadNearby(this, this, chunk.locX, chunk.locZ);
++        chunk.loadNearby(this, this.chunkProvider);
 +    }
 +    // Titanium end
 +
      public void saveChunkNOP(Chunk chunk) {
          if (canSave() && this.chunkLoader != null) {
              try {
-@@ -326,7 +403,7 @@ public class ChunkProviderServer implements IChunkProvider {
-                 BlockSand.instaFall = false;
-                 this.world.getServer().getPluginManager().callEvent(new org.bukkit.event.world.ChunkPopulateEvent(chunk.bukkitChunk));
-                 // CraftBukkit end
+@@ -298,50 +375,16 @@ public class ChunkProviderServer implements IChunkProvider {
+ 
+     public void getChunkAt(IChunkProvider ichunkprovider, int i, int j) {
+         Chunk chunk = this.getOrCreateChunk(i, j);
+-
++        // Titanium start
+         if (!chunk.isDone()) {
+-            chunk.n();
+-            if (this.chunkProvider != null) {
+-                this.chunkProvider.getChunkAt(ichunkprovider, i, j);
+-
+-                // CraftBukkit start
+-                BlockSand.instaFall = true;
+-                Random random = new Random();
+-                random.setSeed(world.getSeed());
+-                long xRand = random.nextLong() / 2L * 2L + 1L;
+-                long zRand = random.nextLong() / 2L * 2L + 1L;
+-                random.setSeed((long) i * xRand + (long) j * zRand ^ world.getSeed());
+-
+-                org.bukkit.World world = this.world.getWorld();
+-                if (world != null) {
+-                    this.world.populating = true;
+-                    try {
+-                        for (org.bukkit.generator.BlockPopulator populator : world.getPopulators()) {
+-                            populator.populate(world, random, chunk.bukkitChunk);
+-                        }
+-                    } finally {
+-                        this.world.populating = false;
+-                    }
+-                }
+-                BlockSand.instaFall = false;
+-                this.world.getServer().getPluginManager().callEvent(new org.bukkit.event.world.ChunkPopulateEvent(chunk.bukkitChunk));
+-                // CraftBukkit end
 -                
-+
-                 chunk.e();
-             }
+-                chunk.e();
+-            }
++            return;
          }
-@@ -394,16 +471,17 @@ public class ChunkProviderServer implements IChunkProvider {
+-
++        chunk.populate(this, this.chunkProvider);
++        // Titnaium end
+     }
+ 
+     public boolean a(IChunkProvider ichunkprovider, Chunk chunk, int i, int j) {
+-        if (this.chunkProvider != null && this.chunkProvider.a(ichunkprovider, chunk, i, j)) {
+-            Chunk chunk1 = this.getOrCreateChunk(i, j);
+-
+-            chunk1.e();
+-            return true;
+-        } else {
+-            return false;
+-        }
++        return chunk.decorateStructures(this, this.chunkProvider); // Titanium
+     }
+ 
+     public boolean saveChunks(boolean flag, IProgressUpdate iprogressupdate) {
+@@ -394,16 +437,17 @@ public class ChunkProviderServer implements IChunkProvider {
                  server.getPluginManager().callEvent(event);
                  if (!event.isCancelled()) {
  
@@ -782,7 +919,7 @@ index a34910099..ebe5ef061 100644
                      for (int x = -2; x < 3; x++) {
                          for (int z = -2; z < 3; z++) {
                              if (x == 0 && z == 0) {
-@@ -416,7 +494,8 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -416,7 +460,8 @@ public class ChunkProviderServer implements IChunkProvider {
                                  chunk.setNeighborUnloaded(x, z);
                              }
                          }
@@ -814,6 +951,35 @@ index df4c1e0e8..47ff14b53 100644
      Chunk a(World world, int i, int j) throws IOException;
  
      void a(World world, Chunk chunk) throws IOException, ExceptionWorldConflict;
+diff --git a/src/main/java/net/minecraft/server/IChunkProvider.java b/src/main/java/net/minecraft/server/IChunkProvider.java
+index c68ffe0e0..270532cc7 100644
+--- a/src/main/java/net/minecraft/server/IChunkProvider.java
++++ b/src/main/java/net/minecraft/server/IChunkProvider.java
+@@ -1,6 +1,7 @@
+ package net.minecraft.server;
+ 
+ import java.util.List;
++import org.jetbrains.annotations.Nullable;
+ 
+ public interface IChunkProvider {
+ 
+@@ -10,6 +11,16 @@ public interface IChunkProvider {
+ 
+     Chunk getChunkAt(BlockPosition blockposition);
+ 
++    // Titanium start
++    @Nullable
++    default Chunk getChunkIfLoaded(int x, int z) {
++        if (!isChunkLoaded(x, z)) {
++            return null;
++        }
++        return getOrCreateChunk(x, z);
++    }
++    // Titanium end
++
+     void getChunkAt(IChunkProvider ichunkprovider, int i, int j);
+ 
+     boolean a(IChunkProvider ichunkprovider, Chunk chunk, int i, int j);
 diff --git a/src/main/java/net/minecraft/server/LongHashMap.java b/src/main/java/net/minecraft/server/LongHashMap.java
 index 11f23a56d..ad5f4aace 100644
 --- a/src/main/java/net/minecraft/server/LongHashMap.java
@@ -1761,6 +1927,177 @@ index f8f904e7b..88efd4475 100644
          }
  
          private void a(Chunk chunk) {
+diff --git a/src/main/java/net/minecraft/server/StructureGenerator.java b/src/main/java/net/minecraft/server/StructureGenerator.java
+index d48a43569..9d3f85c33 100644
+--- a/src/main/java/net/minecraft/server/StructureGenerator.java
++++ b/src/main/java/net/minecraft/server/StructureGenerator.java
+@@ -1,16 +1,16 @@
+ package net.minecraft.server;
+ 
+-import com.google.common.collect.Maps;
+ import java.util.Iterator;
+ import java.util.List;
+ import java.util.Map;
+ import java.util.Random;
+ import java.util.concurrent.Callable;
++import java.util.concurrent.ConcurrentHashMap;
+ 
+ public abstract class StructureGenerator extends WorldGenBase {
+ 
+     private PersistentStructure d;
+-    protected Map<Long, StructureStart> e = Maps.newHashMap();
++    protected Map<Long, StructureStart> e = new ConcurrentHashMap<>(); // Titanium - ConcurrentHashMap
+ 
+     public StructureGenerator() {}
+ 
+diff --git a/src/main/java/net/minecraft/server/StructurePiece.java b/src/main/java/net/minecraft/server/StructurePiece.java
+index 0f4a4999b..e0b8561a5 100644
+--- a/src/main/java/net/minecraft/server/StructurePiece.java
++++ b/src/main/java/net/minecraft/server/StructurePiece.java
+@@ -56,9 +56,11 @@ public abstract class StructurePiece {
+     }
+ 
+     public static StructurePiece a(List<StructurePiece> list, StructureBoundingBox structureboundingbox) {
++        StructurePiece structurepiece; // Paper
++        synchronized (list) { // Paper - synchronize main structure list
+         Iterator iterator = list.iterator();
+ 
+-        StructurePiece structurepiece;
++        //StructurePiece structurepiece; // Paper - move up
+ 
+         do {
+             if (!iterator.hasNext()) {
+@@ -67,7 +69,7 @@ public abstract class StructurePiece {
+ 
+             structurepiece = (StructurePiece) iterator.next();
+         } while (structurepiece.c() == null || !structurepiece.c().a(structureboundingbox));
+-
++        } // Paper
+         return structurepiece;
+     }
+ 
+diff --git a/src/main/java/net/minecraft/server/StructureStart.java b/src/main/java/net/minecraft/server/StructureStart.java
+index 22ba3221a..1f44c5b9e 100644
+--- a/src/main/java/net/minecraft/server/StructureStart.java
++++ b/src/main/java/net/minecraft/server/StructureStart.java
+@@ -1,12 +1,13 @@
+ package net.minecraft.server;
+ 
++import com.google.common.collect.Lists;
+ import java.util.Iterator;
+-import java.util.LinkedList;
++import java.util.List;
+ import java.util.Random;
+ 
+ public abstract class StructureStart {
+ 
+-    protected LinkedList<StructurePiece> a = new LinkedList();
++    protected final List<StructurePiece> a = java.util.Collections.synchronizedList(Lists.newArrayList()); // Paper - synchronized list // Titanium - LinkedList -> ArrayList
+     protected StructureBoundingBox b;
+     private int c;
+     private int d;
+@@ -22,33 +23,33 @@ public abstract class StructureStart {
+         return this.b;
+     }
+ 
+-    public LinkedList<StructurePiece> b() {
++    public List<StructurePiece> b() { // Titanium - LinkedList -> ArrayList
+         return this.a;
+     }
+ 
+     public void a(World world, Random random, StructureBoundingBox structureboundingbox) {
+         Iterator iterator = this.a.iterator();
+ 
++        synchronized (this.a) { // Titanium - synchronize
+         while (iterator.hasNext()) {
+             StructurePiece structurepiece = (StructurePiece) iterator.next();
+ 
+             if (structurepiece.c().a(structureboundingbox) && !structurepiece.a(world, random, structureboundingbox)) {
+                 iterator.remove();
+             }
+-        }
+-
++        }} // Titanium
+     }
+ 
+     protected void c() {
+         this.b = StructureBoundingBox.a();
++        synchronized (this.a) { // Paper - synchronize
+         Iterator iterator = this.a.iterator();
+ 
+         while (iterator.hasNext()) {
+             StructurePiece structurepiece = (StructurePiece) iterator.next();
+ 
+             this.b.b(structurepiece.c());
+-        }
+-
++        }} // Paper
+     }
+ 
+     public NBTTagCompound a(int i, int j) {
+@@ -59,13 +60,14 @@ public abstract class StructureStart {
+         nbttagcompound.setInt("ChunkZ", j);
+         nbttagcompound.set("BB", this.b.g());
+         NBTTagList nbttaglist = new NBTTagList();
++        synchronized (this.a) { // Titanium - synchronize
+         Iterator iterator = this.a.iterator();
+ 
+         while (iterator.hasNext()) {
+             StructurePiece structurepiece = (StructurePiece) iterator.next();
+ 
+             nbttaglist.add(structurepiece.b());
+-        }
++        }} // Titanium
+ 
+         nbttagcompound.set("Children", nbttaglist);
+         this.a(nbttagcompound);
+@@ -103,14 +105,14 @@ public abstract class StructureStart {
+         int l = k - this.b.e;
+ 
+         this.b.a(0, l, 0);
++        synchronized (this.a) { // Paper - synchronize
+         Iterator iterator = this.a.iterator();
+ 
+         while (iterator.hasNext()) {
+             StructurePiece structurepiece = (StructurePiece) iterator.next();
+ 
+             structurepiece.a(0, l, 0);
+-        }
+-
++        }} // Paper
+     }
+ 
+     protected void a(World world, Random random, int i, int j) {
+@@ -127,14 +129,14 @@ public abstract class StructureStart {
+         int i1 = l - this.b.b;
+ 
+         this.b.a(0, i1, 0);
++        synchronized (this.a) { // Paper - synchronize
+         Iterator iterator = this.a.iterator();
+ 
+         while (iterator.hasNext()) {
+             StructurePiece structurepiece = (StructurePiece) iterator.next();
+ 
+             structurepiece.a(0, i1, 0);
+-        }
+-
++        }} // Paper
+     }
+ 
+     public boolean d() {
+diff --git a/src/main/java/net/minecraft/server/WorldGenLargeFeature.java b/src/main/java/net/minecraft/server/WorldGenLargeFeature.java
+index 0b8340e35..ba86514f5 100644
+--- a/src/main/java/net/minecraft/server/WorldGenLargeFeature.java
++++ b/src/main/java/net/minecraft/server/WorldGenLargeFeature.java
+@@ -89,7 +89,7 @@ public class WorldGenLargeFeature extends StructureGenerator {
+         StructureStart structurestart = this.c(blockposition);
+ 
+         if (structurestart != null && structurestart instanceof WorldGenLargeFeature.WorldGenLargeFeatureStart && !structurestart.a.isEmpty()) {
+-            StructurePiece structurepiece = (StructurePiece) structurestart.a.getFirst();
++            StructurePiece structurepiece = structurestart.a.get(0); // Titanium - LinkedList -> ArrayList
+ 
+             return structurepiece instanceof WorldGenRegistration.WorldGenWitchHut;
+         } else {
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
 index 0ca4bb063..778800b5a 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
