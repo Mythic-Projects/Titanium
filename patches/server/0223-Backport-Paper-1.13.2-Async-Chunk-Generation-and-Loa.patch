@@ -1,4 +1,4 @@
-From 56f45d86ca292654edb204eb4ba78040b2f5b240 Mon Sep 17 00:00:00 2001
+From b029654c4e96c56e561d269eddca7b7a2d3b1237 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Fri, 14 Oct 2022 11:59:49 +0200
 Subject: [PATCH] Backport Paper 1.13.2 Async Chunk Generation (and Loading)
@@ -403,7 +403,7 @@ index 155c61f44..3e540342e 100644
  
      public org.bukkit.Chunk bukkitChunk;
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderGenerate.java b/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
-index 1a386ad77..d3f5ee8b0 100644
+index 1a386ad77..d9e157343 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
 @@ -164,25 +164,7 @@ public class ChunkProviderGenerate implements IChunkProvider {
@@ -433,15 +433,6 @@ index 1a386ad77..d3f5ee8b0 100644
  
          Chunk chunk = new Chunk(this.m, chunksnapshot, i, j);
          byte[] abyte = chunk.getBiomeIndex();
-@@ -395,7 +377,7 @@ public class ChunkProviderGenerate implements IChunkProvider {
-         boolean flag = false;
- 
-         if (this.r.y && this.n && chunk.w() < 3600L) {
--            flag |= this.A.a(this.m, this.h, new ChunkCoordIntPair(i, j));
-+            flag |= this.A.a(this.m, this.h, chunk.j()); // Titanium - don't create new ChunkCoordIntPair
-         }
- 
-         return flag;
 @@ -443,28 +425,33 @@ public class ChunkProviderGenerate implements IChunkProvider {
          return 0;
      }
