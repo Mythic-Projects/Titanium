@@ -1,7 +1,7 @@
-From 01ded5ab5a94181576da4d2ef6960b3f694f920c Mon Sep 17 00:00:00 2001
+From 0e31880b40df1395a64eece1e81594abe883545c Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Fri, 14 Oct 2022 11:59:49 +0200
-Subject: [PATCH] Backport Paper 1.13.2 Async Chunk Generation (and Loading)
+Subject: [PATCH] Paper 1.13.2 Async Chunk Generation (and Loading)
 
 Co-authored-by: Peridot <peridot491@protonmail.com>
 
@@ -373,6 +373,23 @@ index 000000000..ee0b44984
 +    };
 +
 +}
+diff --git a/src/main/java/net/minecraft/server/Block.java b/src/main/java/net/minecraft/server/Block.java
+index 86f111df7..210ca9561 100644
+--- a/src/main/java/net/minecraft/server/Block.java
++++ b/src/main/java/net/minecraft/server/Block.java
+@@ -160,11 +160,7 @@ public class Block {
+     }
+ 
+     public int toLegacyData(IBlockData iblockdata) {
+-        if (iblockdata != null && !iblockdata.a().isEmpty()) {
+-            throw new IllegalArgumentException("Don\'t know how to convert " + iblockdata + " back into data...");
+-        } else {
+-            return 0;
+-        }
++        return 0; // SportPaper - optimize toLegacyData removing unneeded sanity checks
+     }
+ 
+     public IBlockData updateState(IBlockData iblockdata, IBlockAccess iblockaccess, BlockPosition blockposition) {
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
 index 155c61f44..eee8537e2 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
@@ -564,7 +581,7 @@ index 1a386ad77..d9e157343 100644
      public Chunk getChunkAt(BlockPosition blockposition) {
          return this.getOrCreateChunk(blockposition.getX() >> 4, blockposition.getZ() >> 4);
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index a34910099..c9e94fee4 100644
+index a34910099..9aca136a0 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
 @@ -1,35 +1,29 @@
@@ -783,7 +800,7 @@ index a34910099..c9e94fee4 100644
          }
  
          unloadQueue.remove(key); // SportPaper
-@@ -271,6 +296,58 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -271,6 +296,43 @@ public class ChunkProviderServer implements IChunkProvider {
          }
      }
  
@@ -820,21 +837,6 @@ index a34910099..c9e94fee4 100644
 +            server.getPluginManager().callEvent(new org.bukkit.event.world.ChunkLoadEvent(chunk.bukkitChunk, isNew));
 +        }
 +
-+        // Update neighbor counts
-+        for (int x = -2; x < 3; x++) {
-+            for (int z = -2; z < 3; z++) {
-+                if (x == 0 && z == 0) {
-+                    continue;
-+                }
-+
-+                Chunk neighbor = chunks.get(LongHash.toLong(chunk.locX + x, chunk.locZ + z));
-+                if (neighbor != null) {
-+                    neighbor.setNeighborLoaded(-x, -z);
-+                    chunk.setNeighborLoaded(x, z);
-+                }
-+            }
-+        }
-+
 +        chunk.loadNearby(this, this.chunkProvider);
 +    }
 +    // Titanium end
@@ -842,7 +844,7 @@ index a34910099..c9e94fee4 100644
      public void saveChunkNOP(Chunk chunk) {
          if (canSave() && this.chunkLoader != null) {
              try {
-@@ -298,50 +375,16 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -298,50 +360,16 @@ public class ChunkProviderServer implements IChunkProvider {
  
      public void getChunkAt(IChunkProvider ichunkprovider, int i, int j) {
          Chunk chunk = this.getOrCreateChunk(i, j);
@@ -898,7 +900,7 @@ index a34910099..c9e94fee4 100644
      }
  
      public boolean saveChunks(boolean flag, IProgressUpdate iprogressupdate) {
-@@ -394,16 +437,17 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -394,16 +422,17 @@ public class ChunkProviderServer implements IChunkProvider {
                  server.getPluginManager().callEvent(event);
                  if (!event.isCancelled()) {
  
@@ -919,7 +921,7 @@ index a34910099..c9e94fee4 100644
                      for (int x = -2; x < 3; x++) {
                          for (int z = -2; z < 3; z++) {
                              if (x == 0 && z == 0) {
-@@ -416,7 +460,8 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -416,7 +445,8 @@ public class ChunkProviderServer implements IChunkProvider {
                                  chunk.setNeighborUnloaded(x, z);
                              }
                          }
@@ -1721,7 +1723,7 @@ index 000000000..6dcfdb990
 +
 +}
 diff --git a/src/main/java/net/minecraft/server/PlayerChunkMap.java b/src/main/java/net/minecraft/server/PlayerChunkMap.java
-index 506cb2727..166579427 100644
+index 506cb2727..5a301e38e 100644
 --- a/src/main/java/net/minecraft/server/PlayerChunkMap.java
 +++ b/src/main/java/net/minecraft/server/PlayerChunkMap.java
 @@ -7,6 +7,8 @@ import java.util.ArrayList;
@@ -1840,7 +1842,7 @@ index 506cb2727..166579427 100644
 +        private void requestChunkIfNeeded(boolean flag) {
 +            if (this.chunkRequest == null) {
 +                this.chunkRequest = PlayerChunkMap.this.getWorld().chunkProviderServer.requestChunk(this.location.x, this.location.z, flag, this.markedHigh ? AsyncPriority.HIGH : AsyncPriority.NORMAL, this.loadedConsumer);
-+                this.chunk = this.chunkRequest.getChunk(); // Paper)
++                this.chunk = this.chunkRequest.getChunk(); // Paper
 +            }
 +        }
 +
@@ -2086,21 +2088,106 @@ index 22ba3221a..1f44c5b9e 100644
  
      public boolean d() {
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 7668c02c0..d43a4aa8e 100644
+index 7668c02c0..73e8b4f26 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -780,8 +780,9 @@ public abstract class World implements IBlockAccess {
+@@ -331,7 +331,7 @@ public abstract class World implements IBlockAccess {
+     }
+ 
+     private boolean isValidLocation(BlockPosition blockposition) {
+-        return blockposition.getX() >= -30000000 && blockposition.getZ() >= -30000000 && blockposition.getX() < 30000000 && blockposition.getZ() < 30000000 && blockposition.getY() >= 0 && blockposition.getY() < 256;
++        return isInWorldBounds(blockposition.getX(), blockposition.getZ()) && blockposition.getY() >= 0 && blockposition.getY() <= 255; // Titanium
+     }
+ 
+     public boolean isEmpty(BlockPosition blockposition) {
+@@ -347,7 +347,7 @@ public abstract class World implements IBlockAccess {
+     }
+ 
+     public boolean a(BlockPosition blockposition, boolean flag) {
+-        return !this.isValidLocation(blockposition) ? false : this.isChunkLoaded(blockposition.getX() >> 4, blockposition.getZ() >> 4, flag);
++        return this.isValidLocation(blockposition) && this.isChunkLoaded(blockposition.getX() >> 4, blockposition.getZ() >> 4, flag);
+     }
+ 
+     public boolean areChunksLoaded(BlockPosition blockposition, int i) {
+@@ -700,7 +700,7 @@ public abstract class World implements IBlockAccess {
+     }
+ 
+     public boolean isLightLevel(BlockPosition blockposition, int level) {
+-        if (blockposition.getX() >= -30000000 && blockposition.getZ() >= -30000000 && blockposition.getX() < 30000000 && blockposition.getZ() < 30000000) {
++        if (isInWorldBounds(blockposition.getX(), blockposition.getZ())) { // Titanium
+             if (this.getType(blockposition).getBlock().s())
+             {
+                 if (c(blockposition.up(), false) >= level)
+@@ -735,7 +735,7 @@ public abstract class World implements IBlockAccess {
+     }
+ 
+     public int c(BlockPosition blockposition, boolean flag) {
+-        if (blockposition.getX() >= -30000000 && blockposition.getZ() >= -30000000 && blockposition.getX() < 30000000 && blockposition.getZ() < 30000000) {
++        if (isInWorldBounds(blockposition.getX(), blockposition.getZ())) { // Titanium
+             if (flag && this.getType(blockposition).getBlock().s()) {
+                 int i = this.c(blockposition.up(), false);
+                 int j = this.c(blockposition.east(), false);
+@@ -779,9 +779,10 @@ public abstract class World implements IBlockAccess {
+     public BlockPosition getHighestBlockYAt(BlockPosition blockposition) {
          int i;
  
-         if (blockposition.getX() >= -30000000 && blockposition.getZ() >= -30000000 && blockposition.getX() < 30000000 && blockposition.getZ() < 30000000) {
+-        if (blockposition.getX() >= -30000000 && blockposition.getZ() >= -30000000 && blockposition.getX() < 30000000 && blockposition.getZ() < 30000000) {
 -            if (this.isChunkLoaded(blockposition.getX() >> 4, blockposition.getZ() >> 4, true)) {
 -                i = this.getChunkAt(blockposition.getX() >> 4, blockposition.getZ() >> 4).b(blockposition.getX() & 15, blockposition.getZ() & 15);
++        if (isInWorldBounds(blockposition.getX(), blockposition.getZ())) { // Titanium
 +            Chunk chunk = this.getChunkIfLoaded(blockposition.getX() >> 4, blockposition.getZ() >> 4); // Titanium - Micro optimization
 +            if (chunk != null) {
 +                i = chunk.b(blockposition.getX() & 15, blockposition.getZ() & 15);
              } else {
                  i = 0;
              }
+@@ -793,7 +794,7 @@ public abstract class World implements IBlockAccess {
+     }
+ 
+     public int b(int i, int j) {
+-        if (i >= -30000000 && j >= -30000000 && i < 30000000 && j < 30000000) {
++        if (isInWorldBounds(i, j)) { // Titanium
+             if (!this.isChunkLoaded(i >> 4, j >> 4, true)) {
+                 return 0;
+             } else {
+@@ -844,6 +845,8 @@ public abstract class World implements IBlockAccess {
+         return this.worldProvider.p()[this.getLightLevel(blockposition)];
+     }
+ 
++    private static final IBlockData AIR_DATA = Blocks.AIR.getBlockData(); // Titanium - Micro optimization
++
+     // Paper start - reduces need to do isLoaded before getType
+     public IBlockData getTypeIfLoaded(BlockPosition blockposition) {
+         // CraftBukkit start - tree generation
+@@ -859,7 +862,7 @@ public abstract class World implements IBlockAccess {
+         // CraftBukkit end
+         Chunk chunk = this.getChunkIfLoaded(blockposition);
+         if (chunk != null) {
+-            return this.isValidLocation(blockposition) ? chunk.getBlockData(blockposition) : Blocks.AIR.getBlockData();
++            return this.isValidLocation(blockposition) ? chunk.getBlockData(blockposition) : AIR_DATA; // Titanium
+         }
+         return null;
+     }
+@@ -884,7 +887,7 @@ public abstract class World implements IBlockAccess {
+         }
+         // CraftBukkit end
+         if (!this.isValidLocation(blockposition)) {
+-            return Blocks.AIR.getBlockData();
++            return AIR_DATA; // Titanium
+         } else {
+             Chunk chunk = this.getChunkAtWorldCoords(blockposition);
+ 
+@@ -3387,4 +3390,10 @@ public abstract class World implements IBlockAccess {
+ 
+         return k >= -short0 && k <= short0 && l >= -short0 && l <= short0 && this.keepSpawnInMemory; // CraftBukkit - Added 'this.keepSpawnInMemory'
+     }
++
++    // Titanium start - some cleanup
++    private static boolean isInWorldBounds(int x, int z) {
++        return x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000;
++    }
++    // Titanium end
+ }
 diff --git a/src/main/java/net/minecraft/server/WorldGenLargeFeature.java b/src/main/java/net/minecraft/server/WorldGenLargeFeature.java
 index 0b8340e35..ba86514f5 100644
 --- a/src/main/java/net/minecraft/server/WorldGenLargeFeature.java
@@ -2114,6 +2201,77 @@ index 0b8340e35..ba86514f5 100644
  
              return structurepiece instanceof WorldGenRegistration.WorldGenWitchHut;
          } else {
+diff --git a/src/main/java/net/minecraft/server/WorldGenMinable.java b/src/main/java/net/minecraft/server/WorldGenMinable.java
+index 2307c87b6..b7b34a5c7 100644
+--- a/src/main/java/net/minecraft/server/WorldGenMinable.java
++++ b/src/main/java/net/minecraft/server/WorldGenMinable.java
+@@ -7,6 +7,7 @@ public class WorldGenMinable extends WorldGenerator {
+ 
+     private final IBlockData a;
+     private final int b;
++    private final float b8;
+     private final Predicate<IBlockData> c;
+ 
+     public WorldGenMinable(IBlockData iblockdata, int i) {
+@@ -16,15 +17,20 @@ public class WorldGenMinable extends WorldGenerator {
+     public WorldGenMinable(IBlockData iblockdata, int i, Predicate<IBlockData> predicate) {
+         this.a = iblockdata;
+         this.b = i;
++        this.b8 = (float) this.b / 8.0F; // Titanium
+         this.c = predicate;
+     }
+ 
+     public boolean generate(World world, Random random, BlockPosition blockposition) {
+         float f = random.nextFloat() * 3.1415927F;
+-        double d0 = (double) ((float) (blockposition.getX() + 8) + MathHelper.sin(f) * (float) this.b / 8.0F);
+-        double d1 = (double) ((float) (blockposition.getX() + 8) - MathHelper.sin(f) * (float) this.b / 8.0F);
+-        double d2 = (double) ((float) (blockposition.getZ() + 8) + MathHelper.cos(f) * (float) this.b / 8.0F);
+-        double d3 = (double) ((float) (blockposition.getZ() + 8) - MathHelper.cos(f) * (float) this.b / 8.0F);
++        // Titanium start - micro optimization
++        float sinF = MathHelper.sin(f) * this.b8; // Titanium
++        float cosF = MathHelper.cos(f) * this.b8; // Titanium
++        double d0 = ((float) (blockposition.getX() + 8) + sinF);
++        double d1 = ((float) (blockposition.getX() + 8) - sinF);
++        double d2 = ((float) (blockposition.getZ() + 8) + cosF);
++        double d3 = ((float) (blockposition.getZ() + 8) - cosF);
++        // Titanium end
+         double d4 = (double) (blockposition.getY() + random.nextInt(3) - 2);
+         double d5 = (double) (blockposition.getY() + random.nextInt(3) - 2);
+ 
+@@ -35,12 +41,12 @@ public class WorldGenMinable extends WorldGenerator {
+             double d8 = d2 + (d3 - d2) * (double) f1;
+             double d9 = random.nextDouble() * (double) this.b / 16.0D;
+             double d10 = (double) (MathHelper.sin(3.1415927F * f1) + 1.0F) * d9 + 1.0D;
+-            double d11 = (double) (MathHelper.sin(3.1415927F * f1) + 1.0F) * d9 + 1.0D;
++            //double d11 = (double) (MathHelper.sin(3.1415927F * f1) + 1.0F) * d9 + 1.0D; // Titanium - don't calculate same thing twice
+             int j = MathHelper.floor(d6 - d10 / 2.0D);
+-            int k = MathHelper.floor(d7 - d11 / 2.0D);
++            int k = MathHelper.floor(d7 - d10 / 2.0D); // Titanium - don't calculate same thing twice (d11 -> d10)
+             int l = MathHelper.floor(d8 - d10 / 2.0D);
+             int i1 = MathHelper.floor(d6 + d10 / 2.0D);
+-            int j1 = MathHelper.floor(d7 + d11 / 2.0D);
++            int j1 = MathHelper.floor(d7 + d10 / 2.0D); // Titanium - don't calculate same thing twice (d11 -> d10)
+             int k1 = MathHelper.floor(d8 + d10 / 2.0D);
+ 
+             for (int l1 = j; l1 <= i1; ++l1) {
+@@ -48,7 +54,7 @@ public class WorldGenMinable extends WorldGenerator {
+ 
+                 if (d12 * d12 < 1.0D) {
+                     for (int i2 = k; i2 <= j1; ++i2) {
+-                        double d13 = ((double) i2 + 0.5D - d7) / (d11 / 2.0D);
++                        double d13 = ((double) i2 + 0.5D - d7) / (d10 / 2.0D); // Titanium - don't calculate same thing twice (d11 -> d10)
+ 
+                         if (d12 * d12 + d13 * d13 < 1.0D) {
+                             for (int j2 = l; j2 <= k1; ++j2) {
+@@ -57,7 +63,7 @@ public class WorldGenMinable extends WorldGenerator {
+                                 if (d12 * d12 + d13 * d13 + d14 * d14 < 1.0D) {
+                                     BlockPosition blockposition1 = new BlockPosition(l1, i2, j2);
+ 
+-                                    if (this.c.apply(world.getType(blockposition1))) {
++                                    if (this.c.apply(world.getTypeIfLoaded(blockposition1))) { // Titanium - don't load chunks
+                                         world.setTypeAndData(blockposition1, this.a, 2);
+                                     }
+                                 }
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
 index 0ca4bb063..778800b5a 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
@@ -2133,10 +2291,10 @@ index 0ca4bb063..778800b5a 100644
      }
 diff --git a/src/main/java/net/titanium/chunk/ChunkMap.java b/src/main/java/net/titanium/chunk/ChunkMap.java
 new file mode 100644
-index 000000000..337e31eab
+index 000000000..2f4460edf
 --- /dev/null
 +++ b/src/main/java/net/titanium/chunk/ChunkMap.java
-@@ -0,0 +1,108 @@
+@@ -0,0 +1,119 @@
 +package net.titanium.chunk;
 +
 +import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -2153,6 +2311,8 @@ index 000000000..337e31eab
 +
 +    private static final Logger LOGGER = LogManager.getLogger();
 +
++    private Chunk lastChunkByPos = null;
++
 +    public ChunkMap(int expected, float f) {
 +        super(expected, f);
 +    }
@@ -2160,6 +2320,7 @@ index 000000000..337e31eab
 +    public Chunk put(long key, Chunk chunk) {
 +        org.spigotmc.AsyncCatcher.catchOp("Async Chunk put");
 +
++        this.lastChunkByPos = chunk;
 +        Chunk oldChunk;
 +        synchronized (this) {
 +            // synchronize so any async gets are safe
@@ -2218,13 +2379,21 @@ index 000000000..337e31eab
 +            }
 +        }
 +
++        if (this.lastChunkByPos != null && key == this.lastChunkByPos.chunkKey) {
++            this.lastChunkByPos = null;
++        }
++
 +        return oldChunk;
 +    }
 +
 +    @Override
 +    public Chunk get(long key) {
 +        if (MCUtil.isMainThread()) {
-+            return super.get(key);
++            if (this.lastChunkByPos != null && key == this.lastChunkByPos.chunkKey) {
++                return this.lastChunkByPos;
++            }
++            Chunk chunk = super.get(key);
++            return chunk != null ? (this.lastChunkByPos = chunk) : null;
 +        } else {
 +            synchronized (this) {
 +                return super.get(key);
