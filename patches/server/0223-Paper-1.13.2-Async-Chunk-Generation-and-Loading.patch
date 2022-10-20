@@ -1,4 +1,4 @@
-From 0e31880b40df1395a64eece1e81594abe883545c Mon Sep 17 00:00:00 2001
+From 73be69e1670759f6b5d8a9fe5f2768e4aa8bd9b5 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Fri, 14 Oct 2022 11:59:49 +0200
 Subject: [PATCH] Paper 1.13.2 Async Chunk Generation (and Loading)
@@ -2088,7 +2088,7 @@ index 22ba3221a..1f44c5b9e 100644
  
      public boolean d() {
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 7668c02c0..73e8b4f26 100644
+index 7668c02c0..2fd831617 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -331,7 +331,7 @@ public abstract class World implements IBlockAccess {
@@ -2109,7 +2109,85 @@ index 7668c02c0..73e8b4f26 100644
      }
  
      public boolean areChunksLoaded(BlockPosition blockposition, int i) {
-@@ -700,7 +700,7 @@ public abstract class World implements IBlockAccess {
+@@ -488,6 +488,77 @@ public abstract class World implements IBlockAccess {
+         }
+     }
+ 
++    // Titanium start
++    public boolean setTypeAndDataIfLoaded(BlockPosition blockposition, IBlockData iblockdata, int i) {
++        // CraftBukkit start - tree generation
++        if (this.captureTreeGeneration) {
++            BlockState blockstate = null;
++            Iterator<BlockState> it = capturedBlockStates.iterator();
++            while (it.hasNext()) {
++                BlockState previous = it.next();
++                if (previous.getX() == blockposition.getX() && previous.getY() == blockposition.getY() && previous.getZ() == blockposition.getZ()) {
++                    blockstate = previous;
++                    it.remove();
++                    break;
++                }
++            }
++            if (blockstate == null) {
++                blockstate = org.bukkit.craftbukkit.block.CraftBlockState.getBlockState(this, blockposition.getX(), blockposition.getY(), blockposition.getZ(), i);
++            }
++            blockstate.setTypeId(CraftMagicNumbers.getId(iblockdata.getBlock()));
++            blockstate.setRawData((byte) iblockdata.getBlock().toLegacyData(iblockdata));
++            this.capturedBlockStates.add(blockstate);
++            return true;
++        }
++        // CraftBukkit end
++        Chunk chunk = this.getChunkIfLoaded(blockposition);
++        if (chunk != null) {
++            if (!this.isValidLocation(blockposition)) {
++                return false;
++            }
++
++            if (!this.isClientSide && this.worldData.getType() == WorldType.DEBUG_ALL_BLOCK_STATES) {
++                return false;
++            }
++
++            // CraftBukkit start - capture blockstates
++            BlockState blockstate = null;
++            if (this.captureBlockStates) {
++                blockstate = org.bukkit.craftbukkit.block.CraftBlockState.getBlockState(this, blockposition.getX(), blockposition.getY(), blockposition.getZ(), i);
++                this.capturedBlockStates.add(blockstate);
++            }
++            // CraftBukkit end
++
++            IBlockData iblockdata1 = chunk.a(blockposition, iblockdata);
++            if (iblockdata1 != null) {
++                Block block = iblockdata.getBlock();
++                Block block1 = iblockdata1.getBlock();
++
++                if (block.p() != block1.p() || block.r() != block1.r()) {
++                    this.x(blockposition);
++                }
++
++                // CraftBukkit start
++                if (!this.captureBlockStates) { // Don't notify clients or update physics while capturing blockstates
++                    // Modularize client and physic updates
++                    notifyAndUpdatePhysics(blockposition, chunk, block1, block, i);
++                }
++                // CraftBukkit end
++
++                return true;
++            }
++
++            // CraftBukkit start - remove blockstate if failed
++            if (this.captureBlockStates) {
++                this.capturedBlockStates.remove(blockstate);
++            }
++            // CraftBukkit end
++            return false;
++        }
++        return false;
++    }
++    // Titanium end
++
+     // CraftBukkit start - Split off from original setTypeAndData(int i, int j, int k, Block block, int l, int i1) method in order to directly send client and physic updates
+     public void notifyAndUpdatePhysics(BlockPosition blockposition, Chunk chunk, Block oldBlock, Block newBLock, int flag) {
+         if ((flag & 2) != 0 && (chunk == null || chunk.isReady())) {  // allow chunk to be null here as chunk.isReady() is false when we send our notification during block placement
+@@ -700,7 +771,7 @@ public abstract class World implements IBlockAccess {
      }
  
      public boolean isLightLevel(BlockPosition blockposition, int level) {
@@ -2118,7 +2196,7 @@ index 7668c02c0..73e8b4f26 100644
              if (this.getType(blockposition).getBlock().s())
              {
                  if (c(blockposition.up(), false) >= level)
-@@ -735,7 +735,7 @@ public abstract class World implements IBlockAccess {
+@@ -735,7 +806,7 @@ public abstract class World implements IBlockAccess {
      }
  
      public int c(BlockPosition blockposition, boolean flag) {
@@ -2127,7 +2205,7 @@ index 7668c02c0..73e8b4f26 100644
              if (flag && this.getType(blockposition).getBlock().s()) {
                  int i = this.c(blockposition.up(), false);
                  int j = this.c(blockposition.east(), false);
-@@ -779,9 +779,10 @@ public abstract class World implements IBlockAccess {
+@@ -779,9 +850,10 @@ public abstract class World implements IBlockAccess {
      public BlockPosition getHighestBlockYAt(BlockPosition blockposition) {
          int i;
  
@@ -2141,7 +2219,7 @@ index 7668c02c0..73e8b4f26 100644
              } else {
                  i = 0;
              }
-@@ -793,7 +794,7 @@ public abstract class World implements IBlockAccess {
+@@ -793,7 +865,7 @@ public abstract class World implements IBlockAccess {
      }
  
      public int b(int i, int j) {
@@ -2150,7 +2228,7 @@ index 7668c02c0..73e8b4f26 100644
              if (!this.isChunkLoaded(i >> 4, j >> 4, true)) {
                  return 0;
              } else {
-@@ -844,6 +845,8 @@ public abstract class World implements IBlockAccess {
+@@ -844,6 +916,8 @@ public abstract class World implements IBlockAccess {
          return this.worldProvider.p()[this.getLightLevel(blockposition)];
      }
  
@@ -2159,7 +2237,7 @@ index 7668c02c0..73e8b4f26 100644
      // Paper start - reduces need to do isLoaded before getType
      public IBlockData getTypeIfLoaded(BlockPosition blockposition) {
          // CraftBukkit start - tree generation
-@@ -859,7 +862,7 @@ public abstract class World implements IBlockAccess {
+@@ -859,7 +933,7 @@ public abstract class World implements IBlockAccess {
          // CraftBukkit end
          Chunk chunk = this.getChunkIfLoaded(blockposition);
          if (chunk != null) {
@@ -2168,7 +2246,7 @@ index 7668c02c0..73e8b4f26 100644
          }
          return null;
      }
-@@ -884,7 +887,7 @@ public abstract class World implements IBlockAccess {
+@@ -884,7 +958,7 @@ public abstract class World implements IBlockAccess {
          }
          // CraftBukkit end
          if (!this.isValidLocation(blockposition)) {
@@ -2177,7 +2255,7 @@ index 7668c02c0..73e8b4f26 100644
          } else {
              Chunk chunk = this.getChunkAtWorldCoords(blockposition);
  
-@@ -3387,4 +3390,10 @@ public abstract class World implements IBlockAccess {
+@@ -3387,4 +3461,10 @@ public abstract class World implements IBlockAccess {
  
          return k >= -short0 && k <= short0 && l >= -short0 && l <= short0 && this.keepSpawnInMemory; // CraftBukkit - Added 'this.keepSpawnInMemory'
      }
@@ -2202,7 +2280,7 @@ index 0b8340e35..ba86514f5 100644
              return structurepiece instanceof WorldGenRegistration.WorldGenWitchHut;
          } else {
 diff --git a/src/main/java/net/minecraft/server/WorldGenMinable.java b/src/main/java/net/minecraft/server/WorldGenMinable.java
-index 2307c87b6..b7b34a5c7 100644
+index 2307c87b6..ae22fb53f 100644
 --- a/src/main/java/net/minecraft/server/WorldGenMinable.java
 +++ b/src/main/java/net/minecraft/server/WorldGenMinable.java
 @@ -7,6 +7,7 @@ public class WorldGenMinable extends WorldGenerator {
@@ -2263,15 +2341,19 @@ index 2307c87b6..b7b34a5c7 100644
  
                          if (d12 * d12 + d13 * d13 < 1.0D) {
                              for (int j2 = l; j2 <= k1; ++j2) {
-@@ -57,7 +63,7 @@ public class WorldGenMinable extends WorldGenerator {
+@@ -57,8 +63,10 @@ public class WorldGenMinable extends WorldGenerator {
                                  if (d12 * d12 + d13 * d13 + d14 * d14 < 1.0D) {
                                      BlockPosition blockposition1 = new BlockPosition(l1, i2, j2);
  
 -                                    if (this.c.apply(world.getType(blockposition1))) {
-+                                    if (this.c.apply(world.getTypeIfLoaded(blockposition1))) { // Titanium - don't load chunks
-                                         world.setTypeAndData(blockposition1, this.a, 2);
+-                                        world.setTypeAndData(blockposition1, this.a, 2);
++                                    // Titanium start - don't load/gen chunks
++                                    if (this.c.apply(world.getTypeIfLoaded(blockposition1))) {
++                                        world.setTypeAndDataIfLoaded(blockposition1, this.a, 2);
++                                        // Titanium end
                                      }
                                  }
+                             }
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
 index 0ca4bb063..778800b5a 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
