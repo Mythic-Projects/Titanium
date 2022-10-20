@@ -1,22 +1,19 @@
-From d30c0cf1e7fb45b2777de912cd6e752e1805038b Mon Sep 17 00:00:00 2001
+From d81a38102012f09ecd0faecc6e58ddfb200f2fa4 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 13 Jun 2022 18:44:12 +0200
 Subject: [PATCH] More fast util
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerChunkMap.java b/src/main/java/net/minecraft/server/PlayerChunkMap.java
-index 7d72eb35d..a3691b6e0 100644
+index 31a7fb615..7aa2b129d 100644
 --- a/src/main/java/net/minecraft/server/PlayerChunkMap.java
 +++ b/src/main/java/net/minecraft/server/PlayerChunkMap.java
-@@ -1,6 +1,7 @@
+@@ -1,10 +1,12 @@
  package net.minecraft.server;
  
  import com.google.common.collect.Lists;
 +import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
  import it.unimi.dsi.fastutil.objects.ObjectArrayList;
- import it.unimi.dsi.fastutil.shorts.Short2ShortArrayMap;
- import it.unimi.dsi.fastutil.shorts.Short2ShortMap;
-@@ -9,6 +10,7 @@ import it.unimi.dsi.fastutil.shorts.ShortList;
  import java.util.ArrayList;
  import java.util.Iterator;
  import java.util.List;
@@ -24,16 +21,16 @@ index 7d72eb35d..a3691b6e0 100644
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
-@@ -356,7 +358,7 @@ public class PlayerChunkMap {
+@@ -352,7 +354,7 @@ public class PlayerChunkMap {
  
      class PlayerChunk {
  
 -        private final List<EntityPlayer> b = Lists.newArrayList();
 +        private final List<EntityPlayer> b = new ObjectArrayList<>(); // Titanium - ArrayList -> ObjectArrayList
          private final ChunkCoordIntPair location;
-         private final Short2ShortMap dirtyBlocks = new Short2ShortArrayMap(64); // Titanium - use fast util
+         private short[] dirtyBlocks = new short[64];
          private int dirtyCount;
-@@ -364,13 +366,9 @@ public class PlayerChunkMap {
+@@ -360,13 +362,9 @@ public class PlayerChunkMap {
          private long g;
  
          // CraftBukkit start - add fields
