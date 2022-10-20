@@ -1,4 +1,4 @@
-From ff17017ac700dd7941c6f87684c09b38612f39ae Mon Sep 17 00:00:00 2001
+From 67362935fe100c033f97c11209b0afd4b64d1c8a Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Fri, 14 Oct 2022 11:59:49 +0200
 Subject: [PATCH] Backport Paper 1.13.2 Async Chunk Generation (and Loading)
@@ -7,24 +7,30 @@ Co-authored-by: Peridot <peridot491@protonmail.com>
 
 diff --git a/src/main/java/net/titanium/AsyncPriority.java b/src/main/java/net/titanium/AsyncPriority.java
 new file mode 100644
-index 00000000..889509fa
+index 00000000..72753a86
 --- /dev/null
 +++ b/src/main/java/net/titanium/AsyncPriority.java
-@@ -0,0 +1,18 @@
+@@ -0,0 +1,24 @@
 +package net.titanium;
 +
++/**
++ * Enum representing in which order asynchronous tasks will be executed.
++ */
 +public enum AsyncPriority {
 +
 +    /**
-+     * The lowest priority. This is the default priority. Tasks with this priority will be executed last in the queue.
++     * Tasks will be executed in the order they were added.
 +     */
 +    NORMAL,
++
 +    /**
-+     * Higher priority than normal.
++     * Tasks will be executed before NORMAL tasks.
 +     */
 +    HIGH,
++
 +    /**
-+     * Highest priority. Tasks with this priority will be executed first in the queue.
++     * Tasks will be executed before HIGH and NORMAL tasks.
++     * Shouldn't be used often - only when you really need to execute task as soon as possible.
 +     */
 +    URGENT
 +
