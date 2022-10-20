@@ -1,4 +1,4 @@
-From d4437d2d3f833fd3e63386b3309779c572c94795 Mon Sep 17 00:00:00 2001
+From 01ded5ab5a94181576da4d2ef6960b3f694f920c Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Fri, 14 Oct 2022 11:59:49 +0200
 Subject: [PATCH] Backport Paper 1.13.2 Async Chunk Generation (and Loading)
@@ -1721,10 +1721,10 @@ index 000000000..6dcfdb990
 +
 +}
 diff --git a/src/main/java/net/minecraft/server/PlayerChunkMap.java b/src/main/java/net/minecraft/server/PlayerChunkMap.java
-index f8f904e7b..88efd4475 100644
+index 506cb2727..166579427 100644
 --- a/src/main/java/net/minecraft/server/PlayerChunkMap.java
 +++ b/src/main/java/net/minecraft/server/PlayerChunkMap.java
-@@ -11,6 +11,8 @@ import java.util.ArrayList;
+@@ -7,6 +7,8 @@ import java.util.ArrayList;
  import java.util.Iterator;
  import java.util.List;
  import java.util.Map;
@@ -1733,7 +1733,7 @@ index f8f904e7b..88efd4475 100644
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
-@@ -27,7 +29,7 @@ public class PlayerChunkMap {
+@@ -23,7 +25,7 @@ public class PlayerChunkMap {
      private static final Logger a = LogManager.getLogger();
      private final WorldServer world;
      private final List<EntityPlayer> managedPlayers = new ObjectArrayList<>(); // Titanium - ArrayList -> ObjectArrayList
@@ -1742,7 +1742,7 @@ index f8f904e7b..88efd4475 100644
      private final Queue<PlayerChunkMap.PlayerChunk> e = new java.util.concurrent.ConcurrentLinkedQueue<PlayerChunkMap.PlayerChunk>(); // CraftBukkit ArrayList -> ConcurrentLinkedQueue
      private final Queue<PlayerChunkMap.PlayerChunk> f = new java.util.concurrent.ConcurrentLinkedQueue<PlayerChunkMap.PlayerChunk>(); // CraftBukkit ArrayList -> ConcurrentLinkedQueue
      private int g;
-@@ -40,6 +42,7 @@ public class PlayerChunkMap {
+@@ -36,6 +38,7 @@ public class PlayerChunkMap {
          this.a(viewDistance); // Spigot
      }
  
@@ -1750,7 +1750,7 @@ index f8f904e7b..88efd4475 100644
      public WorldServer a() {
          return this.world;
      }
-@@ -247,13 +250,18 @@ public class PlayerChunkMap {
+@@ -243,13 +246,18 @@ public class PlayerChunkMap {
                              chunksToLoad.add(new ChunkCoordIntPair(l1, i2)); // CraftBukkit
                          }
  
@@ -1773,7 +1773,7 @@ index f8f904e7b..88efd4475 100644
                      }
                  }
  
-@@ -264,7 +272,11 @@ public class PlayerChunkMap {
+@@ -260,7 +268,11 @@ public class PlayerChunkMap {
                  // CraftBukkit start - send nearest chunks first
                  Collections.sort(chunksToLoad, new ChunkCoordComparator(entityplayer));
                  for (ChunkCoordIntPair pair : chunksToLoad) {
@@ -1786,7 +1786,7 @@ index f8f904e7b..88efd4475 100644
                  }
  
                  if (j1 > 1 || j1 < -1 || k1 > 1 || k1 < -1) {
-@@ -352,6 +364,17 @@ public class PlayerChunkMap {
+@@ -348,6 +360,17 @@ public class PlayerChunkMap {
      }
      // PaperSpigot end
  
@@ -1804,7 +1804,7 @@ index f8f904e7b..88efd4475 100644
      public static int getFurthestViewableBlock(int i) {
          return i * 16 - 16;
      }
-@@ -370,10 +393,59 @@ public class PlayerChunkMap {
+@@ -366,10 +389,59 @@ public class PlayerChunkMap {
          private boolean loaded = false;
          private Runnable loadedRunnable = () -> PlayerChunk.this.loaded = true;
          // CraftBukkit end
@@ -1865,7 +1865,7 @@ index f8f904e7b..88efd4475 100644
          }
  
          public void a(final EntityPlayer entityplayer) {  // CraftBukkit - added final to argument
-@@ -391,23 +463,25 @@ public class PlayerChunkMap {
+@@ -387,23 +459,25 @@ public class PlayerChunkMap {
                      playerRunnable = null;
                      entityplayer.chunkCoordIntPairQueue.add(this.location);
                  } else {
@@ -1899,7 +1899,7 @@ index f8f904e7b..88efd4475 100644
                      ChunkIOExecutor.dropQueuedChunkLoad(PlayerChunkMap.this.a(), this.location.x, this.location.z, this.players.get(entityplayer));
                      this.b.remove(entityplayer);
                      this.players.remove(entityplayer);
-@@ -422,7 +496,11 @@ public class PlayerChunkMap {
+@@ -418,7 +492,11 @@ public class PlayerChunkMap {
                      return;
                  }
                  // CraftBukkit end
@@ -1912,7 +1912,7 @@ index f8f904e7b..88efd4475 100644
  
                  if (chunk.isReady()) {
                      entityplayer.playerConnection.sendPacket(new PacketPlayOutMapChunk(chunk, true, 0));
-@@ -449,7 +527,13 @@ public class PlayerChunkMap {
+@@ -445,7 +523,13 @@ public class PlayerChunkMap {
          }
  
          public void a() {
@@ -2085,6 +2085,22 @@ index 22ba3221a..1f44c5b9e 100644
      }
  
      public boolean d() {
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index 7668c02c0..d43a4aa8e 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -780,8 +780,9 @@ public abstract class World implements IBlockAccess {
+         int i;
+ 
+         if (blockposition.getX() >= -30000000 && blockposition.getZ() >= -30000000 && blockposition.getX() < 30000000 && blockposition.getZ() < 30000000) {
+-            if (this.isChunkLoaded(blockposition.getX() >> 4, blockposition.getZ() >> 4, true)) {
+-                i = this.getChunkAt(blockposition.getX() >> 4, blockposition.getZ() >> 4).b(blockposition.getX() & 15, blockposition.getZ() & 15);
++            Chunk chunk = this.getChunkIfLoaded(blockposition.getX() >> 4, blockposition.getZ() >> 4); // Titanium - Micro optimization
++            if (chunk != null) {
++                i = chunk.b(blockposition.getX() & 15, blockposition.getZ() & 15);
+             } else {
+                 i = 0;
+             }
 diff --git a/src/main/java/net/minecraft/server/WorldGenLargeFeature.java b/src/main/java/net/minecraft/server/WorldGenLargeFeature.java
 index 0b8340e35..ba86514f5 100644
 --- a/src/main/java/net/minecraft/server/WorldGenLargeFeature.java
