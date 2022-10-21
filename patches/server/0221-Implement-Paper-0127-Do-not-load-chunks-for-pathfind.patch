@@ -1,4 +1,4 @@
-From b29197769f47b6c2eee8d502e44fdbfec3489820 Mon Sep 17 00:00:00 2001
+From c2ce6f44ce0ba5a12e7f33ac203fd95fe66fa74c Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Tue, 19 Jan 2016 00:13:19 -0500
 Subject: [PATCH] Implement [Paper-0127] Do not load chunks for pathfinding by
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0127] Do not load chunks for pathfinding by
 
 
 diff --git a/src/main/java/net/minecraft/server/ChunkCache.java b/src/main/java/net/minecraft/server/ChunkCache.java
-index a64d03085..ee3610fb4 100644
+index a64d03085..edcfa031b 100644
 --- a/src/main/java/net/minecraft/server/ChunkCache.java
 +++ b/src/main/java/net/minecraft/server/ChunkCache.java
 @@ -33,7 +33,7 @@ public class ChunkCache implements IBlockAccess {
@@ -17,11 +17,7 @@ index a64d03085..ee3610fb4 100644
 +                this.c[l - this.a][i1 - this.b] = world.getChunkIfLoaded(l, i1); // Paper
              }
          }
-
-diff --git a/src/main/java/net/minecraft/server/ChunkCache.java b/src/main/java/net/minecraft/server/ChunkCache.java
-index ee3610fb4..bd2728d3f 100644
---- a/src/main/java/net/minecraft/server/ChunkCache.java
-+++ b/src/main/java/net/minecraft/server/ChunkCache.java
+ 
 @@ -74,7 +74,7 @@ public class ChunkCache implements IBlockAccess {
          int var8;
          for (var7 = this.a; var7 <= var5; ++var7) {
@@ -30,7 +26,7 @@ index ee3610fb4..bd2728d3f 100644
 +                this.c[var7 - this.a][var8 - this.b] = world.getChunkIfLoaded(var7, var8); // Paper
              }
          }
-
+ 
 -- 
 2.36.0.windows.1
 
