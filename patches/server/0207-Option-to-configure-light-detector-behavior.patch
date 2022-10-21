@@ -1,0 +1,56 @@
+From fde6fbe2e85cf5cc13123c37984c610ef18de520 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 23 Sep 2022 22:57:54 +0200
+Subject: [PATCH] Option to configure light detector behavior
+
+
+diff --git a/src/main/java/net/minecraft/server/TileEntityLightDetector.java b/src/main/java/net/minecraft/server/TileEntityLightDetector.java
+index f75e2de63..b692340c2 100644
+--- a/src/main/java/net/minecraft/server/TileEntityLightDetector.java
++++ b/src/main/java/net/minecraft/server/TileEntityLightDetector.java
+@@ -1,11 +1,17 @@
+ package net.minecraft.server;
+ 
++import net.titanium.config.TitaniumConfig;
++
+ public class TileEntityLightDetector extends TileEntity implements IUpdatePlayerListBox {
+ 
+     public TileEntityLightDetector() {}
+ 
+     public void c() {
+-        if (this.world != null && !this.world.isClientSide && this.world.getTime() % 20L == 0L) {
++        // Titanium start - Option to configure light detector behavior
++        TitaniumConfig.GameMechanics.LightDetector lightDetector = TitaniumConfig.get().gameMechanics.lightDetector;
++        if (lightDetector.disableTicking) return;
++        if (this.world != null && !this.world.isClientSide && this.world.getTime() % lightDetector.checkInterval == 0L) {
++            // Titanium end
+             this.e = this.w();
+             if (this.e instanceof BlockDaylightDetector) {
+                 ((BlockDaylightDetector) this.e).f(this.world, this.position);
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index 84f8ccd9d..32fcc3497 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -120,6 +120,19 @@ public class TitaniumConfig extends TitaniumConfigSection {
+         @Comment("Whether to disable sync of position and velocity of TNT in water to client.")
+         public boolean disableTntInWaterSync = false;
+ 
++        public LightDetector lightDetector = new LightDetector();
++
++        public static class LightDetector extends TitaniumConfigSection {
++
++            @Comment("Whether to disable light detector ticking.")
++            @Comment("Could break light detector mechanics.")
++            public boolean disableTicking = false;
++
++            @Comment("How often light detector should check for light level in ticks.")
++            public int checkInterval = 20;
++
++        }
++
+     }
+ 
+     @Comment("The max NBT size in bytes. The default value is 2097152 which is ~2Mb - it's insane big.")
+-- 
+2.36.0.windows.1
+

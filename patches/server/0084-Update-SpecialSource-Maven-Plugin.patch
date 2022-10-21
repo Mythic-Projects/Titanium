@@ -1,0 +1,22 @@
+From 6b49c735973e1ba567ba1b0cf78a549000ef72d4 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sat, 28 May 2022 09:59:08 +0200
+Subject: [PATCH] Update SpecialSource Maven Plugin
+
+
+diff --git a/pom.xml b/pom.xml
+index 5fa7c4db0..12ec8e5c8 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -320,7 +320,7 @@
+             <plugin>
+                 <groupId>net.md-5</groupId>
+                 <artifactId>specialsource-maven-plugin</artifactId>
+-                <version>1.2.1</version>
++                <version>1.2.4</version>
+                 <executions>
+                     <execution>
+                         <phase>package</phase>
+-- 
+2.36.0.windows.1
+

@@ -1,0 +1,63 @@
+From 14064de303b3ce424e78a5b572690ef8b0b8c0b2 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 24 Jul 2022 19:21:47 +0200
+Subject: [PATCH] Remove Timings from server configuration
+
+
+diff --git a/src/main/java/net/titanium/config/SpigotConfig.java b/src/main/java/net/titanium/config/SpigotConfig.java
+index dd47b50c5..a9dddef60 100644
+--- a/src/main/java/net/titanium/config/SpigotConfig.java
++++ b/src/main/java/net/titanium/config/SpigotConfig.java
+@@ -161,49 +161,6 @@ public class SpigotConfig extends TitaniumConfigSection {
+ 
+     }
+ 
+-    @Comment("Various settings related to server timings and debugging.")
+-    public Timings timings = new Timings();
+-
+-    public static class Timings extends TitaniumConfigSection {
+-
+-        public boolean enabled = true;
+-        public boolean verbose = true;
+-        public boolean serverNamePrivacy = false;
+-        public List<String> hiddenConfigEntries = Arrays.asList("database", "bungeecord-addresses");
+-        public int historyInterval = 300;
+-        public int historyLength = 3600;
+-
+-        @Override
+-        public void loadProcessedProperties() {
+-            TimingsManager.privacy = serverNamePrivacy;
+-            TimingsManager.hiddenConfigs = hiddenConfigEntries;
+-
+-            co.aikar.timings.Timings.setTimingsEnabled(enabled);
+-            co.aikar.timings.Timings.setVerboseTimingsEnabled(verbose);
+-            co.aikar.timings.Timings.setHistoryInterval(historyInterval * 20);
+-            co.aikar.timings.Timings.setHistoryLength(historyLength * 20);
+-
+-            log(Level.INFO, "Spigot Timings: " + enabled +
+-                    " - Verbose: " + verbose +
+-                    " - Interval: " + timeSummary(co.aikar.timings.Timings.getHistoryInterval() / 20) +
+-                    " - Length: " + timeSummary(co.aikar.timings.Timings.getHistoryLength() / 20));
+-        }
+-
+-        private static String timeSummary(int seconds) {
+-            String time = "";
+-            if (seconds > 60 * 60) {
+-                time += TimeUnit.SECONDS.toHours(seconds) + "h";
+-                seconds /= 60;
+-            }
+-
+-            if (seconds > 0) {
+-                time += TimeUnit.SECONDS.toMinutes(seconds) + "m";
+-            }
+-            return time;
+-        }
+-
+-    }
+-
+     public Stats stats = new Stats();
+ 
+     public static class Stats extends TitaniumConfigSection {
+-- 
+2.36.0.windows.1
+

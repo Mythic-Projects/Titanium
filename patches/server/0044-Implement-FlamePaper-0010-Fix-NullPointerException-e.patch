@@ -1,0 +1,24 @@
+From d0d03c2966c04a604143ed8f4f277d2896c183f1 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Thu, 19 May 2022 23:11:46 +0200
+Subject: [PATCH] Implement [FlamePaper-0010] Fix NullPointerException exploits
+ for invalid logins
+
+
+diff --git a/src/main/java/net/minecraft/server/LoginListener.java b/src/main/java/net/minecraft/server/LoginListener.java
+index 541cec7cf..ecff46f0a 100644
+--- a/src/main/java/net/minecraft/server/LoginListener.java
++++ b/src/main/java/net/minecraft/server/LoginListener.java
+@@ -152,7 +152,8 @@ public class LoginListener implements PacketLoginInListener, IUpdatePlayerListBo
+     }
+ 
+     public String d() {
+-        return this.i != null ? this.i.toString() + " (" + this.networkManager.getSocketAddress().toString() + ")" : String.valueOf(this.networkManager.getSocketAddress());
++        String socketAddress = networkManager == null ? null : (networkManager.getSocketAddress() == null ? null : networkManager.getSocketAddress().toString());
++        return this.i != null ? this.i + " (" + socketAddress + ")" : socketAddress;
+     }
+ 
+     public void a(PacketLoginInStart packetlogininstart) {
+-- 
+2.36.0.windows.1
+

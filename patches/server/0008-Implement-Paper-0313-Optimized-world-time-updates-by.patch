@@ -1,12 +1,11 @@
-From 65215e1833244731810b653b4bdb5699dd33362d Mon Sep 17 00:00:00 2001
+From 45f6e8c9ce0d2182480538b6c32e397ea0d0d766 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 9 Apr 2021 18:59:20 +0200
-Subject: [PATCH] Implement [Paper-0313] - Optimized world time updates by
- Aikar
+Subject: [PATCH] Implement [Paper-0313] Optimized world time updates by Aikar
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 4308b992..88ff70f2 100644
+index 4308b9920..88ff70f2f 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -796,16 +796,35 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs

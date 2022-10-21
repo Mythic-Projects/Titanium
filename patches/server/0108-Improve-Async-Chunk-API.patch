@@ -1,0 +1,52 @@
+From 6a6211b441ae95017a59566cc7f89dae163c16b6 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 5 Jun 2022 20:25:39 +0200
+Subject: [PATCH] Improve Async Chunk API
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+index 46fcbc019..19cdb459e 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+@@ -12,6 +12,7 @@ import java.util.Random;
+ import java.util.Set;
+ import java.util.UUID;
+ 
++import java.util.concurrent.CompletableFuture;
+ import net.minecraft.server.*;
+ 
+ import net.titanium.config.TitaniumConfig;
+@@ -1517,4 +1518,30 @@ public class CraftWorld implements World {
+         return spigot;
+     }
+     // Spigot end
++
++    // Titanium start
++    private final Titanium titanium = new Titanium() {
++
++        @Override
++        public CompletableFuture<Chunk> getChunkAtAsync(int x, int z) {
++            CompletableFuture<Chunk> future = new CompletableFuture<>();
++            CraftWorld.this.getChunkAtAsync(x, z, future::complete);
++            return future;
++        }
++
++        @Override
++        public CompletableFuture<Chunk> getChunkAtAsync(Location location) {
++            return getChunkAtAsync(location.getBlockX(), location.getBlockZ());
++        }
++
++        @Override
++        public CompletableFuture<Chunk> getChunkAtAsync(Block block) {
++            return getChunkAtAsync(block.getX(), block.getZ());
++        }
++    };
++
++    public Titanium titanium() {
++        return titanium;
++    }
++    // Titanium end
+ }
+-- 
+2.36.0.windows.1
+

@@ -1,0 +1,50 @@
+From 0e93b77f4dac58347e0d410f850b2c7227e73b66 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Mon, 23 May 2022 21:46:28 +0200
+Subject: [PATCH] Implement [Paper-0085] Use a Shared Random for Entities
+
+
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index cb1cf8855..a0d98b4ba 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -9,6 +9,7 @@ import java.util.concurrent.Callable;
+ 
+ // CraftBukkit start
+ import net.titanium.config.TitaniumConfig;
++import org.apache.logging.log4j.LogManager;
+ import org.bukkit.Bukkit;
+ import org.bukkit.Location;
+ import org.bukkit.Server;
+@@ -139,6 +140,19 @@ public abstract class Entity implements ICommandListener {
+     public boolean inUnloadedChunk = false; // PaperSpigot - Remove entities in unloaded chunks
+     public boolean loadChunks = false; // PaperSpigot - Entities can load chunks they move through and keep them loaded
+ 
++    public static Random SHARED_RANDOM = new Random() {
++        private boolean locked = false;
++        @Override
++        public synchronized void setSeed(long seed) {
++            if (locked) {
++                LogManager.getLogger().error("Ignoring setSeed on Entity.SHARED_RANDOM", new Throwable());
++            } else {
++                super.setSeed(seed);
++                locked = true;
++            }
++        }
++    };
++
+     // Spigot start
+     public Timing tickTimer = SpigotTimings.getEntityTimings(this); // Spigot
+     public final byte activationType = org.spigotmc.ActivationRange.initializeEntityActivationType(this);
+@@ -172,7 +186,7 @@ public abstract class Entity implements ICommandListener {
+         this.width = 0.6F;
+         this.length = 1.8F;
+         this.h = 1;
+-        this.random = new Random();
++        this.random = SHARED_RANDOM;
+         this.maxFireTicks = 1;
+         this.justCreated = true;
+         this.uniqueID = MathHelper.a(this.random);
+-- 
+2.36.0.windows.1
+

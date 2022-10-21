@@ -1,0 +1,64 @@
+From e23279694b3a0f543e43d09256bf2e71731c9163 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 23 Sep 2022 23:25:14 +0200
+Subject: [PATCH] Option to disable entities collisions
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityInsentient.java b/src/main/java/net/minecraft/server/EntityInsentient.java
+index 6ef9663fc..302af42f4 100644
+--- a/src/main/java/net/minecraft/server/EntityInsentient.java
++++ b/src/main/java/net/minecraft/server/EntityInsentient.java
+@@ -6,6 +6,7 @@ import java.util.List;
+ import java.util.UUID;
+ 
+ // CraftBukkit start
++import net.titanium.config.TitaniumConfig;
+ import org.bukkit.craftbukkit.event.CraftEventFactory;
+ import org.bukkit.craftbukkit.entity.CraftLivingEntity;
+ import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
+@@ -957,4 +958,15 @@ public abstract class EntityInsentient extends EntityLiving {
+ 
+         private EnumEntityPositionType() {}
+     }
++
++    // Titanium start - Option to disable entities collisions
++    @Override
++    protected void bL() {
++        if (TitaniumConfig.get().gameMechanics.disableEntitiesCollisions) {
++            return;
++        }
++        super.bL();
++    }
++    // Titanium end
++
+ }
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index 9a2142db8..98b97bb5a 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -1337,6 +1337,8 @@ public abstract class World implements IBlockAccess {
+         }
+         // Spigot end
+ 
++        if (TitaniumConfig.get().gameMechanics.disableEntitiesCollisions && (entity instanceof EntityHuman || entity instanceof EntityInsentient || entity instanceof EntityArmorStand)) return arraylist; // Titanium - Option to disable entities collisions
++
+         if (entity instanceof EntityItem) return arraylist; // PaperSpigot - Optimize item movement
+ 
+         if (entity instanceof EntityTNTPrimed) return arraylist; // TacoSpigot - Optimize tnt entity movement
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index 5052f33d8..9c5adc903 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -124,6 +124,9 @@ public class TitaniumConfig extends TitaniumConfigSection {
+         @Comment("Only head rotation for Players and Villagers would be still handled")
+         public boolean disableHeadRotationHandling = false;
+ 
++        @Comment("Whether to disable entities collisions.")
++        public boolean disableEntitiesCollisions = false;
++
+         public LightDetector lightDetector = new LightDetector();
+ 
+         public static class LightDetector extends TitaniumConfigSection {
+-- 
+2.36.0.windows.1
+
