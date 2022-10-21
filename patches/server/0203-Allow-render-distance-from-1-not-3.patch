@@ -1,14 +1,14 @@
-From 196c8a359618f9b9be616e3235f0a8e475874e67 Mon Sep 17 00:00:00 2001
+From 6cfba57cfbb4e24a1aee27ad69022e06d57ec8c9 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 23 Sep 2022 21:17:20 +0200
 Subject: [PATCH] Allow render distance from 1, not 3
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerChunkMap.java b/src/main/java/net/minecraft/server/PlayerChunkMap.java
-index e18015be9..f8f904e7b 100644
+index 6b5a6fb79..506cb2727 100644
 --- a/src/main/java/net/minecraft/server/PlayerChunkMap.java
 +++ b/src/main/java/net/minecraft/server/PlayerChunkMap.java
-@@ -282,7 +282,7 @@ public class PlayerChunkMap {
+@@ -278,7 +278,7 @@ public class PlayerChunkMap {
      }
  
      public void a(int i) {
@@ -17,7 +17,7 @@ index e18015be9..f8f904e7b 100644
          if (i != this.g) {
              int j = i - this.g;
              ArrayList arraylist = Lists.newArrayList(this.managedPlayers);
-@@ -322,7 +322,7 @@ public class PlayerChunkMap {
+@@ -318,7 +318,7 @@ public class PlayerChunkMap {
  
      // PaperSpigot start - Player view distance API
      public void updateViewDistance(EntityPlayer player, int viewDistance) {

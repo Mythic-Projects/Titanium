@@ -1,57 +1,22 @@
-From 326b5ac5ae1cdde34683045478c8f70c8f026e97 Mon Sep 17 00:00:00 2001
+From 83baa115e283b4428112c5fa36b50e2cf2e44e7f Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sat, 11 Jun 2022 00:25:00 +0200
 Subject: [PATCH] Use fast util in PlayerChunkMap
 
 
-diff --git a/src/main/java/net/minecraft/server/PacketPlayOutMultiBlockChange.java b/src/main/java/net/minecraft/server/PacketPlayOutMultiBlockChange.java
-index 40a60fe05..cb5297612 100644
---- a/src/main/java/net/minecraft/server/PacketPlayOutMultiBlockChange.java
-+++ b/src/main/java/net/minecraft/server/PacketPlayOutMultiBlockChange.java
-@@ -1,5 +1,7 @@
- package net.minecraft.server;
- 
-+import it.unimi.dsi.fastutil.shorts.Short2ShortMap;
-+import it.unimi.dsi.fastutil.shorts.ShortList;
- import java.io.IOException;
- 
- public class PacketPlayOutMultiBlockChange implements Packet<PacketListenerPlayOut> {
-@@ -19,6 +21,18 @@ public class PacketPlayOutMultiBlockChange implements Packet<PacketListenerPlayO
- 
-     }
- 
-+    // Titanium start - use fast util
-+    public PacketPlayOutMultiBlockChange(int i, Short2ShortMap ashort, Chunk chunk) {
-+        this.a = new ChunkCoordIntPair(chunk.locX, chunk.locZ);
-+        this.b = new PacketPlayOutMultiBlockChange.MultiBlockChangeInfo[i];
-+
-+        for (short j = 0; j < this.b.length; ++j) {
-+            this.b[j] = new PacketPlayOutMultiBlockChange.MultiBlockChangeInfo(ashort.get(j), chunk);
-+        }
-+
-+    }
-+    // Titanium end
-+
-     public void a(PacketDataSerializer packetdataserializer) throws IOException {
-         this.a = new ChunkCoordIntPair(packetdataserializer.readInt(), packetdataserializer.readInt());
-         this.b = new PacketPlayOutMultiBlockChange.MultiBlockChangeInfo[packetdataserializer.e()];
 diff --git a/src/main/java/net/minecraft/server/PlayerChunkMap.java b/src/main/java/net/minecraft/server/PlayerChunkMap.java
-index 38586aad7..7d72eb35d 100644
+index 38586aad7..31a7fb615 100644
 --- a/src/main/java/net/minecraft/server/PlayerChunkMap.java
 +++ b/src/main/java/net/minecraft/server/PlayerChunkMap.java
-@@ -1,6 +1,11 @@
+@@ -1,6 +1,7 @@
  package net.minecraft.server;
  
  import com.google.common.collect.Lists;
 +import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-+import it.unimi.dsi.fastutil.shorts.Short2ShortArrayMap;
-+import it.unimi.dsi.fastutil.shorts.Short2ShortMap;
-+import it.unimi.dsi.fastutil.shorts.ShortArrayList;
-+import it.unimi.dsi.fastutil.shorts.ShortList;
  import java.util.ArrayList;
  import java.util.Iterator;
  import java.util.List;
-@@ -19,7 +24,7 @@ public class PlayerChunkMap {
+@@ -19,7 +20,7 @@ public class PlayerChunkMap {
  
      private static final Logger a = LogManager.getLogger();
      private final WorldServer world;
@@ -60,62 +25,6 @@ index 38586aad7..7d72eb35d 100644
      private final LongHashMap<PlayerChunkMap.PlayerChunk> d = new LongHashMap();
      private final Queue<PlayerChunkMap.PlayerChunk> e = new java.util.concurrent.ConcurrentLinkedQueue<PlayerChunkMap.PlayerChunk>(); // CraftBukkit ArrayList -> ConcurrentLinkedQueue
      private final Queue<PlayerChunkMap.PlayerChunk> f = new java.util.concurrent.ConcurrentLinkedQueue<PlayerChunkMap.PlayerChunk>(); // CraftBukkit ArrayList -> ConcurrentLinkedQueue
-@@ -353,7 +358,7 @@ public class PlayerChunkMap {
- 
-         private final List<EntityPlayer> b = Lists.newArrayList();
-         private final ChunkCoordIntPair location;
--        private short[] dirtyBlocks = new short[64];
-+        private final Short2ShortMap dirtyBlocks = new Short2ShortArrayMap(64); // Titanium - use fast util
-         private int dirtyCount;
-         private int f;
-         private long g;
-@@ -462,13 +467,13 @@ public class PlayerChunkMap {
-             if (this.dirtyCount < 64) {
-                 short short0 = (short) (i << 12 | k << 8 | j);
- 
--                for (int l = 0; l < this.dirtyCount; ++l) {
--                    if (this.dirtyBlocks[l] == short0) {
-+                for (short l = 0; l < this.dirtyCount; ++l) {
-+                    if (this.dirtyBlocks.get(l) == short0) { // Titanium - use fast util
-                         return;
-                     }
-                 }
- 
--                this.dirtyBlocks[this.dirtyCount++] = short0;
-+                this.dirtyBlocks.put((short) this.dirtyCount++, short0); // Titanium - use fast util
-             }
- 
-         }
-@@ -491,9 +496,11 @@ public class PlayerChunkMap {
-                 int k;
- 
-                 if (this.dirtyCount == 1) {
--                    i = (this.dirtyBlocks[0] >> 12 & 15) + this.location.x * 16;
--                    j = this.dirtyBlocks[0] & 255;
--                    k = (this.dirtyBlocks[0] >> 8 & 15) + this.location.z * 16;
-+                    // Titanium start - use fast util
-+                    i = (this.dirtyBlocks.get((short) 0) >> 12 & 15) + this.location.x * 16;
-+                    j = this.dirtyBlocks.get((short) 0) & 255;
-+                    k = (this.dirtyBlocks.get((short) 0) >> 8 & 15) + this.location.z * 16;
-+                    // Titanium end
-                     BlockPosition blockposition = new BlockPosition(i, j, k);
- 
-                     this.a((Packet) (new PacketPlayOutBlockChange(PlayerChunkMap.this.world, blockposition)));
-@@ -522,9 +529,11 @@ public class PlayerChunkMap {
-                         this.a((Packet) (new PacketPlayOutMultiBlockChange(this.dirtyCount, this.dirtyBlocks, PlayerChunkMap.this.world.getChunkAt(this.location.x, this.location.z))));
- 
-                         for (i = 0; i < this.dirtyCount; ++i) {
--                            j = (this.dirtyBlocks[i] >> 12 & 15) + this.location.x * 16;
--                            k = this.dirtyBlocks[i] & 255;
--                            l = (this.dirtyBlocks[i] >> 8 & 15) + this.location.z * 16;
-+                            // Titanium start - use fast util
-+                            j = (this.dirtyBlocks.get((short) i) >> 12 & 15) + this.location.x * 16;
-+                            k = this.dirtyBlocks.get((short) i) & 255;
-+                            l = (this.dirtyBlocks.get((short) i)>> 8 & 15) + this.location.z * 16;
-+                            // Titanium end
-                             BlockPosition blockposition1 = new BlockPosition(j, k, l);
- 
-                             if (PlayerChunkMap.this.world.getType(blockposition1).getBlock().isTileEntity()) {
 -- 
 2.36.0.windows.1
 

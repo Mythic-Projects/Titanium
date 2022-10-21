@@ -92,6 +92,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0350] Use a Queue for Queueing Commands
 [Paper-0352] Optimize BlockPosition helper methods by Spottedleaf
 [Paper-0353] Send nearby packets from world player list not server by Mystiflow
+[Paper-0361] Async Chunk Loading and Generation by Aikar
 [Paper-0387] Reduce memory footprint of NBTTagCompound by Spottedleaf
 [Paper-0797] Use Velocity compression and cipher natives by Elier
 
@@ -112,6 +113,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [SportPaper-0185] Speed up chunk unloading
 [SportPaper-0198] Optimize head rotation patch
 [SportPaper-0204] Fix Teleport Invisibility
+[SportPaper-0207] Optimize toLegacyData removing sanity checks by Pablete1234
 
 [FlamePaper-0003] Fix chunk memory leak
 [FlamePaper-0005] Fix multiple memory leaks
