@@ -1,4 +1,4 @@
-From 936852b87d30ebb416e7971fbd31cb760ad3da5f Mon Sep 17 00:00:00 2001
+From ce67cf48482c839b61b120d447a304abadb23318 Mon Sep 17 00:00:00 2001
 From: ysl3000 <yannicklamprecht@live.de>
 Date: Wed, 3 Nov 2021 14:29:02 -0400
 Subject: [PATCH] Implement [PandaSpigot-0024] Player Chunk Load/Unload Events
@@ -18,10 +18,10 @@ index f8cd8bc2c..0f6b3b66e 100644
                      }
                  } else {
 diff --git a/src/main/java/net/minecraft/server/PlayerChunkMap.java b/src/main/java/net/minecraft/server/PlayerChunkMap.java
-index a3691b6e0..e18015be9 100644
+index 7aa2b129d..6b5a6fb79 100644
 --- a/src/main/java/net/minecraft/server/PlayerChunkMap.java
 +++ b/src/main/java/net/minecraft/server/PlayerChunkMap.java
-@@ -431,6 +431,7 @@ public class PlayerChunkMap {
+@@ -427,6 +427,7 @@ public class PlayerChunkMap {
                  this.players.remove(entityplayer); // CraftBukkit
                  this.b.remove(entityplayer);
                  entityplayer.chunkCoordIntPairQueue.remove(this.location);
