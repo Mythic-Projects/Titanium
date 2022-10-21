@@ -17,7 +17,20 @@ index a64d03085..ee3610fb4 100644
 +                this.c[l - this.a][i1 - this.b] = world.getChunkIfLoaded(l, i1); // Paper
              }
          }
- 
+
+diff --git a/src/main/java/net/minecraft/server/ChunkCache.java b/src/main/java/net/minecraft/server/ChunkCache.java
+index ee3610fb4..bd2728d3f 100644
+--- a/src/main/java/net/minecraft/server/ChunkCache.java
++++ b/src/main/java/net/minecraft/server/ChunkCache.java
+@@ -74,7 +74,7 @@ public class ChunkCache implements IBlockAccess {
+         int var8;
+         for (var7 = this.a; var7 <= var5; ++var7) {
+             for (var8 = this.b; var8 <= var6; ++var8) {
+-                this.c[var7 - this.a][var8 - this.b] = world.getChunkAt(var7, var8);
++                this.c[var7 - this.a][var8 - this.b] = world.getChunkIfLoaded(var7, var8); // Paper
+             }
+         }
+
 -- 
 2.36.0.windows.1
 
