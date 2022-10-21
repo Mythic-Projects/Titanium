@@ -1,0 +1,22 @@
+From 7e006624c79aca2f03509f1766e767795d6bc614 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Mon, 23 May 2022 22:16:46 +0200
+Subject: [PATCH] Fix Shared Random patch
+
+
+diff --git a/src/main/java/net/minecraft/server/EntitySquid.java b/src/main/java/net/minecraft/server/EntitySquid.java
+index 07536a8a6..0d166acf8 100644
+--- a/src/main/java/net/minecraft/server/EntitySquid.java
++++ b/src/main/java/net/minecraft/server/EntitySquid.java
+@@ -20,7 +20,7 @@ public class EntitySquid extends EntityWaterAnimal {
+     public EntitySquid(World world) {
+         super(world);
+         this.setSize(0.95F, 0.95F);
+-        this.random.setSeed((long) (1 + this.getId()));
++        //this.random.setSeed((long) (1 + this.getId())); //Paper - shared random
+         this.bq = 1.0F / (this.random.nextFloat() + 1.0F) * 0.2F;
+         this.goalSelector.a(0, new EntitySquid.PathfinderGoalSquid(this));
+     }
+-- 
+2.36.0.windows.1
+

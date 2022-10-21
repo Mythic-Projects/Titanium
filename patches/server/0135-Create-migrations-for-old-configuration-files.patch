@@ -1,0 +1,370 @@
+From ce29a9fd2e544ce4999e9226f3e46b1443f35dc8 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Thu, 16 Jun 2022 23:40:42 +0200
+Subject: [PATCH] Create migrations for old configuration files
+
+
+diff --git a/src/main/java/net/titanium/config/LegacyConfigHelper.java b/src/main/java/net/titanium/config/LegacyConfigHelper.java
+index b4a4615d8..8241ba8b6 100644
+--- a/src/main/java/net/titanium/config/LegacyConfigHelper.java
++++ b/src/main/java/net/titanium/config/LegacyConfigHelper.java
+@@ -1,13 +1,7 @@
+ package net.titanium.config;
+ 
+-import eu.okaeri.configs.OkaeriConfig;
+ import java.io.File;
+ import java.io.IOException;
+-import java.time.Duration;
+-import java.util.ArrayList;
+-import java.util.HashMap;
+-import java.util.Map;
+-import java.util.Set;
+ import org.bukkit.Bukkit;
+ import org.bukkit.configuration.InvalidConfigurationException;
+ import org.bukkit.configuration.file.YamlConfiguration;
+@@ -72,7 +66,7 @@ public class LegacyConfigHelper {
+     }
+ 
+     public void saveSectionToFile() {
+-        this.mapData(this.titaniumConfigSection, null).forEach(this.configuration::set);
++        this.titaniumConfigSection.mapData(null, true).forEach(this.configuration::set);
+ 
+         if (this.configVersion != -1) {
+             this.configuration.set("config-version", this.configVersion);
+@@ -86,41 +80,4 @@ public class LegacyConfigHelper {
+         }
+     }
+ 
+-    private Map<String, Object> mapData(OkaeriConfig parentConfig, String parentSection) {
+-        Map<String, Object> dataMap = new HashMap<>();
+-
+-        for (String key : parentConfig.getConfigurer().getAllKeys()) {
+-            Object data = parentConfig.get(key);
+-
+-            String dataKey = parentSection == null ? key : parentSection + "." + key;
+-
+-            if (data instanceof OkaeriConfig) {
+-                if (key.equalsIgnoreCase("world-settings")) {
+-                    this.mapData((OkaeriConfig) data, null)
+-                            .forEach((mappedKey, mappedValue) -> dataMap.put(dataKey + ".default." + mappedKey, mappedValue));
+-                    continue;
+-                }
+-
+-                dataMap.putAll(this.mapData((OkaeriConfig) data, dataKey));
+-                continue;
+-            }
+-            dataMap.put(dataKey, this.convertType(data));
+-        }
+-
+-        return dataMap;
+-    }
+-
+-    private Object convertType(Object value) {
+-        if (value instanceof Set) {
+-            return new ArrayList((Set) value);
+-        }
+-        if (value instanceof Enum) {
+-            return ((Enum) value).name();
+-        }
+-        if (value instanceof Duration) {
+-            return ((Duration) value).toString();
+-        }
+-        return value;
+-    }
+-
+ }
+diff --git a/src/main/java/net/titanium/config/MigrationHelper.java b/src/main/java/net/titanium/config/MigrationHelper.java
+new file mode 100644
+index 000000000..f6ff399b9
+--- /dev/null
++++ b/src/main/java/net/titanium/config/MigrationHelper.java
+@@ -0,0 +1,116 @@
++package net.titanium.config;
++
++import eu.okaeri.configs.migrate.view.RawConfigView;
++import java.io.File;
++import java.io.IOException;
++import org.bukkit.Bukkit;
++import org.bukkit.configuration.InvalidConfigurationException;
++import org.bukkit.configuration.MemorySection;
++import org.bukkit.configuration.file.YamlConfiguration;
++
++public class MigrationHelper {
++
++    private static final File BUKKIT_FILE = new File("bukkit.yml");
++    private static final File SPIGOT_FILE = new File("spigot.yml");
++    private static final File PAPER_FILE = new File("paper.yml");
++    private static final File TACOSPIGOT_FILE = new File("taco.yml");
++    private static final File ION_FILE = new File("ion.yml");
++    private static final File COMMANDS_FILE = new File("commands.yml");
++
++    private final TitaniumConfig config;
++    private final RawConfigView rawView;
++
++    public MigrationHelper(TitaniumConfig config) {
++        this.config = config;
++        this.rawView = new RawConfigView(config);
++    }
++
++    public void putBukkitConfig() {
++        this.putConfig(BUKKIT_FILE, "bukkit");
++    }
++
++    public void putSpigotConfig() {
++        this.putConfig(SPIGOT_FILE, "spigot");
++    }
++
++    public void putPaperConfig() {
++        this.putConfig(PAPER_FILE, "paper");
++    }
++
++    public void putTacoSpigotConfig() {
++        this.putConfig(TACOSPIGOT_FILE, "taco");
++    }
++
++    public void putIonConfig() {
++        this.putConfig(ION_FILE, "ion");
++    }
++
++    public void putCommandsConfig() {
++        this.putConfig(COMMANDS_FILE, "commands");
++    }
++
++    private void putConfig(File file, String sectionName) {
++        try {
++            YamlConfiguration oldConfig = loadConfig(file);
++            oldConfig.getKeys(true)
++                    .forEach(key -> {
++                        Object newValue = oldConfig.get(key);
++
++                        String finalKey = sectionName != null ? sectionName + "." + key : key;
++                        finalKey = finalKey.replace("world-settings.default", "world-settings");
++
++                        Object oldValue = this.rawView.get(finalKey);
++
++                        if (newValue instanceof MemorySection) {
++                            return;
++                        }
++
++                        if (oldValue != null && !oldValue.getClass().isAssignableFrom(newValue.getClass())) {
++                            try {
++                                // YamlConfiguration doesn't support some types, so we need to try convert them to needed type
++                                if (newValue instanceof Number) {
++                                    Number number = (Number) newValue;
++                                    if (oldValue instanceof Byte) {
++                                        newValue = number.byteValue();
++                                    } else if (oldValue instanceof Short) {
++                                        newValue = number.shortValue();
++                                    } else if (oldValue instanceof Float) {
++                                        newValue = number.floatValue();
++                                    }
++                                }
++                            } catch (Exception ex) {
++                                Bukkit.getLogger().warning("Failed to migrate " + key + " (" + file.getName() + "). We couldn't assign the value of type " + newValue.getClass() + " to " + oldValue.getClass());
++                                return;
++                            }
++                        }
++
++                        rawView.set(finalKey, newValue);
++                    });
++        } catch (MigrationException ex) {
++            Bukkit.getLogger().warning(ex.getMessage());
++        }
++    }
++
++    private static YamlConfiguration loadConfig(File file) throws MigrationException {
++        if (!file.exists()) {
++            throw new MigrationException("We couldn't migrate " + file.getName() + ". File does not exist.");
++        }
++
++        YamlConfiguration config = new YamlConfiguration();
++        try {
++            config.load(file);
++        } catch (IOException | InvalidConfigurationException ex) {
++            throw new MigrationException("We couldn't load " + file.getName() + ", we couldn't migrate it.");
++        }
++        return config;
++    }
++
++    private static class MigrationException extends Exception {
++
++        public MigrationException(String message) {
++            super(message);
++        }
++
++    }
++
++}
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index a192a9a24..6ffddc386 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -9,7 +9,10 @@ import eu.okaeri.configs.annotation.Header;
+ import eu.okaeri.configs.annotation.NameModifier;
+ import eu.okaeri.configs.annotation.NameStrategy;
+ import eu.okaeri.configs.annotation.Names;
++import eu.okaeri.configs.exception.InitializationException;
+ import eu.okaeri.configs.exception.OkaeriException;
++import java.nio.file.Files;
++import java.nio.file.LinkOption;
+ import java.util.HashMap;
+ import java.util.HashSet;
+ import java.util.Map;
+@@ -22,8 +25,6 @@ import net.titanium.util.Pair;
+ import org.bukkit.Bukkit;
+ import org.bukkit.ChatColor;
+ import org.bukkit.command.Command;
+-import org.spigotmc.RestartCommand;
+-import org.spigotmc.TicksPerSecondCommand;
+ 
+ @Header("This is the main configuration file for Titanium.")
+ @Header("It's collect all the settings from bukkit.yml, spigot.yml etc.")
+@@ -197,6 +198,12 @@ TitaniumConfig extends TitaniumConfigSection {
+ 
+     }
+ 
++    @Comment("After enabling this option old configuration files (bukkit.yml, spigot.yml etc.) will be migrated.")
++    @Comment("This option force this migration even, if titanium.yml exists.")
++    @Comment("This option will be automatically disabled after running it.")
++    @Comment("Server will force migration, if titanium.yml didn't exist before.")
++    public boolean migrateOldFiles = false;
++
+     @Comment("When this option is enabled, the server will create a directory `legacy_configs` with files like bukkit.yml, spigot.yml etc.")
+     @Comment("Changing option there will not affect the server, it's only mirror of this file.")
+     @Comment("Enable this option only if some of your plugins are not compatible with the new configs.")
+@@ -216,15 +223,49 @@ TitaniumConfig extends TitaniumConfigSection {
+ 
+     }
+ 
++    @Exclude
++    private boolean forceMigration = false;
++
++    @Override
++    public OkaeriConfig saveDefaults() throws OkaeriException {
++        if (this.getBindFile() == null) {
++            throw new InitializationException("bindFile cannot be null");
++        } else {
++            boolean exists = Files.exists(this.getBindFile(), new LinkOption[0]);
++            if (!exists) {
++                this.forceMigration = true;
++            }
++            return exists ? this : this.save();
++        }
++    }
++
+     @Override
+     public OkaeriConfig load() throws OkaeriException {
+         INSTANCE = this;
+ 
+-        log(true, true, Level.INFO, "Loading Titanium server config from " + this.getBindFile().getFileName().toString());
++        forceLog("Loading Titanium server config from " + this.getBindFile().getFileName().toString());
+ 
+         super.load();
+         this.loadProperties();
+ 
++        if (forceMigration || migrateOldFiles) {
++            forceLog("Migrating old config files");
++
++            MigrationHelper migrationHelper = new MigrationHelper(this);
++
++            migrationHelper.putBukkitConfig();
++            migrationHelper.putSpigotConfig();
++            migrationHelper.putPaperConfig();
++            migrationHelper.putTacoSpigotConfig();
++            migrationHelper.putIonConfig();
++            migrationHelper.putCommandsConfig();
++
++            forceMigration = false;
++            migrateOldFiles = false;
++
++            this.save();
++        }
++
+         if (enableLegacyConfigFiles) {
+             if (this.bukkitConfigHelper == null) {
+                 this.bukkitConfigHelper = new LegacyConfigHelper(this.bukkit, "bukkit");
+@@ -367,4 +408,8 @@ TitaniumConfig extends TitaniumConfigSection {
+         log(Level.INFO, log, params);
+     }
+ 
++    static void forceLog(String log, Object... params) {
++        log(true, true, Level.INFO, log, params);
++    }
++
+ }
+diff --git a/src/main/java/net/titanium/config/TitaniumConfigSection.java b/src/main/java/net/titanium/config/TitaniumConfigSection.java
+index 3ea4cae2f..1d9af7463 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfigSection.java
++++ b/src/main/java/net/titanium/config/TitaniumConfigSection.java
+@@ -3,8 +3,13 @@ package net.titanium.config;
+ import eu.okaeri.configs.OkaeriConfig;
+ import eu.okaeri.configs.annotation.Exclude;
+ import java.lang.reflect.Field;
++import java.time.Duration;
++import java.util.ArrayList;
++import java.util.HashMap;
+ import java.util.List;
++import java.util.Map;
+ import java.util.Objects;
++import java.util.Set;
+ import java.util.logging.Level;
+ import java.util.stream.Collectors;
+ import org.bukkit.Bukkit;
+@@ -16,7 +21,7 @@ public abstract class TitaniumConfigSection extends OkaeriConfig {
+     public void loadProcessedProperties() {
+     }
+ 
+-    public void loadProperties() {
++    public final void loadProperties() {
+         this.loadProcessedProperties();
+ 
+         Class<?> clazz = this.getClass();
+@@ -66,4 +71,45 @@ public abstract class TitaniumConfigSection extends OkaeriConfig {
+         return false;
+     }
+ 
++    public Map<String, Object> mapData(String parentSection, boolean convertToBukkit) {
++        return this.mapData(this, parentSection, convertToBukkit);
++    }
++
++    private Map<String, Object> mapData(OkaeriConfig parentConfig, String parentSection, boolean legacy) {
++        Map<String, Object> dataMap = new HashMap<>();
++
++        for (String key : parentConfig.getConfigurer().getAllKeys()) {
++            Object data = parentConfig.get(key);
++
++            String dataKey = parentSection == null ? key : parentSection + "." + key;
++
++            if (data instanceof OkaeriConfig) {
++                if (legacy && key.equalsIgnoreCase("world-settings")) {
++                    this.mapData((OkaeriConfig) data, null, true)
++                            .forEach((mappedKey, mappedValue) -> dataMap.put(dataKey + ".default." + mappedKey, mappedValue));
++                    continue;
++                }
++
++                dataMap.putAll(this.mapData((OkaeriConfig) data, dataKey, legacy));
++                continue;
++            }
++            dataMap.put(dataKey, legacy ? convertType(data) : data);
++        }
++
++        return dataMap;
++    }
++
++    private static Object convertType(Object value) {
++        if (value instanceof Set) {
++            return new ArrayList((Set) value);
++        }
++        if (value instanceof Enum) {
++            return ((Enum) value).name();
++        }
++        if (value instanceof Duration) {
++            return ((Duration) value).toString();
++        }
++        return value;
++    }
++
+ }
+-- 
+2.36.0.windows.1
+

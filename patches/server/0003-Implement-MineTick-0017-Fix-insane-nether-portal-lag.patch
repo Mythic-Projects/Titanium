@@ -1,11 +1,11 @@
-From f79b7f2c88521987a1d4fba8945f84b5b0ed6b6c Mon Sep 17 00:00:00 2001
+From 1018dbd64027a6a29faf2cca10e83ec2c5ae6973 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 9 Apr 2021 13:59:12 +0200
-Subject: [PATCH] Implement [MineTick-0017] - Fix insane nether portal lag
+Subject: [PATCH] Implement [MineTick-0017] Fix insane nether portal lag
 
 
 diff --git a/src/main/java/net/minecraft/server/PortalTravelAgent.java b/src/main/java/net/minecraft/server/PortalTravelAgent.java
-index 72f3735b..42b04abc 100644
+index 72f3735b1..42b04abc9 100644
 --- a/src/main/java/net/minecraft/server/PortalTravelAgent.java
 +++ b/src/main/java/net/minecraft/server/PortalTravelAgent.java
 @@ -94,7 +94,13 @@ public class PortalTravelAgent {
@@ -24,7 +24,7 @@ index 72f3735b..42b04abc 100644
              return false;
          }
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftTravelAgent.java b/src/main/java/org/bukkit/craftbukkit/CraftTravelAgent.java
-index cae65cf8..6b671a50 100644
+index cae65cf86..6b671a50c 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftTravelAgent.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftTravelAgent.java
 @@ -44,7 +44,14 @@ public class CraftTravelAgent extends PortalTravelAgent implements TravelAgent {

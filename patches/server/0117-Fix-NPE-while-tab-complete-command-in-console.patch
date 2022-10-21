@@ -1,0 +1,26 @@
+From 67e47cbd0e8ff5bec30b9e1bbe397c275f12e49c Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Tue, 7 Jun 2022 15:54:00 +0200
+Subject: [PATCH] Fix NPE while tab complete command in console
+
+
+diff --git a/src/main/java/net/titanium/console/TitaniumConsoleCompleter.java b/src/main/java/net/titanium/console/TitaniumConsoleCompleter.java
+index 606af7f1a..91f57d888 100644
+--- a/src/main/java/net/titanium/console/TitaniumConsoleCompleter.java
++++ b/src/main/java/net/titanium/console/TitaniumConsoleCompleter.java
+@@ -27,6 +27,12 @@ public class TitaniumConsoleCompleter implements Completer {
+         try {
+             List<String> offers = waiter.get(); // wait until completions get processed on main thread
+ 
++            // Titanium start - fix NPE while tab complete command in console
++            if (offers == null) {
++                return;
++            }
++            // Titanium end
++
+             for (String offer : offers) {
+                 if (offer.isEmpty()) continue;
+ 
+-- 
+2.36.0.windows.1
+

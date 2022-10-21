@@ -1,12 +1,12 @@
-From 4aee74be47790060e553a0eec808bffa6e27c6e1 Mon Sep 17 00:00:00 2001
+From 9a6b08f8a69d2851de2d56d72a790fa1ab7a0506 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 9 Apr 2021 16:00:40 +0200
-Subject: [PATCH] Implement [Paper-0302] - Don't load chunks for villager door
+Subject: [PATCH] Implement [Paper-0302] Don't load chunks for villager door
  check by Aikar
 
 
 diff --git a/src/main/java/net/minecraft/server/Village.java b/src/main/java/net/minecraft/server/Village.java
-index e67aa042..072f466a 100644
+index e67aa0423..072f466a2 100644
 --- a/src/main/java/net/minecraft/server/Village.java
 +++ b/src/main/java/net/minecraft/server/Village.java
 @@ -318,7 +318,12 @@ public class Village {
@@ -24,7 +24,7 @@ index e67aa042..072f466a 100644
          return block instanceof BlockDoor ? block.getMaterial() == Material.WOOD : false;
      }
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 8f3511f8..b92a64ea 100644
+index 8f3511f80..b92a64eae 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -70,7 +70,7 @@ public abstract class World implements IBlockAccess {

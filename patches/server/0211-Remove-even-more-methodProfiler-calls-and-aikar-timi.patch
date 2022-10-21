@@ -1,0 +1,522 @@
+From ec086215ccf8db113ef027475c1ee5de40cb147b Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sat, 24 Sep 2022 10:01:51 +0200
+Subject: [PATCH] Remove even more methodProfiler calls and aikar timings
+
+
+diff --git a/src/main/java/net/minecraft/server/CommandDebug.java b/src/main/java/net/minecraft/server/CommandDebug.java
+index 916298c36..ae716d306 100644
+--- a/src/main/java/net/minecraft/server/CommandDebug.java
++++ b/src/main/java/net/minecraft/server/CommandDebug.java
+@@ -100,6 +100,7 @@ public class CommandDebug extends CommandAbstract {
+     }
+ 
+     private void a(int i, String s, StringBuilder stringbuilder) {
++        if (true) return; // Purpur
+         List list = MinecraftServer.getServer().methodProfiler.b(s);
+ 
+         if (list != null && list.size() >= 3) {
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index c6b947ed8..4e7a5ee51 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -300,7 +300,7 @@ public abstract class Entity implements ICommandListener {
+     }
+ 
+     public void K() {
+-        this.world.methodProfiler.a("entityBaseTick");
++        //this.world.methodProfiler.a("entityBaseTick"); // Purpur
+         if (this.vehicle != null && this.vehicle.dead) {
+             this.vehicle = null;
+         }
+@@ -312,7 +312,7 @@ public abstract class Entity implements ICommandListener {
+         this.lastPitch = this.pitch;
+         this.lastYaw = this.yaw;
+         if (!this.world.isClientSide && this.world instanceof WorldServer) {
+-            this.world.methodProfiler.a("portal");
++            //this.world.methodProfiler.a("portal"); // Purpur
+             MinecraftServer minecraftserver = ((WorldServer) this.world).getMinecraftServer();
+             int i = this.L();
+ 
+@@ -348,7 +348,7 @@ public abstract class Entity implements ICommandListener {
+                 --this.portalCooldown;
+             }
+ 
+-            this.world.methodProfiler.b();
++            //this.world.methodProfiler.b(); // Purpur
+         }
+ 
+         this.Y();
+@@ -384,7 +384,7 @@ public abstract class Entity implements ICommandListener {
+         }
+ 
+         this.justCreated = false;
+-        this.world.methodProfiler.b();
++        //this.world.methodProfiler.b(); // Purpur
+     }
+ 
+     public int L() {
+@@ -516,7 +516,7 @@ public abstract class Entity implements ICommandListener {
+                 return;
+             }
+             // CraftBukkit end
+-            this.world.methodProfiler.a("move");
++            //this.world.methodProfiler.a("move"); // Purpur
+             double d3 = this.locX;
+             double d4 = this.locY;
+             double d5 = this.locZ;
+@@ -735,8 +735,8 @@ public abstract class Entity implements ICommandListener {
+                 }
+             }
+ 
+-            this.world.methodProfiler.b();
+-            this.world.methodProfiler.a("rest");
++            //this.world.methodProfiler.b(); // Purpur
++            //this.world.methodProfiler.a("rest"); // Purpur
+             this.recalcPosition();
+             this.positionChanged = d6 != d0 || d8 != d2;
+             this.E = d7 != d1;
+@@ -865,7 +865,7 @@ public abstract class Entity implements ICommandListener {
+                 this.fireTicks = -this.maxFireTicks;
+             }
+ 
+-            this.world.methodProfiler.b();
++            //this.world.methodProfiler.b(); // Purpur
+         }
+     }
+ 
+@@ -2051,7 +2051,7 @@ public abstract class Entity implements ICommandListener {
+ 
+     public void c(int i) {
+         if (!this.world.isClientSide && !this.dead) {
+-            this.world.methodProfiler.a("changeDimension");
++            //this.world.methodProfiler.a("changeDimension"); // Purpur
+             MinecraftServer minecraftserver = MinecraftServer.getServer();
+             // CraftBukkit start - Move logic into new function "teleportToLocation"
+             // int j = this.dimension;
+@@ -2100,7 +2100,7 @@ public abstract class Entity implements ICommandListener {
+ 
+             this.world.kill(this);
+             this.dead = false;
+-            this.world.methodProfiler.a("reposition");
++            //this.world.methodProfiler.a("reposition"); // Purpur
+             // CraftBukkit start - Ensure chunks are loaded in case TravelAgent is not used which would initially cause chunks to load during find/create
+             // minecraftserver.getPlayerList().changeWorld(this, j, worldserver, worldserver1);
+             boolean before = worldserver1.chunkProviderServer.forceChunkLoad;
+@@ -2108,7 +2108,7 @@ public abstract class Entity implements ICommandListener {
+             worldserver1.getMinecraftServer().getPlayerList().repositionEntity(this, exit, portal);
+             worldserver1.chunkProviderServer.forceChunkLoad = before;
+             // CraftBukkit end
+-            this.world.methodProfiler.c("reloading");
++            //this.world.methodProfiler.c("reloading"); // Purpur
+             Entity entity = EntityTypes.createEntityByName(EntityTypes.b(this), worldserver1);
+ 
+             if (entity != null) {
+@@ -2133,10 +2133,10 @@ public abstract class Entity implements ICommandListener {
+             }
+ 
+             this.dead = true;
+-            this.world.methodProfiler.b();
++            //this.world.methodProfiler.b(); // Purpur
+             worldserver.j();
+             worldserver1.j();
+-            this.world.methodProfiler.b();
++            //this.world.methodProfiler.b(); // Purpur
+         }
+     }
+ 
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 9d481fdbe..fbd30bb5f 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -797,13 +797,13 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+                     lastTick = curTime;
+ 
+                     this.nextTickTime += 50L;
+-                    this.methodProfiler.a("tick"); // push
++                    //this.methodProfiler.a("tick"); // push // Purpur
+                     this.A(this::haveTime);
+-                    this.methodProfiler.c("nextTickWait"); // popPush
++                    //this.methodProfiler.c("nextTickWait"); // popPush // Purpur
+                     this.mayHaveDelayedTasks = true;
+                     this.delayedTasksMaxNextTickTime = Math.max(getMillis() + 50L, this.nextTickTime);
+                     this.waitUntilNextTick();
+-                    this.methodProfiler.b(); // pop
++                    //this.methodProfiler.b(); // pop // Purpur
+                     this.isReady = true;
+                 }
+                 // Spigot end
+@@ -980,13 +980,13 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+         // WindSpigot end
+ 
+         ++this.ticks;
+-        if (this.T) {
++        if (false && this.T) {
+             this.T = false;
+             this.methodProfiler.a = true;
+             this.methodProfiler.a();
+         }
+ 
+-        this.methodProfiler.a("root");
++        //this.methodProfiler.a("root"); // Purpur
+         this.B();
+         if (i - this.X >= 5000000000L) {
+             this.X = i;
+@@ -1006,7 +1006,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+             if (autosavePeriod <= 1000) { // Titanium - use non-blocking auto save only for large periods
+                 //SpigotTimings.worldSaveTimer.startTiming(); // Spigot // Purpur
+             }
+-            this.methodProfiler.a("save");
++            //this.methodProfiler.a("save"); // Purpur
+             this.v.savePlayers();
+ 
+             // Migot start - non-blocking auto save
+@@ -1028,7 +1028,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+                 // this.saveChunks(true);
+                 // Spigot End
+             }
+-            this.methodProfiler.b();
++            //this.methodProfiler.b(); // Purpur
+             if (autosavePeriod <= 1000) { // Titanium - use non-blocking auto save only for large periods
+                 //SpigotTimings.worldSaveTimer.stopTiming(); // Spigot // Purpur
+             }
+@@ -1049,10 +1049,10 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+         // Paper end
+         // WindSpigot end
+ 
+-        this.methodProfiler.a("tallying");
++        //this.methodProfiler.a("tallying"); // Purpur
+         this.h[this.ticks % 100] = System.nanoTime() - i;
+-        this.methodProfiler.b();
+-        this.methodProfiler.a("snooper");
++        //this.methodProfiler.b(); // Purpur
++        //this.methodProfiler.a("snooper"); // Purpur
+         if (getSnooperEnabled() && !this.n.d() && this.ticks > 100) {  // Spigot
+             this.n.a();
+         }
+@@ -1061,15 +1061,15 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+             this.n.b();
+         }
+ 
+-        this.methodProfiler.b();
+-        this.methodProfiler.b();
++        //this.methodProfiler.b(); // Purpur
++        //this.methodProfiler.b(); // Purpur
+         org.spigotmc.WatchdogThread.tick(); // Spigot
+         //co.aikar.timings.TimingsManager.FULL_SERVER_TICK.stopTiming(); // Spigot // Purpur
+     }
+ 
+     public void B() {
+         //SpigotTimings.minecraftSchedulerTimer.startTiming(); // Spigot // Purpur
+-        this.methodProfiler.a("jobs");
++        //this.methodProfiler.a("jobs"); // Purpur
+         Queue queue = this.j;
+ 
+         // Spigot start
+@@ -1081,7 +1081,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+         // Spigot end
+         //SpigotTimings.minecraftSchedulerTimer.stopTiming(); // Spigot // Purpur
+ 
+-        this.methodProfiler.c("levels");
++        //this.methodProfiler.c("levels"); // Purpur
+ 
+         //SpigotTimings.bukkitSchedulerTimer.startTiming(); // Spigot // Purpur
+         // CraftBukkit start
+@@ -1137,7 +1137,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+                 WorldServer worldserver = this.worlds.get(i);
+                 worldserver.hasPhysicsEvent = org.bukkit.event.block.BlockPhysicsEvent.getHandlerList().getRegisteredListeners().length > 0; // PandaSpigot
+ 
+-                this.methodProfiler.a(worldserver.getWorldData().getName());
++                //this.methodProfiler.a(worldserver.getWorldData().getName()); // Purpur
+                 /* Drop global time updates
+                 if (this.ticks % 20 == 0) {
+                     this.methodProfiler.a("timeSync");
+@@ -1146,7 +1146,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+                 }
+                 // CraftBukkit end */
+ 
+-                this.methodProfiler.a("tick");
++                //this.methodProfiler.a("tick"); // Purpur
+ 
+                 CrashReport crashreport;
+ 
+@@ -1182,8 +1182,8 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+                     throw new ReportedException(crashreport);
+                 }
+ 
+-                this.methodProfiler.b();
+-                this.methodProfiler.a("tracker");
++                //this.methodProfiler.b(); // Purpur
++                //this.methodProfiler.a("tracker"); // Purpur
+                 //worldserver.timings.tracker.startTiming(); // Spigot // Purpur
+                 // PandaSpigot start - controlled flush for entity tracker packets
+                 List<NetworkManager> disabledFlushes = new ArrayList<>(worldserver.players.size());
+@@ -1208,8 +1208,8 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+                 }
+                 // PandaSpigot end
+                 //worldserver.timings.tracker.stopTiming(); // Spigot // Purpur
+-                this.methodProfiler.b();
+-                this.methodProfiler.b();
++                //this.methodProfiler.b(); // Purpur
++                //this.methodProfiler.b(); // Purpur
+                 worldserver.explosionDensityCache.clear(); // PaperSpigot - Optimize explosions
+             // } // CraftBukkit
+ 
+@@ -1222,15 +1222,15 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+         }
+         // WindSpigot end
+ 
+-        this.methodProfiler.c("connection");
++        //this.methodProfiler.c("connection"); // Purpur
+         //SpigotTimings.connectionTimer.startTiming(); // Spigot // Purpur
+         this.aq().c();
+         //SpigotTimings.connectionTimer.stopTiming(); // Spigot // Purpur
+-        this.methodProfiler.c("players");
++        //this.methodProfiler.c("players"); // Purpur
+         //SpigotTimings.playerListTimer.startTiming(); // Spigot // Purpur
+         this.v.tick();
+         //SpigotTimings.playerListTimer.stopTiming(); // Spigot // Purpur
+-        this.methodProfiler.c("tickables");
++        //this.methodProfiler.c("tickables"); // Purpur
+ 
+         //SpigotTimings.tickablesTimer.startTiming(); // Spigot // Purpur
+         for (i = 0; i < this.p.size(); ++i) {
+@@ -1238,7 +1238,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+         }
+         //SpigotTimings.tickablesTimer.stopTiming(); // Spigot // Purpur
+ 
+-        this.methodProfiler.b();
++        //this.methodProfiler.b(); // Purpur
+     }
+ 
+     public boolean getAllowNether() {
+@@ -1456,7 +1456,10 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+     public CrashReport b(CrashReport crashreport) {
+         crashreport.g().a("Profiler Position", new Callable() {
+             public String a() throws Exception {
+-                return MinecraftServer.this.methodProfiler.a ? MinecraftServer.this.methodProfiler.c() : "N/A (disabled)";
++                // Purpur start - Remove profiler
++                //return MinecraftServer.this.methodProfiler.a ? MinecraftServer.this.methodProfiler.c() : "N/A (disabled)";
++                return "N/A (disabled)";
++                // Purpur end
+             }
+ 
+             public Object call() throws Exception {
+diff --git a/src/main/java/net/minecraft/server/PathfinderGoalSelector.java b/src/main/java/net/minecraft/server/PathfinderGoalSelector.java
+index b03ba8575..d2066fe64 100644
+--- a/src/main/java/net/minecraft/server/PathfinderGoalSelector.java
++++ b/src/main/java/net/minecraft/server/PathfinderGoalSelector.java
+@@ -45,7 +45,7 @@ public class PathfinderGoalSelector {
+     }
+ 
+     public void a() {
+-        this.d.a("goalSetup");
++        //this.d.a("goalSetup"); // Purpur
+         Iterator iterator;
+         PathfinderGoalSelector.PathfinderGoalSelectorItem pathfindergoalselector_pathfindergoalselectoritem;
+ 
+@@ -82,8 +82,8 @@ public class PathfinderGoalSelector {
+             }
+         }
+ 
+-        this.d.b();
+-        this.d.a("goalTick");
++        //this.d.b(); // Purpur
++        //this.d.a("goalTick"); // Purpur
+         iterator = this.c.iterator();
+ 
+         while (iterator.hasNext()) {
+@@ -91,7 +91,7 @@ public class PathfinderGoalSelector {
+             pathfindergoalselector_pathfindergoalselectoritem.a.e();
+         }
+ 
+-        this.d.b();
++        //this.d.b(); // Purpur
+     }
+ 
+     private boolean a(PathfinderGoalSelector.PathfinderGoalSelectorItem pathfindergoalselector_pathfindergoalselectoritem) {
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index 2a8b26460..7668c02c0 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -1539,7 +1539,7 @@ public abstract class World implements IBlockAccess {
+         //timings.entityTick.startTiming(); // Spigot // Purpur
+         guardEntityList = true; // Spigot
+         // CraftBukkit start - Use field for loop variable
+-        co.aikar.timings.TimingHistory.entityTicks += this.entityList.size(); // Spigot
++        //co.aikar.timings.TimingHistory.entityTicks += this.entityList.size(); // Spigot // Purpur
+         int entitiesThisCycle = 0;
+         // PaperSpigot start - Disable tick limiters
+         //if (tickPosition < 0) tickPosition = 0;
+@@ -1669,7 +1669,7 @@ public abstract class World implements IBlockAccess {
+         }
+         // CraftBukkit end */
+ 
+-        this.methodProfiler.c("pendingBlockEntities");
++        //this.methodProfiler.c("pendingBlockEntities"); // Purpur
+         if (!this.b.isEmpty()) {
+             for (int l = 0; l < this.b.size(); ++l) {
+                 TileEntity tileentity1 = (TileEntity) this.b.get(l);
+@@ -1693,10 +1693,10 @@ public abstract class World implements IBlockAccess {
+         }
+ 
+         //timings.tileEntityPending.stopTiming(); // Spigot // Purpur
+-        co.aikar.timings.TimingHistory.tileEntityTicks += this.tileEntityList.size(); // Spigot
++        //co.aikar.timings.TimingHistory.tileEntityTicks += this.tileEntityList.size(); // Spigot // Purpur
+ 
+-        this.methodProfiler.b();
+-        this.methodProfiler.b();
++        //this.methodProfiler.b(); // Purpur
++        //this.methodProfiler.b(); // Purpur
+     }
+ 
+     public boolean a(TileEntity tileentity) {
+@@ -1757,7 +1757,7 @@ public abstract class World implements IBlockAccess {
+             entity.lastPitch = entity.pitch;
+             if (flag && entity.ad) {
+                 ++entity.ticksLived;
+-                ++co.aikar.timings.TimingHistory.activatedEntityTicks; // Spigot
++                //++co.aikar.timings.TimingHistory.activatedEntityTicks; // Spigot // Purpur
+                 if (entity.vehicle != null) {
+                     entity.ak();
+                 } else {
+@@ -1765,7 +1765,7 @@ public abstract class World implements IBlockAccess {
+                 }
+             }
+ 
+-            this.methodProfiler.a("chunkCheck");
++            //this.methodProfiler.a("chunkCheck"); // Purpur
+             if (Double.isNaN(entity.locX) || Double.isInfinite(entity.locX)) {
+                 entity.locX = entity.P;
+             }
+@@ -1804,7 +1804,7 @@ public abstract class World implements IBlockAccess {
+                 }
+             }
+ 
+-            this.methodProfiler.b();
++            //this.methodProfiler.b(); // Purpur
+             if (flag && entity.ad && entity.passenger != null) {
+                 if (!entity.passenger.dead && entity.passenger.vehicle == entity) {
+                     this.g(entity.passenger);
+@@ -2307,7 +2307,7 @@ public abstract class World implements IBlockAccess {
+ 
+     protected void D() {
+         // this.chunkTickList.clear(); // CraftBukkit - removed
+-        this.methodProfiler.a("buildList");
++        //this.methodProfiler.a("buildList"); // Purpur
+ 
+         int i;
+         EntityHuman entityhuman;
+@@ -2353,12 +2353,12 @@ public abstract class World implements IBlockAccess {
+             // Spigot End
+         }
+ 
+-        this.methodProfiler.b();
++        //this.methodProfiler.b(); // Purpur
+         if (this.L > 0) {
+             --this.L;
+         }
+ 
+-        this.methodProfiler.a("playerCheckLight");
++        //this.methodProfiler.a("playerCheckLight"); // Purpur
+         if (spigotConfigTitanium.randomLightUpdates && !this.players.isEmpty()) { // Spigot
+             i = this.random.nextInt(this.players.size());
+             entityhuman = (EntityHuman) this.players.get(i);
+@@ -2368,13 +2368,13 @@ public abstract class World implements IBlockAccess {
+             this.x(new BlockPosition(j, k, l));
+         }
+ 
+-        this.methodProfiler.b();
++        //this.methodProfiler.b(); // Purpur
+     }
+ 
+     protected abstract int q();
+ 
+     protected void a(int i, int j, Chunk chunk) {
+-        this.methodProfiler.c("moodSound");
++        //this.methodProfiler.c("moodSound"); // Purpur
+         if (!this.paperConfigTitanium.disableMoodSounds && this.L == 0 && !this.isClientSide) { // PaperSpigot - Disable mood sounds
+             this.m = this.m * 3 + 1013904223;
+             int k = this.m >> 2;
+@@ -2396,7 +2396,7 @@ public abstract class World implements IBlockAccess {
+             }
+         }
+ 
+-        this.methodProfiler.c("checkLight");
++        //this.methodProfiler.c("checkLight"); // Purpur
+         chunk.m();
+     }
+ 
+@@ -2535,7 +2535,7 @@ public abstract class World implements IBlockAccess {
+             int i = 0;
+             int j = 0;
+ 
+-            this.methodProfiler.a("getBrightness");
++            //this.methodProfiler.a("getBrightness"); // Purpur
+             int k = this.b(enumskyblock, blockposition);
+             int l = this.a(blockposition, enumskyblock);
+             int i1 = blockposition.getX();
+@@ -2597,8 +2597,8 @@ public abstract class World implements IBlockAccess {
+                 i = 0;
+             }
+ 
+-            this.methodProfiler.b();
+-            this.methodProfiler.a("checkedPosition < toCheckCount");
++            //this.methodProfiler.b(); // Purpur
++            //this.methodProfiler.a("checkedPosition < toCheckCount"); // Purpur
+ 
+             while (i < j) {
+                 l1 = this.H[i++];
+@@ -2656,7 +2656,7 @@ public abstract class World implements IBlockAccess {
+                 }
+             }
+             // PaperSpigot end
+-            this.methodProfiler.b();
++            //this.methodProfiler.b(); // Purpur
+             return true;
+         }
+     }
+diff --git a/src/main/java/net/titanium/config/SpigotConfig.java b/src/main/java/net/titanium/config/SpigotConfig.java
+index a9dddef60..c426e882f 100644
+--- a/src/main/java/net/titanium/config/SpigotConfig.java
++++ b/src/main/java/net/titanium/config/SpigotConfig.java
+@@ -1,6 +1,5 @@
+ package net.titanium.config;
+ 
+-import co.aikar.timings.TimingsManager;
+ import com.google.common.collect.ImmutableSet;
+ import eu.okaeri.configs.annotation.Comment;
+ import eu.okaeri.configs.annotation.CustomKey;
+@@ -9,20 +8,15 @@ import eu.okaeri.configs.annotation.NameModifier;
+ import eu.okaeri.configs.annotation.NameStrategy;
+ import eu.okaeri.configs.annotation.Names;
+ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+-import java.util.Arrays;
+ import java.util.HashMap;
+-import java.util.List;
+ import java.util.Map;
+ import java.util.Set;
+-import java.util.concurrent.TimeUnit;
+ import java.util.logging.Level;
+ import net.minecraft.server.AttributeRanged;
+ import net.minecraft.server.GenericAttributes;
+-import net.titanium.util.range.RangeFormatting;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.core.LoggerContext;
+ import org.apache.logging.log4j.core.config.Configuration;
+-import org.bukkit.Bukkit;
+ import org.spigotmc.RestartCommand;
+ import org.spigotmc.TicksPerSecondCommand;
+ import org.spigotmc.WatchdogThread;
+@@ -182,7 +176,7 @@ public class SpigotConfig extends TitaniumConfigSection {
+                             forcedStats.put(key + "." + key2, value2)));
+ 
+             if (disableSaving && forcedStats.getOrDefault("achievement.openInventory", 0) < 1) {
+-                log(Level.WARNING,"*** WARNING *** stats.disable-saving is true but stats.forced-stats.achievement.openInventory" +
++                log(Level.WARNING, "*** WARNING *** stats.disable-saving is true but stats.forced-stats.achievement.openInventory" +
+                         " isn't set to 1. Disabling stat saving without forcing the achievement may cause it to get stuck on the player's " +
+                         "screen.");
+             }
+-- 
+2.36.0.windows.1
+
