@@ -112,6 +112,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [SportPaper-0134] Improved Async Task Scheduler by cswhite2000
 [SportPaper-0162] Fix PlayerInteractEvent not cancelling properly by cswhite2000
 [SportPaper-0176] Use fast util collections
+[SportPaper-0177] Prevent rayTrace from loading chunks by Ashcon
 [SportPaper-0185] Speed up chunk unloading
 [SportPaper-0198] Optimize head rotation patch
 [SportPaper-0204] Fix Teleport Invisibility
