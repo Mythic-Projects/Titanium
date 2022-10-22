@@ -1,0 +1,23 @@
+From b32f9d81df1aef77f2af3e29262d8af14974ae53 Mon Sep 17 00:00:00 2001
+From: RoccoDev <hey@rocco.dev>
+Date: Mon, 26 Apr 2021 09:50:16 +0200
+Subject: [PATCH] Implement [KigPaper-0170] Kick after receiving invalid
+ creative action packet by RoccoDev
+
+
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index fd0de7a85..466eaece7 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -1894,6 +1894,8 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+                     entityitem.j();
+                 }
+             }
++        } else {
++            disconnect("Not in creative mode"); // KigPaper
+         }
+ 
+     }
+-- 
+2.36.0.windows.1
+
