@@ -77,6 +77,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0121] Reduce IO ops opening a new region
 [Paper-0127] Do not load chunks for pathfinding by Aikar
 [Paper-0144] Improve Minecraft Hopper Performance
+[Paper-0161] Disable Vanilla Chunk GC by Aikar
 [Paper-0168] Disable ticking of snow blocks
 [Paper-0173] Optimize World.isLoaded(BlockPosition)
 [Paper-0180] Server Tick Events
