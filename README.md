@@ -85,6 +85,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0192] Make legacy ping handler more reliable by Minecrell
 [Paper-0196] Fix block break desync by Michael Himing
 [Paper-0202] Shame on you Mojang moves chunk loading off https thread
+[Paper-0232] Fix MC-117075: TE Unload Lag Spike by mezz
 [Paper-0302] Don't load chunks for villager door check by Aikar
 [Paper-0313] Optimized world time updates by Aikar
 [Paper-0321] Cleanup allocated favicon ByteBuf
