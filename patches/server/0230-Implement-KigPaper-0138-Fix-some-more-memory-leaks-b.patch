@@ -1,4 +1,4 @@
-From d54028c039757e749154ea7ed076e3dbcd938daa Mon Sep 17 00:00:00 2001
+From d78d2148ab39b9118f580cb9827d016f3417a6e4 Mon Sep 17 00:00:00 2001
 From: RoccoDev <hey@rocco.dev>
 Date: Thu, 11 Feb 2021 17:07:11 +0100
 Subject: [PATCH] Implement [KigPaper-0138] Fix some more memory leaks by
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [KigPaper-0138] Fix some more memory leaks by
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityInsentient.java b/src/main/java/net/minecraft/server/EntityInsentient.java
-index 302af42f4..f158ab332 100644
+index 302af42f..6e2e0c53 100644
 --- a/src/main/java/net/minecraft/server/EntityInsentient.java
 +++ b/src/main/java/net/minecraft/server/EntityInsentient.java
 @@ -1,6 +1,7 @@
@@ -43,9 +43,9 @@ index 302af42f4..f158ab332 100644
 +        this.goalTarget = new WeakReference<>(entityliving); // KigPaper - WeakReference
          // CraftBukkit end
      }
-
+ 
 diff --git a/src/main/java/net/minecraft/server/PathfinderGoalSwell.java b/src/main/java/net/minecraft/server/PathfinderGoalSwell.java
-index c8eebf8cb..29e885e6e 100644
+index c8eebf8c..29e885e6 100644
 --- a/src/main/java/net/minecraft/server/PathfinderGoalSwell.java
 +++ b/src/main/java/net/minecraft/server/PathfinderGoalSwell.java
 @@ -3,7 +3,7 @@ package net.minecraft.server;
