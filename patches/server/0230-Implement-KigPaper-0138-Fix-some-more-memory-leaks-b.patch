@@ -22,7 +22,7 @@ index 302af42f4..f158ab332 100644
      public PathfinderGoalSelector goalSelector;
      public PathfinderGoalSelector targetSelector;
 -    private EntityLiving goalTarget;
-+    private WeakReference<EntityLiving> goalTarget; // KigPaper - wrap in WeakReference
++    private WeakReference<EntityLiving> goalTarget = new WeakReference<>(null); // KigPaper - wrap in WeakReference
      private EntitySenses bk;
      private ItemStack[] equipment = new ItemStack[5];
      public float[] dropChances = new float[5];
@@ -43,7 +43,7 @@ index 302af42f4..f158ab332 100644
 +        this.goalTarget = new WeakReference<>(entityliving); // KigPaper - WeakReference
          // CraftBukkit end
      }
- 
+
 diff --git a/src/main/java/net/minecraft/server/PathfinderGoalSwell.java b/src/main/java/net/minecraft/server/PathfinderGoalSwell.java
 index c8eebf8cb..29e885e6e 100644
 --- a/src/main/java/net/minecraft/server/PathfinderGoalSwell.java
