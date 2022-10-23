@@ -210,6 +210,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [KigPaper-0110] Backport from Spigot: Enforce cooldowns on book edits by RoccoDev
 [KigPaper-0112] Only trigger PlayerConnection#disconnect once by RoccoDev
 [KigPaper-0138] Fix some more memory leaks by RoccoDev
+[KigPaper-0161] Fix CraftinManager memory leak by RoccoDev
 [KigPaper-0170] Kick after receiving invalid creative action packet by RoccoDev
 [KigPaper-0070/0233] Prevent billion laughs attacks
 
