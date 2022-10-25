@@ -1,0 +1,368 @@
+From 2146b9eb982e5a7aa1d9bc8cc48f83ad5a982d6f Mon Sep 17 00:00:00 2001
+From: Aikar <aikar@aikar.co>
+Date: Mon, 19 Sep 2016 23:16:39 -0400
+Subject: [PATCH] Implement [Paper-0156] Auto Save Improvements by Aikar
+
+
+diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
+index eee8537e..44c1a5b6 100644
+--- a/src/main/java/net/minecraft/server/Chunk.java
++++ b/src/main/java/net/minecraft/server/Chunk.java
+@@ -1059,11 +1059,10 @@ public class Chunk {
+             if (this.r && this.world.getTime() != this.lastSaved || this.q) {
+                 return true;
+             }
+-        } else if (this.r && this.world.getTime() >= this.lastSaved + MinecraftServer.getServer().autosavePeriod * 4) { // Spigot - Only save if we've passed 2 auto save intervals without modification
+-            return true;
+         }
+ 
+-        return this.q;
++        // This !flag section should say if s(isModified) or t(hasEntities), then check auto save
++        return ((this.q || this.r) && this.world.getTime() >= this.lastSaved + world.paperConfigTitanium.autoSaveInterval); // Paper - Make world configurable and incremental
+     }
+ 
+     public Random a(long i) {
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+index 9aca136a..a69d45f0 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+@@ -389,7 +389,7 @@ public class ChunkProviderServer implements IChunkProvider {
+                 this.saveChunk(chunk);
+                 chunk.f(false);
+                 ++i;
+-                if (i == 24 && !flag && false) { // Spigot
++                if (!flag && i >= world.paperConfigTitanium.maxAutoSaveChunksPerTick) { // Spigot - // Paper - Incremental Auto Save - cap max per tick
+                     return false;
+                 }
+             }
+diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
+index a3897b2f..1b94a089 100644
+--- a/src/main/java/net/minecraft/server/EntityPlayer.java
++++ b/src/main/java/net/minecraft/server/EntityPlayer.java
+@@ -29,6 +29,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+ 
+     private static final Logger bH = LogManager.getLogger();
+     public String locale = "en_US"; // Spigot
++    public long lastSave = MinecraftServer.currentTick; // Paper
+     public PlayerConnection playerConnection;
+     public final MinecraftServer server;
+     public final PlayerInteractManager playerInteractManager;
+diff --git a/src/main/java/net/minecraft/server/FileIOThread.java b/src/main/java/net/minecraft/server/FileIOThread.java
+index 4476f3b3..c9b3bf45 100644
+--- a/src/main/java/net/minecraft/server/FileIOThread.java
++++ b/src/main/java/net/minecraft/server/FileIOThread.java
+@@ -12,16 +12,6 @@ public class FileIOThread implements Runnable {
+     private volatile long d;
+     private volatile boolean e;
+ 
+-    // Migot start
+-    public boolean isDone() {
+-        return this.c == this.d;
+-    }
+-
+-    public void setNoDelay(boolean active) {
+-        this.e = active;
+-    }
+-    // Migot end
+-
+     private FileIOThread() {
+         Thread thread = new Thread(this, "File IO Thread");
+ 
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index ae51fb5f..d79473be 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -27,7 +27,6 @@ import java.util.ArrayList;
+ import java.util.Arrays;
+ import java.util.Collections;
+ import java.util.Date;
+-import java.util.LinkedList;
+ import java.util.List;
+ import java.util.Queue;
+ import java.util.Random;
+@@ -44,8 +43,6 @@ import joptsimple.OptionSet;
+ import net.openhft.affinity.AffinityLock;
+ import net.titanium.AsyncPriority;
+ import net.titanium.config.TitaniumConfig;
+-import net.titanium.job.AutoSaveJob;
+-import net.titanium.job.AutoSaveJob.JobDetail;
+ import org.apache.commons.lang3.Validate;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+@@ -119,6 +116,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+     public java.util.Queue<Runnable> processQueue = new java.util.concurrent.ConcurrentLinkedQueue<Runnable>();
+     public java.util.Queue<Runnable> priorityProcessQueue = new java.util.concurrent.ConcurrentLinkedQueue<Runnable>(); // WindSpigot
+     public int autosavePeriod;
++    public boolean serverAutoSave = false; // Paper
+     // CraftBukkit end
+ 
+     // WindSpigot - MSPT for tps command
+@@ -148,44 +146,6 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+     }
+     // WindSpigot end
+ 
+-    // Migot start - non-blocking auto save
+-    private LinkedList<AutoSaveJob> autoSaveWorlds = new LinkedList<AutoSaveJob>();
+-    private int autoSaveDelay = 0;
+-    private boolean autoSaveOrdered = false;
+-
+-    private void queueWorldsForAutoSave() {
+-        if (!this.N) {
+-            this.autoSaveWorlds.clear();
+-            for (int j = 0; j < this.worlds.size(); ++j) {
+-                WorldServer worldserver = this.worlds.get(j);
+-                if (worldserver != null) {
+-                    this.autoSaveWorlds.add(new AutoSaveJob(JobDetail.WORLD_SAVE, worldserver));
+-                    this.autoSaveWorlds.add(new AutoSaveJob(JobDetail.WORLD_SAVEEVENT, worldserver));
+-                }
+-            }
+-            int queuesize = this.autoSaveWorlds.size() / 2;
+-            this.autoSaveDelay = 0;
+-            this.autoSaveOrdered = true;
+-            this.info("[AutoSave] " + queuesize + " worlds - Starting ...");
+-        }
+-    }
+-
+-    private void autoSaveNextWorld() throws ExceptionWorldConflict {
+-        if (!this.autoSaveWorlds.isEmpty()) {
+-            if (this.autoSaveDelay++ > 20) { // delay of 1 seconds between checks of the auto-save job queue
+-                this.autoSaveDelay = 0;
+-                if (this.autoSaveWorlds.getFirst().process()) {
+-                    this.autoSaveWorlds.removeFirst();
+-                }
+-            }
+-        } else if (this.autoSaveOrdered) {
+-            this.info("[AutoSave] Done.");
+-            this.autoSaveOrdered = false;
+-            server.playerCommandState = false;
+-        }
+-    }
+-    // Migot end
+-
+     public MinecraftServer(OptionSet options, Proxy proxy, File file1, Thread thread) {
+         super("Server"); // WindSpigot - backport modern tick loop
+         io.netty.util.ResourceLeakDetector.setEnabled( false ); // Spigot - disable
+@@ -1004,43 +964,31 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+             this.r.b().a(agameprofile);
+         }
+ 
+-        if (autosavePeriod > 0 && this.ticks % autosavePeriod == 0) { // CraftBukkit
+-            if (autosavePeriod <= 1000) { // Titanium - use non-blocking auto save only for large periods
+-                //SpigotTimings.worldSaveTimer.startTiming(); // Spigot // Purpur
+-            }
++        //if (autosavePeriod > 0 && this.ticks % autosavePeriod == 0) { // CraftBukkit // Paper - Incremental Auto Saving
+             //this.methodProfiler.a("save"); // Purpur
+-            this.v.savePlayers();
++            serverAutoSave = (autosavePeriod > 0 && this.ticks % autosavePeriod == 0); // Paper
++            int playerSaveInterval = TitaniumConfig.get().paper.settings.playerAutoSaveRate;
++            if (playerSaveInterval < 0) {
++                playerSaveInterval = autosavePeriod;
++            }
++            if (playerSaveInterval > 0) { // CraftBukkit // Paper
++                this.v.savePlayers(playerSaveInterval);
++            } // Paper - Incremental Auto Saving
+ 
+-            // Migot start - non-blocking auto save
+-            if (autosavePeriod > 1000) { // Titanium - use non-blocking auto save only for large periods
+-                server.playerCommandState = true;
+-                this.queueWorldsForAutoSave();
+-                // Migot end
+-            } else {
+-                //SpigotTimings.worldSaveTimer.startTiming(); // Spigot // Purpur
+-                // Spigot Start
+-                // We replace this with saving each individual world as this.saveChunks(...) is broken,
+-                // and causes the main thread to sleep for random amounts of time depending on chunk activity
+-                // Also pass flag to only save modified chunks
+-                server.playerCommandState = true;
+-                for (World world : worlds) {
+-                    world.getWorld().save(false);
+-                }
+-                server.playerCommandState = false;
+-                // this.saveChunks(true);
+-                // Spigot End
++            //SpigotTimings.worldSaveTimer.startTiming(); // Spigot // Purpur
++            // Spigot Start
++            // We replace this with saving each individual world as this.saveChunks(...) is broken,
++            // and causes the main thread to sleep for random amounts of time depending on chunk activity
++            // Also pass flag to only save modified chunks
++            server.playerCommandState = true;
++            for (World world : worlds) {
++                if (world.paperConfigTitanium.autoSaveInterval > 0) world.getWorld().save(false); // Paper - Incremental / Configurable Auto Saving
+             }
++            server.playerCommandState = false;
++            // this.saveChunks(true);
++            // Spigot End
+             //this.methodProfiler.b(); // Purpur
+-            if (autosavePeriod <= 1000) { // Titanium - use non-blocking auto save only for large periods
+-                //SpigotTimings.worldSaveTimer.stopTiming(); // Spigot // Purpur
+-            }
+-        }
+-
+-        // Migot start - non-blocking auto save
+-        if (autosavePeriod > 1000 && this.autoSaveOrdered) { // Titanium - use non-blocking auto save only for large periods
+-            this.autoSaveNextWorld();
+-        }
+-        // Migot end
++        //} // Paper - Incremental Auto Saving
+ 
+         // WindSpigot start - backport modern tick loop
+         // Paper start
+diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
+index 03116263..a675874c 100644
+--- a/src/main/java/net/minecraft/server/PlayerList.java
++++ b/src/main/java/net/minecraft/server/PlayerList.java
+@@ -299,6 +299,7 @@ public abstract class PlayerList {
+     }
+ 
+     protected void savePlayerFile(EntityPlayer entityplayer) {
++        entityplayer.lastSave = MinecraftServer.currentTick; // Paper
+         this.playerFileData.save(entityplayer);
+         ServerStatisticManager serverstatisticmanager = (ServerStatisticManager) this.o.get(entityplayer.getUniqueID());
+ 
+@@ -1109,12 +1110,23 @@ public abstract class PlayerList {
+ 
+     }
+ 
++    // Paper start
+     public void savePlayers() {
++        this.savePlayers(null);
++    }
++
++    public void savePlayers(Integer interval) {
++        long now = MinecraftServer.currentTick;
++        int numSaved = 0; // Paper
+         for (int i = 0; i < this.players.size(); ++i) {
+-            this.savePlayerFile((EntityPlayer) this.players.get(i));
++            EntityPlayer entityplayer = this.players.get(i);
++            if (interval == null || now - entityplayer.lastSave >= interval) {
++                this.savePlayerFile(entityplayer);
++                if (interval != null && ++numSaved <= TitaniumConfig.get().paper.settings.maxPlayersAutoSavePerTick) { break; } // Paper
++            }
+         }
+-
+     }
++    // Paper end
+ 
+     public void addWhitelist(GameProfile gameprofile) {
+         this.whitelist.add(new WhiteListEntry(gameprofile));
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index b42f7cbd..1c981cac 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -988,7 +988,8 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+ 
+     public void save(boolean flag, IProgressUpdate iprogressupdate) throws ExceptionWorldConflict {
+         if (this.chunkProvider.canSave()) {
+-            org.bukkit.Bukkit.getPluginManager().callEvent(new org.bukkit.event.world.WorldSaveEvent(getWorld())); // CraftBukkit
++            if (flag) org.bukkit.Bukkit.getPluginManager().callEvent(new org.bukkit.event.world.WorldSaveEvent(getWorld())); // CraftBukkit // Paper - Incremental Auto Saving - Only fire event on full save
++            if (flag || server.serverAutoSave) { // Paper
+             if (iprogressupdate != null) {
+                 iprogressupdate.a("Saving level");
+             }
+@@ -997,6 +998,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+             if (iprogressupdate != null) {
+                 iprogressupdate.c("Saving chunks");
+             }
++            } // Paper
+ 
+             this.chunkProvider.saveChunks(flag, iprogressupdate);
+             // CraftBukkit - ArrayList -> Collection
+diff --git a/src/main/java/net/titanium/config/PaperConfig.java b/src/main/java/net/titanium/config/PaperConfig.java
+index 739d38d3..75cfd1e7 100644
+--- a/src/main/java/net/titanium/config/PaperConfig.java
++++ b/src/main/java/net/titanium/config/PaperConfig.java
+@@ -53,7 +53,7 @@ public class PaperConfig extends TitaniumConfigSection {
+ 
+         @Comment("Maximum number of player data to save per tick.")
+         @CustomKey("max-players-auto-save-per-tick")
+-        public int maxPlayersAutoSavePerTick_ = 10;
++        public int maxPlayersAutoSavePerTick_ = -1;
+         @Exclude
+         public int maxPlayersAutoSavePerTick = 10;
+ 
+diff --git a/src/main/java/net/titanium/config/PaperWorldConfig.java b/src/main/java/net/titanium/config/PaperWorldConfig.java
+index 9897a8ec..ad52f0fa 100644
+--- a/src/main/java/net/titanium/config/PaperWorldConfig.java
++++ b/src/main/java/net/titanium/config/PaperWorldConfig.java
+@@ -243,6 +243,9 @@ public class PaperWorldConfig extends TitaniumConfigSection {
+     @Exclude
+     public int autoSaveInterval = -1;
+ 
++    @Comment("Maximum count of chunks that can be saved at 1 tick.")
++    public int maxAutoSaveChunksPerTick = 24;
++
+     @Comment("Whether to enable certain features during world generation.")
+     public GeneratorSettings generatorSettings = new GeneratorSettings();
+ 
+diff --git a/src/main/java/net/titanium/job/AutoSaveJob.java b/src/main/java/net/titanium/job/AutoSaveJob.java
+deleted file mode 100644
+index b4ed7c1d..00000000
+--- a/src/main/java/net/titanium/job/AutoSaveJob.java
++++ /dev/null
+@@ -1,63 +0,0 @@
+-package net.titanium.job;
+-
+-import co.aikar.timings.SpigotTimings;
+-import net.minecraft.server.ExceptionWorldConflict;
+-import net.minecraft.server.FileIOThread;
+-import net.minecraft.server.IProgressUpdate;
+-import net.minecraft.server.MinecraftServer;
+-import net.minecraft.server.RegionFileCache;
+-import net.minecraft.server.WorldServer;
+-import org.bukkit.Bukkit;
+-import org.bukkit.event.world.WorldSaveEvent;
+-
+-public class AutoSaveJob {
+-
+-    public enum JobDetail {
+-        WORLD_SAVE,
+-        WORLD_SAVEEVENT,
+-    }
+-
+-    private WorldServer worldserver;
+-    private JobDetail jobDetail;
+-
+-    public AutoSaveJob(JobDetail detail, WorldServer worldserver) {
+-        this.jobDetail = detail;
+-        this.worldserver = worldserver;
+-    }
+-
+-    /**
+-     *
+-     * @return true if the job shall be removed from the autosave queue
+-     * @throws ExceptionWorldConflict
+-     */
+-    public boolean process() throws ExceptionWorldConflict {
+-        if (this.isJob(JobDetail.WORLD_SAVE) && this.worldserver != null) {
+-            //SpigotTimings.worldSaveTimer.startTiming(); // Purpur
+-            MinecraftServer.getServer().info("[AutoSave] Saving world " + this.worldserver.getWorld().getName());
+-            this.worldserver.save(true, (IProgressUpdate) null);
+-            FileIOThread.a().setNoDelay(true);
+-            //SpigotTimings.worldSaveTimer.stopTiming(); // Purpur
+-        } else if (this.isJob(JobDetail.WORLD_SAVEEVENT) && this.worldserver != null) {
+-            if (FileIOThread.a().isDone()) {
+-                //SpigotTimings.worldSaveTimer.startTiming(); // Purpur
+-                FileIOThread.a().setNoDelay(false);
+-                RegionFileCache.a();
+-                Bukkit.getPluginManager().callEvent(new WorldSaveEvent(this.worldserver.getWorld()));
+-                //SpigotTimings.worldSaveTimer.stopTiming(); // Purpur
+-            } else {
+-                return false;
+-            }
+-        }
+-        this.worldserver = null;
+-        return true;
+-    }
+-
+-
+-    private boolean isJob(JobDetail detail) {
+-        if (this.jobDetail != null) {
+-            return this.jobDetail.equals(detail);
+-        }
+-        return false;
+-    }
+-
+-}
+-- 
+2.36.0.windows.1
+

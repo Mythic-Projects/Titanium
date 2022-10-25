@@ -1,0 +1,85 @@
+From 4215cad6d8949ed741e7a89dbd255e1268f9d68c Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 21 Oct 2022 20:55:45 +0200
+Subject: [PATCH] Move modern tick loop classes to net.titanium
+
+
+diff --git a/src/main/java/ga/windpvp/windspigot/async/thread/AsyncPacketThread.java b/src/main/java/ga/windpvp/windspigot/async/thread/AsyncPacketThread.java
+index dbe2d505..a1a6ec54 100644
+--- a/src/main/java/ga/windpvp/windspigot/async/thread/AsyncPacketThread.java
++++ b/src/main/java/ga/windpvp/windspigot/async/thread/AsyncPacketThread.java
+@@ -1,8 +1,6 @@
+ package ga.windpvp.windspigot.async.thread;
+ 
+ import ga.windpvp.windspigot.async.netty.Spigot404Write;
+-import ga.windpvp.windspigot.tickloop.ReentrantIAsyncHandler;
+-import ga.windpvp.windspigot.tickloop.TasksPerTick;
+ import io.netty.util.concurrent.Future;
+ import io.netty.util.concurrent.GenericFutureListener;
+ import java.math.BigDecimal;
+@@ -10,8 +8,6 @@ import java.util.Queue;
+ import java.util.concurrent.ConcurrentLinkedQueue;
+ import net.minecraft.server.NetworkManager;
+ import net.minecraft.server.Packet;
+-import org.apache.logging.log4j.LogManager;
+-import org.apache.logging.log4j.Logger;
+ 
+ public abstract class AsyncPacketThread {
+ 
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index ad5350c7..ae51fb5f 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -10,8 +10,8 @@ import com.mojang.authlib.GameProfile;
+ import com.mojang.authlib.GameProfileRepository;
+ import com.mojang.authlib.minecraft.MinecraftSessionService;
+ import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+-import ga.windpvp.windspigot.tickloop.ReentrantIAsyncHandler;
+-import ga.windpvp.windspigot.tickloop.TasksPerTick;
++import net.titanium.tickloop.ReentrantIAsyncHandler;
++import net.titanium.tickloop.TasksPerTick;
+ import io.netty.buffer.ByteBuf;
+ import io.netty.buffer.ByteBufOutputStream;
+ import io.netty.buffer.Unpooled;
+diff --git a/src/main/java/ga/windpvp/windspigot/tickloop/IAsyncHandler.java b/src/main/java/net/titanium/tickloop/IAsyncHandler.java
+similarity index 98%
+rename from src/main/java/ga/windpvp/windspigot/tickloop/IAsyncHandler.java
+rename to src/main/java/net/titanium/tickloop/IAsyncHandler.java
+index 10fc849e..00a0508e 100644
+--- a/src/main/java/ga/windpvp/windspigot/tickloop/IAsyncHandler.java
++++ b/src/main/java/net/titanium/tickloop/IAsyncHandler.java
+@@ -1,4 +1,4 @@
+-package ga.windpvp.windspigot.tickloop;
++package net.titanium.tickloop;
+ 
+ import java.util.Queue;
+ import java.util.concurrent.CompletableFuture;
+diff --git a/src/main/java/ga/windpvp/windspigot/tickloop/ReentrantIAsyncHandler.java b/src/main/java/net/titanium/tickloop/ReentrantIAsyncHandler.java
+similarity index 92%
+rename from src/main/java/ga/windpvp/windspigot/tickloop/ReentrantIAsyncHandler.java
+rename to src/main/java/net/titanium/tickloop/ReentrantIAsyncHandler.java
+index fa273afa..24111f3b 100644
+--- a/src/main/java/ga/windpvp/windspigot/tickloop/ReentrantIAsyncHandler.java
++++ b/src/main/java/net/titanium/tickloop/ReentrantIAsyncHandler.java
+@@ -1,4 +1,4 @@
+-package ga.windpvp.windspigot.tickloop;
++package net.titanium.tickloop;
+ 
+ public abstract class ReentrantIAsyncHandler<R extends Runnable> extends IAsyncHandler<R> {
+ 
+diff --git a/src/main/java/ga/windpvp/windspigot/tickloop/TasksPerTick.java b/src/main/java/net/titanium/tickloop/TasksPerTick.java
+similarity index 88%
+rename from src/main/java/ga/windpvp/windspigot/tickloop/TasksPerTick.java
+rename to src/main/java/net/titanium/tickloop/TasksPerTick.java
+index 6878289b..aca388a1 100644
+--- a/src/main/java/ga/windpvp/windspigot/tickloop/TasksPerTick.java
++++ b/src/main/java/net/titanium/tickloop/TasksPerTick.java
+@@ -1,4 +1,4 @@
+-package ga.windpvp.windspigot.tickloop;
++package net.titanium.tickloop;
+ 
+ public class TasksPerTick implements Runnable {
+ 	private final int tick;
+-- 
+2.36.0.windows.1
+

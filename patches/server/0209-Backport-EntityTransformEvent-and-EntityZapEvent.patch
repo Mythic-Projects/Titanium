@@ -1,0 +1,218 @@
+From f60fb8d6b923b018374c9ddc2ff20617e2f81af3 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Wed, 28 Sep 2022 17:22:47 +0200
+Subject: [PATCH] Backport EntityTransformEvent and EntityZapEvent
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityMushroomCow.java b/src/main/java/net/minecraft/server/EntityMushroomCow.java
+index fef767c2..0e19eca3 100644
+--- a/src/main/java/net/minecraft/server/EntityMushroomCow.java
++++ b/src/main/java/net/minecraft/server/EntityMushroomCow.java
+@@ -1,5 +1,7 @@
+ package net.minecraft.server;
+ 
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.EntityTransformEvent;
+ import org.bukkit.event.player.PlayerShearEntityEvent; // CraftBukkit
+ 
+ public class EntityMushroomCow extends EntityCow {
+@@ -46,6 +48,12 @@ public class EntityMushroomCow extends EntityCow {
+                     entitycow.setCustomName(this.getCustomName());
+                 }
+ 
++                // CraftBukkit start
++                if (CraftEventFactory.callEntityTransformEvent(this, entitycow, EntityTransformEvent.TransformReason.SHEARED).isCancelled()) {
++                    return false;
++                }
++                // CraftBukkit end
++
+                 this.world.addEntity(entitycow);
+ 
+                 for (int i = 0; i < 5; ++i) {
+diff --git a/src/main/java/net/minecraft/server/EntityPig.java b/src/main/java/net/minecraft/server/EntityPig.java
+index 3f2ce15f..33d83cd4 100644
+--- a/src/main/java/net/minecraft/server/EntityPig.java
++++ b/src/main/java/net/minecraft/server/EntityPig.java
+@@ -114,6 +114,12 @@ public class EntityPig extends EntityAnimal {
+         if (!this.world.isClientSide && !this.dead) {
+             EntityPigZombie entitypigzombie = new EntityPigZombie(this.world);
+ 
++            // Paper start
++            if (CraftEventFactory.callEntityZapEvent(this, entitylightning, entitypigzombie).isCancelled()) {
++                return;
++            }
++            // Paper end
++
+             // CraftBukkit start
+             if (CraftEventFactory.callPigZapEvent(this, entitylightning, entitypigzombie).isCancelled()) {
+                 return;
+diff --git a/src/main/java/net/minecraft/server/EntitySlime.java b/src/main/java/net/minecraft/server/EntitySlime.java
+index d2126b16..cf20be75 100644
+--- a/src/main/java/net/minecraft/server/EntitySlime.java
++++ b/src/main/java/net/minecraft/server/EntitySlime.java
+@@ -1,6 +1,10 @@
+ package net.minecraft.server;
+ 
+ // CraftBukkit start
++import java.util.ArrayList;
++import java.util.List;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.EntityTransformEvent;
+ import org.bukkit.event.entity.SlimeSplitEvent;
+ // CraftBukkit end
+ 
+@@ -147,6 +151,7 @@ public class EntitySlime extends EntityInsentient implements IMonster {
+                 super.die();
+                 return;
+             }
++            List<EntitySlime> slimes = new ArrayList<>();
+             // CraftBukkit end
+ 
+             for (int k = 0; k < j; ++k) {
+@@ -164,8 +169,18 @@ public class EntitySlime extends EntityInsentient implements IMonster {
+ 
+                 entityslime.setSize(i / 2);
+                 entityslime.setPositionRotation(this.locX + (double) f, this.locY + 0.5D, this.locZ + (double) f1, this.random.nextFloat() * 360.0F, 0.0F);
+-                this.world.addEntity(entityslime, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.SLIME_SPLIT); // CraftBukkit - SpawnReason
++                slimes.add(entityslime); // CraftBukkit
+             }
++
++            // CraftBukkit start
++            if (CraftEventFactory.callEntityTransformEvent(this, slimes, EntityTransformEvent.TransformReason.SPLIT).isCancelled()) {
++                return;
++            }
++
++            for (EntitySlime slime : slimes) {
++                this.world.addEntity(slime, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.SLIME_SPLIT); // CraftBukkit - SpawnReason
++            }
++            // CraftBukkit end
+         }
+ 
+         super.die();
+diff --git a/src/main/java/net/minecraft/server/EntityVillager.java b/src/main/java/net/minecraft/server/EntityVillager.java
+index f1c905aa..f1f2c4dd 100644
+--- a/src/main/java/net/minecraft/server/EntityVillager.java
++++ b/src/main/java/net/minecraft/server/EntityVillager.java
+@@ -3,6 +3,8 @@ package net.minecraft.server;
+ import java.util.Iterator;
+ import java.util.Random;
+ import org.bukkit.craftbukkit.entity.CraftVillager; // CraftBukkit
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.EntityTransformEvent;
+ 
+ public class EntityVillager extends EntityAgeable implements IMerchant, NPC {
+ 
+@@ -509,6 +511,12 @@ public class EntityVillager extends EntityAgeable implements IMerchant, NPC {
+         if (!this.world.isClientSide && !this.dead) {
+             EntityWitch entitywitch = new EntityWitch(this.world);
+ 
++            // Paper start
++            if (org.bukkit.craftbukkit.event.CraftEventFactory.callEntityZapEvent(this, entitylightning, entitywitch).isCancelled()) {
++                return;
++            }
++            // Paper end
++
+             entitywitch.setPositionRotation(this.locX, this.locY, this.locZ, this.yaw, this.pitch);
+             entitywitch.prepare(this.world.E(new BlockPosition(entitywitch)), (GroupDataEntity) null);
+             entitywitch.k(this.ce());
+@@ -517,6 +525,11 @@ public class EntityVillager extends EntityAgeable implements IMerchant, NPC {
+                 entitywitch.setCustomNameVisible(this.getCustomNameVisible());
+             }
+ 
++            // CraftBukkit start
++            if (CraftEventFactory.callEntityTransformEvent(this, entitywitch, EntityTransformEvent.TransformReason.LIGHTNING).isCancelled()) {
++                return;
++            }
++            // CraftBukkit end
+             this.world.addEntity(entitywitch);
+             this.die();
+         }
+diff --git a/src/main/java/net/minecraft/server/EntityZombie.java b/src/main/java/net/minecraft/server/EntityZombie.java
+index 3c1f72bc..caa0df62 100644
+--- a/src/main/java/net/minecraft/server/EntityZombie.java
++++ b/src/main/java/net/minecraft/server/EntityZombie.java
+@@ -8,10 +8,12 @@ import java.util.UUID;
+ //CraftBukkit start
+ import net.titanium.config.TitaniumConfig;
+ import org.bukkit.craftbukkit.entity.CraftLivingEntity;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ import org.bukkit.event.entity.CreatureSpawnEvent;
+ import org.bukkit.event.entity.EntityCombustByEntityEvent;
+ import org.bukkit.event.entity.EntityCombustEvent;
+ import org.bukkit.event.entity.EntityTargetEvent;
++import org.bukkit.event.entity.EntityTransformEvent;
+ //CraftBukkit end
+ 
+ public class EntityZombie extends EntityMonster {
+@@ -353,6 +355,12 @@ public class EntityZombie extends EntityMonster {
+                 entityzombie.setCustomNameVisible(entityinsentient.getCustomNameVisible());
+             }
+ 
++            // CraftBukkit start
++            if (CraftEventFactory.callEntityTransformEvent(entityliving, entityzombie, EntityTransformEvent.TransformReason.INFECTION).isCancelled()) {
++                return;
++            }
++            // CraftBukkit end
++
+             this.world.addEntity(entityzombie, CreatureSpawnEvent.SpawnReason.INFECTION); // CraftBukkit - add SpawnReason
+             this.world.a((EntityHuman) null, 1016, new BlockPosition((int) this.locX, (int) this.locY, (int) this.locZ), 0);
+         }
+@@ -495,6 +503,12 @@ public class EntityZombie extends EntityMonster {
+             entityvillager.setCustomNameVisible(this.getCustomNameVisible());
+         }
+ 
++        // CraftBukkit start
++        if (CraftEventFactory.callEntityTransformEvent(this, entityvillager, EntityTransformEvent.TransformReason.CURED).isCancelled()) {
++            return;
++        }
++        // CraftBukkit end
++
+         this.world.addEntity(entityvillager, CreatureSpawnEvent.SpawnReason.CURED); // CraftBukkit - add SpawnReason
+         entityvillager.addEffect(new MobEffect(MobEffectList.CONFUSION.id, 200, 0));
+         this.world.a((EntityHuman) null, 1017, new BlockPosition((int) this.locX, (int) this.locY, (int) this.locZ), 0);
+diff --git a/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java b/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
+index 0e220ae4..3aa549ce 100644
+--- a/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
++++ b/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
+@@ -2,6 +2,7 @@ package org.bukkit.craftbukkit.event;
+ 
+ import java.net.InetAddress;
+ import java.util.ArrayList;
++import java.util.Collections;
+ import java.util.EnumMap;
+ import java.util.List;
+ import java.util.Map;
+@@ -172,6 +173,30 @@ public class CraftEventFactory {
+         Bukkit.getPluginManager().callEvent(event);
+         return event;
+     }
++
++    // EntityZapEvent
++    public static com.destroystokyo.paper.event.entity.EntityZapEvent callEntityZapEvent (Entity entity, Entity lightning, Entity changedEntity) {
++        com.destroystokyo.paper.event.entity.EntityZapEvent event = new com.destroystokyo.paper.event.entity.EntityZapEvent(entity.getBukkitEntity(), (LightningStrike) lightning.getBukkitEntity(), changedEntity.getBukkitEntity());
++        entity.getBukkitEntity().getServer().getPluginManager().callEvent(event);
++        return event;
++    }
++
++    // EntityTransformEvent
++    public static EntityTransformEvent callEntityTransformEvent(EntityLiving original, EntityLiving coverted, EntityTransformEvent.TransformReason transformReason) {
++        return callEntityTransformEvent(original, Collections.singletonList(coverted), transformReason);
++    }
++
++    public static EntityTransformEvent callEntityTransformEvent(EntityLiving original, List<? extends EntityLiving> convertedList, EntityTransformEvent.TransformReason convertType) {
++        List<org.bukkit.entity.Entity> list = new ArrayList<>();
++        for (EntityLiving entityLiving : convertedList) {
++            list.add(entityLiving.getBukkitEntity());
++        }
++
++        EntityTransformEvent event = new EntityTransformEvent(original.getBukkitEntity(), list, convertType);
++        Bukkit.getPluginManager().callEvent(event);
++
++        return event;
++    }
+     // Titanium end
+ 
+     /**
+-- 
+2.36.0.windows.1
+
