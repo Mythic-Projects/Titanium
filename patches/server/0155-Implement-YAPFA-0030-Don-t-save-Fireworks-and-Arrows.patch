@@ -1,0 +1,40 @@
+From 1c9ee279af98f650e0c6b772c1306c6f09eee2bc Mon Sep 17 00:00:00 2001
+From: tr7zw <tr7zw@live.de>
+Date: Wed, 26 Feb 2020 21:39:58 +0100
+Subject: [PATCH] Implement [YAPFA-0030] Don't save Fireworks and Arrows by
+ tr7zw
+
+
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index 59d11f79..cada26e0 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -1278,6 +1278,11 @@ public abstract class Entity implements ICommandListener {
+     public void b(Entity entity, int i) {}
+ 
+     public boolean c(NBTTagCompound nbttagcompound) {
++        // YAPFA start - Don't save Fireworks and Arrows // Titanium - configuration for this
++        if(TitaniumConfig.get().disableFireworksAndArrowsSaving && (this instanceof EntityFireworks || this instanceof EntityArrow)) {
++            return false;
++        }
++        // YAPFA end
+         String s = this.ag();
+ 
+         if (!this.dead && s != null) {
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index 51a97a53..21e82d26 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -159,6 +159,9 @@ public class TitaniumConfig extends TitaniumConfigSection {
+ 
+     }
+ 
++    @Comment("Whether saving of fireworks and arrows should be disabled.")
++    public boolean disableFireworksAndArrowsSaving = false;
++
+     @Comment("Allocates an entire cpu to the server - improves performance, but uses more cpu.")
+     @Comment("Enable it only if your OS is configured properly - see https://github.com/OpenHFT/Java-Thread-Affinity#isolcpus")
+     public boolean threadAffinity = false;
+-- 
+2.36.0.windows.1
+

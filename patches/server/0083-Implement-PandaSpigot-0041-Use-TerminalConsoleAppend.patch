@@ -1,4 +1,4 @@
-From eed07341a355e76071e38e6d5e6a29c0d9bcddb9 Mon Sep 17 00:00:00 2001
+From 52d2ccac2b3f5bcdcd5b2af6f2dc6dc6ad7550f3 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 27 May 2022 21:43:20 +0200
 Subject: [PATCH] Implement [PandaSpigot-0041] Use TerminalConsoleAppender for
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [PandaSpigot-0041] Use TerminalConsoleAppender for
 
 
 diff --git a/pom.xml b/pom.xml
-index 02dcaae99..5fa7c4db0 100644
+index 02dcaae9..5fa7c4db 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -52,10 +52,16 @@
@@ -91,7 +91,7 @@ index 02dcaae99..5fa7c4db0 100644
              <!-- Gotta go after shade plugin -->
              <plugin>
 diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
-index f1cace099..9525ea2a4 100644
+index f1cace09..9525ea2a 100644
 --- a/src/main/java/net/minecraft/server/DedicatedServer.java
 +++ b/src/main/java/net/minecraft/server/DedicatedServer.java
 @@ -13,6 +13,7 @@ import java.util.Random;
@@ -142,7 +142,7 @@ index f1cace099..9525ea2a4 100644
          System.setOut(new PrintStream(new LoggerOutputStream(logger, Level.INFO), true));
          System.setErr(new PrintStream(new LoggerOutputStream(logger, Level.WARN), true));
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 006dc56a9..9623d760c 100644
+index 006dc56a..9623d760 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -42,7 +42,7 @@ import org.apache.logging.log4j.Logger;
@@ -200,7 +200,7 @@ index 006dc56a9..9623d760c 100644
  
      public boolean a(int i, String s) {
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index 2dfce6d55..ecca9e9eb 100644
+index 2dfce6d5..ecca9e9e 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -18,6 +18,7 @@ import java.util.List;
@@ -223,7 +223,7 @@ index 2dfce6d55..ecca9e9eb 100644
          this.k = new GameProfileBanList(PlayerList.a);
 diff --git a/src/main/java/net/titanium/console/TitaniumConsole.java b/src/main/java/net/titanium/console/TitaniumConsole.java
 new file mode 100644
-index 000000000..4825477ef
+index 00000000..7f2101c4
 --- /dev/null
 +++ b/src/main/java/net/titanium/console/TitaniumConsole.java
 @@ -0,0 +1,39 @@
@@ -261,14 +261,14 @@ index 000000000..4825477ef
 +    @Override
 +    protected LineReader buildReader(LineReaderBuilder builder) {
 +        return super.buildReader(builder
-+                .appName("PandaSpigot")
++                .appName("Titanium")
 +                .variable(LineReader.HISTORY_FILE, Paths.get(".console_history"))
 +                .completer(new TitaniumConsoleCompleter(this.server)));
 +    }
 +}
 diff --git a/src/main/java/net/titanium/console/TitaniumConsoleCommandSender.java b/src/main/java/net/titanium/console/TitaniumConsoleCommandSender.java
 new file mode 100644
-index 000000000..0ab83f7ac
+index 00000000..0ab83f7a
 --- /dev/null
 +++ b/src/main/java/net/titanium/console/TitaniumConsoleCommandSender.java
 @@ -0,0 +1,17 @@
@@ -291,7 +291,7 @@ index 000000000..0ab83f7ac
 +
 diff --git a/src/main/java/net/titanium/console/TitaniumConsoleCompleter.java b/src/main/java/net/titanium/console/TitaniumConsoleCompleter.java
 new file mode 100644
-index 000000000..606af7f1a
+index 00000000..606af7f1
 --- /dev/null
 +++ b/src/main/java/net/titanium/console/TitaniumConsoleCompleter.java
 @@ -0,0 +1,56 @@
@@ -352,7 +352,7 @@ index 000000000..606af7f1a
 +    }
 +}
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 94a945887..8eebe388c 100644
+index 94a94588..8eebe388 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -134,7 +134,7 @@ import io.netty.buffer.ByteBuf;
@@ -377,7 +377,7 @@ index 94a945887..8eebe388c 100644
      @Override
      public PluginCommand getPluginCommand(String name) {
 diff --git a/src/main/java/org/bukkit/craftbukkit/Main.java b/src/main/java/org/bukkit/craftbukkit/Main.java
-index 43a1c4985..109563b91 100644
+index 43a1c498..109563b9 100644
 --- a/src/main/java/org/bukkit/craftbukkit/Main.java
 +++ b/src/main/java/org/bukkit/craftbukkit/Main.java
 @@ -10,7 +10,7 @@ import java.util.logging.Logger;
@@ -431,7 +431,7 @@ index 43a1c4985..109563b91 100644
                  MinecraftServer.main(options);
              } catch (Throwable t) {
 diff --git a/src/main/java/org/bukkit/craftbukkit/command/ColouredConsoleSender.java b/src/main/java/org/bukkit/craftbukkit/command/ColouredConsoleSender.java
-index 26a2fb894..93b549afb 100644
+index 26a2fb89..93b549af 100644
 --- a/src/main/java/org/bukkit/craftbukkit/command/ColouredConsoleSender.java
 +++ b/src/main/java/org/bukkit/craftbukkit/command/ColouredConsoleSender.java
 @@ -5,15 +5,15 @@ import java.util.Map;
@@ -462,7 +462,7 @@ index 26a2fb894..93b549afb 100644
 +    // PandaSpigot end
  }
 diff --git a/src/main/java/org/bukkit/craftbukkit/command/ConsoleCommandCompleter.java b/src/main/java/org/bukkit/craftbukkit/command/ConsoleCommandCompleter.java
-index 7ef577271..e99eab8aa 100644
+index 7ef57727..e99eab8a 100644
 --- a/src/main/java/org/bukkit/craftbukkit/command/ConsoleCommandCompleter.java
 +++ b/src/main/java/org/bukkit/craftbukkit/command/ConsoleCommandCompleter.java
 @@ -7,9 +7,9 @@ import java.util.logging.Level;
@@ -478,7 +478,7 @@ index 7ef577271..e99eab8aa 100644
  
      public ConsoleCommandCompleter(CraftServer server) {
 diff --git a/src/main/java/org/bukkit/craftbukkit/util/ServerShutdownThread.java b/src/main/java/org/bukkit/craftbukkit/util/ServerShutdownThread.java
-index ae3481ba8..0f8e49997 100644
+index ae3481ba..0f8e4999 100644
 --- a/src/main/java/org/bukkit/craftbukkit/util/ServerShutdownThread.java
 +++ b/src/main/java/org/bukkit/craftbukkit/util/ServerShutdownThread.java
 @@ -18,7 +18,7 @@ public class ServerShutdownThread extends Thread {
@@ -491,7 +491,7 @@ index ae3481ba8..0f8e49997 100644
              }
          }
 diff --git a/src/main/java/org/bukkit/craftbukkit/util/TerminalConsoleWriterThread.java b/src/main/java/org/bukkit/craftbukkit/util/TerminalConsoleWriterThread.java
-index 772f730ff..784d41dbd 100644
+index 772f730f..784d41db 100644
 --- a/src/main/java/org/bukkit/craftbukkit/util/TerminalConsoleWriterThread.java
 +++ b/src/main/java/org/bukkit/craftbukkit/util/TerminalConsoleWriterThread.java
 @@ -4,11 +4,11 @@ import java.io.IOException;
@@ -518,13 +518,13 @@ index 772f730ff..784d41dbd 100644
  }
 diff --git a/src/main/resources/log4j2.component.properties b/src/main/resources/log4j2.component.properties
 new file mode 100644
-index 000000000..0694b2146
+index 00000000..0694b214
 --- /dev/null
 +++ b/src/main/resources/log4j2.component.properties
 @@ -0,0 +1 @@
 +log4j.skipJansi=true
 diff --git a/src/main/resources/log4j2.xml b/src/main/resources/log4j2.xml
-index 63cb069fe..9af4553cb 100644
+index 63cb069f..9af4553c 100644
 --- a/src/main/resources/log4j2.xml
 +++ b/src/main/resources/log4j2.xml
 @@ -1,12 +1,11 @@

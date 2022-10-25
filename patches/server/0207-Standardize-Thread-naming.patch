@@ -1,0 +1,117 @@
+From 8fd771dca187d085d1318b2d395f49055d30c5ef Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Wed, 28 Sep 2022 12:46:07 +0200
+Subject: [PATCH] Standardize Thread naming
+
+
+diff --git a/src/main/java/ga/windpvp/windspigot/async/entitytracker/AsyncEntityTracker.java b/src/main/java/ga/windpvp/windspigot/async/entitytracker/AsyncEntityTracker.java
+index 848f149f..33c9079b 100644
+--- a/src/main/java/ga/windpvp/windspigot/async/entitytracker/AsyncEntityTracker.java
++++ b/src/main/java/ga/windpvp/windspigot/async/entitytracker/AsyncEntityTracker.java
+@@ -14,7 +14,7 @@ import net.titanium.config.TitaniumConfig;
+ 
+ public class AsyncEntityTracker extends EntityTracker {
+ 
+-    private static final ExecutorService trackingThreadExecutor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("Titanium Entity Tracker Thread").build());
++    private static final ExecutorService trackingThreadExecutor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("Titanium - Entity Tracker Thread #%d").build());
+     private static final List<NetworkManager> disabledFlushes = Lists.newArrayList();
+ 
+     private final ResettableLatch latch = new ResettableLatch(TitaniumConfig.get().entityTracker.async.threads);
+diff --git a/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java b/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java
+index dd1276c2..8cae1fbd 100644
+--- a/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java
++++ b/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java
+@@ -16,7 +16,7 @@ public class SearchHandler {
+ 
+     private static SearchHandler INSTANCE;
+     private final ExecutorService executor = Executors.newFixedThreadPool(TitaniumConfig.get().pathSearches.async.threads,
+-            new ThreadFactoryBuilder().setNameFormat("Titanium Entity Path Search Thread %d").build());
++            new ThreadFactoryBuilder().setNameFormat("Titanium - Entity Path Search Thread #%d").build());
+ 
+     public SearchHandler() {
+         INSTANCE = this;
+diff --git a/src/main/java/net/minecraft/server/HttpUtilities.java b/src/main/java/net/minecraft/server/HttpUtilities.java
+index 4132d8bf..84199759 100644
+--- a/src/main/java/net/minecraft/server/HttpUtilities.java
++++ b/src/main/java/net/minecraft/server/HttpUtilities.java
+@@ -21,7 +21,7 @@ import org.apache.logging.log4j.Logger;
+ 
+ public class HttpUtilities {
+ 
+-    public static final ListeningExecutorService a = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool((new ThreadFactoryBuilder()).setDaemon(true).setNameFormat("Downloader %d").build()));
++    public static final ListeningExecutorService a = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool((new ThreadFactoryBuilder()).setDaemon(true).setNameFormat("Downloader #%d").build()));
+     private static final AtomicInteger b = new AtomicInteger(0);
+     private static final Logger c = LogManager.getLogger();
+ 
+diff --git a/src/main/java/net/minecraft/server/PacketPlayInChat.java b/src/main/java/net/minecraft/server/PacketPlayInChat.java
+index 18358b43..4ddc4f4b 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayInChat.java
++++ b/src/main/java/net/minecraft/server/PacketPlayInChat.java
+@@ -26,7 +26,7 @@ public class PacketPlayInChat implements Packet<PacketListenerPlayIn> {
+ 
+     // Spigot Start
+     private static final java.util.concurrent.ExecutorService executors = java.util.concurrent.Executors.newCachedThreadPool(
+-            new com.google.common.util.concurrent.ThreadFactoryBuilder().setDaemon( true ).setNameFormat( "Async Chat Thread - #%d" ).build() );
++            new com.google.common.util.concurrent.ThreadFactoryBuilder().setDaemon( true ).setNameFormat( "Async Chat Thread #%d" ).build() );
+     public void a(final PacketListenerPlayIn packetlistenerplayin) {
+         if ( !a.startsWith("/") )
+         {
+diff --git a/src/main/java/net/minecraft/server/PacketPlayInTabComplete.java b/src/main/java/net/minecraft/server/PacketPlayInTabComplete.java
+index 3440a337..ab19be86 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayInTabComplete.java
++++ b/src/main/java/net/minecraft/server/PacketPlayInTabComplete.java
+@@ -44,7 +44,7 @@ public class PacketPlayInTabComplete implements Packet<PacketListenerPlayIn> {
+     }
+ 
+     // Titanium start - Async tab complete
+-    private static final ExecutorService TAB_COMPLETION_EXECUTOR = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setDaemon(true).setNameFormat("Titanium TabComplete Thread - %d").build());
++    private static final ExecutorService TAB_COMPLETION_EXECUTOR = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setDaemon(true).setNameFormat("Titanium - Tab Complete Thread #%d").build());
+     public void a(PacketListenerPlayIn packetlistenerplayin) {
+         TAB_COMPLETION_EXECUTOR.submit(() -> packetlistenerplayin.a(this));
+         // Titanium end
+diff --git a/src/main/java/net/minecraft/server/TileEntitySkull.java b/src/main/java/net/minecraft/server/TileEntitySkull.java
+index dc98962b..8a2f5848 100644
+--- a/src/main/java/net/minecraft/server/TileEntitySkull.java
++++ b/src/main/java/net/minecraft/server/TileEntitySkull.java
+@@ -27,7 +27,7 @@ public class TileEntitySkull extends TileEntity {
+     // Spigot start
+     public static final Executor executor = Executors.newFixedThreadPool(3,
+             new ThreadFactoryBuilder()
+-                    .setNameFormat("Head Conversion Thread - %1$d")
++                    .setNameFormat("Head Conversion Thread #%d")
+                     .build()
+     );
+     // Titanium start - replace guava cache with caffeine
+diff --git a/src/main/java/net/titanium/Titanium.java b/src/main/java/net/titanium/Titanium.java
+index dd14ef74..fdf5e2a0 100644
+--- a/src/main/java/net/titanium/Titanium.java
++++ b/src/main/java/net/titanium/Titanium.java
+@@ -45,10 +45,10 @@ public class Titanium {
+         }
+ 
+         if (serverConfig.combat.async.hitDetection) {
+-            this.hitDetectionThread = new CombatThread("Hit Detection Thread");
++            this.hitDetectionThread = new CombatThread("Titanium - Hit Detection Thread");
+         }
+         if (serverConfig.combat.async.knockback) {
+-            this.knockbackThread = new CombatThread("Knockback Thread");
++            this.knockbackThread = new CombatThread("Titanium - Knockback Thread");
+         }
+     }
+ 
+diff --git a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftAsyncScheduler.java b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftAsyncScheduler.java
+index 12b40e07..584c416d 100644
+--- a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftAsyncScheduler.java
++++ b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftAsyncScheduler.java
+@@ -40,7 +40,7 @@ public class CraftAsyncScheduler extends CraftScheduler {
+ 
+     private final ThreadPoolExecutor executor = new ThreadPoolExecutor(
+             4, Integer.MAX_VALUE,30L, TimeUnit.SECONDS, new SynchronousQueue<>(),
+-            new ThreadFactoryBuilder().setNameFormat("Craft Scheduler Thread - %1$d").build());
++            new ThreadFactoryBuilder().setNameFormat("Craft Scheduler Thread #%d").build());
+     private final Executor management = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
+             .setNameFormat("Craft Async Scheduler Management Thread").build());
+     private final List<CraftTask> temp = new ArrayList<>();
+-- 
+2.36.0.windows.1
+
