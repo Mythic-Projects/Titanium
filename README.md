@@ -77,6 +77,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0121] Reduce IO ops opening a new region
 [Paper-0127] Do not load chunks for pathfinding by Aikar
 [Paper-0144] Improve Minecraft Hopper Performance
+[Paper-0156] Auto Save Improvements by Aikar
 [Paper-0161] Disable Vanilla Chunk GC by Aikar
 [Paper-0168] Disable ticking of snow blocks
 [Paper-0173] Optimize World.isLoaded(BlockPosition)
@@ -195,7 +196,6 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [IonSpigot-0023] Implement PandaWire by SuicidalKids
 [IonSpigot-0037] Fast Cannon Entity Tracker by SuicidalKids
 
-[Migot-0004] Non Blocking Auto Save by Poweruser
 [Migot-0005] Fix Occasional Client Side Unloading of Chunk 0 0
 [Migot-0009] Prevent creature spawning in unloaded chunks
 [Migot-0027] Enable Concurrent Chunk Decoration
