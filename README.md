@@ -87,6 +87,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0196] Fix block break desync by Michael Himing
 [Paper-0202] Shame on you Mojang moves chunk loading off https thread
 [Paper-0232] Fix MC-117075: TE Unload Lag Spike by mezz
+[Paper-0287] MC-124833 by Zach Brown
 [Paper-0302] Don't load chunks for villager door check by Aikar
 [Paper-0313] Optimized world time updates by Aikar
 [Paper-0321] Cleanup allocated favicon ByteBuf
@@ -99,6 +100,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0353] Send nearby packets from world player list not server by Mystiflow
 [Paper-0361] Async Chunk Loading and Generation by Aikar
 [Paper-0362] Prevent mob spawning from loading/generating chunks by Shane Freeder
+[Paper-0374] Add Stricter Client Sign limits by Aikar
 [Paper-0387] Reduce memory footprint of NBTTagCompound by Spottedleaf
 [Paper-0797] Use Velocity compression and cipher natives by Elier
 
