@@ -1,0 +1,29 @@
+From 731b1b3e9f27862c09f37c7ab1e6723e3c5b83f8 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Thu, 4 Aug 2022 00:43:13 +0200
+Subject: [PATCH] Implement [PaperBin-????] Faster Game Rules Lookup
+
+
+diff --git a/src/main/java/net/minecraft/server/GameRules.java b/src/main/java/net/minecraft/server/GameRules.java
+index 1c89c9058..2ee8ca262 100644
+--- a/src/main/java/net/minecraft/server/GameRules.java
++++ b/src/main/java/net/minecraft/server/GameRules.java
+@@ -1,12 +1,13 @@
+ package net.minecraft.server;
+ 
++import java.util.HashMap;
+ import java.util.Iterator;
++import java.util.Map;
+ import java.util.Set;
+-import java.util.TreeMap;
+ 
+ public class GameRules {
+ 
+-    private TreeMap<String, GameRules.GameRuleValue> a = new TreeMap();
++    private Map<String, GameRuleValue> a = new HashMap<>(); // PaperBin - TreeMap -> HashMap - Faster Game Rules Lookup
+ 
+     public GameRules() {
+         this.a("doFireTick", "true", GameRules.EnumGameRuleType.BOOLEAN_VALUE);
+-- 
+2.36.0.windows.1
+

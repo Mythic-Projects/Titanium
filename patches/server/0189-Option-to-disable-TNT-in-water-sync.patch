@@ -1,0 +1,54 @@
+From a05488252a25bbe426d6d807779f31bdce84f1d2 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 23 Sep 2022 22:17:59 +0200
+Subject: [PATCH] Option to disable TNT in water sync
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityTNTPrimed.java b/src/main/java/net/minecraft/server/EntityTNTPrimed.java
+index f99cd3a61..c0b2742cd 100644
+--- a/src/main/java/net/minecraft/server/EntityTNTPrimed.java
++++ b/src/main/java/net/minecraft/server/EntityTNTPrimed.java
+@@ -193,7 +193,7 @@ public class EntityTNTPrimed extends Entity {
+         this.motY = oldMotY;
+         this.motZ = oldMotZ;
+ 
+-        if (this.inWater) {
++        if (this.inWater && !TitaniumConfig.get().gameMechanics.disableTntInWaterSync) { // Titanium - Option to disable TNT in water sync
+             // Send position and velocity updates to nearby players on every tick while the TNT is in water.
+             // This does pretty well at keeping their clients in sync with the server.
+             EntityTrackerEntry ete = ((WorldServer) this.getWorld()).getTracker().trackedEntities.get(this.getId());
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index e88bf134e..84f8ccd9d 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -96,15 +96,16 @@ public class TitaniumConfig extends TitaniumConfigSection {
+     @Comment("It can have impact on performance (probably small, but still) since it have a little calculations (to fix Nocom exploit).")
+     public boolean fixBlockBreakDesync = false;
+ 
++    @Comment("All things in that section could break vanilla mechanics, so keep that in mind.")
+     public GameMechanics gameMechanics = new GameMechanics();
+ 
+     public static class GameMechanics extends TitaniumConfigSection {
+ 
++        @Comment("Whether to disable fluids ticking (for eg. water won't flow).")
+         public boolean tickFluids = true;
+ 
+         @Comment("Whether to disable statistics (ESC -> Statistics) and achievements.")
+         @Comment("This option could improve performance a little especially on large servers.")
+-        @Comment("Of course it's not vanilla mechanic.")
+         public boolean disableStatistics = false;
+ 
+         @Comment("Whether to disable chunk ticking.")
+@@ -116,6 +117,9 @@ public class TitaniumConfig extends TitaniumConfigSection {
+         @Comment("Mostly optimization for clients.")
+         public boolean disableExplosionParticles = false;
+ 
++        @Comment("Whether to disable sync of position and velocity of TNT in water to client.")
++        public boolean disableTntInWaterSync = false;
++
+     }
+ 
+     @Comment("The max NBT size in bytes. The default value is 2097152 which is ~2Mb - it's insane big.")
+-- 
+2.36.0.windows.1
+

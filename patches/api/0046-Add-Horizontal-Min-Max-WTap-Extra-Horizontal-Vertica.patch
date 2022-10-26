@@ -1,0 +1,35 @@
+From 54b7bc788cf5a884be887c1c7e608e9cdb01d287 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Mon, 24 Oct 2022 00:51:09 +0200
+Subject: [PATCH] Add Horizontal Min/Max & WTap Extra Horizontal/Vertical to
+ KnockbackProfile
+
+
+diff --git a/src/main/java/net/titanium/knockback/KnockbackProfile.java b/src/main/java/net/titanium/knockback/KnockbackProfile.java
+index c3b8a1ef..507f8b42 100644
+--- a/src/main/java/net/titanium/knockback/KnockbackProfile.java
++++ b/src/main/java/net/titanium/knockback/KnockbackProfile.java
+@@ -2,4 +2,20 @@ package net.titanium.knockback;
+ 
+ public interface KnockbackProfile extends dev.cobblesword.nachospigot.knockback.KnockbackProfile { // We extend nacho KnockbackProfile to not modify their KnockbackProfile if we'd like to add our custom functionality
+ 
++    double getHorizontalMin();
++
++    void setHorizontalMin(double horizontalMin);
++
++    double getHorizontalMax();
++
++    void setHorizontalMax(double horizontalMax);
++
++    double getWTapExtraHorizontal();
++
++    void setWTapExtraHorizontal(double wTapHorizontal);
++
++    double getWTapExtraVertical();
++
++    void setWTapExtraVertical(double wTapVertical);
++
+ }
+-- 
+2.36.0.windows.1
+

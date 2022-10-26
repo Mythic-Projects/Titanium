@@ -1,4 +1,4 @@
-From fab5972c60d32bfdad6f0890d5be5ff8082ec909 Mon Sep 17 00:00:00 2001
+From 729f152a75c76c62deeaf8a24311c44e73313476 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 23 May 2022 19:47:37 +0200
 Subject: [PATCH] Fix LegacyConfigHelper
@@ -163,7 +163,7 @@ index 05ab2e8eb..b7843b6b6 100644
              this.ionConfigHelper.saveSectionToFile();
          }
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index afbb710e4..94a945887 100644
+index f08bf72e6..97d362ff0 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -33,6 +33,7 @@ import javax.imageio.ImageIO;
@@ -174,7 +174,7 @@ index afbb710e4..94a945887 100644
  import net.titanium.config.TitaniumConfig;
  import net.titanium.config.serdes.DecolorTransformer;
  import net.titanium.config.serdes.WarningStateTransformer;
-@@ -1845,34 +1846,54 @@ public final class CraftServer implements Server {
+@@ -1852,34 +1853,54 @@ public final class CraftServer implements Server {
          @Override
          public YamlConfiguration getBukkitConfig()
          {

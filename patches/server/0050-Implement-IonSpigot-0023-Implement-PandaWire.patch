@@ -1,4 +1,4 @@
-From 992b986c14f194df79a95b15a3c4ffe659c669b4 Mon Sep 17 00:00:00 2001
+From 501a3f5678346c2b356e2d70212f6e9495ac5644 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 22 May 2022 22:26:25 +0200
 Subject: [PATCH] Implement [IonSpigot-0023] Implement PandaWire
@@ -620,10 +620,10 @@ index a3ce72a70..5da1c1fd6 100644
          return ChatColor.translateAlternateColorCodes('&', input);
      }
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 74e3c97aa..4bab54134 100644
+index 874cf634f..a5ce6b81c 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-@@ -1862,6 +1862,14 @@ public final class CraftServer implements Server {
+@@ -1869,6 +1869,14 @@ public final class CraftServer implements Server {
              return serverConfig.getPaperConfigHelper().getConfiguration();
          }
  

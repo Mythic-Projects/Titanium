@@ -1,11 +1,11 @@
-From 0e93b77f4dac58347e0d410f850b2c7227e73b66 Mon Sep 17 00:00:00 2001
+From 251c88a670eafebddea23f9ed30a7f9b2a37223b Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 23 May 2022 21:46:28 +0200
 Subject: [PATCH] Implement [Paper-0085] Use a Shared Random for Entities
 
 
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index cb1cf8855..a0d98b4ba 100644
+index cb1cf885..a0d98b4b 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
 @@ -9,6 +9,7 @@ import java.util.concurrent.Callable;
@@ -45,6 +45,19 @@ index cb1cf8855..a0d98b4ba 100644
          this.maxFireTicks = 1;
          this.justCreated = true;
          this.uniqueID = MathHelper.a(this.random);
+diff --git a/src/main/java/net/minecraft/server/EntitySquid.java b/src/main/java/net/minecraft/server/EntitySquid.java
+index 07536a8a..0d166acf 100644
+--- a/src/main/java/net/minecraft/server/EntitySquid.java
++++ b/src/main/java/net/minecraft/server/EntitySquid.java
+@@ -20,7 +20,7 @@ public class EntitySquid extends EntityWaterAnimal {
+     public EntitySquid(World world) {
+         super(world);
+         this.setSize(0.95F, 0.95F);
+-        this.random.setSeed((long) (1 + this.getId()));
++        //this.random.setSeed((long) (1 + this.getId())); //Paper - shared random
+         this.bq = 1.0F / (this.random.nextFloat() + 1.0F) * 0.2F;
+         this.goalSelector.a(0, new EntitySquid.PathfinderGoalSquid(this));
+     }
 -- 
 2.36.0.windows.1
 

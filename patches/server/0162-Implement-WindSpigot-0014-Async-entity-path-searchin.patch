@@ -1,0 +1,800 @@
+From 0ef3cd32350e32b03fe6a77233cfd384df399279 Mon Sep 17 00:00:00 2001
+From: windcolor-dev <teaglehao@gmail.com>
+Date: Sun, 28 Aug 2022 15:10:51 +0200
+Subject: [PATCH] Implement [WindSpigot-0014] Async entity path searching by
+ windcolor-dev
+
+
+diff --git a/src/main/java/ga/windpvp/windspigot/async/pathsearch/AsyncNavigation.java b/src/main/java/ga/windpvp/windspigot/async/pathsearch/AsyncNavigation.java
+new file mode 100644
+index 000000000..18f4b62b2
+--- /dev/null
++++ b/src/main/java/ga/windpvp/windspigot/async/pathsearch/AsyncNavigation.java
+@@ -0,0 +1,155 @@
++package ga.windpvp.windspigot.async.pathsearch;
++
++import com.google.common.collect.Lists;
++import ga.windpvp.windspigot.async.pathsearch.cache.SearchCacheEntry;
++import ga.windpvp.windspigot.async.pathsearch.cache.SearchCacheEntryEntity;
++import ga.windpvp.windspigot.async.pathsearch.cache.SearchCacheEntryPosition;
++import java.util.List;
++import java.util.concurrent.atomic.AtomicBoolean;
++import net.minecraft.server.BlockPosition;
++import net.minecraft.server.Entity;
++import net.minecraft.server.EntityInsentient;
++import net.minecraft.server.Navigation;
++import net.minecraft.server.PathEntity;
++import net.minecraft.server.World;
++import net.titanium.config.TitaniumConfig;
++import org.bukkit.entity.EntityType;
++
++/*
++ *  A replacement for normal entity navigation that performs path searching async
++ *
++ *  This is way faster than sync navigation (can handle thousands of entities with full AI), but has a few disadvantages.
++ *  Entities' AI can be delayed for up to 2 ticks (very unlikely, but possible), so the cached target path might become inaccurate
++ *  after this time period, but most servers do not need to have perfectly accurate entity navigation. I believe the enhanced
++ *  performance is worth it.
++ *
++ *  This system performs an async calculation without using it when a entity should perform and use a sync calculation. We start an async
++ *  calculation task when a path search is requested, then we return the result of the earlier calculation when a path search is requested again.
++ *  This means that the entity does not do anything in terms of targeting for the first tick. If the calculations were not completed within
++ *  2 ticks, the server will perform the path search on the main thread.
++ *
++ */
++public class AsyncNavigation extends Navigation {
++
++    private static final List<EntityType> offloadedEntities = Lists.newArrayList();
++    private static int minimumDistanceForOffloadingSquared = 0;
++    public final AtomicBoolean isSearching = new AtomicBoolean(false);
++    private final List<SearchCacheEntryEntity> searchCache = Lists.newCopyOnWriteArrayList();
++    private final List<SearchCacheEntryPosition> positionSearchCache = Lists.newCopyOnWriteArrayList();
++    private int ticksSinceCleanup = 0;
++
++    public AsyncNavigation(EntityInsentient var1, World var2) {
++        super(var1, var2);
++    }
++
++    private void issueSearch(Entity targetEntity) {
++        SearchHandler.getInstance().issueSearch(targetEntity, this);
++    }
++
++    private void issueSearch(int x, int y, int z) {
++        SearchHandler.getInstance().issueSearch(x, y, z, this);
++    }
++
++    @Override
++    public PathEntity a(Entity targetEntity) {
++        boolean isTooClose = this.b.h(targetEntity) < minimumDistanceForOffloadingSquared;
++        boolean alreadySearching = this.isSearching.get();
++
++        if ((!offLoadedSearches(this.getEntity().getBukkitEntity().getType()) || isTooClose) && !alreadySearching) {
++            return super.a(targetEntity);
++        }
++
++        PathEntity finalPath = null;
++
++        for (SearchCacheEntryEntity cacheEntry : this.searchCache) {
++            if (cacheEntry.getTargetingEntity() == this.getEntity()) {
++                finalPath = cacheEntry.getPath();
++
++                if (TitaniumConfig.get().pathSearches.async.ensurePathSearchAccuracy) {
++                    // Perform sync if server cannot process an accurate async pathfind in time
++                    if (!cacheEntry.isAccurate()) {
++                        return super.a(targetEntity);
++                    }
++                }
++
++                break;
++            }
++        }
++
++        if (finalPath == null && !this.isSearching.get()) {
++            this.issueSearch(targetEntity);
++        }
++
++        return finalPath;
++    }
++
++    @Override
++    public PathEntity a(int x, int y, int z) {
++        boolean isTooClose = this.b.distanceSquared(x, y, z) < minimumDistanceForOffloadingSquared;
++        boolean alreadySearching = this.isSearching.get();
++
++        if ((!offLoadedSearches(this.getEntity().getBukkitEntity().getType()) || isTooClose) && !alreadySearching) {
++            return super.a(new BlockPosition(x, y, z));
++        }
++
++        PathEntity finalPath = null;
++
++        for (SearchCacheEntryPosition cacheEntry : this.positionSearchCache) {
++            if (cacheEntry.getTargetingEntity() == this.getEntity()) {
++                finalPath = cacheEntry.getPath();
++
++                if (TitaniumConfig.get().pathSearches.async.ensurePathSearchAccuracy) {
++                    // Perform sync if server cannot process an accurate async pathfind in time
++                    if (!cacheEntry.isAccurate()) {
++                        return super.a(new BlockPosition(x, y, z));
++                    }
++                }
++
++                break;
++            }
++        }
++
++        if (finalPath == null && !this.isSearching.get()) {
++            this.issueSearch(x, y, z);
++        }
++
++        return finalPath;
++    }
++
++    @Override
++    public PathEntity a(BlockPosition blockposition) {
++        return this.a(blockposition.getX(), blockposition.getY(), blockposition.getZ());
++    }
++
++    public void addEntry(SearchCacheEntry cacheEntry) {
++        if (cacheEntry instanceof SearchCacheEntryEntity) {
++            this.searchCache.add((SearchCacheEntryEntity) cacheEntry);
++        } else {
++            this.positionSearchCache.add((SearchCacheEntryPosition) cacheEntry);
++        }
++    }
++
++    @Override
++    public void cleanUpExpiredSearches() {
++        this.ticksSinceCleanup++;
++        if (this.ticksSinceCleanup == 150) {
++            this.ticksSinceCleanup = 0;
++
++            this.searchCache.clear();
++            this.positionSearchCache.clear();
++        }
++    }
++
++    public static void addOffloadedEntities(List<EntityType> entities) {
++        offloadedEntities.addAll(entities);
++    }
++
++    private static boolean offLoadedSearches(EntityType type) {
++        return TitaniumConfig.get().pathSearches.async.enabled && offloadedEntities.contains(type);
++    }
++
++    public static void setMinimumDistanceForOffloading(int distanceToAsync) {
++        minimumDistanceForOffloadingSquared = distanceToAsync;
++    }
++
++}
+diff --git a/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java b/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java
+new file mode 100644
+index 000000000..79a7340e4
+--- /dev/null
++++ b/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java
+@@ -0,0 +1,70 @@
++package ga.windpvp.windspigot.async.pathsearch;
++
++import com.google.common.util.concurrent.ThreadFactoryBuilder;
++import ga.windpvp.windspigot.async.AsyncUtil;
++import ga.windpvp.windspigot.async.pathsearch.cache.SearchCacheEntryEntity;
++import ga.windpvp.windspigot.async.pathsearch.cache.SearchCacheEntryPosition;
++import java.util.concurrent.ExecutorService;
++import java.util.concurrent.Executors;
++import net.minecraft.server.ChunkCache;
++import net.minecraft.server.Entity;
++import net.minecraft.server.MathHelper;
++import net.minecraft.server.PathEntity;
++import net.titanium.config.TitaniumConfig;
++
++public class SearchHandler {
++
++    private static SearchHandler INSTANCE;
++    private final ExecutorService executor = Executors.newFixedThreadPool(TitaniumConfig.get().pathSearches.async.threads,
++            new ThreadFactoryBuilder().setNameFormat("Titanium Entity Path Search Thread %d").build());
++
++    public SearchHandler() {
++        INSTANCE = this;
++    }
++
++    public void issueSearch(Entity targetEntity, AsyncNavigation navigation) {
++
++        final ChunkCache chunkCache = navigation.createChunkCache(true);
++
++        if (chunkCache == null) {
++            return;
++        }
++
++        navigation.isSearching.set(true);
++
++        final int finalX = MathHelper.floor(targetEntity.locX);
++        final int finalY = MathHelper.floor(targetEntity.locY) + 1;
++        final int finalZ = MathHelper.floor(targetEntity.locZ);
++
++        AsyncUtil.run(() -> {
++            PathEntity path = navigation.doPathSearch(chunkCache, finalX, finalY, finalZ);
++            SearchCacheEntryEntity cache = new SearchCacheEntryEntity(targetEntity, navigation.getEntity(), path);
++
++            navigation.addEntry(cache);
++            navigation.isSearching.set(false);
++        }, this.executor);
++    }
++
++    public void issueSearch(int x, int y, int z, AsyncNavigation navigation) {
++        final ChunkCache chunkCache = navigation.createChunkCache(false);
++
++        if (chunkCache == null) {
++            return;
++        }
++
++        navigation.isSearching.set(true);
++
++        AsyncUtil.run(() -> {
++            PathEntity path = navigation.doPathSearch(chunkCache, x, y, z);
++            SearchCacheEntryPosition cache = new SearchCacheEntryPosition(x, y, z, navigation.getEntity(), path);
++
++            navigation.addEntry(cache);
++            navigation.isSearching.set(false);
++        }, this.executor);
++    }
++
++    public static SearchHandler getInstance() {
++        return INSTANCE;
++    }
++
++}
+diff --git a/src/main/java/ga/windpvp/windspigot/async/pathsearch/cache/SearchCacheEntry.java b/src/main/java/ga/windpvp/windspigot/async/pathsearch/cache/SearchCacheEntry.java
+new file mode 100644
+index 000000000..1f687ce23
+--- /dev/null
++++ b/src/main/java/ga/windpvp/windspigot/async/pathsearch/cache/SearchCacheEntry.java
+@@ -0,0 +1,36 @@
++package ga.windpvp.windspigot.async.pathsearch.cache;
++
++import net.minecraft.server.EntityInsentient;
++import net.minecraft.server.MinecraftServer;
++import net.minecraft.server.PathEntity;
++
++// A cache entry for general targeting to use after an async path search
++public class SearchCacheEntry {
++
++    private final EntityInsentient targetingEntity;
++    private final PathEntity path;
++    private final int tick;
++
++    public SearchCacheEntry(EntityInsentient targetingEntity, PathEntity path) {
++        this.targetingEntity = targetingEntity;
++        this.path = path;
++        this.tick = MinecraftServer.currentTick;
++    }
++
++    public EntityInsentient getTargetingEntity() {
++        return this.targetingEntity;
++    }
++
++    public PathEntity getPath() {
++        return this.path;
++    }
++
++    public int getTick() {
++        return this.tick;
++    }
++
++    public boolean isAccurate() {
++        return MinecraftServer.currentTick - this.tick < 3;
++    }
++
++}
+diff --git a/src/main/java/ga/windpvp/windspigot/async/pathsearch/cache/SearchCacheEntryEntity.java b/src/main/java/ga/windpvp/windspigot/async/pathsearch/cache/SearchCacheEntryEntity.java
+new file mode 100644
+index 000000000..d774268ae
+--- /dev/null
++++ b/src/main/java/ga/windpvp/windspigot/async/pathsearch/cache/SearchCacheEntryEntity.java
+@@ -0,0 +1,21 @@
++package ga.windpvp.windspigot.async.pathsearch.cache;
++
++import net.minecraft.server.Entity;
++import net.minecraft.server.EntityInsentient;
++import net.minecraft.server.PathEntity;
++
++// A cache entry for entity targeting to use after an async path search
++public class SearchCacheEntryEntity extends SearchCacheEntry {
++
++    private final Entity target;
++
++    public SearchCacheEntryEntity(Entity target, EntityInsentient targetingEntity, PathEntity path) {
++        super(targetingEntity, path);
++        this.target = target;
++    }
++
++    public Entity getTarget() {
++        return this.target;
++    }
++
++}
+diff --git a/src/main/java/ga/windpvp/windspigot/async/pathsearch/cache/SearchCacheEntryPosition.java b/src/main/java/ga/windpvp/windspigot/async/pathsearch/cache/SearchCacheEntryPosition.java
+new file mode 100644
+index 000000000..0405a10f4
+--- /dev/null
++++ b/src/main/java/ga/windpvp/windspigot/async/pathsearch/cache/SearchCacheEntryPosition.java
+@@ -0,0 +1,32 @@
++package ga.windpvp.windspigot.async.pathsearch.cache;
++
++import net.minecraft.server.EntityInsentient;
++import net.minecraft.server.PathEntity;
++
++// A cache entry for positional targeting to use after an async path search
++public class SearchCacheEntryPosition extends SearchCacheEntry {
++
++    private final int x;
++    private final int y;
++    private final int z;
++
++    public SearchCacheEntryPosition(int x, int y, int z, EntityInsentient targetingEntity, PathEntity path) {
++        super(targetingEntity, path);
++        this.x = x;
++        this.y = y;
++        this.z = z;
++    }
++
++    public int getX() {
++        return this.x;
++    }
++
++    public int getY() {
++        return this.y;
++    }
++
++    public int getZ() {
++        return this.z;
++    }
++
++}
+diff --git a/src/main/java/net/minecraft/server/ChunkCache.java b/src/main/java/net/minecraft/server/ChunkCache.java
+index 45d385d31..b9ab623fa 100644
+--- a/src/main/java/net/minecraft/server/ChunkCache.java
++++ b/src/main/java/net/minecraft/server/ChunkCache.java
+@@ -39,6 +39,36 @@ public class ChunkCache implements IBlockAccess {
+ 
+     }
+ 
++    // WindSpigot start - reduce usage of blockposition
++    public ChunkCache(World world, int x, int y, int z, int x1, int y1, int z1, int var4) {
++        this.e = world;
++        this.a = x - var4 >> 4;
++        this.b = z - var4 >> 4;
++        int var5 = x1 + var4 >> 4;
++        int var6 = z1 + var4 >> 4;
++        this.c = new Chunk[var5 - this.a + 1][var6 - this.b + 1];
++        this.d = true;
++
++        int var7;
++        int var8;
++        for (var7 = this.a; var7 <= var5; ++var7) {
++            for (var8 = this.b; var8 <= var6; ++var8) {
++                this.c[var7 - this.a][var8 - this.b] = world.getChunkAt(var7, var8);
++            }
++        }
++
++        for (var7 = x >> 4; var7 <= x1 >> 4; ++var7) {
++            for (var8 = z >> 4; var8 <= z1 >> 4; ++var8) {
++                Chunk var9 = this.c[var7 - this.a][var8 - this.b];
++                if (var9 != null && !var9.c(y, y1)) {
++                    this.d = false;
++                }
++            }
++        }
++
++    }
++    // WindSpigot end
++
+     public TileEntity getTileEntity(BlockPosition blockposition) {
+         int i = (blockposition.getX() >> 4) - this.a;
+         int j = (blockposition.getZ() >> 4) - this.b;
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index 38383d57e..4e7a5ee51 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -9,6 +9,7 @@ import java.util.concurrent.Callable;
+ 
+ // CraftBukkit start
+ import net.titanium.config.TitaniumConfig;
++import net.titanium.util.MathUtil;
+ import org.apache.logging.log4j.LogManager;
+ import org.bukkit.Bukkit;
+ import org.bukkit.Location;
+@@ -1169,9 +1170,20 @@ public abstract class Entity implements ICommandListener {
+     }
+ 
+     public double c(BlockPosition blockposition) {
+-        return blockposition.d(this.locX, this.locY, this.locZ);
++        // WindSpigot start - reduce usage of blockposition
++        //return blockposition.d(this.locX, this.locY, this.locZ);
++        return distanceSquared(blockposition.getX(), blockposition.getY(), blockposition.getZ());
+     }
+ 
++    public double distanceSquared(double x, double y, double z) {
++        double d3 = x + 0.5D - locX;
++        double d4 = y + 0.5D - locY;
++        double d5 = z + 0.5D - locZ;
++
++        return MathUtil.pow2(d3) + MathUtil.pow2(d4) + MathUtil.pow2(d5);
++    }
++    // WindSpigot end
++
+     public double f(double d0, double d1, double d2) {
+         double d3 = this.locX - d0;
+         double d4 = this.locY - d1;
+@@ -1180,6 +1192,7 @@ public abstract class Entity implements ICommandListener {
+         return (double) MathHelper.sqrt(d3 * d3 + d4 * d4 + d5 * d5);
+     }
+ 
++
+     public double h(Entity entity) {
+         double d0 = this.locX - entity.locX;
+         double d1 = this.locY - entity.locY;
+diff --git a/src/main/java/net/minecraft/server/EntityInsentient.java b/src/main/java/net/minecraft/server/EntityInsentient.java
+index 920790d12..f9129b71f 100644
+--- a/src/main/java/net/minecraft/server/EntityInsentient.java
++++ b/src/main/java/net/minecraft/server/EntityInsentient.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import ga.windpvp.windspigot.async.pathsearch.AsyncNavigation;
+ import java.util.Iterator;
+ import java.util.List;
+ import java.util.UUID;
+@@ -61,7 +62,10 @@ public abstract class EntityInsentient extends EntityLiving {
+     }
+ 
+     protected NavigationAbstract b(World world) {
+-        return new Navigation(this, world);
++        // MinetickMod start - Async Path Searches
++        //return new Navigation(this, world);
++        return new AsyncNavigation(this, world);
++        // MinetickMod end
+     }
+ 
+     public ControllerLook getControllerLook() {
+@@ -455,6 +459,7 @@ public abstract class EntityInsentient extends EntityLiving {
+ 
+     protected final void doTick() {
+         ++this.ticksFarFromPlayer;
++        this.navigation.cleanUpExpiredSearches(); // WindSpigot - Async Path Searches
+         //this.world.methodProfiler.a("checkDespawn"); // Purpur
+         this.D();
+         //this.world.methodProfiler.b(); // Purpur
+diff --git a/src/main/java/net/minecraft/server/NavigationAbstract.java b/src/main/java/net/minecraft/server/NavigationAbstract.java
+index ea6104338..1ec5cedab 100644
+--- a/src/main/java/net/minecraft/server/NavigationAbstract.java
++++ b/src/main/java/net/minecraft/server/NavigationAbstract.java
+@@ -23,6 +23,50 @@ public abstract class NavigationAbstract {
+         this.j = this.a();
+     }
+ 
++    // WindSpigot start - async path finding
++    public EntityInsentient getEntity() {
++        return this.b;
++    }
++
++    @Override
++    public int hashCode() {
++        return this.b.getUniqueID().hashCode();
++    }
++
++    public void cleanUpExpiredSearches() {}
++
++    // WindSpigot start - reduce usage of blockposition
++    public ChunkCache createChunkCache(boolean forEntitySearch) {
++        if (this.b()) {
++            float f = this.i();
++            //BlockPosition blockposition1 = new BlockPosition(this.b);
++            int i = (int) (f + (forEntitySearch ? 16.0F : 8.0F));
++            //return new ChunkCache(this.c, blockposition1.a(-i, -i, -i), blockposition1.a(i, i, i), 0);
++            return new ChunkCache(this.c, MathHelper.floor(b.locX) - i, MathHelper.floor(b.locY) - i,
++                    MathHelper.floor(b.locZ) - i, MathHelper.floor(b.locX) + i, MathHelper.floor(b.locY) + i,
++                    MathHelper.floor(b.locZ) + i, 0);
++        }
++        return null;
++    }
++    // WindSpigot end - async path finding
++
++    public PathEntity doPathSearch(ChunkCache chunkcache, BlockPosition blockposition) {
++        return this.doPathSearch(chunkcache, blockposition.getX(), blockposition.getY(), blockposition.getZ());
++    }
++
++    public PathEntity doPathSearch(ChunkCache chunkcache, int x, int y, int z) {
++        if (this.b()) {
++            float f = this.i();
++            return this.j.a((IBlockAccess) chunkcache, (Entity) this.b, x, y, z, f);
++        }
++        return null;
++    }
++
++    public PathEntity doPathSearch(ChunkCache chunkcache, Entity entity) {
++        return this.doPathSearch(chunkcache, (new BlockPosition(entity)).up());
++    }
++    // WindSpigot end - reduce usage of blockposition
++
+     protected abstract Pathfinder a();
+ 
+     public void a(double d0) {
+@@ -32,9 +76,12 @@ public abstract class NavigationAbstract {
+     public float i() {
+         return (float) this.a.getValue();
+     }
++    public PathEntity a(double d0, double d1, double d2) {
++        return this.a(MathHelper.floor(d0), (int) d1, MathHelper.floor(d2));
++    }
+ 
+-    public final PathEntity a(double d0, double d1, double d2) {
+-        return this.a(new BlockPosition(MathHelper.floor(d0), (int) d1, MathHelper.floor(d2)));
++    public PathEntity a(int d0, int d1, int d2) {
++        return this.a(new BlockPosition(d0, (int) d1, d2));
+     }
+ 
+     public PathEntity a(BlockPosition blockposition) {
+@@ -47,7 +94,7 @@ public abstract class NavigationAbstract {
+             BlockPosition blockposition1 = new BlockPosition(this.b);
+             int i = (int) (f + 8.0F);
+             ChunkCache chunkcache = new ChunkCache(this.c, blockposition1.a(-i, -i, -i), blockposition1.a(i, i, i), 0);
+-            PathEntity pathentity = this.j.a((IBlockAccess) chunkcache, (Entity) this.b, blockposition, f);
++            PathEntity pathentity = this.j.a(chunkcache, this.b, blockposition, f);
+ 
+             //this.c.methodProfiler.b(); // Purpur
+             return pathentity;
+@@ -55,7 +102,7 @@ public abstract class NavigationAbstract {
+     }
+ 
+     public boolean a(double d0, double d1, double d2, double d3) {
+-        PathEntity pathentity = this.a((double) MathHelper.floor(d0), (double) ((int) d1), (double) MathHelper.floor(d2));
++        PathEntity pathentity = this.a(MathHelper.floor(d0), ((int) d1), MathHelper.floor(d2));
+ 
+         return this.a(pathentity, d3);
+     }
+diff --git a/src/main/java/net/minecraft/server/Pathfinder.java b/src/main/java/net/minecraft/server/Pathfinder.java
+index 450df83e6..b7b1ea61e 100644
+--- a/src/main/java/net/minecraft/server/Pathfinder.java
++++ b/src/main/java/net/minecraft/server/Pathfinder.java
+@@ -18,15 +18,23 @@ public class Pathfinder {
+         return this.a(iblockaccess, entity, (double) ((float) blockposition.getX() + 0.5F), (double) ((float) blockposition.getY() + 0.5F), (double) ((float) blockposition.getZ() + 0.5F), f);
+     }
+ 
+-    private PathEntity a(IBlockAccess iblockaccess, Entity entity, double d0, double d1, double d2, float f) {
+-        this.a.a();
+-        this.c.a(iblockaccess, entity);
+-        PathPoint pathpoint = this.c.a(entity);
+-        PathPoint pathpoint1 = this.c.a(entity, d0, d1, d2);
+-        PathEntity pathentity = this.a(entity, pathpoint, pathpoint1, f);
++    // WindSpigot start
++    public PathEntity a(IBlockAccess var1, Entity var2, int x, int y, int z, float var4) {
++        return this.a(var1, var2, (double) ((float) x + 0.5F), (double) ((float) y + 0.5F), (double) ((float) z + 0.5F), var4);
++    }
++    // WindSpigot end
+ 
+-        this.c.a();
+-        return pathentity;
++    private PathEntity a(IBlockAccess iblockaccess, Entity entity, double d0, double d1, double d2, float f) {
++        synchronized (entity) { // WindSpigot - synchronize
++            this.a.a();
++            this.c.a(iblockaccess, entity);
++            PathPoint pathpoint = this.c.a(entity);
++            PathPoint pathpoint1 = this.c.a(entity, d0, d1, d2);
++            PathEntity pathentity = this.a(entity, pathpoint, pathpoint1, f);
++
++            this.c.a();
++            return pathentity;
++        }
+     }
+ 
+     private PathEntity a(Entity entity, PathPoint pathpoint, PathPoint pathpoint1, float f) {
+diff --git a/src/main/java/net/titanium/Titanium.java b/src/main/java/net/titanium/Titanium.java
+index 166873aee..dd14ef74b 100644
+--- a/src/main/java/net/titanium/Titanium.java
++++ b/src/main/java/net/titanium/Titanium.java
+@@ -3,6 +3,7 @@ package net.titanium;
+ import eu.okaeri.configs.ConfigManager;
+ import eu.okaeri.configs.serdes.commons.SerdesCommons;
+ import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
++import ga.windpvp.windspigot.async.pathsearch.SearchHandler;
+ import ga.windpvp.windspigot.async.thread.CombatThread;
+ import java.io.File;
+ import net.minecraft.server.MinecraftServer;
+@@ -11,6 +12,7 @@ import net.titanium.config.knockback.KnockbackConfig;
+ import net.titanium.config.message.MessageConfig;
+ import net.titanium.config.migration.S0001_Migrate_messages_into_separate_file;
+ import net.titanium.config.serdes.DecolorTransformer;
++import net.titanium.config.serdes.EntityTypeTransformer;
+ import net.titanium.config.serdes.RangeFormattingTransformer;
+ import net.titanium.config.serdes.WarningStateTransformer;
+ 
+@@ -24,6 +26,8 @@ public class Titanium {
+     private MessageConfig messageConfig;
+     private KnockbackConfig knockbackConfig;
+ 
++    private SearchHandler searchHandler;
++
+     private CombatThread hitDetectionThread;
+     private CombatThread knockbackThread;
+ 
+@@ -36,6 +40,10 @@ public class Titanium {
+         this.loadMessageConfig();
+         this.loadKnockbackConfig();
+ 
++        if (serverConfig.pathSearches.async.enabled) {
++            this.searchHandler = new SearchHandler();
++        }
++
+         if (serverConfig.combat.async.hitDetection) {
+             this.hitDetectionThread = new CombatThread("Hit Detection Thread");
+         }
+@@ -63,6 +71,7 @@ public class Titanium {
+                 registry.register(new DecolorTransformer());
+                 registry.register(new WarningStateTransformer());
+                 registry.register(new RangeFormattingTransformer());
++                registry.register(new EntityTypeTransformer());
+             });
+             it.withBindFile((File) server.options.valueOf("titanium-settings"));
+             it.withRemoveOrphans(false);
+@@ -108,6 +117,10 @@ public class Titanium {
+         knockbackConfig = new KnockbackConfig((File) server.options.valueOf("knockback-settings"));
+     }
+ 
++    public SearchHandler getSearchHandler() {
++        return this.searchHandler;
++    }
++
+     public CombatThread getHitDetectionThread() {
+         return hitDetectionThread;
+     }
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index 21e82d265..4fedffb61 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -2,6 +2,7 @@ package net.titanium.config;
+ 
+ import com.google.common.collect.ImmutableMap;
+ import com.google.common.collect.ImmutableSet;
++import com.google.common.collect.Lists;
+ import eu.okaeri.configs.OkaeriConfig;
+ import eu.okaeri.configs.annotation.Comment;
+ import eu.okaeri.configs.annotation.Exclude;
+@@ -11,6 +12,7 @@ import eu.okaeri.configs.annotation.NameStrategy;
+ import eu.okaeri.configs.annotation.Names;
+ import eu.okaeri.configs.exception.InitializationException;
+ import eu.okaeri.configs.exception.OkaeriException;
++import ga.windpvp.windspigot.async.pathsearch.AsyncNavigation;
+ import java.nio.file.Files;
+ import java.nio.file.LinkOption;
+ import java.util.Arrays;
+@@ -27,6 +29,7 @@ import net.titanium.util.Pair;
+ import org.bukkit.Bukkit;
+ import org.bukkit.ChatColor;
+ import org.bukkit.command.Command;
++import org.bukkit.entity.EntityType;
+ 
+ @Header("This is the main configuration file for Titanium.")
+ @Header("It's collect all the settings from bukkit.yml, spigot.yml etc.")
+@@ -205,7 +208,8 @@ public class TitaniumConfig extends TitaniumConfigSection {
+         public static class Async extends TitaniumConfigSection {
+ 
+             @Comment("Whether some calculation of tnt explosions should be calculated asynchronously.")
+-            @Comment("Enabling this could be good idea since it can have good impact on performance.")
++            @Comment("Enabling this can have good impact on performance.")
++            @Comment("But have in mind in some cases it can cause some bugs or not work properly with some plugins.")
+             public boolean enabled = false;
+ 
+         }
+@@ -221,8 +225,8 @@ public class TitaniumConfig extends TitaniumConfigSection {
+         public static class Async extends TitaniumConfigSection {
+ 
+             @Comment("Whether to use asynchronous entity tracking.")
+-            @Comment("Enabling this could be good idea since it can have good impact on performance.")
+-            @Comment("Disable it if something doesn't work properly (for eg. anticheat plugin).")
++            @Comment("Enabling this can have good impact on performance.")
++            @Comment("But have in mind in some cases it can cause some bugs or not work properly with some plugins.")
+             public boolean enabled = false;
+ 
+             @Comment("How many threads to use for entity tracking.")
+@@ -232,6 +236,68 @@ public class TitaniumConfig extends TitaniumConfigSection {
+ 
+     }
+ 
++    public PathSearches pathSearches = new PathSearches();
++
++    public static class PathSearches extends TitaniumConfigSection {
++
++        public Async async = new Async();
++
++        public static class Async extends TitaniumConfigSection {
++
++            @Comment("Whether to use asynchronous path searches.")
++            @Comment("Enabling this can have good impact on performance.")
++            @Comment("But have in mind in some cases it can cause some bugs or not work properly with some plugins.")
++            public boolean enabled = false;
++
++            @Comment("How many threads to use for path searches.")
++            @Comment("Don't use value higher than 3 since most threads won't be used and will occur with no performance gain.")
++            public int threads = 3;
++
++            @Comment("The minimum distance to handle entities path searches asynchronously.")
++            @Comment("Putting this value too low will occur with no performance gain since small calculations will be handled asynchronously.")
++            public int distanceToAsync = 5;
++
++            @Comment("Ensures accuracy of async path searches, disabling this will result in possibly inaccurate targeting, but higher performance.")
++            public boolean ensurePathSearchAccuracy = true;
++
++            @Comment("List of entities that path searches should be handled asynchronously.")
++            public List<EntityType> entities = Arrays.asList(
++                    EntityType.BAT,
++                    EntityType.BLAZE,
++                    EntityType.CHICKEN,
++                    EntityType.COW,
++                    EntityType.CREEPER,
++                    EntityType.ENDERMAN,
++                    EntityType.ENDERMITE,
++                    EntityType.HORSE,
++                    EntityType.IRON_GOLEM,
++                    EntityType.MAGMA_CUBE,
++                    EntityType.MUSHROOM_COW,
++                    EntityType.PIG,
++                    EntityType.PIG_ZOMBIE,
++                    EntityType.RABBIT,
++                    EntityType.SHEEP,
++                    EntityType.SKELETON,
++                    EntityType.SILVERFISH,
++                    EntityType.SLIME,
++                    EntityType.SNOWMAN,
++                    EntityType.SQUID,
++                    EntityType.WITCH,
++                    EntityType.ZOMBIE
++            );
++
++            @Override
++            public void loadProcessedProperties() {
++                if (this.enabled) {
++                    AsyncNavigation.setMinimumDistanceForOffloading(this.distanceToAsync);
++                    AsyncNavigation.addOffloadedEntities(this.entities);
++                }
++            }
++
++        }
++
++    }
++
+     public Combat combat = new Combat();
+ 
+     public static class Combat extends TitaniumConfigSection {
+diff --git a/src/main/java/net/titanium/config/serdes/EntityTypeTransformer.java b/src/main/java/net/titanium/config/serdes/EntityTypeTransformer.java
+new file mode 100644
+index 000000000..caa859e60
+--- /dev/null
++++ b/src/main/java/net/titanium/config/serdes/EntityTypeTransformer.java
+@@ -0,0 +1,25 @@
++package net.titanium.config.serdes;
++
++import eu.okaeri.configs.schema.GenericsPair;
++import eu.okaeri.configs.serdes.BidirectionalTransformer;
++import eu.okaeri.configs.serdes.SerdesContext;
++import org.bukkit.entity.EntityType;
++
++public class EntityTypeTransformer extends BidirectionalTransformer<String, EntityType> {
++
++    @Override
++    public GenericsPair<String, EntityType> getPair() {
++        return this.genericsPair(String.class, EntityType.class);
++    }
++
++    @Override
++    public EntityType leftToRight(String data, SerdesContext serdesContext) {
++        return EntityType.findType(data);
++    }
++
++    @Override
++    public String rightToLeft(EntityType type, SerdesContext serdesContext) {
++        return type.name();
++    }
++
++}
+-- 
+2.36.0.windows.1
+

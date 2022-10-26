@@ -1,4 +1,4 @@
-From cf69a4045800ed0fceda83904ee3ee8b290b9eaf Mon Sep 17 00:00:00 2001
+From 40b8039f42faa1353d4456b1551828e283942800 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 22 May 2022 23:01:59 +0200
 Subject: [PATCH] Implement [Taco-0024] Optimize tnt entity and falling block
@@ -192,10 +192,10 @@ index 01ba17d0b..a88915383 100644
      private LegacyConfigHelper ionConfigHelper;
  
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 4bab54134..afbb710e4 100644
+index a5ce6b81c..f08bf72e6 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-@@ -1862,6 +1862,12 @@ public final class CraftServer implements Server {
+@@ -1869,6 +1869,12 @@ public final class CraftServer implements Server {
              return serverConfig.getPaperConfigHelper().getConfiguration();
          }
  
