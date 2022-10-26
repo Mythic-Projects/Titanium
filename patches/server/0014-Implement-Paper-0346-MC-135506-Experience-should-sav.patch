@@ -1,4 +1,4 @@
-From 3ba8fadf9f8df771bbca9c818048fc845387bdd7 Mon Sep 17 00:00:00 2001
+From 61fbad132c2a6e3fce39fa7b18a9ebd9aa2da355 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 1 May 2022 12:12:12 +0200
 Subject: [PATCH] Implement [Paper-0346] [MC-135506] Experience should save as
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0346] [MC-135506] Experience should save as
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityExperienceOrb.java b/src/main/java/net/minecraft/server/EntityExperienceOrb.java
-index aefa9fa8..d4a5c256 100644
+index aefa9fa8..58bb432f 100644
 --- a/src/main/java/net/minecraft/server/EntityExperienceOrb.java
 +++ b/src/main/java/net/minecraft/server/EntityExperienceOrb.java
 @@ -145,13 +145,13 @@ public class EntityExperienceOrb extends Entity {
@@ -14,7 +14,7 @@ index aefa9fa8..d4a5c256 100644
          nbttagcompound.setShort("Health", (short) ((byte) this.d));
          nbttagcompound.setShort("Age", (short) this.b);
 -        nbttagcompound.setShort("Value", (short) this.value);
-+        nbttagcompound.setInt("Value", (short) this.value);
++        nbttagcompound.setInt("Value", this.value);
      }
  
      public void a(NBTTagCompound nbttagcompound) {

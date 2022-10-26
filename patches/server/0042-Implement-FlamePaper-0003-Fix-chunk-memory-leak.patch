@@ -1,11 +1,11 @@
-From d3cadc879b2958d0a70428567e98d925089edbbb Mon Sep 17 00:00:00 2001
+From 30bbabb08d331ceda165bf111ff9161d2d22eb65 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 19 May 2022 23:07:12 +0200
 Subject: [PATCH] Implement [FlamePaper-0003] Fix chunk memory leak
 
 
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index c08454465..7795d0b71 100644
+index c0845446..7795d0b7 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
 @@ -40,7 +40,7 @@ public class ChunkProviderServer implements IChunkProvider {
@@ -58,7 +58,7 @@ index c08454465..7795d0b71 100644
          return !this.world.savingDisabled;
      }
 diff --git a/src/main/java/net/minecraft/server/ChunkRegionLoader.java b/src/main/java/net/minecraft/server/ChunkRegionLoader.java
-index 6b244904d..7889b91e7 100644
+index 6b244904..7889b91e 100644
 --- a/src/main/java/net/minecraft/server/ChunkRegionLoader.java
 +++ b/src/main/java/net/minecraft/server/ChunkRegionLoader.java
 @@ -17,8 +17,9 @@ import org.apache.logging.log4j.Logger;
@@ -74,7 +74,7 @@ index 6b244904d..7889b91e7 100644
      private boolean e = false;
  
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index fcb31e75b..cf1592484 100644
+index fcb31e75..cf159248 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
 @@ -231,7 +231,12 @@ public class WorldServer extends World implements IAsyncTaskHandler {
@@ -92,19 +92,22 @@ index fcb31e75b..cf1592484 100644
  
          if (j != this.ab()) {
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 190a81c8f..41faeec3d 100644
+index 190a81c8..4b3f4db5 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-@@ -998,6 +998,23 @@ public final class CraftServer implements Server {
+@@ -998,6 +998,26 @@ public final class CraftServer implements Server {
              } catch (ExceptionWorldConflict ex) {
                  getLogger().log(Level.SEVERE, null, ex);
              }
 +        } else { // FlamePaper - Fix chunk memory leak
 +            ChunkProviderServer chunkProviderServer = handle.chunkProviderServer;
-+            ChunkRegionLoader regionLoader = (ChunkRegionLoader) chunkProviderServer.chunkLoader;
-+
-+            regionLoader.b.clear();
-+            regionLoader.c.clear();
++            // Titanium start - Add instanceof check
++            if (chunkProviderServer.chunkLoader instanceof ChunkRegionLoader) {
++                ChunkRegionLoader regionLoader = (ChunkRegionLoader) chunkProviderServer.chunkLoader;
++                regionLoader.b.clear();
++                regionLoader.c.clear();
++            }
++            // Titanium end
 +
 +            try {
 +                FileIOThread.a().b();

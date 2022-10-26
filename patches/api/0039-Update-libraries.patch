@@ -1,0 +1,52 @@
+From 55a45e95c9baba8b3e16286141b872f04668e797 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Tue, 30 Aug 2022 00:45:27 +0200
+Subject: [PATCH] Update libraries
+
+
+diff --git a/build.gradle b/build.gradle
+index 38b5afe9..15149a29 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -1,14 +1,14 @@
+ dependencies {
+     // Minecraft libraries start
+-    api 'commons-lang:commons-lang:2.6'
+-    api 'com.googlecode.json-simple:json-simple:1.1.1'
+-    api 'org.avaje:ebean:2.8.1'
+-    api 'org.yaml:snakeyaml:1.30' // KigPaper - CVE-2017-18640
+-    api 'net.md-5:bungeecord-chat:1.8-SNAPSHOT'
+-
+-    // bundled with Minecraft, should be kept in sync
+     api 'com.google.guava:guava:21.0' // Titanium - update guava to 21.0
+-    api 'com.google.code.gson:gson:2.8.0' // Titanium - update gson to 2.8.0
++    api 'com.google.code.gson:gson:2.8.9' // Titanium - update gson to 2.8.9
++    api 'net.md-5:bungeecord-chat:1.8-SNAPSHOT'
++    api 'org.yaml:snakeyaml:1.30' // KigPaper - CVE-2017-18640
++    api('com.googlecode.json-simple:json-simple:1.1.1') {
++        transitive = false
++    }
++    api 'org.avaje:ebean:2.8.1'
++    api 'commons-lang:commons-lang:2.6'
+ 
+     compileOnlyApi 'net.sf.trove4j:trove4j:3.0.3' // provided by CraftBukkit
+     // Minecraft libraries end
+@@ -18,10 +18,12 @@ dependencies {
+     api 'eu.okaeri:okaeri-configs-yaml-bukkit:4.0.6'
+     api 'eu.okaeri:okaeri-configs-serdes-commons:4.0.6'
+     // Titanium end
+-    api 'org.slf4j:slf4j-simple:1.7.36' // Titanium - backport Plugin#getSLF4JLogger from Paper
+-    // Titanium libraries end
++    api 'org.apache.logging.log4j:log4j-api:2.18.0' // Titanium - updated log4j to 2.18.0 // Titanium - Add log4j-api to API
++    api 'org.slf4j:slf4j-api:1.8.0-beta4' // Titanium - Backport Plugin#getSLF4JLogger from Paper
++    api 'org.apache.commons:commons-lang3:3.12.0' // Titanium - updated commons-lang3 to 3.12.0 // Titanium - Add commons-lang3 to API
+ 
+-    api 'org.jetbrains:annotations:23.0.0' // Titanium - add jetbrains annotations - future is now 😎
++    api 'org.jetbrains:annotations:23.0.0' // Titanium - Add JetBrains annotations - future is now 😎
++    // Titanium libraries end
+ 
+     testImplementation 'junit:junit:4.13.2' // Titanium - Updated junit to 4.13.2
+     testImplementation 'org.hamcrest:hamcrest-library:1.3'
+-- 
+2.36.0.windows.1
+

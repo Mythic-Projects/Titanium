@@ -1,0 +1,33 @@
+From c31f48610ceddffa3bcb343a041dc53615828f6f Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sat, 4 Jun 2022 12:39:17 +0200
+Subject: [PATCH] Improve publishing project to maven repository
+
+
+diff --git a/build.gradle b/build.gradle
+index 7f767252..9cccca20 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -31,6 +31,19 @@ task generateApiVersioningFile(type: Copy) {
+     file.write "version=${project.version}"
+ }
+ 
++shadowJar {
++    dependsOn generateApiVersioningFile
++    from(layout.buildDirectory.file("pom.properties")) {
++        into("META-INF/maven/${project.group}/${project.name.toLowerCase()}")
++    }
++
++    manifest {
++        attributes(
++                "Automatic-Module-Name": "org.bukkit"
++        )
++    }
++}
++
+ jar {
+     dependsOn generateApiVersioningFile
+     from(layout.buildDirectory.file("pom.properties")) {
+-- 
+2.36.0.windows.1
+

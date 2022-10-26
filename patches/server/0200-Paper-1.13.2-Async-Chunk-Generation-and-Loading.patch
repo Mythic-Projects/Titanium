@@ -1,0 +1,2794 @@
+From 9c573fea3d1cf749d822080d66bec92188c43428 Mon Sep 17 00:00:00 2001
+From: Aikar <aikar@aikar.co>
+Date: Fri, 14 Oct 2022 11:59:49 +0200
+Subject: [PATCH] Paper 1.13.2 Async Chunk Generation (and Loading)
+
+Co-authored-by: Peridot <peridot491@protonmail.com>
+
+diff --git a/src/main/java/com/destroystokyo/paper/util/PriorityQueuedExecutor.java b/src/main/java/com/destroystokyo/paper/util/PriorityQueuedExecutor.java
+new file mode 100644
+index 000000000..ee0b44984
+--- /dev/null
++++ b/src/main/java/com/destroystokyo/paper/util/PriorityQueuedExecutor.java
+@@ -0,0 +1,362 @@
++package com.destroystokyo.paper.util;
++
++import java.util.ArrayList;
++import java.util.List;
++import java.util.concurrent.AbstractExecutorService;
++import java.util.concurrent.CompletableFuture;
++import java.util.concurrent.ConcurrentLinkedQueue;
++import java.util.concurrent.RejectedExecutionException;
++import java.util.concurrent.TimeUnit;
++import java.util.concurrent.atomic.AtomicBoolean;
++import java.util.concurrent.atomic.AtomicInteger;
++import java.util.function.Supplier;
++import javax.annotation.Nonnull;
++
++/**
++ * Implements an Executor Service that allows specifying Task Priority
++ * and bumping of task priority.
++ * <p>
++ * This is a non blocking executor with 3 priority levels.
++ * <p>
++ * URGENT: Rarely used, something that is critical to take action now.
++ * HIGH: Something with more importance than the base tasks
++ *
++ * @author Daniel Ennis &lt;aikar@aikar.co&gt;
++ */
++@SuppressWarnings({"WeakerAccess", "UnusedReturnValue", "unused"})
++// Titanium - Backported from Paper 1.13.2
++public class PriorityQueuedExecutor extends AbstractExecutorService {
++
++    private final ConcurrentLinkedQueue<Runnable> urgent = new ConcurrentLinkedQueue<>();
++    private final ConcurrentLinkedQueue<Runnable> high = new ConcurrentLinkedQueue<>();
++    private final ConcurrentLinkedQueue<Runnable> normal = new ConcurrentLinkedQueue<>();
++    private final List<Thread> threads = new ArrayList<>();
++    private final RejectionHandler handler;
++
++    private volatile boolean shuttingDown = false;
++    private volatile boolean shuttingDownNow = false;
++
++    public PriorityQueuedExecutor(String name) {
++        this(name, -1);
++    }
++
++    public PriorityQueuedExecutor(String name, int threads) {
++        this(name, threads, Thread.NORM_PRIORITY, null);
++    }
++
++    public PriorityQueuedExecutor(String name, int threads, int threadPriority) {
++        this(name, threads, threadPriority, null);
++    }
++
++    public PriorityQueuedExecutor(String name, int threads, RejectionHandler handler) {
++        this(name, threads, Thread.NORM_PRIORITY, handler);
++    }
++
++    public PriorityQueuedExecutor(String name, int threads, int threadPriority, RejectionHandler handler) {
++        if (threads <= -1) {
++            threads = Math.max(1, Runtime.getRuntime().availableProcessors() - 1);
++        }
++        for (int i = 0; i < threads; i++) {
++            ExecutorThread thread = new ExecutorThread(this::processQueues);
++            thread.setDaemon(true);
++            thread.setName(threads == 1
++                    ? name
++                    : name + "-" + (i + 1));
++            thread.setPriority(threadPriority);
++            thread.start();
++            this.threads.add(thread);
++        }
++        if (handler == null) {
++            handler = ABORT_POLICY;
++        }
++        this.handler = handler;
++    }
++
++    /**
++     * If the Current thread belongs to a PriorityQueuedExecutor, return that Executro
++     *
++     * @return The executor that controls this thread
++     */
++    public static PriorityQueuedExecutor getExecutor() {
++        if (!(Thread.currentThread() instanceof ExecutorThread)) {
++            return null;
++        }
++        return ((ExecutorThread) Thread.currentThread()).getExecutor();
++    }
++
++    public void shutdown() {
++        this.shuttingDown = true;
++        synchronized (this) {
++            this.notifyAll();
++        }
++    }
++
++    @Nonnull
++    @Override
++    public List<Runnable> shutdownNow() {
++        this.shuttingDown = true;
++        this.shuttingDownNow = true;
++        List<Runnable> tasks = new ArrayList<>(this.high.size() + this.normal.size());
++        Runnable run;
++        while ((run = this.getTask()) != null) {
++            tasks.add(run);
++        }
++
++        return tasks;
++    }
++
++    @Override
++    public boolean isShutdown() {
++        return this.shuttingDown;
++    }
++
++    @Override
++    public boolean isTerminated() {
++        if (!this.shuttingDown) {
++            return false;
++        }
++        return this.high.isEmpty() && this.normal.isEmpty();
++    }
++
++    @Override
++    public boolean awaitTermination(long timeout, @Nonnull TimeUnit unit) {
++        synchronized (this) {
++            this.notifyAll();
++        }
++        final long wait = unit.toNanos(timeout);
++        final long max = System.nanoTime() + wait;
++        while (!this.threads.isEmpty() && System.nanoTime() < max) {
++            this.threads.removeIf(thread -> !thread.isAlive());
++        }
++        return this.isTerminated();
++    }
++
++
++    public PendingTask<Void> createPendingTask(Runnable task) {
++        return this.createPendingTask(task, Priority.NORMAL);
++    }
++
++    public PendingTask<Void> createPendingTask(Runnable task, Priority priority) {
++        return this.createPendingTask(() -> {
++            task.run();
++            return null;
++        }, priority);
++    }
++
++    public <T> PendingTask<T> createPendingTask(Supplier<T> task) {
++        return this.createPendingTask(task, Priority.NORMAL);
++    }
++
++    public <T> PendingTask<T> createPendingTask(Supplier<T> task, Priority priority) {
++        return new PendingTask<>(task, priority);
++    }
++
++    public PendingTask<Void> submitTask(Runnable run) {
++        return this.createPendingTask(run).submit();
++    }
++
++    public PendingTask<Void> submitTask(Runnable run, Priority priority) {
++        return this.createPendingTask(run, priority).submit();
++    }
++
++    public <T> PendingTask<T> submitTask(Supplier<T> run) {
++        return this.createPendingTask(run).submit();
++    }
++
++    public <T> PendingTask<T> submitTask(Supplier<T> run, Priority priority) {
++        PendingTask<T> task = this.createPendingTask(run, priority);
++        return task.submit();
++    }
++
++    @Override
++    public void execute(@Nonnull Runnable command) {
++        this.submitTask(command);
++    }
++
++    public boolean isCurrentThread() {
++        final Thread thread = Thread.currentThread();
++        if (!(thread instanceof ExecutorThread)) {
++            return false;
++        }
++        return ((ExecutorThread) thread).getExecutor() == this;
++    }
++
++    public Runnable getUrgentTask() {
++        return this.urgent.poll();
++    }
++
++    public Runnable getTask() {
++        Runnable run = this.urgent.poll();
++        if (run != null) {
++            return run;
++        }
++        run = this.high.poll();
++        if (run != null) {
++            return run;
++        }
++        return this.normal.poll();
++    }
++
++    private void processQueues() {
++        Runnable run = null;
++        while (true) {
++            if (run != null) {
++                run.run();
++            }
++            if (this.shuttingDownNow) {
++                return;
++            }
++            if ((run = this.getTask()) != null) {
++                continue;
++            }
++            synchronized (PriorityQueuedExecutor.this) {
++                if ((run = this.getTask()) != null) {
++                    continue;
++                }
++
++                if (this.shuttingDown || this.shuttingDownNow) {
++                    return;
++                }
++                try {
++                    PriorityQueuedExecutor.this.wait();
++                } catch (InterruptedException ignored) {
++                }
++            }
++        }
++    }
++
++    public boolean processUrgentTasks() {
++        Runnable run;
++        boolean hadTask = false;
++        while ((run = this.getUrgentTask()) != null) {
++            run.run();
++            hadTask = true;
++        }
++        return hadTask;
++    }
++
++    public enum Priority {
++        NORMAL, HIGH, URGENT
++    }
++
++    public class ExecutorThread extends Thread {
++
++        public ExecutorThread(Runnable runnable) {
++            super(runnable);
++        }
++
++        public PriorityQueuedExecutor getExecutor() {
++            return PriorityQueuedExecutor.this;
++        }
++
++    }
++
++    public class PendingTask<T> implements Runnable {
++
++        private final AtomicBoolean hasRan = new AtomicBoolean();
++        private final AtomicInteger submitted = new AtomicInteger(-1);
++        private final AtomicInteger priority;
++        private final Supplier<T> run;
++        private final CompletableFuture<T> future = new CompletableFuture<>();
++        private volatile PriorityQueuedExecutor executor;
++
++        public PendingTask(Supplier<T> run) {
++            this(run, Priority.NORMAL);
++        }
++
++        public PendingTask(Supplier<T> run, Priority priority) {
++            this.priority = new AtomicInteger(priority.ordinal());
++            this.run = run;
++        }
++
++        public boolean cancel() {
++            return this.hasRan.compareAndSet(false, true);
++        }
++
++        @Override
++        public void run() {
++            if (!this.hasRan.compareAndSet(false, true)) {
++                return;
++            }
++
++            try {
++                this.future.complete(this.run.get());
++            } catch (Throwable e) {
++                this.future.completeExceptionally(e);
++            }
++        }
++
++        public void bumpPriority() {
++            this.bumpPriority(Priority.HIGH);
++        }
++
++        public void bumpPriority(Priority newPriority) {
++            for (; ; ) {
++                int current = this.priority.get();
++                int ordinal = newPriority.ordinal();
++                if (current >= ordinal || this.priority.compareAndSet(current, ordinal)) {
++                    break;
++                }
++            }
++
++
++            if (this.submitted.get() == -1 || this.hasRan.get()) {
++                return;
++            }
++
++            // Only resubmit if it hasnt ran yet and has been submitted
++            this.submit();
++        }
++
++        public CompletableFuture<T> onDone() {
++            return this.future;
++        }
++
++        public PendingTask<T> submit() {
++            if (PriorityQueuedExecutor.this.shuttingDown) {
++                PriorityQueuedExecutor.this.handler.onRejection(this, PriorityQueuedExecutor.this);
++                return this;
++            }
++            for (; ; ) {
++                final int submitted = this.submitted.get();
++                final int priority = this.priority.get();
++                if (submitted == priority) {
++                    return this;
++                }
++                if (this.submitted.compareAndSet(submitted, priority)) {
++                    if (priority == Priority.URGENT.ordinal()) {
++                        PriorityQueuedExecutor.this.urgent.add(this);
++                    } else if (priority == Priority.HIGH.ordinal()) {
++                        PriorityQueuedExecutor.this.high.add(this);
++                    } else {
++                        PriorityQueuedExecutor.this.normal.add(this);
++                    }
++
++                    break;
++                }
++            }
++
++            synchronized (PriorityQueuedExecutor.this) {
++                // Wake up a thread to take this work
++                PriorityQueuedExecutor.this.notify();
++            }
++            return this;
++        }
++
++    }
++
++    public interface RejectionHandler {
++
++        void onRejection(Runnable run, PriorityQueuedExecutor executor);
++
++    }
++
++    public static final RejectionHandler ABORT_POLICY = (run, executor) -> {
++        throw new RejectedExecutionException("Executor has been shutdown");
++    };
++
++    public static final RejectionHandler CALLER_RUNS_POLICY = (run, executor) -> {
++        run.run();
++    };
++
++}
+diff --git a/src/main/java/net/minecraft/server/Block.java b/src/main/java/net/minecraft/server/Block.java
+index 86f111df7..210ca9561 100644
+--- a/src/main/java/net/minecraft/server/Block.java
++++ b/src/main/java/net/minecraft/server/Block.java
+@@ -160,11 +160,7 @@ public class Block {
+     }
+ 
+     public int toLegacyData(IBlockData iblockdata) {
+-        if (iblockdata != null && !iblockdata.a().isEmpty()) {
+-            throw new IllegalArgumentException("Don\'t know how to convert " + iblockdata + " back into data...");
+-        } else {
+-            return 0;
+-        }
++        return 0; // SportPaper - optimize toLegacyData removing unneeded sanity checks
+     }
+ 
+     public IBlockData updateState(IBlockData iblockdata, IBlockAccess iblockaccess, BlockPosition blockposition) {
+diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
+index 155c61f44..eee8537e2 100644
+--- a/src/main/java/net/minecraft/server/Chunk.java
++++ b/src/main/java/net/minecraft/server/Chunk.java
+@@ -19,7 +19,7 @@ import org.apache.logging.log4j.Logger;
+ import com.google.common.collect.Lists; // CraftBukkit
+ import org.bukkit.Bukkit; // CraftBukkit
+ import org.bukkit.craftbukkit.util.CraftMagicNumbers;
+-import org.github.paperspigot.event.ServerExceptionEvent;
++import org.bukkit.craftbukkit.util.LongHash;
+ import org.github.paperspigot.exception.ServerInternalException;
+ 
+ public class Chunk {
+@@ -35,6 +35,7 @@ public class Chunk {
+     public final int locX;
+     public final int locZ;
+     private final ChunkCoordIntPair chunkCoords;
++    public final long chunkKey; // Titanium
+     private boolean k;
+     public final Map<BlockPosition, TileEntity> tileEntities;
+     public final List<Entity>[] entitySlices; // Spigot
+@@ -156,6 +157,7 @@ public class Chunk {
+             this.bukkitChunk = new org.bukkit.craftbukkit.CraftChunk(this);
+         }
+         this.chunkCoords = new ChunkCoordIntPair(i, j);
++        this.chunkKey = LongHash.toLong(i, j); // Titanium
+     }
+ 
+     public org.bukkit.Chunk bukkitChunk;
+@@ -1123,6 +1125,89 @@ public class Chunk {
+         //world.timings.syncChunkLoadPostTimer.stopTiming(); // Spigot // Purpur
+     }
+ 
++    // Titanium start - micro optimizations for Chunk#loadNearby
++    public void loadNearby(ChunkProviderServer chunkProvider, IChunkProvider chunkGenerator) {
++        Chunk chunk = chunkProvider.getChunkIfLoaded(this.locX, this.locZ -1);
++        Chunk chunk1 = chunkProvider.getChunkIfLoaded(this.locX + 1, this.locZ);
++        Chunk chunk2 = chunkProvider.getChunkIfLoaded(this.locX, this.locZ + 1);
++        Chunk chunk3 = chunkProvider.getChunkIfLoaded(this.locX - 1, this.locZ);
++
++        if (chunk1 != null && chunk2 != null && chunkProvider.isChunkLoaded(this.locX + 1, this.locZ +1 )) {
++            this.decorate(chunkProvider, chunkGenerator);
++        }
++
++        if (chunk3 != null && chunk2 != null && chunkProvider.isChunkLoaded(this.locX - 1, this.locZ + 1)) {
++            chunk3.decorate(chunkProvider, chunkGenerator);
++        }
++
++        if (chunk != null && chunk1 != null && chunkProvider.isChunkLoaded(this.locX + 1, this.locZ - 1)) {
++            chunk.decorate(chunkProvider, chunkGenerator);
++        }
++
++        if (chunk != null && chunk3 != null) {
++            Chunk chunk4 = chunkProvider.getChunkIfLoaded(this.locX - 1, this.locZ - 1);
++            if (chunk4 != null) {
++                chunk4.decorate(chunkProvider, chunkGenerator);
++            }
++        }
++    }
++
++    public void decorate(ChunkProviderServer chunkProvider, IChunkProvider chunkGenerator) {
++        if (this.done) {
++            this.decorateStructures(chunkProvider, chunkGenerator);
++        } else {
++            this.populate(chunkProvider, chunkGenerator);
++        }
++    }
++
++    public boolean decorateStructures(ChunkProviderServer chunkProvider, IChunkProvider chunkGenerator) {
++        if (chunkGenerator == null) {
++            return false;
++        }
++
++        if (chunkGenerator.a(chunkProvider, this, this.locX, this.locZ)) {
++            this.e();
++            return true;
++        }
++
++        return false;
++    }
++
++    public void populate(ChunkProviderServer chunkProvider, IChunkProvider chunkGenerator) {
++        this.n();
++
++        if (chunkGenerator == null) {
++            return;
++        }
++
++        chunkGenerator.getChunkAt(chunkProvider, this.locX, this.locZ);
++
++        BlockSand.instaFall = true;
++        Random random = new Random();
++        random.setSeed(this.world.getSeed());
++        long xRand = random.nextLong() / 2L * 2L + 1L;
++        long zRand = random.nextLong() / 2L * 2L + 1L;
++        random.setSeed((long) this.locX * xRand + (long) this.locZ * zRand ^ this.world.getSeed());
++
++        org.bukkit.World world = this.world.getWorld();
++        if (world != null) {
++            this.world.populating = true;
++            try {
++                for (org.bukkit.generator.BlockPopulator populator : world.getPopulators()) {
++                    populator.populate(world, random, this.bukkitChunk);
++                }
++            } finally {
++                this.world.populating = false;
++            }
++        }
++        BlockSand.instaFall = false;
++        this.world.getServer().getPluginManager().callEvent(new org.bukkit.event.world.ChunkPopulateEvent(this.bukkitChunk));
++        // CraftBukkit end
++
++        this.e();
++    }
++    // Titanium end
++
+     public BlockPosition h(BlockPosition blockposition) {
+         int i = blockposition.getX() & 15;
+         int j = blockposition.getZ() & 15;
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderGenerate.java b/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
+index 1a386ad77..d9e157343 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
+@@ -164,25 +164,7 @@ public class ChunkProviderGenerate implements IChunkProvider {
+             this.z.a(this, this.m, i, j, chunksnapshot);
+         }
+ 
+-        if (this.r.w && this.n && this.m.paperConfigTitanium.generatorSettings.mineshaft) { // PaperSpigot
+-            this.x.a(this, this.m, i, j, chunksnapshot);
+-        }
+-
+-        if (this.r.v && this.n && this.m.paperConfigTitanium.generatorSettings.village) { // PaperSpigot
+-            this.w.a(this, this.m, i, j, chunksnapshot);
+-        }
+-
+-        if (this.r.u && this.n && this.m.paperConfigTitanium.generatorSettings.stronghold) { // PaperSpigot
+-            this.v.a(this, this.m, i, j, chunksnapshot);
+-        }
+-
+-        if (this.r.x && this.n && this.m.paperConfigTitanium.generatorSettings.temple) { // PaperSpigot
+-            this.y.a(this, this.m, i, j, chunksnapshot);
+-        }
+-
+-        if (this.r.y && this.n && this.m.paperConfigTitanium.generatorSettings.monument) { // PaperSpigot
+-            this.A.a(this, this.m, i, j, chunksnapshot);
+-        }
++        this.recreateStructures(null, i, j, chunksnapshot); // Titanium
+ 
+         Chunk chunk = new Chunk(this.m, chunksnapshot, i, j);
+         byte[] abyte = chunk.getBiomeIndex();
+@@ -443,28 +425,33 @@ public class ChunkProviderGenerate implements IChunkProvider {
+         return 0;
+     }
+ 
++    // Titanium start
+     public void recreateStructures(Chunk chunk, int i, int j) {
++        this.recreateStructures(chunk, i, j, null);
++    }
++
++    public void recreateStructures(Chunk chunk, int i, int j, ChunkSnapshot chunksnapshot) {
+         if (this.r.w && this.n && this.m.paperConfigTitanium.generatorSettings.mineshaft) { // PaperSpigot
+-            this.x.a(this, this.m, i, j, (ChunkSnapshot) null);
++            this.x.a(this, this.m, i, j, chunksnapshot);
+         }
+ 
+         if (this.r.v && this.n && this.m.paperConfigTitanium.generatorSettings.village) { // PaperSpigot
+-            this.w.a(this, this.m, i, j, (ChunkSnapshot) null);
++            this.w.a(this, this.m, i, j, chunksnapshot);
+         }
+ 
+         if (this.r.u && this.n && this.m.paperConfigTitanium.generatorSettings.stronghold) { // PaperSpigot
+-            this.v.a(this, this.m, i, j, (ChunkSnapshot) null);
++            this.v.a(this, this.m, i, j, chunksnapshot);
+         }
+ 
+         if (this.r.x && this.n && this.m.paperConfigTitanium.generatorSettings.temple) { // PaperSpigot
+-            this.y.a(this, this.m, i, j, (ChunkSnapshot) null);
++            this.y.a(this, this.m, i, j, chunksnapshot);
+         }
+ 
+         if (this.r.y && this.n && this.m.paperConfigTitanium.generatorSettings.monument) { // PaperSpigot
+-            this.A.a(this, this.m, i, j, (ChunkSnapshot) null);
++            this.A.a(this, this.m, i, j, chunksnapshot);
+         }
+-
+     }
++    // Titanium end
+ 
+     public Chunk getChunkAt(BlockPosition blockposition) {
+         return this.getOrCreateChunk(blockposition.getX() >> 4, blockposition.getZ() >> 4);
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+index a34910099..9aca136a0 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+@@ -1,35 +1,29 @@
+ package net.minecraft.server;
+ 
+-import com.google.common.collect.Lists;
+ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+ import java.io.IOException;
+ import java.util.ArrayList;
+-import java.util.Collections;
+ import java.util.Iterator;
+ import java.util.List;
+-import java.util.Set;
+-import java.util.concurrent.ConcurrentHashMap;
++import java.util.function.Consumer;
++import net.titanium.AsyncPriority;
++import net.titanium.chunk.ChunkMap;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
+ // CraftBukkit start
+ import java.util.Random;
+-import java.util.logging.Level;
+ 
+ import org.bukkit.Bukkit;
+ import org.bukkit.Server;
+ import org.bukkit.craftbukkit.chunkio.ChunkIOExecutor;
+ import org.bukkit.craftbukkit.util.LongHash;
+-import org.bukkit.craftbukkit.util.LongHashSet;
+-import org.bukkit.craftbukkit.util.LongObjectHashMap;
+ import org.bukkit.event.world.ChunkUnloadEvent;
+ import org.github.paperspigot.event.ServerExceptionEvent;
+ import org.github.paperspigot.exception.ServerInternalException;
+ // CraftBukkit end
+ // SportPaper start
+ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+-import it.unimi.dsi.fastutil.longs.LongArraySet;
+ import it.unimi.dsi.fastutil.longs.LongIterator;
+ import it.unimi.dsi.fastutil.longs.LongSet;
+ // SportPaper end
+@@ -42,7 +36,7 @@ public class ChunkProviderServer implements IChunkProvider {
+     public IChunkProvider chunkProvider;
+     public IChunkLoader chunkLoader; // FlamePaper - Make chunkloader public
+     public boolean forceChunkLoad = false; // CraftBukkit - true -> false
+-    public Long2ObjectMap<Chunk> chunks = new Long2ObjectOpenHashMap<Chunk>(8192, 0.5f);
++    public Long2ObjectMap<Chunk> chunks = new ChunkMap(8192, 0.5f); // Titanium - Long2ObjectOpenHashMap -> ChunkMap
+     public WorldServer world;
+ 
+     public ChunkProviderServer(WorldServer worldserver, IChunkLoader ichunkloader, IChunkProvider ichunkprovider) {
+@@ -117,6 +111,66 @@ public class ChunkProviderServer implements IChunkProvider {
+ 
+     }
+ 
++    // Titanium start - Backport Paper 1.13.2 chunk system
++    boolean chunkGoingToExists(int x, int z) {
++        return ChunkIOExecutor.isQueuedToLoad(this.world, x, z);
++    }
++
++    public void bumpPriority(ChunkCoordIntPair coords) {
++        // do nothing, override in async
++    }
++
++    public List<ChunkCoordIntPair> getSpiralOutChunks(BlockPosition blockposition, int radius) {
++        List<ChunkCoordIntPair> list = new ArrayList<>();
++
++        list.add(new ChunkCoordIntPair(blockposition.getX() >> 4, blockposition.getZ() >> 4));
++        for (int r = 1; r <= radius; r++) {
++            int x = -r;
++            int z = r;
++
++            // Iterates the edge of half of the box; then negates for other half.
++            while (x <= r && z > -r) {
++                list.add(new ChunkCoordIntPair((blockposition.getX() + (x << 4)) >> 4, (blockposition.getZ() + (z << 4)) >> 4));
++                list.add(new ChunkCoordIntPair((blockposition.getX() - (x << 4)) >> 4, (blockposition.getZ() - (z << 4)) >> 4));
++
++                if (x < r) {
++                    x++;
++                } else {
++                    z--;
++                }
++            }
++        }
++        return list;
++    }
++
++    public Chunk getChunkAt(int x, int z, boolean load, boolean gen, Consumer<Chunk> consumer) {
++        return this.getChunkAt(x, z, load, gen, AsyncPriority.NORMAL, consumer);
++    }
++
++    public Chunk getChunkAt(int x, int z, boolean load, boolean gen, AsyncPriority priority, Consumer<Chunk> consumer) {
++        return this.getChunkAt(x, z, () -> consumer.accept(this.chunks.get(LongHash.toLong(x, z))));
++    }
++
++    public Chunk getChunkAt(int x, int z, boolean load, boolean gen) {
++        return this.getChunkAt(x, z, () -> {});
++    }
++
++    PaperAsyncChunkProvider.CancellableChunkRequest requestChunk(int x, int z, boolean gen, AsyncPriority priority, Consumer<Chunk> consumer) {
++        Chunk chunk = this.getChunkAt(x, z, true, gen, consumer);
++        return new PaperAsyncChunkProvider.CancellableChunkRequest() {
++            @Override
++            public void cancel() {
++
++            }
++
++            @Override
++            public Chunk getChunk() {
++                return chunk;
++            }
++        };
++    }
++    // Titanium end
++
+     // CraftBukkit start - Add async variant, provide compatibility
+     public Chunk getChunkIfLoaded(int x, int z) {
+         return chunks.get(LongHash.toLong(x, z));
+@@ -126,7 +180,13 @@ public class ChunkProviderServer implements IChunkProvider {
+         return getChunkAt(i, j, null);
+     }
+ 
++    // Titanium start - Backport Paper 1.13.2 chunk system
+     public Chunk getChunkAt(int i, int j, Runnable runnable) {
++        return this.getChunkAt(i, j, true, true, runnable);
++    }
++
++    public Chunk getChunkAt(int i, int j, boolean load, boolean gen, Runnable runnable) {
++        // Titanium end
+         long key = LongHash.toLong(i, j); // IonSpigot - Only create key once
+         Chunk chunk = chunks.get(key);
+         ChunkRegionLoader loader = null;
+@@ -136,15 +196,17 @@ public class ChunkProviderServer implements IChunkProvider {
+ 
+         }
+         // We can only use the queue for already generated chunks
+-        if (chunk == null && loader != null && loader.chunkExists(world, i, j)) {
++        if (load && chunk == null && loader != null && loader.chunkExists(world, i, j)) { // Titanium - Backport Paper 1.13.2 chunk system
+             if (runnable != null) {
+                 ChunkIOExecutor.queueChunkLoad(world, loader, this, i, j, runnable);
+                 return null;
+             } else {
+                 chunk = ChunkIOExecutor.syncChunkLoad(world, loader, this, i, j);
+             }
+-        } else if (chunk == null) {
++        } else if (gen && chunk == null) { // Titanium - Backport Paper 1.13.2 chunk system
+             chunk = originalGetChunkAt(i, j);
++        } else if (chunk == null) { // Titanium - Backport Paper 1.13.2 chunk system
++            chunk = this.emptyChunk;
+         }
+ 
+         unloadQueue.remove(key); // SportPaper
+@@ -157,12 +219,11 @@ public class ChunkProviderServer implements IChunkProvider {
+     }
+     public Chunk originalGetChunkAt(int i, int j) {
+         long key = LongHash.toLong(i, j); // IonSpigot - Only create key once
+-        Chunk chunk = (Chunk) this.chunks.get(key);
++        Chunk chunk = this.chunks.get(key);
+         boolean newChunk = false;
+         // CraftBukkit end
+ 
+         if (chunk == null) {
+-            //world.timings.syncChunkLoadTimer.startTiming(); // Spigot // Purpur
+             chunk = this.loadChunk(i, j);
+             if (chunk == null) {
+                 if (this.chunkProvider == null) {
+@@ -171,50 +232,14 @@ public class ChunkProviderServer implements IChunkProvider {
+                     try {
+                         chunk = this.chunkProvider.getOrCreateChunk(i, j);
+                     } catch (Throwable throwable) {
+-                        CrashReport crashreport = CrashReport.a(throwable, "Exception generating new chunk");
+-                        CrashReportSystemDetails crashreportsystemdetails = crashreport.a("Chunk to be generated");
+-
+-                        crashreportsystemdetails.a("Location", (Object) String.format("%d,%d", new Object[] {i, j}));
+-                        crashreportsystemdetails.a("Position hash", (Object) key); // CraftBukkit - Use LongHash
+-                        crashreportsystemdetails.a("Generator", (Object) this.chunkProvider.getName());
+-                        throw new ReportedException(crashreport);
++                        throw this.generateChunkError(i, j, throwable); // Titanium - moved to method
+                     }
+                 }
+                 newChunk = true; // CraftBukkit
+             }
+ 
+             this.chunks.put(key, chunk);
+-            
+-            chunk.addEntities();
+-            
+-            // CraftBukkit start
+-            Server server = world.getServer();
+-            if (server != null) {
+-                /*
+-                 * If it's a new world, the first few chunks are generated inside
+-                 * the World constructor. We can't reliably alter that, so we have
+-                 * no way of creating a CraftWorld/CraftServer at that point.
+-                 */
+-                server.getPluginManager().callEvent(new org.bukkit.event.world.ChunkLoadEvent(chunk.bukkitChunk, newChunk));
+-            }
+-
+-            // Update neighbor counts
+-            for (int x = -2; x < 3; x++) {
+-                for (int z = -2; z < 3; z++) {
+-                    if (x == 0 && z == 0) {
+-                        continue;
+-                    }
+-
+-                    Chunk neighbor = this.getChunkIfLoaded(chunk.locX + x, chunk.locZ + z);
+-                    if (neighbor != null) {
+-                        neighbor.setNeighborLoaded(-x, -z);
+-                        chunk.setNeighborLoaded(x, z);
+-                    }
+-                }
+-            }
+-            // CraftBukkit end
+-            chunk.loadNearby(this, this, i, j);
+-            //world.timings.syncChunkLoadTimer.stopTiming(); // Spigot // Purpur
++            this.postChunk(chunk, newChunk, false); // Titanium - moved to method
+         }
+ 
+         unloadQueue.remove(key); // SportPaper
+@@ -271,6 +296,43 @@ public class ChunkProviderServer implements IChunkProvider {
+         }
+     }
+ 
++    // Titanium start
++    ReportedException generateChunkError(int x, int z, Throwable throwable) { return a(x, z, throwable); } // Paper - OBFHELPER
++    private ReportedException a(int i, int j, Throwable throwable) {
++        CrashReport crashreport = CrashReport.a(throwable, "Exception generating new chunk");
++        CrashReportSystemDetails crashreportsystemdetails = crashreport.a("Chunk to be generated");
++
++        crashreportsystemdetails.a("Location", String.format("%d,%d", i, j));
++        crashreportsystemdetails.a("Position hash", LongHash.toLong(i, j));
++        crashreportsystemdetails.a("Generator", this.chunkProvider.getName());
++        return new ReportedException(crashreport);
++    }
++
++    public void postChunk(Chunk chunk, boolean isNew, boolean recreateStructures) {
++        if (chunk == null || chunk == emptyChunk) {
++            return;
++        }
++
++        chunk.addEntities();
++
++        if (recreateStructures && this.chunkProvider != null) {
++            this.chunkProvider.recreateStructures(chunk, chunk.locX, chunk.locZ);
++        }
++
++        Server server = world.getServer();
++        if (server != null) {
++            /*
++             * If it's a new world, the first few chunks are generated inside
++             * the World constructor. We can't reliably alter that, so we have
++             * no way of creating a CraftWorld/CraftServer at that point.
++             */
++            server.getPluginManager().callEvent(new org.bukkit.event.world.ChunkLoadEvent(chunk.bukkitChunk, isNew));
++        }
++
++        chunk.loadNearby(this, this.chunkProvider);
++    }
++    // Titanium end
++
+     public void saveChunkNOP(Chunk chunk) {
+         if (canSave() && this.chunkLoader != null) {
+             try {
+@@ -298,50 +360,16 @@ public class ChunkProviderServer implements IChunkProvider {
+ 
+     public void getChunkAt(IChunkProvider ichunkprovider, int i, int j) {
+         Chunk chunk = this.getOrCreateChunk(i, j);
+-
++        // Titanium start
+         if (!chunk.isDone()) {
+-            chunk.n();
+-            if (this.chunkProvider != null) {
+-                this.chunkProvider.getChunkAt(ichunkprovider, i, j);
+-
+-                // CraftBukkit start
+-                BlockSand.instaFall = true;
+-                Random random = new Random();
+-                random.setSeed(world.getSeed());
+-                long xRand = random.nextLong() / 2L * 2L + 1L;
+-                long zRand = random.nextLong() / 2L * 2L + 1L;
+-                random.setSeed((long) i * xRand + (long) j * zRand ^ world.getSeed());
+-
+-                org.bukkit.World world = this.world.getWorld();
+-                if (world != null) {
+-                    this.world.populating = true;
+-                    try {
+-                        for (org.bukkit.generator.BlockPopulator populator : world.getPopulators()) {
+-                            populator.populate(world, random, chunk.bukkitChunk);
+-                        }
+-                    } finally {
+-                        this.world.populating = false;
+-                    }
+-                }
+-                BlockSand.instaFall = false;
+-                this.world.getServer().getPluginManager().callEvent(new org.bukkit.event.world.ChunkPopulateEvent(chunk.bukkitChunk));
+-                // CraftBukkit end
+-                
+-                chunk.e();
+-            }
++            return;
+         }
+-
++        chunk.populate(this, this.chunkProvider);
++        // Titnaium end
+     }
+ 
+     public boolean a(IChunkProvider ichunkprovider, Chunk chunk, int i, int j) {
+-        if (this.chunkProvider != null && this.chunkProvider.a(ichunkprovider, chunk, i, j)) {
+-            Chunk chunk1 = this.getOrCreateChunk(i, j);
+-
+-            chunk1.e();
+-            return true;
+-        } else {
+-            return false;
+-        }
++        return chunk.decorateStructures(this, this.chunkProvider); // Titanium
+     }
+ 
+     public boolean saveChunks(boolean flag, IProgressUpdate iprogressupdate) {
+@@ -394,16 +422,17 @@ public class ChunkProviderServer implements IChunkProvider {
+                 server.getPluginManager().callEvent(event);
+                 if (!event.isCancelled()) {
+ 
+-                    if (chunk != null) {
++                    //if (chunk != null) { // Titanium - Remove redundant null check
+                         chunk.removeEntities();
+                         this.saveChunk(chunk);
+                         this.saveChunkNOP(chunk);
+                         this.chunks.remove(chunkcoordinates); // CraftBukkit
+-                    }
++                    //}
+ 
+                     // this.unloadQueue.remove(olong);
+ 
+-                    // Update neighbor counts
++                    // Titanium start - Improve chunk system (Moved to ChunkMap)
++                    /* // Update neighbor counts
+                     for (int x = -2; x < 3; x++) {
+                         for (int z = -2; z < 3; z++) {
+                             if (x == 0 && z == 0) {
+@@ -416,7 +445,8 @@ public class ChunkProviderServer implements IChunkProvider {
+                                 chunk.setNeighborUnloaded(x, z);
+                             }
+                         }
+-                    }
++                    } */
++                    // Titanium end
+                 }
+             }
+             // CraftBukkit end
+diff --git a/src/main/java/net/minecraft/server/IChunkLoader.java b/src/main/java/net/minecraft/server/IChunkLoader.java
+index df4c1e0e8..47ff14b53 100644
+--- a/src/main/java/net/minecraft/server/IChunkLoader.java
++++ b/src/main/java/net/minecraft/server/IChunkLoader.java
+@@ -4,6 +4,17 @@ import java.io.IOException;
+ 
+ public interface IChunkLoader {
+ 
++    // Titanium start
++    default void loadEntities(Chunk chunk, NBTTagCompound nbttagcompound, World world) {
++    }
++
++    default Object[] loadChunk(World world, int x, int z) throws IOException {
++        return null;
++    }
++
++    default void saveChunk(World world, Chunk chunk) throws IOException, ExceptionWorldConflict  {
++    }
++    // Titanium end
+     Chunk a(World world, int i, int j) throws IOException;
+ 
+     void a(World world, Chunk chunk) throws IOException, ExceptionWorldConflict;
+diff --git a/src/main/java/net/minecraft/server/IChunkProvider.java b/src/main/java/net/minecraft/server/IChunkProvider.java
+index c68ffe0e0..270532cc7 100644
+--- a/src/main/java/net/minecraft/server/IChunkProvider.java
++++ b/src/main/java/net/minecraft/server/IChunkProvider.java
+@@ -1,6 +1,7 @@
+ package net.minecraft.server;
+ 
+ import java.util.List;
++import org.jetbrains.annotations.Nullable;
+ 
+ public interface IChunkProvider {
+ 
+@@ -10,6 +11,16 @@ public interface IChunkProvider {
+ 
+     Chunk getChunkAt(BlockPosition blockposition);
+ 
++    // Titanium start
++    @Nullable
++    default Chunk getChunkIfLoaded(int x, int z) {
++        if (!isChunkLoaded(x, z)) {
++            return null;
++        }
++        return getOrCreateChunk(x, z);
++    }
++    // Titanium end
++
+     void getChunkAt(IChunkProvider ichunkprovider, int i, int j);
+ 
+     boolean a(IChunkProvider ichunkprovider, Chunk chunk, int i, int j);
+diff --git a/src/main/java/net/minecraft/server/LongHashMap.java b/src/main/java/net/minecraft/server/LongHashMap.java
+index 11f23a56d..ad5f4aace 100644
+--- a/src/main/java/net/minecraft/server/LongHashMap.java
++++ b/src/main/java/net/minecraft/server/LongHashMap.java
+@@ -1,5 +1,9 @@
+ package net.minecraft.server;
+ 
++import java.util.ArrayList;
++import java.util.Collection;
++import java.util.List;
++
+ public class LongHashMap<V> {
+ 
+     private transient LongHashMap.LongHashMapEntry<V>[] entries = new LongHashMap.LongHashMapEntry[4096];
+@@ -42,6 +46,18 @@ public class LongHashMap<V> {
+         return null;
+     }
+ 
++    // Titanium start
++    public Collection<V> values() {
++        List<V> values = new ArrayList<V>();
++        for (LongHashMap.LongHashMapEntry<V> longhashmap_longhashmapentry : this.entries) {
++            if (longhashmap_longhashmapentry != null) {
++                values.add(longhashmap_longhashmapentry.b);
++            }
++        }
++        return values;
++    }
++    // Titanium end
++
+     public boolean contains(long i) {
+         return this.c(i) != null;
+     }
+diff --git a/src/main/java/net/minecraft/server/MathHelper.java b/src/main/java/net/minecraft/server/MathHelper.java
+index 49e064626..005b4f1d4 100644
+--- a/src/main/java/net/minecraft/server/MathHelper.java
++++ b/src/main/java/net/minecraft/server/MathHelper.java
+@@ -120,6 +120,7 @@ public class MathHelper {
+         return (double) i / (double) along.length;
+     }
+ 
++    public static float normalizeYaw(float fx) { return g(fx); } // Paper - OBFHELPER
+     public static float g(float f) {
+         f %= 360.0F;
+         if (f >= 180.0F) {
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index fbd30bb5f..ad5350c78 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -42,6 +42,7 @@ import java.util.function.Function;
+ import javax.imageio.ImageIO;
+ import joptsimple.OptionSet;
+ import net.openhft.affinity.AffinityLock;
++import net.titanium.AsyncPriority;
+ import net.titanium.config.TitaniumConfig;
+ import net.titanium.job.AutoSaveJob;
+ import net.titanium.job.AutoSaveJob.JobDetail;
+@@ -527,7 +528,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+                     }
+ 
+                     ++i;
+-                    worldserver.chunkProviderServer.getChunkAt(blockposition.getX() + k >> 4, blockposition.getZ() + l >> 4, () -> {}); // IonSpigot - Async Spawn Chunks
++                    worldserver.chunkProviderServer.getChunkAt(blockposition.getX() + k >> 4, blockposition.getZ() + l >> 4, true, true, AsyncPriority.HIGH, chunk -> {}); // Titanium - use new methods
+                 }
+             }
+         }
+@@ -613,6 +614,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+             if (hasStopped) return;
+             hasStopped = true;
+         }
++        PaperAsyncChunkProvider.stop(this); // Paper
+         // CraftBukkit end
+         if (!this.N) {
+             MinecraftServer.LOGGER.info("Stopping server");
+@@ -1081,6 +1083,8 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+         // Spigot end
+         //SpigotTimings.minecraftSchedulerTimer.stopTiming(); // Spigot // Purpur
+ 
++        PaperAsyncChunkProvider.processMainThreadQueue(this); // Paper
++
+         //this.methodProfiler.c("levels"); // Purpur
+ 
+         //SpigotTimings.bukkitSchedulerTimer.startTiming(); // Spigot // Purpur
+@@ -1135,6 +1139,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+ 
+             // if (i == 0 || this.getAllowNether()) {
+                 WorldServer worldserver = this.worlds.get(i);
++                PaperAsyncChunkProvider.processMainThreadQueue(worldserver); // Paper
+                 worldserver.hasPhysicsEvent = org.bukkit.event.block.BlockPhysicsEvent.getHandlerList().getRegisteredListeners().length > 0; // PandaSpigot
+ 
+                 //this.methodProfiler.a(worldserver.getWorldData().getName()); // Purpur
+diff --git a/src/main/java/net/minecraft/server/PaperAsyncChunkProvider.java b/src/main/java/net/minecraft/server/PaperAsyncChunkProvider.java
+new file mode 100644
+index 000000000..6dcfdb990
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/PaperAsyncChunkProvider.java
+@@ -0,0 +1,643 @@
++package net.minecraft.server;
++
++import com.destroystokyo.paper.util.PriorityQueuedExecutor;
++import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
++import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
++import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
++import java.io.IOException;
++import java.util.concurrent.CompletableFuture;
++import java.util.concurrent.ConcurrentLinkedDeque;
++import java.util.concurrent.atomic.AtomicBoolean;
++import java.util.concurrent.atomic.AtomicInteger;
++import java.util.function.Consumer;
++import javax.annotation.Nullable;
++import net.titanium.AsyncPriority;
++import net.titanium.config.TitaniumConfig;
++import org.bukkit.craftbukkit.generator.CustomChunkGenerator;
++import org.bukkit.craftbukkit.util.LongHash;
++
++// Titanium - Backported from Paper 1.13.2
++public class PaperAsyncChunkProvider extends ChunkProviderServer {
++
++    private static final int GEN_THREAD_PRIORITY = Integer.getInteger("paper.genThreadPriority", 3);
++    private static final int LOAD_THREAD_PRIORITY = Integer.getInteger("paper.loadThreadPriority", 4);
++    private static final PriorityQueuedExecutor LOAD_EXECUTOR;
++    private static final PriorityQueuedExecutor SINGLE_GEN_EXECUTOR;
++    private static final ConcurrentLinkedDeque<Runnable> MAIN_THREAD_QUEUE = new ConcurrentLinkedDeque<>();
++
++    private final PriorityQueuedExecutor loadExecutor;
++    private final PriorityQueuedExecutor generationExecutor;
++    private final Long2ObjectMap<PendingChunk> pendingChunks = Long2ObjectMaps.synchronize(new Long2ObjectOpenHashMap<>());
++
++    private final MinecraftServer server;
++    private final boolean shouldGenSync;
++
++    public PaperAsyncChunkProvider(WorldServer worldserver, IChunkLoader ichunkloader, IChunkProvider ichunkprovider) {
++        super(worldserver, ichunkloader, ichunkprovider);
++
++        this.server = worldserver.getMinecraftServer();
++        String worldName = this.world.getWorld().getName();
++
++        TitaniumConfig.Chunk.Async config = TitaniumConfig.get().chunk.async;
++
++        this.loadExecutor = config.loadExecutorPerWorld
++                ? new PriorityQueuedExecutor("Titanium - Chunk Loading - " + worldName, config.loadThreads, LOAD_THREAD_PRIORITY)
++                : LOAD_EXECUTOR;
++
++        boolean forceAsyncChunkGen = config.forceAsyncGeneration || config.forceAsyncGenerationWorlds.contains(worldName);
++        this.shouldGenSync = ichunkprovider instanceof CustomChunkGenerator && !(((CustomChunkGenerator) ichunkprovider).asyncSupported) && !forceAsyncChunkGen || !config.generation;
++        this.generationExecutor = config.generationThreadPerWorld
++                ? new PriorityQueuedExecutor("Titanium - Chunk Generation - " + worldName, 1, GEN_THREAD_PRIORITY)
++                : SINGLE_GEN_EXECUTOR;
++    }
++
++    static {
++        TitaniumConfig.Chunk.Async config = TitaniumConfig.get().chunk.async;
++        boolean asyncEnabled = config.enabled;
++
++        LOAD_EXECUTOR = new PriorityQueuedExecutor("Titanium - Chunk Loading - Shared", asyncEnabled && !config.loadExecutorPerWorld
++                ? config.loadThreads
++                : 0, LOAD_THREAD_PRIORITY);
++
++        SINGLE_GEN_EXECUTOR = new PriorityQueuedExecutor("Titanium - Chunk Generation - Shared", asyncEnabled && config.generation && !config.generationThreadPerWorld
++                ? 1
++                : 0, GEN_THREAD_PRIORITY);
++    }
++
++    private static PriorityQueuedExecutor.Priority calculatePriority(boolean isBlockingMain, AsyncPriority priority) {
++        if (isBlockingMain) {
++            return PriorityQueuedExecutor.Priority.URGENT;
++        }
++
++        switch (priority) {
++            case URGENT:
++                return PriorityQueuedExecutor.Priority.URGENT;
++            case HIGH:
++                return PriorityQueuedExecutor.Priority.HIGH;
++            default:
++                return PriorityQueuedExecutor.Priority.NORMAL;
++        }
++    }
++
++    static void stop(MinecraftServer server) {
++        for (WorldServer world : server.worlds) {
++            world.getPlayerChunkMap().shutdown();
++        }
++    }
++
++    static void processMainThreadQueue(MinecraftServer server) {
++        for (WorldServer world : server.worlds) {
++            processMainThreadQueue(world);
++        }
++    }
++
++    static void processMainThreadQueue(World world) {
++        IChunkProvider chunkProvider = world.chunkProvider;
++        if (chunkProvider instanceof PaperAsyncChunkProvider) {
++            ((PaperAsyncChunkProvider) chunkProvider).processMainThreadQueue();
++        }
++    }
++
++    private void processMainThreadQueue() {
++        this.processMainThreadQueue((PendingChunk) null);
++    }
++
++    private boolean processMainThreadQueue(PendingChunk pending) {
++        Runnable run;
++        boolean hadLoad = false;
++        while ((run = MAIN_THREAD_QUEUE.poll()) != null) {
++            run.run();
++            hadLoad = true;
++            if (pending != null && pending.hasPosted) {
++                break;
++            }
++        }
++        return hadLoad;
++    }
++
++    @Override
++    public void bumpPriority(ChunkCoordIntPair coords) {
++        PendingChunk pending = this.pendingChunks.get(LongHash.toLong(coords.x, coords.z));
++        if (pending != null) {
++            pending.bumpPriority(PriorityQueuedExecutor.Priority.HIGH);
++        }
++    }
++
++    public Chunk getChunkAt(int i, int j, Runnable runnable) {
++        if (runnable != null) {
++            return this.getChunkAt(i, j, true, true, chunk -> runnable.run());
++        }
++        synchronized (this) {
++            return this.getChunkAt(i, j, true, true);
++        }
++    }
++
++    @Nullable
++    @Override
++    public Chunk getChunkAt(int x, int z, boolean load, boolean gen) {
++        return this.getChunkAt(x, z, load, gen, (Consumer<Chunk>) null);
++    }
++
++    @Nullable
++    @Override
++    public Chunk getChunkAt(int x, int z, boolean load, boolean gen, AsyncPriority priority, Consumer<Chunk> consumer) {
++        long key = LongHash.toLong(x, z);
++        Chunk chunk = this.chunks.get(key);
++        this.unloadQueue.remove(key);
++        if (chunk != null || !load) { // return null if we aren't loading
++            if (consumer != null) {
++                consumer.accept(chunk);
++            }
++            return chunk;
++        }
++        return this.loadOrGenerateChunk(x, z, gen, priority, consumer); // Async overrides this method
++    }
++
++    private Chunk loadOrGenerateChunk(int x, int z, boolean gen, AsyncPriority priority, Consumer<Chunk> consumer) {
++        return this.requestChunk(x, z, gen, priority, consumer).getChunk();
++    }
++
++    final PendingChunkRequest requestChunk(int x, int z, boolean gen, AsyncPriority priority, Consumer<Chunk> consumer) {
++        long key = LongHash.toLong(x, z);
++        boolean isChunkThread = this.isChunkThread();
++        boolean isBlockingMain = consumer == null && this.server.isMainThread();
++        boolean loadOnThisThread = isChunkThread || isBlockingMain;
++        PriorityQueuedExecutor.Priority taskPriority = calculatePriority(isBlockingMain, priority);
++
++        // Obtain a PendingChunk
++        PendingChunk pending;
++        synchronized (this.pendingChunks) {
++            PendingChunk pendingChunk = this.pendingChunks.get(key);
++            if (pendingChunk == null) {
++                pending = new PendingChunk(x, z, key, gen, taskPriority);
++                this.pendingChunks.put(key, pending);
++            } else if (pendingChunk.hasFinished && gen && !pendingChunk.canGenerate && pendingChunk.chunk == null) {
++                // need to overwrite the old
++                pending = new PendingChunk(x, z, key, true, taskPriority);
++                this.pendingChunks.put(key, pending);
++            } else {
++                pending = pendingChunk;
++                if (pending.taskPriority != taskPriority) {
++                    pending.bumpPriority(taskPriority);
++                }
++            }
++        }
++
++        // Listen for when result is ready
++        final CompletableFuture<Chunk> future = new CompletableFuture<>();
++        final PendingChunkRequest request = pending.addListener(future, gen, !loadOnThisThread);
++
++        // Chunk Generation can trigger Chunk Loading, those loads may need to convert, and could be slow
++        // Give an opportunity for urgent tasks to jump in at these times
++        if (isChunkThread) {
++            this.processUrgentTasks();
++        }
++
++        if (loadOnThisThread) {
++            // do loads on main if blocking, or on current if we are a load/gen thread
++            // gen threads do trigger chunk loads
++            pending.loadTask.run();
++        }
++
++        if (isBlockingMain) {
++            while (!future.isDone()) {
++                // We aren't done, obtain lock on queue
++                synchronized (MAIN_THREAD_QUEUE) {
++                    // We may of received our request now, check it
++                    if (this.processMainThreadQueue(pending)) {
++                        // If we processed SOMETHING, don't wait
++                        continue;
++                    }
++                    try {
++                        // We got nothing from the queue, wait until something has been added
++                        MAIN_THREAD_QUEUE.wait(1);
++                    } catch (InterruptedException ignored) {
++                    }
++                }
++                // Queue has been notified or timed out, process it
++                this.processMainThreadQueue(pending);
++            }
++            // We should be done AND posted into chunk map now, return it
++            request.initialReturnChunk = pending.postChunk();
++        } else if (consumer == null) {
++            // This is on another thread
++            request.initialReturnChunk = future.join();
++        } else {
++            future.thenAccept((c) -> {
++                synchronized (PaperAsyncChunkProvider.this) {
++                    consumer.accept(c);
++                }
++            });
++        }
++
++        return request;
++    }
++
++    private void processUrgentTasks() {
++        final PriorityQueuedExecutor executor = PriorityQueuedExecutor.getExecutor();
++        if (executor != null) {
++            executor.processUrgentTasks();
++        }
++    }
++
++    boolean chunkGoingToExists(int x, int z) {
++        synchronized (this.pendingChunks) {
++            PendingChunk pendingChunk = this.pendingChunks.get(LongHash.toLong(x, z));
++            return pendingChunk != null && pendingChunk.canGenerate;
++        }
++    }
++
++    private enum PendingStatus {
++        /**
++         * Request has just started
++         */
++        STARTED,
++        /**
++         * Chunk is attempting to be loaded from disk
++         */
++        LOADING,
++        /**
++         * Chunk must generate on main and is pending main
++         */
++        GENERATION_PENDING,
++        /**
++         * Chunk is generating
++         */
++        GENERATING,
++        /**
++         * Chunk is ready and is pending post to main
++         */
++        PENDING_MAIN,
++        /**
++         * Could not load chunk, and did not need to generat
++         */
++        FAIL,
++        /**
++         * Fully done with this request (may or may not of loaded)
++         */
++        DONE,
++        /**
++         * Chunk load was cancelled (no longer needed)
++         */
++        CANCELLED
++    }
++
++    private enum ChunkSource {
++
++        GENERATE,
++        LOAD,
++        UNKNOWN
++
++    }
++
++    public interface CancellableChunkRequest {
++
++        void cancel();
++
++        Chunk getChunk();
++
++    }
++
++    public static class PendingChunkRequest implements CancellableChunkRequest {
++
++        private final PendingChunk pending;
++        private final AtomicBoolean cancelled = new AtomicBoolean(false);
++        private volatile boolean generating;
++        private volatile Chunk initialReturnChunk;
++
++        private PendingChunkRequest(PendingChunk pending) {
++            this.pending = pending;
++            this.cancelled.set(true);
++        }
++
++        private PendingChunkRequest(PendingChunk pending, boolean gen) {
++            this.pending = pending;
++            this.generating = gen;
++        }
++
++        public void cancel() {
++            this.pending.cancel(this);
++        }
++
++        /**
++         * Will be null on asynchronous loads
++         */
++        @Override
++        @Nullable
++        public Chunk getChunk() {
++            return this.initialReturnChunk;
++        }
++
++    }
++
++    private boolean isLoadThread() {
++        return this.loadExecutor.isCurrentThread();
++    }
++
++    private boolean isGenThread() {
++        return this.generationExecutor.isCurrentThread();
++    }
++
++    private boolean isChunkThread() {
++        return this.isLoadThread() || this.isGenThread();
++    }
++
++    private class PendingChunk implements Runnable {
++
++        private final int x;
++        private final int z;
++        private final long key;
++        private final long started = System.currentTimeMillis();
++        private final CompletableFuture<Chunk> loadOnly = new CompletableFuture<>();
++        private final CompletableFuture<Chunk> generate = new CompletableFuture<>();
++        private final AtomicInteger requests = new AtomicInteger(0);
++
++        private volatile PendingStatus status = PendingStatus.STARTED;
++        private volatile PriorityQueuedExecutor.PendingTask<Void> loadTask;
++        private volatile PriorityQueuedExecutor.PendingTask<Chunk> genTask;
++        private volatile PriorityQueuedExecutor.Priority taskPriority;
++        private volatile boolean generating;
++        private volatile boolean canGenerate;
++        private volatile boolean hasPosted;
++        private volatile boolean hasFinished;
++        private volatile Chunk chunk;
++        private volatile ChunkSource source = ChunkSource.UNKNOWN;
++        private volatile NBTTagCompound pendingLevel;
++
++        PendingChunk(int x, int z, long key, boolean canGenerate, boolean priority) {
++            this.x = x;
++            this.z = z;
++            this.key = key;
++            this.canGenerate = canGenerate;
++            this.taskPriority = priority
++                    ? PriorityQueuedExecutor.Priority.HIGH
++                    : PriorityQueuedExecutor.Priority.NORMAL;
++        }
++
++        PendingChunk(int x, int z, long key, boolean canGenerate, PriorityQueuedExecutor.Priority taskPriority) {
++            this.x = x;
++            this.z = z;
++            this.key = key;
++            this.canGenerate = canGenerate;
++            this.taskPriority = taskPriority;
++        }
++
++        private synchronized void setStatus(PendingStatus status) {
++            this.status = status;
++        }
++
++        private Chunk loadChunk(int x, int z) throws IOException {
++            this.setStatus(PendingStatus.LOADING);
++            Object[] data = PaperAsyncChunkProvider.this.chunkLoader.loadChunk(PaperAsyncChunkProvider.this.world, x, z);
++            if (data != null) {
++                // Level must be loaded on main
++                this.pendingLevel = ((NBTTagCompound) data[1]).getCompound("Level");
++                this.source = ChunkSource.LOAD;
++                return (Chunk) data[0];
++            } else {
++                return null;
++            }
++        }
++
++        private Chunk generateChunk() {
++            synchronized (this) {
++                if (this.requests.get() <= 0) {
++                    return null;
++                }
++            }
++
++            try {
++                Chunk chunk = PaperAsyncChunkProvider.this.chunkProvider.getOrCreateChunk(this.x, this.z);
++                this.source = ChunkSource.GENERATE;
++                this.generateFinished(chunk);
++                return chunk;
++            } catch (Throwable e) {
++                MinecraftServer.LOGGER.error("Couldn't generate chunk (" + PaperAsyncChunkProvider.this.world.getWorld().getName() + ":" + this.x + "," + this.z + ")", e);
++                this.generateFinished(null);
++                return null;
++            }
++        }
++
++        boolean loadFinished(Chunk chunk) {
++            if (chunk != null) {
++                this.postChunkToMain(chunk);
++                return false;
++            }
++            this.loadOnly.complete(null);
++
++            synchronized (this) {
++                boolean cancelled = this.requests.get() <= 0;
++                if (!this.canGenerate || cancelled) {
++                    if (!cancelled) {
++                        this.setStatus(PendingStatus.FAIL);
++                    }
++                    this.chunk = null;
++                    this.hasFinished = true;
++                    PaperAsyncChunkProvider.this.pendingChunks.remove(this.key);
++                    return false;
++                } else {
++                    this.setStatus(PendingStatus.GENERATING);
++                    this.generating = true;
++                    return true;
++                }
++            }
++        }
++
++        void generateFinished(Chunk chunk) {
++            synchronized (this) {
++                this.chunk = chunk;
++                this.hasFinished = true;
++            }
++            if (chunk != null) {
++                this.postChunkToMain(chunk);
++            } else {
++                synchronized (this) {
++                    PaperAsyncChunkProvider.this.pendingChunks.remove(this.key);
++                    this.completeFutures(null);
++                }
++            }
++        }
++
++        synchronized private void completeFutures(Chunk chunk) {
++            this.loadOnly.complete(chunk);
++            this.generate.complete(chunk);
++        }
++
++        private void postChunkToMain(Chunk chunk) {
++            synchronized (this) {
++                this.setStatus(PendingStatus.PENDING_MAIN);
++                this.chunk = chunk;
++                this.hasFinished = true;
++            }
++
++            if (PaperAsyncChunkProvider.this.server.isMainThread()) {
++                this.postChunk();
++                return;
++            }
++
++            // Don't post here, even if on main, it must enter the queue so we can exit any open batch
++            // schedulers, as post stage may trigger a new generation and cause errors
++            synchronized (MAIN_THREAD_QUEUE) {
++                if (this.taskPriority == PriorityQueuedExecutor.Priority.URGENT) {
++                    MAIN_THREAD_QUEUE.addFirst(this::postChunk);
++                } else {
++                    MAIN_THREAD_QUEUE.addLast(this::postChunk);
++                }
++                MAIN_THREAD_QUEUE.notify();
++            }
++        }
++
++        Chunk postChunk() {
++            if (!PaperAsyncChunkProvider.this.server.isMainThread()) {
++                throw new IllegalStateException("Must post from main");
++            }
++            synchronized (this) {
++                if (this.hasPosted || this.requests.get() <= 0) { // if pending is 0, all were cancelled
++                    return this.chunk;
++                }
++                this.hasPosted = true;
++            }
++            try {
++                if (this.chunk == null) {
++                    this.chunk = PaperAsyncChunkProvider.this.chunks.get(this.key);
++                    this.completeFutures(this.chunk);
++                    return this.chunk;
++                }
++                if (this.pendingLevel != null) {
++                    PaperAsyncChunkProvider.this.chunkLoader.loadEntities(this.chunk, this.pendingLevel, PaperAsyncChunkProvider.this.world);
++                    this.pendingLevel = null;
++                }
++                synchronized (PaperAsyncChunkProvider.this.chunks) {
++                    Chunk other = PaperAsyncChunkProvider.this.chunks.get(this.key);
++                    if (other != null) {
++                        this.chunk = other;
++                        PaperAsyncChunkProvider.this.postChunk(this.chunk, false, false);
++                        this.completeFutures(other);
++                        return other;
++                    }
++                    if (this.chunk != null) {
++                        PaperAsyncChunkProvider.this.chunks.put(this.key, this.chunk);
++                    }
++                }
++
++                PaperAsyncChunkProvider.this.postChunk(this.chunk, this.source == ChunkSource.GENERATE, this.source == ChunkSource.LOAD);
++
++                this.completeFutures(this.chunk);
++                return this.chunk;
++            } finally {
++                PaperAsyncChunkProvider.this.pendingChunks.remove(this.key);
++                this.setStatus(PendingStatus.DONE);
++            }
++        }
++
++        synchronized PendingChunkRequest addListener(CompletableFuture<Chunk> future, boolean gen, boolean autoSubmit) {
++            this.requests.incrementAndGet();
++            if (this.loadTask == null) {
++                // Take care of a race condition in that a request could be cancelled after the synchronize
++                // on pendingChunks, but before a listener is added, which would erase these pending tasks.
++                this.genTask = PaperAsyncChunkProvider.this.generationExecutor.createPendingTask(this::generateChunk, this.taskPriority);
++                this.loadTask = PaperAsyncChunkProvider.this.loadExecutor.createPendingTask(this, this.taskPriority);
++                if (autoSubmit) {
++                    // We will execute it outside of the synchronized context immediately after
++                    this.loadTask.submit();
++                }
++            }
++
++            if (this.hasFinished) {
++                future.complete(this.chunk);
++                return new PendingChunkRequest(this);
++            } else if (gen) {
++                this.canGenerate = true;
++                this.generate.thenAccept(future::complete);
++            } else {
++                if (this.generating) {
++                    future.complete(null);
++                    return new PendingChunkRequest(this);
++                } else {
++                    this.loadOnly.thenAccept(future::complete);
++                }
++            }
++
++            return new PendingChunkRequest(this, gen);
++        }
++
++        @Override
++        public void run() {
++            try {
++                if (!this.loadFinished(this.loadChunk(this.x, this.z))) {
++                    return;
++                }
++            } catch (Throwable ex) {
++                MinecraftServer.LOGGER.error("Couldn't load chunk (" + PaperAsyncChunkProvider.this.world.getWorld().getName() + ":" + this.x + "," + this.z + ")", ex);
++                if (ex instanceof IOException) {
++                    this.generateFinished(null);
++                    return;
++                }
++            }
++
++            if (PaperAsyncChunkProvider.this.shouldGenSync) {
++                synchronized (this) {
++                    this.setStatus(PendingStatus.GENERATION_PENDING);
++                    if (this.taskPriority == PriorityQueuedExecutor.Priority.URGENT) {
++                        MAIN_THREAD_QUEUE.addFirst(() -> this.generateFinished(this.generateChunk()));
++                    } else {
++                        MAIN_THREAD_QUEUE.addLast(() -> this.generateFinished(this.generateChunk()));
++                    }
++
++                }
++                synchronized (MAIN_THREAD_QUEUE) {
++                    MAIN_THREAD_QUEUE.notify();
++                }
++            } else {
++                if (PaperAsyncChunkProvider.this.isGenThread()) {
++                    // ideally we should never run into 1 chunk generating another chunk...
++                    // but if we do, let's apply same solution
++                    this.genTask.run();
++                } else {
++                    this.genTask.submit();
++                }
++            }
++        }
++
++        void bumpPriority(PriorityQueuedExecutor.Priority newPriority) {
++            if (this.taskPriority.ordinal() >= newPriority.ordinal()) {
++                return;
++            }
++
++            this.taskPriority = newPriority;
++            PriorityQueuedExecutor.PendingTask<Void> loadTask = this.loadTask;
++            PriorityQueuedExecutor.PendingTask<Chunk> genTask = this.genTask;
++            if (loadTask != null) {
++                loadTask.bumpPriority(newPriority);
++            }
++            if (genTask != null) {
++                genTask.bumpPriority(newPriority);
++            }
++        }
++
++        public synchronized boolean isCancelled() {
++            return this.requests.get() <= 0;
++        }
++
++        public synchronized void cancel(PendingChunkRequest request) {
++            synchronized (PaperAsyncChunkProvider.this.pendingChunks) {
++                if (!request.cancelled.compareAndSet(false, true)) {
++                    return;
++                }
++
++                if (this.requests.decrementAndGet() > 0) {
++                    return;
++                }
++
++                boolean c1 = this.genTask.cancel();
++                boolean c2 = this.loadTask.cancel();
++                this.loadTask = null;
++                this.genTask = null;
++                PaperAsyncChunkProvider.this.pendingChunks.remove(this.key);
++                this.setStatus(PendingStatus.CANCELLED);
++            }
++        }
++
++    }
++
++}
+diff --git a/src/main/java/net/minecraft/server/PlayerChunkMap.java b/src/main/java/net/minecraft/server/PlayerChunkMap.java
+index 506cb2727..f1571037e 100644
+--- a/src/main/java/net/minecraft/server/PlayerChunkMap.java
++++ b/src/main/java/net/minecraft/server/PlayerChunkMap.java
+@@ -7,6 +7,9 @@ import java.util.ArrayList;
+ import java.util.Iterator;
+ import java.util.List;
+ import java.util.Map;
++import java.util.function.Consumer;
++import net.titanium.AsyncPriority;
++import net.titanium.config.TitaniumConfig;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
+@@ -21,9 +24,10 @@ import java.util.HashMap;
+ public class PlayerChunkMap {
+ 
+     private static final Logger a = LogManager.getLogger();
++    private static final boolean LEGACY_CHUNK_SYSTEM = !TitaniumConfig.get().chunk.async.enabled; // Titanium
+     private final WorldServer world;
+     private final List<EntityPlayer> managedPlayers = new ObjectArrayList<>(); // Titanium - ArrayList -> ObjectArrayList
+-    private final LongHashMap<PlayerChunkMap.PlayerChunk> d = new LongHashMap();
++    private final LongHashMap<PlayerChunkMap.PlayerChunk> d = new LongHashMap(); LongHashMap<PlayerChunkMap.PlayerChunk> getChunks() { return this.d; } // Paper - OBFHELPER
+     private final Queue<PlayerChunkMap.PlayerChunk> e = new java.util.concurrent.ConcurrentLinkedQueue<PlayerChunkMap.PlayerChunk>(); // CraftBukkit ArrayList -> ConcurrentLinkedQueue
+     private final Queue<PlayerChunkMap.PlayerChunk> f = new java.util.concurrent.ConcurrentLinkedQueue<PlayerChunkMap.PlayerChunk>(); // CraftBukkit ArrayList -> ConcurrentLinkedQueue
+     private int g;
+@@ -36,6 +40,7 @@ public class PlayerChunkMap {
+         this.a(viewDistance); // Spigot
+     }
+ 
++    public WorldServer getWorld() { return this.a(); } // Titanium - OBFHELPER
+     public WorldServer a() {
+         return this.world;
+     }
+@@ -243,13 +248,18 @@ public class PlayerChunkMap {
+                             chunksToLoad.add(new ChunkCoordIntPair(l1, i2)); // CraftBukkit
+                         }
+ 
++                        // Titanium start - Backport Paper 1.13.2 chunk system
++                        PlayerChunkMap.PlayerChunk playerChunk = this.a(l1 - j1, i2 - k1, false);
+                         if (!this.a(l1 - j1, i2 - k1, i, j, i1)) {
+-                            PlayerChunkMap.PlayerChunk playerchunkmap_playerchunk = this.a(l1 - j1, i2 - k1, false);
+-
+-                            if (playerchunkmap_playerchunk != null) {
+-                                playerchunkmap_playerchunk.b(entityplayer);
++                            if (playerChunk != null) {
++                                playerChunk.b(entityplayer);
++                            }
++                        } else {
++                            if (playerChunk != null) {
++                                playerChunk.checkHighPriority(entityplayer);
+                             }
+                         }
++                        // Titanium end
+                     }
+                 }
+ 
+@@ -260,7 +270,11 @@ public class PlayerChunkMap {
+                 // CraftBukkit start - send nearest chunks first
+                 Collections.sort(chunksToLoad, new ChunkCoordComparator(entityplayer));
+                 for (ChunkCoordIntPair pair : chunksToLoad) {
+-                    this.a(pair.x, pair.z, true).a(entityplayer);
++                    // Paper start
++                    PlayerChunk playerChunk = this.a(pair.x, pair.z, true);
++                    playerChunk.checkHighPriority(entityplayer);
++                    playerChunk.a(entityplayer);
++                    // Paper end
+                 }
+ 
+                 if (j1 > 1 || j1 < -1 || k1 > 1 || k1 < -1) {
+@@ -348,6 +362,17 @@ public class PlayerChunkMap {
+     }
+     // PaperSpigot end
+ 
++    // Paper start
++    void shutdown() {
++        this.getChunks().values().forEach(pchunk -> {
++            PaperAsyncChunkProvider.CancellableChunkRequest chunkRequest = pchunk.chunkRequest;
++            if (chunkRequest != null) {
++                chunkRequest.cancel();
++            }
++        });
++    }
++    // Paper end
++
+     public static int getFurthestViewableBlock(int i) {
+         return i * 16 - 16;
+     }
+@@ -366,10 +391,59 @@ public class PlayerChunkMap {
+         private boolean loaded = false;
+         private Runnable loadedRunnable = () -> PlayerChunk.this.loaded = true;
+         // CraftBukkit end
++        // Titanium (Paper) start - Backport Paper 1.13.2 chunk system
++        private Chunk chunk;
++        private Consumer<Chunk> loadedConsumer = (chunk) -> {
++            this.chunkRequest = null;
++            this.loadedRunnable.run();
++            this.chunk = chunk;
++        };
++
++        PaperAsyncChunkProvider.CancellableChunkRequest chunkRequest;
++        private boolean markedHigh = false;
++        private void checkHighPriority(EntityPlayer player) {
++            if (this.loaded || this.markedHigh || this.chunk != null) {
++                return;
++            }
++            final double dist = this.getDistance(player.locX, player.locZ);
++            if (dist > 8) {
++                return;
++            }
++            if (dist >= 3 && this.getDistance(player, 5) > 3.5) {
++                return;
++            }
++
++            this.markedHigh = true;
++            PlayerChunkMap.this.getWorld().chunkProviderServer.bumpPriority(this.location);
++            if (this.chunkRequest == null) {
++                this.requestChunkIfNeeded(true);
++            }
++        }
++
++        private void requestChunkIfNeeded(boolean flag) {
++            if (this.chunkRequest == null) {
++                this.chunkRequest = PlayerChunkMap.this.getWorld().chunkProviderServer.requestChunk(this.location.x, this.location.z, flag, this.markedHigh ? AsyncPriority.HIGH : AsyncPriority.NORMAL, this.loadedConsumer);
++                this.chunk = this.chunkRequest.getChunk(); // Paper
++            }
++        }
++
++        private double getDistance(EntityPlayer player, int inFront) {
++            final float yaw = MathHelper.normalizeYaw(player.yaw);
++            final double x = player.locX + (inFront * Math.cos(Math.toRadians(yaw)));
++            final double z = player.locZ + (inFront * Math.sin(Math.toRadians(yaw)));
++            return this.getDistance(x, z);
++        }
++
++        private double getDistance(double blockX, double blockZ) {
++            final double x = this.location.x - ((int)Math.floor(blockX) >> 4);
++            final double z = this.location.z - ((int)Math.floor(blockZ) >> 4);
++            return Math.sqrt((x * x) + (z * z));
++        }
++        // Titanium end
+ 
+         public PlayerChunk(int i, int j) {
+             this.location = new ChunkCoordIntPair(i, j);
+-            PlayerChunkMap.this.a().chunkProviderServer.getChunkAt(i, j, loadedRunnable); // CraftBukkit
++            this.chunk = PlayerChunkMap.this.a().chunkProviderServer.getChunkAt(i, j, true, true, this.loadedConsumer); // CraftBukkit // Titanium - use new method
+         }
+ 
+         public void a(final EntityPlayer entityplayer) {  // CraftBukkit - added final to argument
+@@ -387,23 +461,25 @@ public class PlayerChunkMap {
+                     playerRunnable = null;
+                     entityplayer.chunkCoordIntPairQueue.add(this.location);
+                 } else {
+-                    playerRunnable = new Runnable() {
+-                        public void run() {
+-                            entityplayer.chunkCoordIntPairQueue.add(PlayerChunk.this.location);
+-                        }
+-                    };
+-                    PlayerChunkMap.this.a().chunkProviderServer.getChunkAt(this.location.x, this.location.z, playerRunnable);
++                    this.checkHighPriority(entityplayer);
++                    // Titanium start
++                    playerRunnable = () -> entityplayer.chunkCoordIntPairQueue.add(PlayerChunk.this.location);
++                    PlayerChunkMap.this.a().chunkProviderServer.getChunkAt(this.location.x, this.location.z, true, true, chunk -> playerRunnable.run());
++                    // Titanium end
+                 }
+ 
+                 this.players.put(entityplayer, playerRunnable);
+-                // CraftBukkit end
++                // CraftBukkit end*/
+             }
+         }
+ 
+         public void b(EntityPlayer entityplayer) {
+             if (this.b.contains(entityplayer)) {
++                // Titanium start
++                Chunk chunk = this.chunk;
+                 // CraftBukkit start - If we haven't loaded yet don't load the chunk just so we can clean it up
+-                if (!this.loaded) {
++                if (LEGACY_CHUNK_SYSTEM && !this.loaded) {
++                    // Titanium end
+                     ChunkIOExecutor.dropQueuedChunkLoad(PlayerChunkMap.this.a(), this.location.x, this.location.z, this.players.get(entityplayer));
+                     this.b.remove(entityplayer);
+                     this.players.remove(entityplayer);
+@@ -418,7 +494,11 @@ public class PlayerChunkMap {
+                     return;
+                 }
+                 // CraftBukkit end
+-                Chunk chunk = PlayerChunkMap.this.world.getChunkAt(this.location.x, this.location.z);
++                // Titanium start
++                if (chunk == null) {
++                    chunk = PlayerChunkMap.this.world.getChunkAt(this.location.x, this.location.z);
++                }
++                // Titanium end
+ 
+                 if (chunk.isReady()) {
+                     entityplayer.playerConnection.sendPacket(new PacketPlayOutMapChunk(chunk, true, 0));
+@@ -445,7 +525,13 @@ public class PlayerChunkMap {
+         }
+ 
+         public void a() {
+-            this.a(PlayerChunkMap.this.world.getChunkAt(this.location.x, this.location.z));
++            // Titanium start
++            Chunk chunk = this.chunk;
++            if (chunk == null) {
++                chunk = PlayerChunkMap.this.world.getChunkAt(this.location.x, this.location.z);
++            }
++            this.a(chunk);
++            // Titanium end
+         }
+ 
+         private void a(Chunk chunk) {
+diff --git a/src/main/java/net/minecraft/server/StructureGenerator.java b/src/main/java/net/minecraft/server/StructureGenerator.java
+index d48a43569..9d3f85c33 100644
+--- a/src/main/java/net/minecraft/server/StructureGenerator.java
++++ b/src/main/java/net/minecraft/server/StructureGenerator.java
+@@ -1,16 +1,16 @@
+ package net.minecraft.server;
+ 
+-import com.google.common.collect.Maps;
+ import java.util.Iterator;
+ import java.util.List;
+ import java.util.Map;
+ import java.util.Random;
+ import java.util.concurrent.Callable;
++import java.util.concurrent.ConcurrentHashMap;
+ 
+ public abstract class StructureGenerator extends WorldGenBase {
+ 
+     private PersistentStructure d;
+-    protected Map<Long, StructureStart> e = Maps.newHashMap();
++    protected Map<Long, StructureStart> e = new ConcurrentHashMap<>(); // Titanium - ConcurrentHashMap
+ 
+     public StructureGenerator() {}
+ 
+diff --git a/src/main/java/net/minecraft/server/StructurePiece.java b/src/main/java/net/minecraft/server/StructurePiece.java
+index 0f4a4999b..e0b8561a5 100644
+--- a/src/main/java/net/minecraft/server/StructurePiece.java
++++ b/src/main/java/net/minecraft/server/StructurePiece.java
+@@ -56,9 +56,11 @@ public abstract class StructurePiece {
+     }
+ 
+     public static StructurePiece a(List<StructurePiece> list, StructureBoundingBox structureboundingbox) {
++        StructurePiece structurepiece; // Paper
++        synchronized (list) { // Paper - synchronize main structure list
+         Iterator iterator = list.iterator();
+ 
+-        StructurePiece structurepiece;
++        //StructurePiece structurepiece; // Paper - move up
+ 
+         do {
+             if (!iterator.hasNext()) {
+@@ -67,7 +69,7 @@ public abstract class StructurePiece {
+ 
+             structurepiece = (StructurePiece) iterator.next();
+         } while (structurepiece.c() == null || !structurepiece.c().a(structureboundingbox));
+-
++        } // Paper
+         return structurepiece;
+     }
+ 
+diff --git a/src/main/java/net/minecraft/server/StructureStart.java b/src/main/java/net/minecraft/server/StructureStart.java
+index 22ba3221a..1f44c5b9e 100644
+--- a/src/main/java/net/minecraft/server/StructureStart.java
++++ b/src/main/java/net/minecraft/server/StructureStart.java
+@@ -1,12 +1,13 @@
+ package net.minecraft.server;
+ 
++import com.google.common.collect.Lists;
+ import java.util.Iterator;
+-import java.util.LinkedList;
++import java.util.List;
+ import java.util.Random;
+ 
+ public abstract class StructureStart {
+ 
+-    protected LinkedList<StructurePiece> a = new LinkedList();
++    protected final List<StructurePiece> a = java.util.Collections.synchronizedList(Lists.newArrayList()); // Paper - synchronized list // Titanium - LinkedList -> ArrayList
+     protected StructureBoundingBox b;
+     private int c;
+     private int d;
+@@ -22,33 +23,33 @@ public abstract class StructureStart {
+         return this.b;
+     }
+ 
+-    public LinkedList<StructurePiece> b() {
++    public List<StructurePiece> b() { // Titanium - LinkedList -> ArrayList
+         return this.a;
+     }
+ 
+     public void a(World world, Random random, StructureBoundingBox structureboundingbox) {
+         Iterator iterator = this.a.iterator();
+ 
++        synchronized (this.a) { // Titanium - synchronize
+         while (iterator.hasNext()) {
+             StructurePiece structurepiece = (StructurePiece) iterator.next();
+ 
+             if (structurepiece.c().a(structureboundingbox) && !structurepiece.a(world, random, structureboundingbox)) {
+                 iterator.remove();
+             }
+-        }
+-
++        }} // Titanium
+     }
+ 
+     protected void c() {
+         this.b = StructureBoundingBox.a();
++        synchronized (this.a) { // Paper - synchronize
+         Iterator iterator = this.a.iterator();
+ 
+         while (iterator.hasNext()) {
+             StructurePiece structurepiece = (StructurePiece) iterator.next();
+ 
+             this.b.b(structurepiece.c());
+-        }
+-
++        }} // Paper
+     }
+ 
+     public NBTTagCompound a(int i, int j) {
+@@ -59,13 +60,14 @@ public abstract class StructureStart {
+         nbttagcompound.setInt("ChunkZ", j);
+         nbttagcompound.set("BB", this.b.g());
+         NBTTagList nbttaglist = new NBTTagList();
++        synchronized (this.a) { // Titanium - synchronize
+         Iterator iterator = this.a.iterator();
+ 
+         while (iterator.hasNext()) {
+             StructurePiece structurepiece = (StructurePiece) iterator.next();
+ 
+             nbttaglist.add(structurepiece.b());
+-        }
++        }} // Titanium
+ 
+         nbttagcompound.set("Children", nbttaglist);
+         this.a(nbttagcompound);
+@@ -103,14 +105,14 @@ public abstract class StructureStart {
+         int l = k - this.b.e;
+ 
+         this.b.a(0, l, 0);
++        synchronized (this.a) { // Paper - synchronize
+         Iterator iterator = this.a.iterator();
+ 
+         while (iterator.hasNext()) {
+             StructurePiece structurepiece = (StructurePiece) iterator.next();
+ 
+             structurepiece.a(0, l, 0);
+-        }
+-
++        }} // Paper
+     }
+ 
+     protected void a(World world, Random random, int i, int j) {
+@@ -127,14 +129,14 @@ public abstract class StructureStart {
+         int i1 = l - this.b.b;
+ 
+         this.b.a(0, i1, 0);
++        synchronized (this.a) { // Paper - synchronize
+         Iterator iterator = this.a.iterator();
+ 
+         while (iterator.hasNext()) {
+             StructurePiece structurepiece = (StructurePiece) iterator.next();
+ 
+             structurepiece.a(0, i1, 0);
+-        }
+-
++        }} // Paper
+     }
+ 
+     public boolean d() {
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index 7668c02c0..2fd831617 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -331,7 +331,7 @@ public abstract class World implements IBlockAccess {
+     }
+ 
+     private boolean isValidLocation(BlockPosition blockposition) {
+-        return blockposition.getX() >= -30000000 && blockposition.getZ() >= -30000000 && blockposition.getX() < 30000000 && blockposition.getZ() < 30000000 && blockposition.getY() >= 0 && blockposition.getY() < 256;
++        return isInWorldBounds(blockposition.getX(), blockposition.getZ()) && blockposition.getY() >= 0 && blockposition.getY() <= 255; // Titanium
+     }
+ 
+     public boolean isEmpty(BlockPosition blockposition) {
+@@ -347,7 +347,7 @@ public abstract class World implements IBlockAccess {
+     }
+ 
+     public boolean a(BlockPosition blockposition, boolean flag) {
+-        return !this.isValidLocation(blockposition) ? false : this.isChunkLoaded(blockposition.getX() >> 4, blockposition.getZ() >> 4, flag);
++        return this.isValidLocation(blockposition) && this.isChunkLoaded(blockposition.getX() >> 4, blockposition.getZ() >> 4, flag);
+     }
+ 
+     public boolean areChunksLoaded(BlockPosition blockposition, int i) {
+@@ -488,6 +488,77 @@ public abstract class World implements IBlockAccess {
+         }
+     }
+ 
++    // Titanium start
++    public boolean setTypeAndDataIfLoaded(BlockPosition blockposition, IBlockData iblockdata, int i) {
++        // CraftBukkit start - tree generation
++        if (this.captureTreeGeneration) {
++            BlockState blockstate = null;
++            Iterator<BlockState> it = capturedBlockStates.iterator();
++            while (it.hasNext()) {
++                BlockState previous = it.next();
++                if (previous.getX() == blockposition.getX() && previous.getY() == blockposition.getY() && previous.getZ() == blockposition.getZ()) {
++                    blockstate = previous;
++                    it.remove();
++                    break;
++                }
++            }
++            if (blockstate == null) {
++                blockstate = org.bukkit.craftbukkit.block.CraftBlockState.getBlockState(this, blockposition.getX(), blockposition.getY(), blockposition.getZ(), i);
++            }
++            blockstate.setTypeId(CraftMagicNumbers.getId(iblockdata.getBlock()));
++            blockstate.setRawData((byte) iblockdata.getBlock().toLegacyData(iblockdata));
++            this.capturedBlockStates.add(blockstate);
++            return true;
++        }
++        // CraftBukkit end
++        Chunk chunk = this.getChunkIfLoaded(blockposition);
++        if (chunk != null) {
++            if (!this.isValidLocation(blockposition)) {
++                return false;
++            }
++
++            if (!this.isClientSide && this.worldData.getType() == WorldType.DEBUG_ALL_BLOCK_STATES) {
++                return false;
++            }
++
++            // CraftBukkit start - capture blockstates
++            BlockState blockstate = null;
++            if (this.captureBlockStates) {
++                blockstate = org.bukkit.craftbukkit.block.CraftBlockState.getBlockState(this, blockposition.getX(), blockposition.getY(), blockposition.getZ(), i);
++                this.capturedBlockStates.add(blockstate);
++            }
++            // CraftBukkit end
++
++            IBlockData iblockdata1 = chunk.a(blockposition, iblockdata);
++            if (iblockdata1 != null) {
++                Block block = iblockdata.getBlock();
++                Block block1 = iblockdata1.getBlock();
++
++                if (block.p() != block1.p() || block.r() != block1.r()) {
++                    this.x(blockposition);
++                }
++
++                // CraftBukkit start
++                if (!this.captureBlockStates) { // Don't notify clients or update physics while capturing blockstates
++                    // Modularize client and physic updates
++                    notifyAndUpdatePhysics(blockposition, chunk, block1, block, i);
++                }
++                // CraftBukkit end
++
++                return true;
++            }
++
++            // CraftBukkit start - remove blockstate if failed
++            if (this.captureBlockStates) {
++                this.capturedBlockStates.remove(blockstate);
++            }
++            // CraftBukkit end
++            return false;
++        }
++        return false;
++    }
++    // Titanium end
++
+     // CraftBukkit start - Split off from original setTypeAndData(int i, int j, int k, Block block, int l, int i1) method in order to directly send client and physic updates
+     public void notifyAndUpdatePhysics(BlockPosition blockposition, Chunk chunk, Block oldBlock, Block newBLock, int flag) {
+         if ((flag & 2) != 0 && (chunk == null || chunk.isReady())) {  // allow chunk to be null here as chunk.isReady() is false when we send our notification during block placement
+@@ -700,7 +771,7 @@ public abstract class World implements IBlockAccess {
+     }
+ 
+     public boolean isLightLevel(BlockPosition blockposition, int level) {
+-        if (blockposition.getX() >= -30000000 && blockposition.getZ() >= -30000000 && blockposition.getX() < 30000000 && blockposition.getZ() < 30000000) {
++        if (isInWorldBounds(blockposition.getX(), blockposition.getZ())) { // Titanium
+             if (this.getType(blockposition).getBlock().s())
+             {
+                 if (c(blockposition.up(), false) >= level)
+@@ -735,7 +806,7 @@ public abstract class World implements IBlockAccess {
+     }
+ 
+     public int c(BlockPosition blockposition, boolean flag) {
+-        if (blockposition.getX() >= -30000000 && blockposition.getZ() >= -30000000 && blockposition.getX() < 30000000 && blockposition.getZ() < 30000000) {
++        if (isInWorldBounds(blockposition.getX(), blockposition.getZ())) { // Titanium
+             if (flag && this.getType(blockposition).getBlock().s()) {
+                 int i = this.c(blockposition.up(), false);
+                 int j = this.c(blockposition.east(), false);
+@@ -779,9 +850,10 @@ public abstract class World implements IBlockAccess {
+     public BlockPosition getHighestBlockYAt(BlockPosition blockposition) {
+         int i;
+ 
+-        if (blockposition.getX() >= -30000000 && blockposition.getZ() >= -30000000 && blockposition.getX() < 30000000 && blockposition.getZ() < 30000000) {
+-            if (this.isChunkLoaded(blockposition.getX() >> 4, blockposition.getZ() >> 4, true)) {
+-                i = this.getChunkAt(blockposition.getX() >> 4, blockposition.getZ() >> 4).b(blockposition.getX() & 15, blockposition.getZ() & 15);
++        if (isInWorldBounds(blockposition.getX(), blockposition.getZ())) { // Titanium
++            Chunk chunk = this.getChunkIfLoaded(blockposition.getX() >> 4, blockposition.getZ() >> 4); // Titanium - Micro optimization
++            if (chunk != null) {
++                i = chunk.b(blockposition.getX() & 15, blockposition.getZ() & 15);
+             } else {
+                 i = 0;
+             }
+@@ -793,7 +865,7 @@ public abstract class World implements IBlockAccess {
+     }
+ 
+     public int b(int i, int j) {
+-        if (i >= -30000000 && j >= -30000000 && i < 30000000 && j < 30000000) {
++        if (isInWorldBounds(i, j)) { // Titanium
+             if (!this.isChunkLoaded(i >> 4, j >> 4, true)) {
+                 return 0;
+             } else {
+@@ -844,6 +916,8 @@ public abstract class World implements IBlockAccess {
+         return this.worldProvider.p()[this.getLightLevel(blockposition)];
+     }
+ 
++    private static final IBlockData AIR_DATA = Blocks.AIR.getBlockData(); // Titanium - Micro optimization
++
+     // Paper start - reduces need to do isLoaded before getType
+     public IBlockData getTypeIfLoaded(BlockPosition blockposition) {
+         // CraftBukkit start - tree generation
+@@ -859,7 +933,7 @@ public abstract class World implements IBlockAccess {
+         // CraftBukkit end
+         Chunk chunk = this.getChunkIfLoaded(blockposition);
+         if (chunk != null) {
+-            return this.isValidLocation(blockposition) ? chunk.getBlockData(blockposition) : Blocks.AIR.getBlockData();
++            return this.isValidLocation(blockposition) ? chunk.getBlockData(blockposition) : AIR_DATA; // Titanium
+         }
+         return null;
+     }
+@@ -884,7 +958,7 @@ public abstract class World implements IBlockAccess {
+         }
+         // CraftBukkit end
+         if (!this.isValidLocation(blockposition)) {
+-            return Blocks.AIR.getBlockData();
++            return AIR_DATA; // Titanium
+         } else {
+             Chunk chunk = this.getChunkAtWorldCoords(blockposition);
+ 
+@@ -3387,4 +3461,10 @@ public abstract class World implements IBlockAccess {
+ 
+         return k >= -short0 && k <= short0 && l >= -short0 && l <= short0 && this.keepSpawnInMemory; // CraftBukkit - Added 'this.keepSpawnInMemory'
+     }
++
++    // Titanium start - some cleanup
++    private static boolean isInWorldBounds(int x, int z) {
++        return x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000;
++    }
++    // Titanium end
+ }
+diff --git a/src/main/java/net/minecraft/server/WorldGenLargeFeature.java b/src/main/java/net/minecraft/server/WorldGenLargeFeature.java
+index 0b8340e35..ba86514f5 100644
+--- a/src/main/java/net/minecraft/server/WorldGenLargeFeature.java
++++ b/src/main/java/net/minecraft/server/WorldGenLargeFeature.java
+@@ -89,7 +89,7 @@ public class WorldGenLargeFeature extends StructureGenerator {
+         StructureStart structurestart = this.c(blockposition);
+ 
+         if (structurestart != null && structurestart instanceof WorldGenLargeFeature.WorldGenLargeFeatureStart && !structurestart.a.isEmpty()) {
+-            StructurePiece structurepiece = (StructurePiece) structurestart.a.getFirst();
++            StructurePiece structurepiece = structurestart.a.get(0); // Titanium - LinkedList -> ArrayList
+ 
+             return structurepiece instanceof WorldGenRegistration.WorldGenWitchHut;
+         } else {
+diff --git a/src/main/java/net/minecraft/server/WorldGenMinable.java b/src/main/java/net/minecraft/server/WorldGenMinable.java
+index 2307c87b6..ae22fb53f 100644
+--- a/src/main/java/net/minecraft/server/WorldGenMinable.java
++++ b/src/main/java/net/minecraft/server/WorldGenMinable.java
+@@ -7,6 +7,7 @@ public class WorldGenMinable extends WorldGenerator {
+ 
+     private final IBlockData a;
+     private final int b;
++    private final float b8;
+     private final Predicate<IBlockData> c;
+ 
+     public WorldGenMinable(IBlockData iblockdata, int i) {
+@@ -16,15 +17,20 @@ public class WorldGenMinable extends WorldGenerator {
+     public WorldGenMinable(IBlockData iblockdata, int i, Predicate<IBlockData> predicate) {
+         this.a = iblockdata;
+         this.b = i;
++        this.b8 = (float) this.b / 8.0F; // Titanium
+         this.c = predicate;
+     }
+ 
+     public boolean generate(World world, Random random, BlockPosition blockposition) {
+         float f = random.nextFloat() * 3.1415927F;
+-        double d0 = (double) ((float) (blockposition.getX() + 8) + MathHelper.sin(f) * (float) this.b / 8.0F);
+-        double d1 = (double) ((float) (blockposition.getX() + 8) - MathHelper.sin(f) * (float) this.b / 8.0F);
+-        double d2 = (double) ((float) (blockposition.getZ() + 8) + MathHelper.cos(f) * (float) this.b / 8.0F);
+-        double d3 = (double) ((float) (blockposition.getZ() + 8) - MathHelper.cos(f) * (float) this.b / 8.0F);
++        // Titanium start - micro optimization
++        float sinF = MathHelper.sin(f) * this.b8; // Titanium
++        float cosF = MathHelper.cos(f) * this.b8; // Titanium
++        double d0 = ((float) (blockposition.getX() + 8) + sinF);
++        double d1 = ((float) (blockposition.getX() + 8) - sinF);
++        double d2 = ((float) (blockposition.getZ() + 8) + cosF);
++        double d3 = ((float) (blockposition.getZ() + 8) - cosF);
++        // Titanium end
+         double d4 = (double) (blockposition.getY() + random.nextInt(3) - 2);
+         double d5 = (double) (blockposition.getY() + random.nextInt(3) - 2);
+ 
+@@ -35,12 +41,12 @@ public class WorldGenMinable extends WorldGenerator {
+             double d8 = d2 + (d3 - d2) * (double) f1;
+             double d9 = random.nextDouble() * (double) this.b / 16.0D;
+             double d10 = (double) (MathHelper.sin(3.1415927F * f1) + 1.0F) * d9 + 1.0D;
+-            double d11 = (double) (MathHelper.sin(3.1415927F * f1) + 1.0F) * d9 + 1.0D;
++            //double d11 = (double) (MathHelper.sin(3.1415927F * f1) + 1.0F) * d9 + 1.0D; // Titanium - don't calculate same thing twice
+             int j = MathHelper.floor(d6 - d10 / 2.0D);
+-            int k = MathHelper.floor(d7 - d11 / 2.0D);
++            int k = MathHelper.floor(d7 - d10 / 2.0D); // Titanium - don't calculate same thing twice (d11 -> d10)
+             int l = MathHelper.floor(d8 - d10 / 2.0D);
+             int i1 = MathHelper.floor(d6 + d10 / 2.0D);
+-            int j1 = MathHelper.floor(d7 + d11 / 2.0D);
++            int j1 = MathHelper.floor(d7 + d10 / 2.0D); // Titanium - don't calculate same thing twice (d11 -> d10)
+             int k1 = MathHelper.floor(d8 + d10 / 2.0D);
+ 
+             for (int l1 = j; l1 <= i1; ++l1) {
+@@ -48,7 +54,7 @@ public class WorldGenMinable extends WorldGenerator {
+ 
+                 if (d12 * d12 < 1.0D) {
+                     for (int i2 = k; i2 <= j1; ++i2) {
+-                        double d13 = ((double) i2 + 0.5D - d7) / (d11 / 2.0D);
++                        double d13 = ((double) i2 + 0.5D - d7) / (d10 / 2.0D); // Titanium - don't calculate same thing twice (d11 -> d10)
+ 
+                         if (d12 * d12 + d13 * d13 < 1.0D) {
+                             for (int j2 = l; j2 <= k1; ++j2) {
+@@ -57,8 +63,10 @@ public class WorldGenMinable extends WorldGenerator {
+                                 if (d12 * d12 + d13 * d13 + d14 * d14 < 1.0D) {
+                                     BlockPosition blockposition1 = new BlockPosition(l1, i2, j2);
+ 
+-                                    if (this.c.apply(world.getType(blockposition1))) {
+-                                        world.setTypeAndData(blockposition1, this.a, 2);
++                                    // Titanium start - don't load/gen chunks
++                                    if (this.c.apply(world.getTypeIfLoaded(blockposition1))) {
++                                        world.setTypeAndDataIfLoaded(blockposition1, this.a, 2);
++                                        // Titanium end
+                                     }
+                                 }
+                             }
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index 0ca4bb063..778800b5a 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -822,7 +822,11 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+             gen = new org.bukkit.craftbukkit.generator.NormalChunkGenerator(this, this.getSeed());
+         }
+ 
+-        this.chunkProviderServer = new ChunkProviderServer(this, ichunkloader, gen);
++        // Titanium (Paper) start
++        this.chunkProviderServer = TitaniumConfig.get().chunk.async.enabled
++                ? new PaperAsyncChunkProvider(this, ichunkloader, gen)
++                : new ChunkProviderServer(this, ichunkloader, gen);
++        // Titanium end
+         // CraftBukkit end
+         return this.chunkProviderServer;
+     }
+diff --git a/src/main/java/net/titanium/chunk/ChunkMap.java b/src/main/java/net/titanium/chunk/ChunkMap.java
+new file mode 100644
+index 000000000..2f4460edf
+--- /dev/null
++++ b/src/main/java/net/titanium/chunk/ChunkMap.java
+@@ -0,0 +1,119 @@
++package net.titanium.chunk;
++
++import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
++import java.util.Map;
++import net.minecraft.server.Chunk;
++import net.minecraft.server.ChunkCoordIntPair;
++import net.minecraft.server.MCUtil;
++import org.apache.logging.log4j.LogManager;
++import org.apache.logging.log4j.Logger;
++import org.bukkit.craftbukkit.util.LongHash;
++
++// Titanium - Backported from Paper 1.13.2
++public class ChunkMap extends Long2ObjectOpenHashMap<Chunk> {
++
++    private static final Logger LOGGER = LogManager.getLogger();
++
++    private Chunk lastChunkByPos = null;
++
++    public ChunkMap(int expected, float f) {
++        super(expected, f);
++    }
++
++    public Chunk put(long key, Chunk chunk) {
++        org.spigotmc.AsyncCatcher.catchOp("Async Chunk put");
++
++        this.lastChunkByPos = chunk;
++        Chunk oldChunk;
++        synchronized (this) {
++            // synchronize so any async gets are safe
++            oldChunk = super.put(key, chunk);
++        }
++
++        if (oldChunk == null) { // Paper - we should never be overwriting chunks
++            // Update neighbor counts
++            for (int x = -2; x < 3; x++) {
++                for (int z = -2; z < 3; z++) {
++                    if (x == 0 && z == 0) {
++                        continue;
++                    }
++
++                    Chunk neighbor = super.get(LongHash.toLong(chunk.locX + x, chunk.locZ + z));
++                    if (neighbor != null) {
++                        neighbor.setNeighborLoaded(-x, -z);
++                        chunk.setNeighborLoaded(x, z);
++                    }
++                }
++            }
++        } else {
++            LOGGER.error("Overwrote existing chunk! (" + chunk.world.getWorld().getName() + ":" + chunk.locX+"," + chunk.locZ + ")", new IllegalStateException());
++        }
++
++        return oldChunk;
++    }
++
++    public Chunk put(Long key, Chunk chunk) {
++        return this.put(key.longValue(), chunk);
++    }
++
++    public Chunk remove(long key) {
++        org.spigotmc.AsyncCatcher.catchOp("Async Chunk remove");
++
++        Chunk oldChunk;
++        synchronized (this) {
++            // synchronize so any async gets are safe
++            oldChunk = super.remove(key);
++        }
++
++        if (oldChunk != null) { // Paper - don't decrement if we didn't remove anything
++            // Update neighbor counts
++            for (int x = -2; x < 3; x++) {
++                for (int z = -2; z < 3; z++) {
++                    if (x == 0 && z == 0) {
++                        continue;
++                    }
++
++                    Chunk neighbor = super.get(LongHash.toLong(oldChunk.locX + x, oldChunk.locZ + z));
++                    if (neighbor != null) {
++                        neighbor.setNeighborUnloaded(-x, -z);
++                        oldChunk.setNeighborUnloaded(x, z);
++                    }
++                }
++            }
++        }
++
++        if (this.lastChunkByPos != null && key == this.lastChunkByPos.chunkKey) {
++            this.lastChunkByPos = null;
++        }
++
++        return oldChunk;
++    }
++
++    @Override
++    public Chunk get(long key) {
++        if (MCUtil.isMainThread()) {
++            if (this.lastChunkByPos != null && key == this.lastChunkByPos.chunkKey) {
++                return this.lastChunkByPos;
++            }
++            Chunk chunk = super.get(key);
++            return chunk != null ? (this.lastChunkByPos = chunk) : null;
++        } else {
++            synchronized (this) {
++                return super.get(key);
++            }
++        }
++    }
++
++    public Chunk remove(Object key) {
++        return MCUtil.ensureMain("Chunk Remove", () -> this.remove(((Long) key).longValue()));
++    }
++
++    public void putAll(Map<? extends Long, ? extends Chunk> map) {
++        throw new RuntimeException("Not yet implemented");
++    }
++
++    public boolean remove(Object object, Object object1) {
++        throw new RuntimeException("Not yet implemented");
++    }
++
++}
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index 1786dad27..3c1d0951d 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -266,6 +266,32 @@ public class TitaniumConfig extends TitaniumConfigSection {
+ 
+         }
+ 
++        public Async async = new Async();
++
++        public static class Async extends TitaniumConfigSection {
++
++            @Comment("Whether to use modern Async Chunk System (Backported from Paper 1.13.2).")
++            @Comment("This system support not only Async Chunk Loading, but also Async Chunk Generation!")
++            @Comment("Keep in mind that it's still in experimental phase, so use it with caution.")
++            public boolean enabled = false;
++
++            @Comment("The amount of threads to use for chunk loading.")
++            @Comment("If values is -1, it will be set to recommended value (amount of cores).")
++            public int loadThreads = -1;
++            @Comment("Whether to use load executor per world or one shared executor.")
++            public boolean loadExecutorPerWorld = false;
++
++            @Comment("Whether to generate chunks asynchronously (1 thread per world).")
++            public boolean generation = true;
++            @Comment("Whether to use gen executor per world or one shared executor.")
++            public boolean generationThreadPerWorld = true;
++            @Comment("Whether to force async generation (for eg. when custom world generator is used).")
++            public boolean forceAsyncGeneration = false;
++            @Comment("List of worlds that should use async generation (even if they're using custom world generator, that doesn't support it). This option works independently from force-async-generation.")
++            public Set<String> forceAsyncGenerationWorlds = new HashSet<>();
++
++        }
++
+     }
+ 
+     public Tnt tnt = new Tnt();
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 022623244..35632385a 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
+ import javax.imageio.ImageIO;
+ import net.md_5.bungee.api.chat.BaseComponent;
+ import net.minecraft.server.BlockPosition;
++import net.minecraft.server.ChunkCoordIntPair;
+ import net.minecraft.server.ChunkProviderServer;
+ import net.minecraft.server.ChunkRegionLoader;
+ import net.minecraft.server.CommandAbstract;
+@@ -80,6 +81,7 @@ import net.minecraft.server.WorldNBTStorage;
+ import net.minecraft.server.WorldServer;
+ import net.minecraft.server.WorldSettings;
+ import net.minecraft.server.WorldType;
++import net.titanium.AsyncPriority;
+ import net.titanium.config.BukkitConfig;
+ import net.titanium.config.LegacyConfigHelper;
+ import net.titanium.config.TitaniumConfig;
+@@ -1121,8 +1123,11 @@ public final class CraftServer implements Server {
+         if (internal.getWorld().getKeepSpawnInMemory()) {
+             short short1 = 196;
+             long i = System.currentTimeMillis();
+-            for (int j = -short1; j <= short1; j += 16) {
+-                for (int k = -short1; k <= short1; k += 16) {
++            // Paper start
++            for (ChunkCoordIntPair coords : internal.chunkProviderServer.getSpiralOutChunks(internal.getSpawn(), short1 >> 4)) {{
++                    int j = coords.x;
++                    int k = coords.z;
++            // Paper end
+                     long l = System.currentTimeMillis();
+ 
+                     if (l < i) {
+@@ -1138,7 +1143,7 @@ public final class CraftServer implements Server {
+                     }
+ 
+                     BlockPosition chunkcoordinates = internal.getSpawn();
+-                    internal.chunkProviderServer.getChunkAt(chunkcoordinates.getX() + j >> 4, chunkcoordinates.getZ() + k >> 4, () -> {}); // IonSpigot - Async Spawn Chunks
++                    internal.chunkProviderServer.getChunkAt(chunkcoordinates.getX() + j >> 4, chunkcoordinates.getZ() + k >> 4, true, true, AsyncPriority.HIGH, chunk -> {}); // Titanium - use new methods
+                 }
+             }
+         }
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+index e050c4a75..be4a5fc3c 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+@@ -15,6 +15,7 @@ import java.util.UUID;
+ import java.util.concurrent.CompletableFuture;
+ import net.minecraft.server.*;
+ 
++import net.titanium.AsyncPriority;
+ import net.titanium.config.TitaniumConfig;
+ import org.apache.commons.lang.Validate;
+ import org.bukkit.BlockChangeDelegate;
+@@ -58,6 +59,7 @@ import org.bukkit.plugin.Plugin;
+ import org.bukkit.plugin.messaging.StandardMessenger;
+ import org.bukkit.util.Vector;
+ import org.github.paperspigot.exception.ServerInternalException;
++import org.jetbrains.annotations.NotNull;
+ 
+ public class CraftWorld implements World {
+     public static final int CUSTOM_DIMENSION_OFFSET = 10;
+@@ -125,23 +127,15 @@ public class CraftWorld implements World {
+         }
+     }
+ 
+-    // PaperSpigot start - Async chunk load API
+-    public void getChunkAtAsync(final int x, final int z, final ChunkLoadCallback callback) {
++    // Paper start - Async chunk load API
++    @Override
++    public java.util.concurrent.@NotNull CompletableFuture<Chunk> getChunkAtAsync(final int x, final int z, final boolean gen) {
+         final ChunkProviderServer cps = this.world.chunkProviderServer;
+-        cps.getChunkAt(x, z, new Runnable() {
+-            @Override
+-            public void run() {
+-                callback.onLoad(cps.getChunkAt(x, z).bukkitChunk);
+-            }
+-        });
+-    }
+-    public void getChunkAtAsync(Block block, ChunkLoadCallback callback) {
+-        getChunkAtAsync(block.getX() >> 4, block.getZ() >> 4, callback);
++        java.util.concurrent.CompletableFuture<Chunk> future = new java.util.concurrent.CompletableFuture<>();
++        cps.getChunkAt(x, z, true, gen, chunk -> future.complete(chunk != null ? chunk.bukkitChunk : null));
++        return future;
+     }
+-    public void getChunkAtAsync(Location location, ChunkLoadCallback callback) {
+-        getChunkAtAsync(location.getBlockX() >> 4, location.getBlockZ() >> 4, callback);
+-    }
+-    // PaperSpigot end
++    // Paper end
+ 
+     public Chunk getChunkAt(int x, int z) {
+         return this.world.chunkProviderServer.getChunkAt(x, z).bukkitChunk;
+@@ -302,7 +296,8 @@ public class CraftWorld implements World {
+ 
+             chunk.addEntities();
+ 
+-            // Update neighbor counts
++            // Titanium start - Improve chunk system
++            /* // Update neighbor counts
+             for (int x = -2; x < 3; x++) {
+                 for (int z = -2; z < 3; z++) {
+                     if (x == 0 && z == 0) {
+@@ -315,7 +310,8 @@ public class CraftWorld implements World {
+                         chunk.setNeighborLoaded(x, z);
+                     }
+                 }
+-            }
++            } */
++            // Titanium end
+             // CraftBukkit end
+ 
+             chunk.loadNearby(world.chunkProviderServer, world.chunkProviderServer, cx, cz);
+@@ -1524,20 +1520,27 @@ public class CraftWorld implements World {
+ 
+         @Override
+         public CompletableFuture<Chunk> getChunkAtAsync(int x, int z) {
+-            CompletableFuture<Chunk> future = new CompletableFuture<>();
+-            CraftWorld.this.getChunkAtAsync(x, z, future::complete);
+-            return future;
++            return CraftWorld.this.getChunkAtAsync(x, z);
+         }
+ 
+         @Override
+         public CompletableFuture<Chunk> getChunkAtAsync(Location location) {
+-            return getChunkAtAsync(location.getBlockX(), location.getBlockZ());
++            return CraftWorld.this.getChunkAtAsync(location);
+         }
+ 
+         @Override
+         public CompletableFuture<Chunk> getChunkAtAsync(Block block) {
+-            return getChunkAtAsync(block.getX(), block.getZ());
++            return CraftWorld.this.getChunkAtAsync(block);
+         }
++
++        @Override
++        public CompletableFuture<Chunk> getChunkAtAsync(int x, int z, boolean gen, AsyncPriority priority) {
++            final ChunkProviderServer cps = CraftWorld.this.world.chunkProviderServer;
++            java.util.concurrent.CompletableFuture<Chunk> future = new java.util.concurrent.CompletableFuture<>();
++            cps.getChunkAt(x, z, true, gen, priority, chunk -> future.complete(chunk != null ? chunk.bukkitChunk : null));
++            return future;
++        }
++
+     };
+ 
+     public Titanium titanium() {
+diff --git a/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOExecutor.java b/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOExecutor.java
+index f02cb1783..99f935465 100644
+--- a/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOExecutor.java
++++ b/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOExecutor.java
+@@ -3,6 +3,7 @@ package org.bukkit.craftbukkit.chunkio;
+ import net.minecraft.server.Chunk;
+ import net.minecraft.server.ChunkProviderServer;
+ import net.minecraft.server.ChunkRegionLoader;
++import net.minecraft.server.MCUtil;
+ import net.minecraft.server.World;
+ import net.titanium.config.TitaniumConfig;
+ import org.bukkit.craftbukkit.util.AsynchronousExecutor;
+@@ -14,7 +15,7 @@ public class ChunkIOExecutor {
+     private static final AsynchronousExecutor<QueuedChunk, Chunk, Runnable, RuntimeException> instance = new AsynchronousExecutor<QueuedChunk, Chunk, Runnable, RuntimeException>(new ChunkIOProvider(), BASE_THREADS);
+ 
+     public static Chunk syncChunkLoad(World world, ChunkRegionLoader loader, ChunkProviderServer provider, int x, int z) {
+-        return instance.getSkipQueue(new QueuedChunk(x, z, loader, world, provider));
++        return MCUtil.ensureMain("Async Chunk Load", () -> instance.getSkipQueue(new QueuedChunk(x, z, loader, world, provider))); // Paper - ensure main thread
+     }
+ 
+     public static void queueChunkLoad(World world, ChunkRegionLoader loader, ChunkProviderServer provider, int x, int z, Runnable runnable) {
+@@ -26,6 +27,14 @@ public class ChunkIOExecutor {
+         instance.drop(new QueuedChunk(x, z, null, world, null), runnable);
+     }
+ 
++    public static boolean isQueuedToLoad(World world, int x, int z) {
++        try {
++            return instance.get(new QueuedChunk(x, z, null, world, null)) != null;
++        } catch (IllegalStateException ex) {
++            return false;
++        }
++    }
++
+     public static void adjustPoolSize(int players) {
+         int size = Math.max(BASE_THREADS, (int) Math.ceil(players / PLAYERS_PER_THREAD));
+         instance.setActiveThreads(size);
+diff --git a/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOProvider.java b/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOProvider.java
+index c7e2b561f..6b34e1afb 100644
+--- a/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOProvider.java
++++ b/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOProvider.java
+@@ -46,35 +46,8 @@ class ChunkIOProvider implements AsynchronousExecutor.CallBackProvider<QueuedChu
+         queuedChunk.loader.loadEntities(chunk, queuedChunk.compound.getCompound("Level"), queuedChunk.world);
+         chunk.setLastSaved(queuedChunk.provider.world.getTime());
+         queuedChunk.provider.chunks.put(LongHash.toLong(queuedChunk.x, queuedChunk.z), chunk);
+-        chunk.addEntities();
+ 
+-        if (queuedChunk.provider.chunkProvider != null) {
+-            //queuedChunk.provider.world.timings.syncChunkLoadStructuresTimer.startTiming(); // Spigot // Purpur
+-            queuedChunk.provider.chunkProvider.recreateStructures(chunk, queuedChunk.x, queuedChunk.z);
+-            //queuedChunk.provider.world.timings.syncChunkLoadStructuresTimer.stopTiming(); // Spigot // Purpur
+-        }
+-
+-        Server server = queuedChunk.provider.world.getServer();
+-        if (server != null) {
+-            server.getPluginManager().callEvent(new org.bukkit.event.world.ChunkLoadEvent(chunk.bukkitChunk, false));
+-        }
+-
+-        // Update neighbor counts
+-        for (int x = -2; x < 3; x++) {
+-            for (int z = -2; z < 3; z++) {
+-                if (x == 0 && z == 0) {
+-                    continue;
+-                }
+-
+-                Chunk neighbor = queuedChunk.provider.getChunkIfLoaded(chunk.locX + x, chunk.locZ + z);
+-                if (neighbor != null) {
+-                    neighbor.setNeighborLoaded(-x, -z);
+-                    chunk.setNeighborLoaded(x, z);
+-                }
+-            }
+-        }
+-
+-        chunk.loadNearby(queuedChunk.provider, queuedChunk.provider, queuedChunk.x, queuedChunk.z);
++        queuedChunk.provider.postChunk(chunk, false, true); // Titanium
+     }
+ 
+     public void callStage3(QueuedChunk queuedChunk, Chunk chunk, Runnable runnable) throws RuntimeException {
+diff --git a/src/main/java/org/bukkit/craftbukkit/generator/CustomChunkGenerator.java b/src/main/java/org/bukkit/craftbukkit/generator/CustomChunkGenerator.java
+index 04dd15db1..4b0f9e607 100644
+--- a/src/main/java/org/bukkit/craftbukkit/generator/CustomChunkGenerator.java
++++ b/src/main/java/org/bukkit/craftbukkit/generator/CustomChunkGenerator.java
+@@ -14,6 +14,7 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
+     private final ChunkGenerator generator;
+     private final WorldServer world;
+     private final Random random;
++    public final boolean asyncSupported; // Paper
+     private final WorldGenStronghold strongholdGen = new WorldGenStronghold();
+ 
+     private static class CustomBiomeGrid implements BiomeGrid {
+@@ -31,6 +32,15 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
+     public CustomChunkGenerator(World world, long seed, ChunkGenerator generator) {
+         this.world = (WorldServer) world;
+         this.generator = generator;
++        // Paper start
++        boolean asyncSupported = false;
++        try {
++            java.lang.reflect.Field asyncSafe = generator.getClass().getDeclaredField("PAPER_ASYNC_SAFE");
++            asyncSafe.setAccessible(true);
++            asyncSupported = asyncSafe.getBoolean(generator);
++        } catch (NoSuchFieldException | IllegalAccessException ignored) {}
++        this.asyncSupported = asyncSupported;
++        // Paper end
+ 
+         this.random = new Random(seed);
+     }
+-- 
+2.36.0.windows.1
+

@@ -1,0 +1,62 @@
+From 1eef316a00f8c8ba9126adf6878b8ed9989d8a63 Mon Sep 17 00:00:00 2001
+From: Michael Himing <mhiming@gmail.com>
+Date: Sat, 18 Jun 2022 12:00:37 +0200
+Subject: [PATCH] Implement [Paper-0196] Fix block break desync by Michael
+ Himing
+
+Co-authored-by: Peridot <peridot491@protonmail.com>
+
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index 74e0fd86e..5f20925b5 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -16,6 +16,7 @@ import java.util.List;
+ import java.util.Set;
+ import java.util.concurrent.Callable;
+ import net.titanium.config.TitaniumConfig;
++import net.titanium.util.MathUtil;
+ import org.apache.commons.lang3.StringUtils;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+@@ -621,6 +622,18 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+             if (d3 > 36.0D) {
+                 return;
+             } else if (blockposition.getY() >= this.minecraftServer.getMaxBuildHeight()) {
++                int chunkX = blockposition.getX() >> 4;
++                int chunkZ = blockposition.getZ() >> 4;
++                if (TitaniumConfig.get().fixBlockBreakDesync && worldserver.isChunkLoaded(chunkX, chunkZ >> 4, true)) { // Paper - Fix block break desync - Don't send for unloaded chunks
++                    // Titanium start - fix for Nocom exploit (I think)
++                    int deltaX = chunkX - player.getChunkX();
++                    int deltaZ = chunkZ - player.getChunkZ();
++                    int distanceSquared = deltaX * deltaX + deltaZ * deltaZ;
++                    if (distanceSquared <= MathUtil.pow2(TitaniumConfig.get().spigot.worldSettings.viewDistance)) {
++                    // Titanium end
++                        this.sendPacket(new PacketPlayOutBlockChange(worldserver, blockposition)); // Paper - Fix block break desync
++                    }
++                }
+                 return;
+             } else {
+                 if (packetplayinblockdig.c() == PacketPlayInBlockDig.EnumPlayerDigType.START_DESTROY_BLOCK) {
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index 0706450e4..bb946b5dc 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -87,11 +87,14 @@ public class TitaniumConfig extends TitaniumConfigSection {
+     @Comment("Making this value even bigger could be good idea and have good impact on performance.")
+     public int playerTimeStatisticsInterval = 20;
+ 
++    @Comment("Whether to fix block break desync which sometimes appear.")
++    @Comment("It can have impact on performance (probably small, but still) since it have a little calculations (to fix Nocom exploit).")
++    public boolean fixBlockBreakDesync = false;
++
+     public GameMechanics gameMechanics = new GameMechanics();
+ 
+     public static class GameMechanics extends TitaniumConfigSection {
+ 
+-
+         public boolean tickFluids = true;
+ 
+     }
+-- 
+2.36.0.windows.1
+

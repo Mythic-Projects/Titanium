@@ -1,0 +1,25 @@
+From 709089726fe96944a9500f6797a981bcb51d84f7 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Wed, 25 May 2022 22:17:14 +0200
+Subject: [PATCH] Implement [Tuinity-????] Skip updating entity tracker without
+ players
+
+
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 958556f7..006dc56a 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -900,7 +900,9 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+                 }
+                 try {
+                     // PandaSpigot end
+-                    worldserver.getTracker().updatePlayers();
++                    if (this.getPlayerList().getPlayerCount() != 0) { // Tuinity
++                        worldserver.getTracker().updatePlayers();
++                    }
+                     // PandaSpigot start - controlled flush for entity tracker packets
+                 } finally {
+                     for (NetworkManager networkManager : disabledFlushes) {
+-- 
+2.36.0.windows.1
+

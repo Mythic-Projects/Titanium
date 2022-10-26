@@ -1,0 +1,49 @@
+From 8d1514023615b6371873adb92ff36a63f10f5016 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Wed, 15 Jun 2022 21:38:43 +0200
+Subject: [PATCH] Add Server#setMaxPlayers
+
+
+diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
+index 7696b6f7..a7b8c8f5 100644
+--- a/src/main/java/org/bukkit/Bukkit.java
++++ b/src/main/java/org/bukkit/Bukkit.java
+@@ -161,6 +161,16 @@ public final class Bukkit {
+         return server.getMaxPlayers();
+     }
+ 
++    /**
++     * Sets the maximum amount of players which can login to this server.
++     * It's only temporary and after restart this value will be reset to default value (from server.properties).
++     *
++     * @param maxPlayers the amount of players this server will allow
++     */
++    public static void setMaxPlayers(int maxPlayers) {
++        server.setMaxPlayers(maxPlayers);
++    }
++
+     /**
+      * Get the game port that the server runs on.
+      *
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index 0242faa4..1ee72921 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -137,6 +137,14 @@ public interface Server extends PluginMessageRecipient {
+      */
+     public int getMaxPlayers();
+ 
++    /**
++     * Sets the maximum amount of players which can login to this server.
++     * It's only temporary and after restart this value will be reset to default value (from server.properties).
++     *
++     * @param maxPlayers the amount of players this server will allow
++     */
++    public void setMaxPlayers(int maxPlayers);
++
+     /**
+      * Get the game port that the server runs on.
+      *
+-- 
+2.36.0.windows.1
+
