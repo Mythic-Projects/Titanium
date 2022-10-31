@@ -74,6 +74,8 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0076] Optimized light level comaprsions by Aikar
 [Paper-0085] Use a Shared Random for Entities
 [Paper-0090] Improve Maps (in item frames) performance and bug fixes by Aikar
+[Paper-0101] Do not load chunks for light check by Aikar
+[Paper-0118] Prevent Fire from loading chunks by Aikar
 [Paper-0121] Reduce IO ops opening a new region
 [Paper-0127] Do not load chunks for pathfinding by Aikar
 [Paper-0144] Improve Minecraft Hopper Performance
@@ -87,6 +89,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0196] Fix block break desync by Michael Himing
 [Paper-0202] Shame on you Mojang moves chunk loading off https thread
 [Paper-0232] Fix MC-117075: TE Unload Lag Spike by mezz
+[Paper-0276] Improved Async Task Scheduler by Aikar
 [Paper-0287] MC-124833 by Zach Brown
 [Paper-0302] Don't load chunks for villager door check by Aikar
 [Paper-0313] Optimized world time updates by Aikar
@@ -101,6 +104,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0353] Send nearby packets from world player list not server by Mystiflow
 [Paper-0361] Async Chunk Loading and Generation by Aikar
 [Paper-0362] Prevent mob spawning from loading/generating chunks by Shane Freeder
+[Paper-0369] Prevent rayTrace from loading chunks by Aikar
 [Paper-0374] Add Stricter Client Sign limits by Aikar
 [Paper-0387] Reduce memory footprint of NBTTagCompound by Spottedleaf
 [Paper-0797] Use Velocity compression and cipher natives by Elier
@@ -116,11 +120,8 @@ Titanium implements patches from other engines as well. **All credits go to the 
 
 [SportPaper-0027] Fix head rotation packet spam
 [SportPaper-0031/0058] Potion effect events by cswhite2000
-[SportPaper-0086] Prevent Fire from loading chunks by cswhite2000
-[SportPaper-0134] Improved Async Task Scheduler by cswhite2000
 [SportPaper-0162] Fix PlayerInteractEvent not cancelling properly by cswhite2000
 [SportPaper-0176] Use fast util collections
-[SportPaper-0177] Prevent rayTrace from loading chunks by Ashcon
 [SportPaper-0185] Speed up chunk unloading
 [SportPaper-0198] Optimize head rotation patch
 [SportPaper-0204] Fix Teleport Invisibility
@@ -128,7 +129,6 @@ Titanium implements patches from other engines as well. **All credits go to the 
 
 [FlamePaper-0003] Fix chunk memory leak
 [FlamePaper-0005] Fix multiple memory leaks
-[FlamePaper-0008] Do not load chunks for light check by Aikar
 [FlamePaper-0010] Fix NullPointerException exploits for invalid logins
 [FlamePaper-0013] Check channel before reading
 [FlamePaper-0015] Fix Book Exploits

@@ -1,8 +1,8 @@
-From 7999dd20009731346078b1f1db474203d2ef1de3 Mon Sep 17 00:00:00 2001
-From: cswhite2000 <18whitechristop@gmail.com>
-Date: Mon, 13 Aug 2018 01:38:54 -0700
-Subject: [PATCH] Implement [SportPaper-0086] Prevent Fire from loading chunks
- by cswhite2000
+From 1ecce84f6c591481f5a0ff2d7e43da0f0e003ce2 Mon Sep 17 00:00:00 2001
+From: Aikar <aikar@aikar.co>
+Date: Sun, 17 Apr 2016 17:27:09 -0400
+Subject: [PATCH] Implement [Paper-0118] Prevent Fire from loading chunks by
+ Aikar
 
 This causes the nether to spam unload/reload chunks, plus overall
 bad behavior.
