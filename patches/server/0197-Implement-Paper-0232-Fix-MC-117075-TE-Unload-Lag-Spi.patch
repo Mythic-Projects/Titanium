@@ -1,0 +1,27 @@
+From ae100ffc784af3413a6242c6eb8b01f527e7decc Mon Sep 17 00:00:00 2001
+From: mezz <tehgeek@gmail.com>
+Date: Wed, 9 Aug 2017 17:51:22 -0500
+Subject: [PATCH] Implement [Paper-0232] Fix MC-117075: TE Unload Lag Spike by
+ mezz
+
+
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index b09055aba..414e74ddf 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -1677,7 +1677,11 @@ public abstract class World implements IBlockAccess {
+         this.M = true;
+         // CraftBukkit start - From below, clean up tile entities before ticking them
+         if (!this.c.isEmpty()) {
+-            this.tileEntityList.removeAll(this.c);
++            // Paper start - Use alternate implementation with faster contains
++            java.util.Set<TileEntity> toRemove = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
++            toRemove.addAll(this.c);
++            this.tileEntityList.removeAll(toRemove);
++            // Paper end
+             //this.h.removeAll(this.c); // PaperSpigot - Remove unused list
+             this.c.clear();
+         }
+-- 
+2.36.0.windows.1
+

@@ -1,0 +1,57 @@
+From a7b82b596be59d213b6878cff1ce712a35da96d9 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Wed, 25 May 2022 20:55:56 +0200
+Subject: [PATCH] Implement [SportPaper-0027] Fix head rotation packet spam
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
+index beff63760..acc642366 100644
+--- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
++++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
+@@ -411,8 +411,10 @@ public class EntityTrackerEntry {
+                     }
+ 
+                     // CraftBukkit start - Fix for nonsensical head yaw
+-                    this.i = MathHelper.d(this.tracker.getHeadRotation() * 256.0F / 360.0F);
+-                    this.broadcast(new PacketPlayOutEntityHeadRotation(this.tracker, (byte) i));
++                    if (this.tracker instanceof EntityLiving) { // [SportPaper-0027] Fix head rotation packet spam
++                        this.i = MathHelper.d(this.tracker.getHeadRotation() * 256.0F / 360.0F);
++                        this.broadcast(new PacketPlayOutEntityHeadRotation(this.tracker, (byte) i));
++                    }
+                     // CraftBukkit end
+ 
+                     if (this.tracker instanceof EntityLiving) {
+diff --git a/src/main/java/net/minecraft/server/WorldManager.java b/src/main/java/net/minecraft/server/WorldManager.java
+index 55a2112d2..98164f253 100644
+--- a/src/main/java/net/minecraft/server/WorldManager.java
++++ b/src/main/java/net/minecraft/server/WorldManager.java
+@@ -61,6 +61,7 @@ public class WorldManager implements IWorldAccess {
+         if (entity instanceof EntityHuman) entityhuman = (EntityHuman) entity;
+         // CraftBukkit end
+ 
++        PacketPlayOutBlockBreakAnimation packet = null; // SportPaper - cache packet
+         while (iterator.hasNext()) {
+             EntityPlayer entityplayer = (EntityPlayer) iterator.next();
+ 
+@@ -70,13 +71,16 @@ public class WorldManager implements IWorldAccess {
+                 double d2 = (double) blockposition.getZ() - entityplayer.locZ;
+ 
+                 // CraftBukkit start
+-                if (entityhuman != null && entityhuman instanceof EntityPlayer && !entityplayer.getBukkitEntity().canSee(((EntityPlayer) entityhuman).getBukkitEntity())) {
++                if (entityhuman instanceof EntityPlayer && !entityplayer.getBukkitEntity().canSee(((EntityPlayer) entityhuman).getBukkitEntity())) {
+                     continue;
+                 }
+                 // CraftBukkit end
+ 
+                 if (d0 * d0 + d1 * d1 + d2 * d2 < 1024.0D) {
+-                    entityplayer.playerConnection.sendPacket(new PacketPlayOutBlockBreakAnimation(i, blockposition, j));
++                    // SportPaper start
++                    if (packet == null) packet = new PacketPlayOutBlockBreakAnimation(i, blockposition, j);
++                    entityplayer.playerConnection.sendPacket(packet);
++                    // SportPaper end
+                 }
+             }
+         }
+-- 
+2.36.0.windows.1
+

@@ -1,0 +1,36 @@
+From fc500700e068a049d2dfac26fa3cd603e39b742c Mon Sep 17 00:00:00 2001
+From: Zach Brown <zach.brown@destroystokyo.com>
+Date: Wed, 4 Apr 2018 21:00:43 -0400
+Subject: [PATCH] Implement [Paper-0287] MC-124833 by Zach Brown
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityItemFrame.java b/src/main/java/net/minecraft/server/EntityItemFrame.java
+index 10085675e..e52f98ff4 100644
+--- a/src/main/java/net/minecraft/server/EntityItemFrame.java
++++ b/src/main/java/net/minecraft/server/EntityItemFrame.java
+@@ -92,6 +92,10 @@ public class EntityItemFrame extends EntityHanging {
+             }
+ 
+             itemstack.a((EntityItemFrame) null);
++
++            // Paper - MC-124833 - conflicting reports of what server software this does and doesn't affect.
++            // It's a one liner with near-zero impact so we'll patch it anyway just in case
++            this.setItem(ItemStack.EMPTY);
+         }
+     }
+ 
+diff --git a/src/main/java/net/minecraft/server/ItemStack.java b/src/main/java/net/minecraft/server/ItemStack.java
+index d9e2185c8..c643de4f7 100644
+--- a/src/main/java/net/minecraft/server/ItemStack.java
++++ b/src/main/java/net/minecraft/server/ItemStack.java
+@@ -22,6 +22,7 @@ import org.bukkit.event.world.StructureGrowEvent;
+ public final class ItemStack {
+ 
+     public static final DecimalFormat a = new DecimalFormat("#.###");
++    public static final ItemStack EMPTY = new ItemStack((Item) null); // Titanium
+     public int count;
+     public int c;
+     private Item item;
+-- 
+2.36.0.windows.1
+
