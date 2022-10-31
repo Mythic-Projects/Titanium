@@ -1,8 +1,8 @@
-From fe3d495145f2f1718ccb90abb48afccb7c1a51c9 Mon Sep 17 00:00:00 2001
+From 800abf2cb63ba9e774402b992c6cf78d12270ced Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Thu, 31 Mar 2016 19:17:58 -0400
-Subject: [PATCH] Implement [FlamePaper-0008] Do not load chunks for light
- check by Aikar
+Subject: [PATCH] Implement [Paper-0101] Do not load chunks for light check by
+ Aikar
 
 
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
