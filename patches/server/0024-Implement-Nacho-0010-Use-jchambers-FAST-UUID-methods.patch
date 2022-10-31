@@ -1,0 +1,405 @@
+From c312a751983d99f6185c343fb6ec3677baf6848b Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Thu, 19 May 2022 19:09:33 +0200
+Subject: [PATCH] Implement [Nacho-0010] Use jchambers' FAST UUID methods
+
+
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index 3b03f651a..0f3ed169e 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import com.eatthepath.uuid.FastUUID;
+ import java.util.Iterator;
+ import java.util.List;
+ import java.util.Random;
+@@ -1319,7 +1320,7 @@ public abstract class Entity implements ICommandListener {
+             if (nbttagcompound.hasKeyOfType("UUIDMost", 4) && nbttagcompound.hasKeyOfType("UUIDLeast", 4)) {
+                 this.uniqueID = new UUID(nbttagcompound.getLong("UUIDMost"), nbttagcompound.getLong("UUIDLeast"));
+             } else if (nbttagcompound.hasKeyOfType("UUID", 8)) {
+-                this.uniqueID = UUID.fromString(nbttagcompound.getString("UUID"));
++                this.uniqueID = FastUUID.parseUUID(nbttagcompound.getString("UUID"));
+             }
+ 
+             this.setPosition(this.locX, this.locY, this.locZ);
+diff --git a/src/main/java/net/minecraft/server/EntityCreature.java b/src/main/java/net/minecraft/server/EntityCreature.java
+index 5ea36f7eb..9e150f8a0 100644
+--- a/src/main/java/net/minecraft/server/EntityCreature.java
++++ b/src/main/java/net/minecraft/server/EntityCreature.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import com.eatthepath.uuid.FastUUID;
+ import java.util.UUID;
+ 
+ // CraftBukkit start
+@@ -8,7 +9,7 @@ import org.bukkit.event.entity.EntityUnleashEvent;
+ 
+ public abstract class EntityCreature extends EntityInsentient {
+ 
+-    public static final UUID bk = UUID.fromString("E199AD21-BA8A-4C53-8D13-6182D5C69D3A");
++    public static final UUID bk = FastUUID.parseUUID("E199AD21-BA8A-4C53-8D13-6182D5C69D3A");
+     public static final AttributeModifier bl = (new AttributeModifier(EntityCreature.bk, "Fleeing speed bonus", 2.0D, 2)).a(false);
+     private BlockPosition a;
+     private float b;
+diff --git a/src/main/java/net/minecraft/server/EntityEnderman.java b/src/main/java/net/minecraft/server/EntityEnderman.java
+index f3afbbd3a..72645353b 100644
+--- a/src/main/java/net/minecraft/server/EntityEnderman.java
++++ b/src/main/java/net/minecraft/server/EntityEnderman.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import com.eatthepath.uuid.FastUUID;
+ import com.google.common.base.Predicate;
+ import com.google.common.collect.Sets;
+ import java.util.Collections;
+@@ -16,7 +17,7 @@ import org.bukkit.event.entity.EntityTeleportEvent;
+ 
+ public class EntityEnderman extends EntityMonster {
+ 
+-    private static final UUID a = UUID.fromString("020E0DFB-87AE-4653-9556-831010E291A0");
++    private static final UUID a = FastUUID.parseUUID("020E0DFB-87AE-4653-9556-831010E291A0");
+     private static final AttributeModifier b = (new AttributeModifier(EntityEnderman.a, "Attacking speed boost", 0.15000000596046448D, 0)).a(false);
+     private static final Set<Block> c = Sets.newIdentityHashSet();
+     private boolean bm;
+diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
+index c8b4e2928..9c5ed1ecc 100644
+--- a/src/main/java/net/minecraft/server/EntityLiving.java
++++ b/src/main/java/net/minecraft/server/EntityLiving.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import com.eatthepath.uuid.FastUUID;
+ import com.google.common.base.Predicate;
+ import com.google.common.base.Predicates;
+ import com.google.common.collect.Maps;
+@@ -32,7 +33,7 @@ import org.spigotmc.event.entity.EntityDismountEvent;
+ 
+ public abstract class EntityLiving extends Entity {
+ 
+-    private static final UUID a = UUID.fromString("662A6B8D-DA3E-4C1C-8813-96EA6097278D");
++    private static final UUID a = FastUUID.parseUUID("662A6B8D-DA3E-4C1C-8813-96EA6097278D");
+     private static final AttributeModifier b = (new AttributeModifier(EntityLiving.a, "Sprinting speed boost", 0.30000001192092896D, 2)).a(false);
+     private AttributeMapBase c;
+     public CombatTracker combatTracker = new CombatTracker(this);
+diff --git a/src/main/java/net/minecraft/server/EntityProjectile.java b/src/main/java/net/minecraft/server/EntityProjectile.java
+index e7cca3c6c..4cb8a804b 100644
+--- a/src/main/java/net/minecraft/server/EntityProjectile.java
++++ b/src/main/java/net/minecraft/server/EntityProjectile.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import com.eatthepath.uuid.FastUUID;
+ import java.util.List;
+ import java.util.UUID;
+ 
+@@ -261,7 +262,7 @@ public abstract class EntityProjectile extends Entity implements IProjectile {
+             this.shooter = this.world.a(this.shooterName);
+             if (this.shooter == null && this.world instanceof WorldServer) {
+                 try {
+-                    Entity entity = ((WorldServer) this.world).getEntity(UUID.fromString(this.shooterName));
++                    Entity entity = ((WorldServer) this.world).getEntity(FastUUID.parseUUID(this.shooterName));
+ 
+                     if (entity instanceof EntityLiving) {
+                         this.shooter = (EntityLiving) entity;
+diff --git a/src/main/java/net/minecraft/server/EntityZombie.java b/src/main/java/net/minecraft/server/EntityZombie.java
+index 6d3b002bc..2f5e3e12a 100644
+--- a/src/main/java/net/minecraft/server/EntityZombie.java
++++ b/src/main/java/net/minecraft/server/EntityZombie.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import com.eatthepath.uuid.FastUUID;
+ import java.util.Calendar;
+ import java.util.List;
+ import java.util.UUID;
+@@ -15,7 +16,7 @@ import org.bukkit.event.entity.EntityTargetEvent;
+ public class EntityZombie extends EntityMonster {
+ 
+     protected static final IAttribute a = (new AttributeRanged((IAttribute) null, "zombie.spawnReinforcements", 0.0D, 0.0D, 1.0D)).a("Spawn Reinforcements Chance");
+-    private static final UUID b = UUID.fromString("B9766B59-9566-4402-BC1F-2EE2A276D836");
++    private static final UUID b = FastUUID.parseUUID("B9766B59-9566-4402-BC1F-2EE2A276D836");
+     private static final AttributeModifier c = new AttributeModifier(EntityZombie.b, "Baby speed boost", org.github.paperspigot.PaperSpigotConfig.babyZombieMovementSpeed, 1); // PaperSpigot - Configurable baby zombie movement speed
+     private final PathfinderGoalBreakDoor bm = new PathfinderGoalBreakDoor(this);
+     private int bn;
+diff --git a/src/main/java/net/minecraft/server/GameProfileBanEntry.java b/src/main/java/net/minecraft/server/GameProfileBanEntry.java
+index 16fe48193..33685974e 100644
+--- a/src/main/java/net/minecraft/server/GameProfileBanEntry.java
++++ b/src/main/java/net/minecraft/server/GameProfileBanEntry.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import com.eatthepath.uuid.FastUUID;
+ import com.google.gson.JsonObject;
+ import com.mojang.authlib.GameProfile;
+ import java.util.Date;
+@@ -36,7 +37,7 @@ public class GameProfileBanEntry extends ExpirableListEntry<GameProfile> {
+             String s = jsonobject.get("uuid").getAsString();
+ 
+             try {
+-                uuid = UUID.fromString(s);
++                uuid = FastUUID.parseUUID(s);
+             } catch (Throwable throwable) {
+             }
+ 
+diff --git a/src/main/java/net/minecraft/server/Item.java b/src/main/java/net/minecraft/server/Item.java
+index 87a2d7b90..d5d93e996 100644
+--- a/src/main/java/net/minecraft/server/Item.java
++++ b/src/main/java/net/minecraft/server/Item.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import com.eatthepath.uuid.FastUUID;
+ import com.google.common.base.Function;
+ import com.google.common.collect.HashMultimap;
+ import com.google.common.collect.Maps;
+@@ -12,7 +13,7 @@ public class Item {
+ 
+     public static final RegistryMaterials<MinecraftKey, Item> REGISTRY = new RegistryMaterials();
+     private static final Map<Block, Item> a = Maps.newHashMap();
+-    protected static final UUID f = UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
++    protected static final UUID f = FastUUID.parseUUID("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
+     private CreativeModeTab b;
+     protected static Random g = new Random();
+     protected int maxStackSize = 64;
+diff --git a/src/main/java/net/minecraft/server/MobEffectList.java b/src/main/java/net/minecraft/server/MobEffectList.java
+index 863e9d8e9..550053588 100644
+--- a/src/main/java/net/minecraft/server/MobEffectList.java
++++ b/src/main/java/net/minecraft/server/MobEffectList.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import com.eatthepath.uuid.FastUUID;
+ import com.google.common.collect.Maps;
+ import java.util.Iterator;
+ import java.util.Map;
+@@ -194,7 +195,7 @@ public class MobEffectList {
+     }
+ 
+     public MobEffectList a(IAttribute iattribute, String s, double d0, int i) {
+-        AttributeModifier attributemodifier = new AttributeModifier(UUID.fromString(s), this.a(), d0, i);
++        AttributeModifier attributemodifier = new AttributeModifier(FastUUID.parseUUID(s), this.a(), d0, i);
+ 
+         this.J.put(iattribute, attributemodifier);
+         return this;
+diff --git a/src/main/java/net/minecraft/server/NameReferencingFileConverter.java b/src/main/java/net/minecraft/server/NameReferencingFileConverter.java
+index 40291094e..dd8477c40 100644
+--- a/src/main/java/net/minecraft/server/NameReferencingFileConverter.java
++++ b/src/main/java/net/minecraft/server/NameReferencingFileConverter.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import com.eatthepath.uuid.FastUUID;
+ import com.google.common.base.Charsets;
+ import com.google.common.base.Predicate;
+ import com.google.common.collect.Iterators;
+@@ -338,7 +339,7 @@ public class NameReferencingFileConverter {
+                         if (uuid == null) {
+                             throw new NameReferencingFileConverter.FileConversionException("Missing UUID for user profile " + gameprofile.getName(), null);
+                         } else {
+-                            this.a(file, this.a(gameprofile), uuid.toString());
++                            this.a(file, this.a(gameprofile), FastUUID.toString(uuid));
+                         }
+                     }
+ 
+diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
+index 96a906f04..24c306eaf 100644
+--- a/src/main/java/net/minecraft/server/PlayerList.java
++++ b/src/main/java/net/minecraft/server/PlayerList.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import com.eatthepath.uuid.FastUUID;
+ import com.google.common.collect.Lists;
+ import com.google.common.collect.Maps;
+ import com.google.common.collect.Sets;
+@@ -1223,7 +1224,7 @@ public abstract class PlayerList {
+ 
+         if (serverstatisticmanager == null) {
+             File file = new File(this.server.getWorldServer(0).getDataManager().getDirectory(), "stats");
+-            File file1 = new File(file, uuid.toString() + ".json");
++            File file1 = new File(file, FastUUID.toString(uuid) + ".json");
+ 
+             if (!file1.exists()) {
+                 File file2 = new File(file, entityhuman.getName() + ".json");
+diff --git a/src/main/java/net/minecraft/server/ServerPing.java b/src/main/java/net/minecraft/server/ServerPing.java
+index f635f2f18..0c9fee929 100644
+--- a/src/main/java/net/minecraft/server/ServerPing.java
++++ b/src/main/java/net/minecraft/server/ServerPing.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import com.eatthepath.uuid.FastUUID;
+ import com.google.gson.JsonArray;
+ import com.google.gson.JsonDeserializationContext;
+ import com.google.gson.JsonDeserializer;
+@@ -237,7 +238,7 @@ public class ServerPing {
+                             JsonObject jsonobject1 = ChatDeserializer.l(jsonarray.get(i), "player[" + i + "]");
+                             String s = ChatDeserializer.h(jsonobject1, "id");
+ 
+-                            agameprofile[i] = new GameProfile(UUID.fromString(s), ChatDeserializer.h(jsonobject1, "name"));
++                            agameprofile[i] = new GameProfile(FastUUID.parseUUID(s), ChatDeserializer.h(jsonobject1, "name"));
+                         }
+ 
+                         serverping_serverpingplayersample.a(agameprofile);
+@@ -259,7 +260,7 @@ public class ServerPing {
+                         JsonObject jsonobject1 = new JsonObject();
+                         UUID uuid = serverping_serverpingplayersample.c()[i].getId();
+ 
+-                        jsonobject1.addProperty("id", uuid == null ? "" : uuid.toString());
++                        jsonobject1.addProperty("id", uuid == null ? "" : FastUUID.toString(uuid));
+                         jsonobject1.addProperty("name", serverping_serverpingplayersample.c()[i].getName());
+                         jsonarray.add(jsonobject1);
+                     }
+diff --git a/src/main/java/net/minecraft/server/UserCache.java b/src/main/java/net/minecraft/server/UserCache.java
+index 0f82e06cb..1ac356b07 100644
+--- a/src/main/java/net/minecraft/server/UserCache.java
++++ b/src/main/java/net/minecraft/server/UserCache.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import com.eatthepath.uuid.FastUUID;
+ import com.google.common.base.Charsets;
+ import com.google.common.collect.Iterators;
+ import com.google.common.collect.Lists;
+@@ -280,7 +281,7 @@ public class UserCache {
+             jsonobject.addProperty("name", usercache_usercacheentry.a().getName());
+             UUID uuid = usercache_usercacheentry.a().getId();
+ 
+-            jsonobject.addProperty("uuid", uuid == null ? "" : uuid.toString());
++            jsonobject.addProperty("uuid", uuid == null ? "" : FastUUID.toString(uuid));
+             jsonobject.addProperty("expiresOn", UserCache.a.format(usercache_usercacheentry.b()));
+             return jsonobject;
+         }
+@@ -309,7 +310,7 @@ public class UserCache {
+                         UUID uuid;
+ 
+                         try {
+-                            uuid = UUID.fromString(s);
++                            uuid = FastUUID.parseUUID(s);
+                         } catch (Throwable throwable) {
+                             return null;
+                         }
+diff --git a/src/main/java/net/minecraft/server/Village.java b/src/main/java/net/minecraft/server/Village.java
+index 072f466a2..23ee9b1c2 100644
+--- a/src/main/java/net/minecraft/server/Village.java
++++ b/src/main/java/net/minecraft/server/Village.java
+@@ -1,5 +1,6 @@
+ package net.minecraft.server;
+ 
++import com.eatthepath.uuid.FastUUID;
+ import com.google.common.collect.Lists;
+ import com.mojang.authlib.GameProfile;
+ import java.util.Iterator;
+@@ -391,7 +392,7 @@ public class Village {
+ 
+             if (nbttagcompound2.hasKey("UUID")) {
+                 UserCache usercache = MinecraftServer.getServer().getUserCache();
+-                GameProfile gameprofile = usercache.a(UUID.fromString(nbttagcompound2.getString("UUID")));
++                GameProfile gameprofile = usercache.a(FastUUID.parseUUID(nbttagcompound2.getString("UUID")));
+ 
+                 if (gameprofile != null) {
+                     this.j.put(gameprofile.getName(), Integer.valueOf(nbttagcompound2.getInt("S")));
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftOfflinePlayer.java b/src/main/java/org/bukkit/craftbukkit/CraftOfflinePlayer.java
+index 45217866b..65f66c65e 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftOfflinePlayer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftOfflinePlayer.java
+@@ -1,5 +1,6 @@
+ package org.bukkit.craftbukkit;
+ 
++import com.eatthepath.uuid.FastUUID;
+ import com.mojang.authlib.GameProfile;
+ import java.io.File;
+ import java.util.LinkedHashMap;
+@@ -135,7 +136,7 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
+             return Bukkit.getServer().getOfflinePlayer((String) args.get("name"));
+         }
+ 
+-        return Bukkit.getServer().getOfflinePlayer(UUID.fromString((String) args.get("UUID")));
++        return Bukkit.getServer().getOfflinePlayer(FastUUID.parseUUID((String) args.get("UUID")));
+     }
+ 
+     @Override
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 32ad864ab..9e3709d50 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -1,5 +1,6 @@
+ package org.bukkit.craftbukkit;
+ 
++import com.eatthepath.uuid.FastUUID;
+ import it.unimi.dsi.fastutil.objects.ObjectLists;
+ import java.awt.image.BufferedImage;
+ import java.io.File;
+@@ -1506,7 +1507,7 @@ public final class CraftServer implements Server {
+ 
+         for (String file : files) {
+             try {
+-                players.add(getOfflinePlayer(UUID.fromString(file.substring(0, file.length() - 4))));
++                players.add(getOfflinePlayer(FastUUID.parseUUID(file.substring(0, file.length() - 4))));
+             } catch (IllegalArgumentException ex) {
+                 // Who knows what is in this directory, just ignore invalid files
+             }
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftHorse.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftHorse.java
+index 230ae9ee4..7dfd3f986 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftHorse.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftHorse.java
+@@ -1,5 +1,6 @@
+ package org.bukkit.craftbukkit.entity;
+ 
++import com.eatthepath.uuid.FastUUID;
+ import net.minecraft.server.EntityHorse;
+ import org.apache.commons.lang.Validate;
+ import org.bukkit.craftbukkit.CraftServer;
+@@ -117,7 +118,7 @@ public class CraftHorse extends CraftAnimals implements Horse {
+ 
+     public UUID getOwnerUUID() {
+         try {
+-            return UUID.fromString(getHandle().getOwnerUUID());
++            return FastUUID.parseUUID(getHandle().getOwnerUUID());
+         } catch (IllegalArgumentException ex) {
+             return null;
+         }
+@@ -127,7 +128,7 @@ public class CraftHorse extends CraftAnimals implements Horse {
+         if (uuid == null) {
+             getHandle().setOwnerUUID("");
+         } else {
+-            getHandle().setOwnerUUID(uuid.toString());
++            getHandle().setOwnerUUID(FastUUID.toString(uuid));
+         }
+     }
+ 
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftTameableAnimal.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftTameableAnimal.java
+index ea1d10b3c..e6d3c9ac1 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftTameableAnimal.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftTameableAnimal.java
+@@ -1,5 +1,6 @@
+ package org.bukkit.craftbukkit.entity;
+ 
++import com.eatthepath.uuid.FastUUID;
+ import net.minecraft.server.EntityTameableAnimal;
+ import org.bukkit.craftbukkit.CraftServer;
+ import org.bukkit.entity.AnimalTamer;
+@@ -20,7 +21,7 @@ public class CraftTameableAnimal extends CraftAnimals implements Tameable, Creat
+ 
+     public UUID getOwnerUUID() {
+         try {
+-            return UUID.fromString(getHandle().getOwnerUUID());
++            return FastUUID.parseUUID(getHandle().getOwnerUUID());
+         } catch (IllegalArgumentException ex) {
+             return null;
+         }
+@@ -30,7 +31,7 @@ public class CraftTameableAnimal extends CraftAnimals implements Tameable, Creat
+         if (uuid == null) {
+             getHandle().setOwnerUUID("");
+         } else {
+-            getHandle().setOwnerUUID(uuid.toString());
++            getHandle().setOwnerUUID(FastUUID.toString(uuid));
+         }
+     }
+ 
+-- 
+2.36.0.windows.1
+

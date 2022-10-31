@@ -1,0 +1,21 @@
+From ea01bf7bb7d403efbda1cfd8c8a4121f05807efe Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 24 Jun 2022 23:48:56 +0200
+Subject: [PATCH] Add slf4j-simple
+
+
+diff --git a/build.gradle b/build.gradle
+index ac36aadf9..25c44bd24 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -29,6 +29,7 @@ dependencies {
+     implementation 'net.minecrell:terminalconsoleappender:1.3.0'
+     implementation 'org.jline:jline-terminal-jansi:3.20.0'
+     // PandaSpigot end
++    implementation 'org.slf4j:slf4j-simple:1.7.36' // Titanium - add slf4j-simple to remove warning in console on startup
+     implementation 'com.velocitypowered:velocity-native:1.1.9' // Nacho - Use Velocity natives & compression // Titanium - updated velocity-native to 1.1.9
+     implementation 'com.eatthepath:fast-uuid:0.2.0' // Nacho - Use jchambers' FAST UUID method
+     implementation 'com.github.matejtymes:javafixes:1.3.6.1' // WindSpigot
+-- 
+2.36.0.windows.1
+

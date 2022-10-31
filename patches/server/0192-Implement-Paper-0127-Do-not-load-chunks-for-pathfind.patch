@@ -1,0 +1,32 @@
+From f1e54fbf54cff7ea48069537f3a1074d2828f68f Mon Sep 17 00:00:00 2001
+From: Aikar <aikar@aikar.co>
+Date: Tue, 19 Jan 2016 00:13:19 -0500
+Subject: [PATCH] Implement [Paper-0127] Do not load chunks for pathfinding by
+ Aikar
+
+
+diff --git a/src/main/java/net/minecraft/server/ChunkCache.java b/src/main/java/net/minecraft/server/ChunkCache.java
+index a64d03085..edcfa031b 100644
+--- a/src/main/java/net/minecraft/server/ChunkCache.java
++++ b/src/main/java/net/minecraft/server/ChunkCache.java
+@@ -33,7 +33,7 @@ public class ChunkCache implements IBlockAccess {
+ 
+         for (l = this.a; l <= j; ++l) {
+             for (i1 = this.b; i1 <= k; ++i1) {
+-                this.c[l - this.a][i1 - this.b] = world.getChunkAt(l, i1);
++                this.c[l - this.a][i1 - this.b] = world.getChunkIfLoaded(l, i1); // Paper
+             }
+         }
+ 
+@@ -74,7 +74,7 @@ public class ChunkCache implements IBlockAccess {
+         int var8;
+         for (var7 = this.a; var7 <= var5; ++var7) {
+             for (var8 = this.b; var8 <= var6; ++var8) {
+-                this.c[var7 - this.a][var8 - this.b] = world.getChunkAt(var7, var8);
++                this.c[var7 - this.a][var8 - this.b] = world.getChunkIfLoaded(var7, var8); // Paper
+             }
+         }
+ 
+-- 
+2.36.0.windows.1
+

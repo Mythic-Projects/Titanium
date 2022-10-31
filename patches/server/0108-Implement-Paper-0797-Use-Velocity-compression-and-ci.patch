@@ -1,0 +1,566 @@
+From b186f6ef5d3044ef1018f7647a6e23e816e84fd7 Mon Sep 17 00:00:00 2001
+From: Elier <elierrrlg@outlook.com>
+Date: Tue, 7 Jun 2022 14:58:12 +0200
+Subject: [PATCH] Implement [Paper-0797] Use Velocity compression and cipher
+ natives by Elier
+
+
+diff --git a/build.gradle b/build.gradle
+index f33372641..2cd9f0ed7 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -24,13 +24,14 @@ dependencies {
+     implementation 'com.mojang:authlib:1.5.21'
+     // Minecraft libraries end
+ 
+-    implementation 'net.jafama:jafama:2.3.2' // Titanium - Use faster math library
+-    implementation 'com.eatthepath:fast-uuid:0.2.0' // Nacho - Use jchambers' FAST UUID methods
+-
++    // Titanium libraries start
+     // PandaSpigot start - Use TerminalConsoleAppender
+     implementation 'net.minecrell:terminalconsoleappender:1.3.0'
+     implementation 'org.jline:jline-terminal-jansi:3.20.0'
+     // PandaSpigot end
++    implementation 'com.velocitypowered:velocity-native:1.1.0-SNAPSHOT' // Nacho - Use Velocity natives & compression
++    implementation 'com.eatthepath:fast-uuid:0.2.0' // Nacho - Use jchambers' FAST UUID methods
++    // Titanium libraries end
+ 
+     testImplementation 'junit:junit:4.13.2' // Titanium - Updated junit to 4.13.2
+     testImplementation 'org.hamcrest:hamcrest-library:1.3'
+diff --git a/src/main/java/me/elier/minecraft/util/CryptException.java b/src/main/java/me/elier/minecraft/util/CryptException.java
+new file mode 100644
+index 000000000..68e93d580
+--- /dev/null
++++ b/src/main/java/me/elier/minecraft/util/CryptException.java
+@@ -0,0 +1,7 @@
++package me.elier.minecraft.util;
++
++public class CryptException extends Exception {
++    public CryptException(Throwable throwable) {
++        super(throwable);
++    }
++}
+\ No newline at end of file
+diff --git a/src/main/java/net/minecraft/server/LoginListener.java b/src/main/java/net/minecraft/server/LoginListener.java
+index dc5d7af14..6e277ff05 100644
+--- a/src/main/java/net/minecraft/server/LoginListener.java
++++ b/src/main/java/net/minecraft/server/LoginListener.java
+@@ -195,9 +195,15 @@ public class LoginListener implements PacketLoginInListener, IUpdatePlayerListBo
+         if (!Arrays.equals(this.e, packetlogininencryptionbegin.b(privatekey))) {
+             throw new IllegalStateException("Invalid nonce!");
+         } else {
+-            this.loginKey = packetlogininencryptionbegin.a(privatekey);
+-            this.g = LoginListener.EnumProtocolState.AUTHENTICATING;
+-            this.networkManager.a(this.loginKey);
++            // Paper start
++            try {
++                this.loginKey = packetlogininencryptionbegin.a(privatekey);
++                this.g = LoginListener.EnumProtocolState.AUTHENTICATING;
++                this.networkManager.setupEncryption(this.loginKey);
++            } catch (Exception ex) {
++                throw new IllegalStateException("Protocol error", ex);
++            }
++            // Paper end
+             authenticatorPool.execute(new Runnable() { // PandaSpigot - Cache authenticator threads
+                 public void run() {
+                     GameProfile gameprofile = LoginListener.this.i;
+diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
+index 5b92d7897..0690f514b 100644
+--- a/src/main/java/net/minecraft/server/NetworkManager.java
++++ b/src/main/java/net/minecraft/server/NetworkManager.java
+@@ -2,6 +2,8 @@ package net.minecraft.server;
+ 
+ import com.google.common.collect.Queues;
+ import com.google.common.util.concurrent.ThreadFactoryBuilder;
++import com.velocitypowered.natives.compression.VelocityCompressor;
++import com.velocitypowered.natives.util.Natives;
+ import io.netty.channel.Channel;
+ import io.netty.channel.ChannelFuture;
+ import io.netty.channel.ChannelFutureListener;
+@@ -19,6 +21,7 @@ import io.netty.util.concurrent.GenericFutureListener;
+ import java.net.SocketAddress;
+ import java.util.Queue;
+ import javax.crypto.SecretKey;
++import me.elier.minecraft.util.CryptException;
+ import org.apache.commons.lang3.ArrayUtils;
+ import org.apache.commons.lang3.Validate;
+ import org.apache.logging.log4j.LogManager;
+@@ -449,11 +452,30 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+         return this.channel instanceof LocalChannel || this.channel instanceof LocalServerChannel;
+     }
+ 
++    // Paper start
++    /*
+     public void a(SecretKey secretkey) {
+         this.o = true;
+         this.channel.pipeline().addBefore("splitter", "decrypt", new PacketDecrypter(MinecraftEncryption.a(2, secretkey)));
+         this.channel.pipeline().addBefore("prepender", "encrypt", new PacketEncrypter(MinecraftEncryption.a(1, secretkey)));
+     }
++     */
++
++    public void setupEncryption(javax.crypto.SecretKey key) throws CryptException {
++        if (!this.o) {
++            try {
++                com.velocitypowered.natives.encryption.VelocityCipher decryption = com.velocitypowered.natives.util.Natives.cipher.get().forDecryption(key);
++                com.velocitypowered.natives.encryption.VelocityCipher encryption = com.velocitypowered.natives.util.Natives.cipher.get().forEncryption(key);
++
++                this.o = true;
++                this.channel.pipeline().addBefore("splitter", "decrypt", new PacketDecrypter(decryption));
++                this.channel.pipeline().addBefore("prepender", "encrypt", new PacketEncrypter(encryption));
++            } catch (java.security.GeneralSecurityException e) {
++                throw new CryptException(e);
++            }
++        }
++    }
++    // Paper end
+ 
+     public boolean isConnected() { return this.g(); } // PandaSpigot - OBFHELPER
+     public boolean g() {
+@@ -477,28 +499,32 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+     }
+ 
+     public void a(int i) {
+-        if (i >= 0) {
++        this.setupCompression(i);
++    }
++
++    public void setupCompression(int compressionThreshold) {
++        // Nacho end
++        if (compressionThreshold >= 0) {
++            VelocityCompressor compressor = Natives.compress.get().create(-1); // Paper
+             if (this.channel.pipeline().get("decompress") instanceof PacketDecompressor) {
+-                ((PacketDecompressor) this.channel.pipeline().get("decompress")).a(i);
++                ((PacketDecompressor) this.channel.pipeline().get("decompress")).a(compressionThreshold);
+             } else {
+-                this.channel.pipeline().addBefore("decoder", "decompress", new PacketDecompressor(i));
++                this.channel.pipeline().addBefore("decoder", "decompress", new PacketDecompressor(compressor, compressionThreshold)); // Paper
+             }
+ 
+             if (this.channel.pipeline().get("compress") instanceof PacketCompressor) {
+-                ((PacketCompressor) this.channel.pipeline().get("decompress")).a(i);
++                ((PacketCompressor) this.channel.pipeline().get("decompress")).a(compressionThreshold);
+             } else {
+-                this.channel.pipeline().addBefore("encoder", "compress", new PacketCompressor(i));
++                this.channel.pipeline().addBefore("encoder", "compress", new PacketCompressor(compressor, compressionThreshold)); // Paper
+             }
+         } else {
+             if (this.channel.pipeline().get("decompress") instanceof PacketDecompressor) {
+                 this.channel.pipeline().remove("decompress");
+             }
+-
+             if (this.channel.pipeline().get("compress") instanceof PacketCompressor) {
+                 this.channel.pipeline().remove("compress");
+             }
+         }
+-
+     }
+ 
+     public void l() {
+diff --git a/src/main/java/net/minecraft/server/PacketCompressor.java b/src/main/java/net/minecraft/server/PacketCompressor.java
+index 8107890ff..144751f36 100644
+--- a/src/main/java/net/minecraft/server/PacketCompressor.java
++++ b/src/main/java/net/minecraft/server/PacketCompressor.java
+@@ -1,52 +1,104 @@
+ package net.minecraft.server;
+ 
++import com.velocitypowered.natives.compression.VelocityCompressor; // Paper
++import com.velocitypowered.natives.util.MoreByteBufUtils; // Paper
+ import io.netty.buffer.ByteBuf;
+ import io.netty.channel.ChannelHandlerContext;
+ import io.netty.handler.codec.MessageToByteEncoder;
+ import java.util.zip.Deflater;
+ 
+ public class PacketCompressor extends MessageToByteEncoder<ByteBuf> {
++    private final byte[] encodeBuf; // Paper
++    private final Deflater deflater;
++    private final com.velocitypowered.natives.compression.VelocityCompressor compressor; // Paper
++    private int threshold;
+ 
+-    private final byte[] a = new byte[8192];
+-    private final Deflater b;
+-    private int c;
+-
+-    public PacketCompressor(int i) {
+-        this.c = i;
+-        this.b = new Deflater();
++    public PacketCompressor(int compressionThreshold) {
++        // Paper start
++        this(null, compressionThreshold);
++    }
++    public PacketCompressor(VelocityCompressor compressor, int compressionThreshold) {
++        this.threshold = compressionThreshold;
++        if (compressor == null) {
++            this.encodeBuf = new byte[8192];
++            this.deflater = new Deflater();
++        } else {
++            this.encodeBuf = null;
++            this.deflater = null;
++        }
++        this.compressor = compressor;
++        // Paper end
+     }
+ 
+-    protected void a(ChannelHandlerContext channelhandlercontext, ByteBuf bytebuf, ByteBuf bytebuf1) throws Exception {
+-        int i = bytebuf.readableBytes();
+-        PacketDataSerializer packetdataserializer = new PacketDataSerializer(bytebuf1);
+-
+-        if (i < this.c) {
+-            packetdataserializer.b(0);
+-            packetdataserializer.writeBytes(bytebuf);
++    protected void encode(ChannelHandlerContext var1, ByteBuf var2, ByteBuf var3) throws Exception {
++        int var4 = var2.readableBytes();
++        PacketDataSerializer var5 = new PacketDataSerializer(var3);
++        if (var4 < this.threshold) {
++            var5.b(0);
++            var5.writeBytes(var2);
+         } else {
+-            byte[] abyte = new byte[i];
++            // Paper start
++            if (this.deflater != null) {
++                byte[] var6 = new byte[var4];
++                var2.readBytes(var6);
++                var5.b(var6.length);
++                this.deflater.setInput(var6, 0, var4);
++                this.deflater.finish();
+ 
+-            bytebuf.readBytes(abyte);
+-            packetdataserializer.b(abyte.length);
+-            this.b.setInput(abyte, 0, i);
+-            this.b.finish();
++                while (!this.deflater.finished()) {
++                    int var7 = this.deflater.deflate(this.encodeBuf);
++                    var5.writeBytes(this.encodeBuf, 0, var7);
++                }
+ 
+-            while (!this.b.finished()) {
+-                int j = this.b.deflate(this.a);
++                this.deflater.reset();
++                return;
++            }
+ 
+-                packetdataserializer.writeBytes(this.a, 0, j);
++            var5.b(var4);
++            ByteBuf compatibleIn = MoreByteBufUtils.ensureCompatible(var1.alloc(), this.compressor, var2);
++            try {
++                this.compressor.deflate(compatibleIn, var3);
++            } finally {
++                compatibleIn.release();
+             }
++            // Paper end
++        }
++    }
+ 
+-            this.b.reset();
++    // Paper start
++    @Override
++    protected ByteBuf allocateBuffer(ChannelHandlerContext ctx, ByteBuf msg, boolean preferDirect) throws Exception{
++        if (this.compressor != null) {
++            // We allocate bytes to be compressed plus 1 byte. This covers two cases:
++            //
++            // - Compression
++            //    According to https://github.com/ebiggers/libdeflate/blob/master/libdeflate.h#L103,
++            //    if the data compresses well (and we do not have some pathological case) then the maximum
++            //    size the compressed size will ever be is the input size minus one.
++            // - Uncompressed
++            //    This is fairly obvious - we will then have one more than the uncompressed size.
++            int initialBufferSize = msg.readableBytes() + 1;
++            return com.velocitypowered.natives.util.MoreByteBufUtils.preferredBuffer(ctx.alloc(), this.compressor, initialBufferSize);
+         }
+ 
++        return super.allocateBuffer(ctx, msg, preferDirect);
++    }
++
++    @Override
++    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
++        if (this.compressor != null) {
++            this.compressor.close();
++        }
+     }
++    // Paper end
+ 
+-    public void a(int i) {
+-        this.c = i;
++    public void a(int var1) {
++        // Nacho start - OBFHELPER
++        this.setThreshold(var1);
+     }
+ 
+-    protected void encode(ChannelHandlerContext channelhandlercontext, ByteBuf object, ByteBuf bytebuf) throws Exception {
+-        this.a(channelhandlercontext, object, bytebuf);
++    public void setThreshold(int threshold) {
++        this.threshold = threshold;
+     }
+-}
++    // Nacho end
++}
+\ No newline at end of file
+diff --git a/src/main/java/net/minecraft/server/PacketDecompressor.java b/src/main/java/net/minecraft/server/PacketDecompressor.java
+index 300d46475..659d08127 100644
+--- a/src/main/java/net/minecraft/server/PacketDecompressor.java
++++ b/src/main/java/net/minecraft/server/PacketDecompressor.java
+@@ -1,5 +1,7 @@
+ package net.minecraft.server;
+ 
++import com.velocitypowered.natives.compression.VelocityCompressor; // Paper
++import com.velocitypowered.natives.util.MoreByteBufUtils; // Paper
+ import io.netty.buffer.ByteBuf;
+ import io.netty.buffer.Unpooled;
+ import io.netty.channel.ChannelHandlerContext;
+@@ -9,46 +11,72 @@ import java.util.List;
+ import java.util.zip.Inflater;
+ 
+ public class PacketDecompressor extends ByteToMessageDecoder {
++    private final Inflater inflater;
++    private final com.velocitypowered.natives.compression.VelocityCompressor compressor; // Paper
++    private int threshold;
+ 
+-    private final Inflater a;
+-    private int b;
+-
+-    public PacketDecompressor(int i) {
+-        this.b = i;
+-        this.a = new Inflater();
++    public PacketDecompressor(int compressionThreshold) {
++        this(null, compressionThreshold);
++    }
++    public PacketDecompressor(VelocityCompressor compressor, int compressionThreshold) {
++        this.threshold = compressionThreshold;
++        this.inflater = compressor == null ? new Inflater() : null;
++        this.compressor = compressor;
+     }
+ 
+-    protected void decode(ChannelHandlerContext channelhandlercontext, ByteBuf bytebuf, List<Object> list) throws Exception {
+-        if (bytebuf.readableBytes() != 0) {
+-            PacketDataSerializer packetdataserializer = new PacketDataSerializer(bytebuf);
+-            int i = packetdataserializer.e();
+-
+-            if (i == 0) {
+-                list.add(packetdataserializer.readBytes(packetdataserializer.readableBytes()));
++    protected void decode(ChannelHandlerContext var1, ByteBuf var2, List<Object> var3) throws Exception {
++        if (var2.readableBytes() != 0) {
++            PacketDataSerializer var4 = new PacketDataSerializer(var2);
++            int var5 = var4.e();
++            if (var5 == 0) {
++                var3.add(var4.readBytes(var4.readableBytes()));
+             } else {
+-                if (i < this.b) {
+-                    throw new DecoderException("Badly compressed packet - size of " + i + " is below server threshold of " + this.b);
++                if (var5 < this.threshold) {
++                    throw new DecoderException("Badly compressed packet - size of " + var5 + " is below server threshold of " + this.threshold);
+                 }
+ 
+-                if (i > 2097152) {
+-                    throw new DecoderException("Badly compressed packet - size of " + i + " is larger than protocol maximum of " + 2097152);
++                if (var5 > 2097152) {
++                    throw new DecoderException("Badly compressed packet - size of " + var5 + " is larger than protocol maximum of " + 2097152);
+                 }
+-
+-                byte[] abyte = new byte[packetdataserializer.readableBytes()];
+-
+-                packetdataserializer.readBytes(abyte);
+-                this.a.setInput(abyte);
+-                byte[] abyte1 = new byte[i];
+-
+-                this.a.inflate(abyte1);
+-                list.add(Unpooled.wrappedBuffer(abyte1));
+-                this.a.reset();
++                // Paper start
++                if(this.inflater != null) {
++                    byte[] var6 = new byte[var4.readableBytes()];
++                    var4.readBytes(var6);
++                    this.inflater.setInput(var6);
++                    byte[] var7 = new byte[var5];
++                    this.inflater.inflate(var7);
++                    var3.add(Unpooled.wrappedBuffer(var7));
++                    this.inflater.reset();
++                    return;
++                }
++                int claimedUncompressedSize = var5; // OBFHELPER
++                ByteBuf compatibleIn = MoreByteBufUtils.ensureCompatible(var1.alloc(), this.compressor, var2);
++                ByteBuf uncompressed = MoreByteBufUtils.preferredBuffer(var1.alloc(), this.compressor, claimedUncompressedSize);
++                try {
++                    this.compressor.inflate(compatibleIn, uncompressed, claimedUncompressedSize);
++                    var3.add(uncompressed);
++                    var2.clear();
++                } catch (Exception e) {
++                    uncompressed.release();
++                    throw e;
++                } finally {
++                    compatibleIn.release();
++                }
++                // Paper end
+             }
++        }
++    }
+ 
++    // Paper start
++    @Override
++    public void handlerRemoved0(ChannelHandlerContext ctx) throws Exception {
++        if (this.compressor != null) {
++            this.compressor.close();
+         }
+     }
++    // Paper end
+ 
+-    public void a(int i) {
+-        this.b = i;
++    public void a(int var1) {
++        this.threshold = var1;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/main/java/net/minecraft/server/PacketDecrypter.java b/src/main/java/net/minecraft/server/PacketDecrypter.java
+index 4d02db906..2852385be 100644
+--- a/src/main/java/net/minecraft/server/PacketDecrypter.java
++++ b/src/main/java/net/minecraft/server/PacketDecrypter.java
+@@ -1,24 +1,36 @@
+ package net.minecraft.server;
+ 
++import com.velocitypowered.natives.encryption.VelocityCipher;
++import com.velocitypowered.natives.util.MoreByteBufUtils;
+ import io.netty.buffer.ByteBuf;
+ import io.netty.channel.ChannelHandlerContext;
+ import io.netty.handler.codec.MessageToMessageDecoder;
+ import java.util.List;
+-import javax.crypto.Cipher;
+ 
+ public class PacketDecrypter extends MessageToMessageDecoder<ByteBuf> {
++    private final VelocityCipher cipher; // Paper
+ 
+-    private final PacketEncryptionHandler a;
+-
+-    public PacketDecrypter(Cipher cipher) {
+-        this.a = new PacketEncryptionHandler(cipher);
++    public PacketDecrypter(VelocityCipher cipher) { // Paper
++        this.cipher = cipher; // Paper
+     }
+ 
+-    protected void a(ChannelHandlerContext channelhandlercontext, ByteBuf bytebuf, List<Object> list) throws Exception {
+-        list.add(this.a.a(channelhandlercontext, bytebuf));
++    protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
++        // Paper start
++        ByteBuf compatible = MoreByteBufUtils.ensureCompatible(channelHandlerContext.alloc(), cipher, byteBuf);
++        try {
++            cipher.process(compatible);
++            list.add(compatible);
++        } catch (Exception e) {
++            compatible.release(); // compatible will never be used if we throw an exception
++            throw e;
++        }
++        // Paper end
+     }
+ 
+-    protected void decode(ChannelHandlerContext channelhandlercontext, ByteBuf object, List list) throws Exception {
+-        this.a(channelhandlercontext, object, list);
++    // Paper start
++    @Override
++    public void handlerRemoved(ChannelHandlerContext ctx) {
++        cipher.close();
+     }
+-}
++    // Paper end
++}
+\ No newline at end of file
+diff --git a/src/main/java/net/minecraft/server/PacketEncrypter.java b/src/main/java/net/minecraft/server/PacketEncrypter.java
+index b32a7e676..23efafd71 100644
+--- a/src/main/java/net/minecraft/server/PacketEncrypter.java
++++ b/src/main/java/net/minecraft/server/PacketEncrypter.java
+@@ -1,23 +1,37 @@
+ package net.minecraft.server;
+ 
++import com.velocitypowered.natives.encryption.VelocityCipher; // Paper
++import com.velocitypowered.natives.util.MoreByteBufUtils; // Paper
+ import io.netty.buffer.ByteBuf;
+ import io.netty.channel.ChannelHandlerContext;
+-import io.netty.handler.codec.MessageToByteEncoder;
+-import javax.crypto.Cipher;
++import io.netty.handler.codec.MessageToMessageEncoder; // Paper
+ 
+-public class PacketEncrypter extends MessageToByteEncoder<ByteBuf> {
++import java.util.List; // Paper
+ 
+-    private final PacketEncryptionHandler a;
++public class PacketEncrypter extends MessageToMessageEncoder<ByteBuf> { // Paper - change superclass
++    private final VelocityCipher cipher; // Paper
+ 
+-    public PacketEncrypter(Cipher cipher) {
+-        this.a = new PacketEncryptionHandler(cipher);
++    public PacketEncrypter(VelocityCipher ciper) { // Paper
++        this.cipher = ciper; // Paper
+     }
+ 
+-    protected void a(ChannelHandlerContext channelhandlercontext, ByteBuf bytebuf, ByteBuf bytebuf1) throws Exception {
+-        this.a.a(bytebuf, bytebuf1);
++    protected void encode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception { // Paper
++        // Paper start
++        ByteBuf compatible = MoreByteBufUtils.ensureCompatible(channelHandlerContext.alloc(), cipher, byteBuf);
++        try {
++            cipher.process(compatible);
++            list.add(compatible);
++        } catch (Exception e) {
++            compatible.release(); // compatible will never be used if we throw an exception
++            throw e;
++        }
++        // Paper end
+     }
+ 
+-    protected void encode(ChannelHandlerContext channelhandlercontext, ByteBuf object, ByteBuf bytebuf) throws Exception {
+-        this.a(channelhandlercontext, (ByteBuf) object, bytebuf);
++    // Paper start
++    @Override
++    public void handlerRemoved(ChannelHandlerContext ctx) {
++        cipher.close();
+     }
+-}
++    // Paper end
++}
+\ No newline at end of file
+diff --git a/src/main/java/net/minecraft/server/RegionFile.java b/src/main/java/net/minecraft/server/RegionFile.java
+index 81ada5e38..fc948bc63 100644
+--- a/src/main/java/net/minecraft/server/RegionFile.java
++++ b/src/main/java/net/minecraft/server/RegionFile.java
+@@ -2,6 +2,7 @@ package net.minecraft.server;
+ 
+ import com.google.common.collect.Lists;
+ import java.io.EOFException;
++import java.nio.Buffer;
+ import java.nio.ByteBuffer;
+ import java.nio.IntBuffer;
+ import org.github.paperspigot.exception.ServerInternalException;
+@@ -76,7 +77,7 @@ public class RegionFile {
+             while (header.hasRemaining())  {
+                 if (this.c.getChannel().read(header) == -1) throw new EOFException();
+             }
+-            header.clear();
++            ((Buffer) header).clear(); // Nacho - Fix NoSuchMethodError
+             IntBuffer headerAsInts = header.asIntBuffer();
+             // Paper end
+ 
+diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
+index 55631adb9..4a2a1b565 100644
+--- a/src/main/java/net/minecraft/server/ServerConnection.java
++++ b/src/main/java/net/minecraft/server/ServerConnection.java
+@@ -2,6 +2,7 @@ package net.minecraft.server;
+ 
+ import com.google.common.collect.Lists;
+ import com.google.common.util.concurrent.ThreadFactoryBuilder;
++import com.velocitypowered.natives.util.Natives;
+ import io.netty.bootstrap.ServerBootstrap;
+ import io.netty.channel.Channel;
+ import io.netty.channel.ChannelException;
+@@ -107,6 +108,11 @@ public class ServerConnection {
+                 ServerConnection.e.info("Using default channel type");
+             }
+ 
++            // Paper start - indicate Velocity natives in use
++            e.info("Titanium: Using " + Natives.compress.getLoadedVariant() + " compression from Velocity.");
++            e.info("Titanium: Using " + Natives.cipher.getLoadedVariant() + " cipher from Velocity.");
++            // Paper end
++
+             this.g.add(((ServerBootstrap) ((ServerBootstrap) (new ServerBootstrap()).channel(oclass)).childHandler(new ChannelInitializer() {
+                 protected void initChannel(Channel channel) throws Exception {
+                     try {
+-- 
+2.36.0.windows.1
+

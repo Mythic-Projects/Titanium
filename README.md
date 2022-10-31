@@ -142,7 +142,6 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Nacho-0009] Remove an extra file io call within world credit bob7l
 [Nacho-0010] Use jchambers' FAST UUID methods
 [Nacho-0012] Don't load chunks for physics
-[Nacho-0019] Avoid lock every packet send
 [Nacho-0023] Optimize EntityTracker for the chunk updater
 [Nacho-0024] Do not create new BlockPosition when loading chunk
 [Nacho-0025] Disable random tickSpeed being modified
@@ -152,12 +151,9 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Nacho-????] Async Entity Tracker by Rastrian
 [Nacho-????] Async knockback and hit detection packets by Rastrian
 
-[WindSpigot-0001] Thread affinity by windcolor-dev
 [WindSpigot-0014] Async entity path searching by windcolor-dev
 [WindSpigot-0017] Async entity tracking by windcolor-dev
 [WindSpigot-0054] Modern tick loop by windcolor-dev
-[WindSpigot-????] Use concurrent entity tracking collections by windcolor-dev
-[WindSpigot-????] Prevent display of overload on first 500 ticks by windcolor-dev
 
 [PandaSpigot-0003/0004] Setup Gradle project by hpfxd
 [PandaSpigot-0005] Add internal setMaxStackSize method for materials by hpfxd
@@ -193,11 +189,10 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [IonSpigot-0006] Fix Chunk Loading by SuicidalKids
 [IonSpigot-0008] Reduce Chunk Hashing by SuicidalKids 
 [IonSpigot-0009] Reduce Unload Queue Complexity by SuicidalKids
-[IonSpigot-0011] Async Spawn Chunks by SuicidalKids
 [IonSpigot-0012] Movement Cache by SuicidalKids
+[IonSpigot-0013] Implement PandaWire by SuicidalKids
 [IonSpigot-0014] Faster Chunk Entity List by SuicidalKids
 [IonSpigot-0020] Faster EntityTracker Collections by SuicidalKids
-[IonSpigot-0023] Implement PandaWire by SuicidalKids
 [IonSpigot-0037] Fast Cannon Entity Tracker by SuicidalKids
 
 [Migot-0005] Fix Occasional Client Side Unloading of Chunk 0 0
@@ -207,7 +202,6 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Migot-0036] Check for lava only once per tick
 
 [MineTick-0011] Optimize Idle Furnaces
-[MineTick-0017] Fix insane nether portal lag
 [MineTick-0023] Fix chunk coordinates miscalculations
 
 [KigPaper-0108] Fix CraftPlayer setFlying not working by RoccoDev
@@ -218,8 +212,6 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [KigPaper-0170] Kick after receiving invalid creative action packet by RoccoDev
 [KigPaper-0070/0233] Prevent billion laughs attacks
 
-[Tuinity-????] Skip updating entity tracker without players
-
 [Purpur-0150] Tick fluids config
 [Purpur-0046/0280] Spark Profiler by BillyGalbreath
 [Purpur-0049/0290] Remove Timings by BillyGalbreath
@@ -229,7 +221,6 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Yatopia-0047] Smarter statistics ticking
 
 [Akarin-0007] Avoid double I/O operation on load player file
-[Akarin-0010] Save Json list asynchronously
 
 [InsanePaper-269] Cache Chunk Coordinations
 

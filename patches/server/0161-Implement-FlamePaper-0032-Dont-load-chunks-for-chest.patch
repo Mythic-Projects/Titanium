@@ -1,0 +1,27 @@
+From 10b5ba8403f769d990af46227313dfe364238b5c Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Wed, 14 Sep 2022 21:06:28 +0200
+Subject: [PATCH] Implement [FlamePaper-0032] Dont load chunks for chests
+
+
+diff --git a/src/main/java/net/minecraft/server/BlockChest.java b/src/main/java/net/minecraft/server/BlockChest.java
+index f5f65dd92..295fb1c16 100644
+--- a/src/main/java/net/minecraft/server/BlockChest.java
++++ b/src/main/java/net/minecraft/server/BlockChest.java
+@@ -50,7 +50,12 @@ public class BlockChest extends BlockContainer {
+         while (iterator.hasNext()) {
+             EnumDirection enumdirection = (EnumDirection) iterator.next();
+             BlockPosition blockposition1 = blockposition.shift(enumdirection);
+-            IBlockData iblockdata1 = world.getType(blockposition1);
++            // FlamePaper start - Dont load chunks for chests
++            IBlockData iblockdata1 = world.getTypeIfLoaded(blockposition1);
++            if (iblockdata1 == null) {
++                continue;
++            }
++            // FlamePaper end
+ 
+             if (iblockdata1.getBlock() == this) {
+                 this.e(world, blockposition1, iblockdata1);
+-- 
+2.36.0.windows.1
+

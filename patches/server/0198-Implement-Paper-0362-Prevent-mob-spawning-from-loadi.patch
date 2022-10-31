@@ -1,0 +1,57 @@
+From d56f0fdaa55b39960a0d9d56fc050226a0c27787 Mon Sep 17 00:00:00 2001
+From: Shane Freeder <theboyetronic@gmail.com>
+Date: Mon, 8 Oct 2018 17:51:52 +0100
+Subject: [PATCH] Implement [Paper-0362] Prevent mob spawning from
+ loading/generating chunks by Shane Freeder
+
+
+diff --git a/src/main/java/net/minecraft/server/BlockSnow.java b/src/main/java/net/minecraft/server/BlockSnow.java
+index 03b1a8bc8..9bc8f5460 100644
+--- a/src/main/java/net/minecraft/server/BlockSnow.java
++++ b/src/main/java/net/minecraft/server/BlockSnow.java
+@@ -2,7 +2,9 @@ package net.minecraft.server;
+ 
+ import java.util.Random;
+ 
+-public class BlockSnow extends Block {
++public class
++
++BlockSnow extends Block {
+ 
+     public static final BlockStateInteger LAYERS = BlockStateInteger.of("layers", 1, 8);
+ 
+diff --git a/src/main/java/net/minecraft/server/SpawnerCreature.java b/src/main/java/net/minecraft/server/SpawnerCreature.java
+index e830d20c6..1092defac 100644
+--- a/src/main/java/net/minecraft/server/SpawnerCreature.java
++++ b/src/main/java/net/minecraft/server/SpawnerCreature.java
+@@ -132,9 +132,9 @@ public final class SpawnerCreature {
+                             int i2 = blockposition1.getX();
+                             int j2 = blockposition1.getY();
+                             int k2 = blockposition1.getZ();
+-                            Block block = worldserver.getType(blockposition1).getBlock();
++                            IBlockData blockData = worldserver.getTypeIfLoaded(blockposition1); // Paper
+ 
+-                            if (!block.isOccluding()) {
++                            if (blockData != null && !blockData.getBlock().isOccluding()) { // Paper
+                                 int l2 = 0;
+                                 int i3 = 0;
+ 
+@@ -151,13 +151,13 @@ public final class SpawnerCreature {
+                                         if (i4 < 4) {
+                                             label108: {
+                                                 j3 += worldserver.random.nextInt(b1) - worldserver.random.nextInt(b1);
+-                                                k3 += worldserver.random.nextInt(1) - worldserver.random.nextInt(1);
++                                                //k3 += worldserver.random.nextInt(1) - worldserver.random.nextInt(1); // Titanium - unnecessary (always equals 0)
+                                                 l3 += worldserver.random.nextInt(b1) - worldserver.random.nextInt(b1);
+                                                 BlockPosition blockposition2 = new BlockPosition(j3, k3, l3);
+                                                 float f = (float) j3 + 0.5F;
+                                                 float f1 = (float) l3 + 0.5F;
+ 
+-                                                if (!worldserver.isPlayerNearbyWhoAffectsSpawning((double) f, (double) k3, (double) f1, 24.0D) && blockposition.c((double) f, (double) k3, (double) f1) >= 576.0D) { // PaperSpigot - Affects Spawning API
++                                                if (worldserver.getWorldBorder().isInBounds(blockposition2) && worldserver.getChunkIfLoaded(blockposition2) != null && !worldserver.isPlayerNearbyWhoAffectsSpawning((double) f, (double) k3, (double) f1, 24.0D) && blockposition.c((double) f, (double) k3, (double) f1) >= 576.0D) { // PaperSpigot - Affects Spawning API // Paper - Don't load/generate chunks for mob spawning
+                                                     if (biomebase_biomemeta == null) {
+                                                         biomebase_biomemeta = worldserver.a(enumcreaturetype, blockposition2);
+                                                         if (biomebase_biomemeta == null) {
+-- 
+2.36.0.windows.1
+

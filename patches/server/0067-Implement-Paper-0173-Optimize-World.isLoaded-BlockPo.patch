@@ -1,0 +1,22 @@
+From 16ff770e71f767a8757a88797e354e934e0b2d1b Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Mon, 23 May 2022 22:08:01 +0200
+Subject: [PATCH] Implement [Paper-0173] Optimize World.isLoaded(BlockPosition)
+
+
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index 46ffc14d0..6645e4cb4 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -330,7 +330,7 @@ public abstract class World implements IBlockAccess {
+     }
+ 
+     public boolean isLoaded(BlockPosition blockposition) {
+-        return this.a(blockposition, true);
++        return getChunkIfLoaded(blockposition.getX() >> 4, blockposition.getZ() >> 4) != null; // Paper
+     }
+ 
+     public boolean isLoaded(int blockposition_x, int blockposition_y, int blockposition_z) {
+-- 
+2.36.0.windows.1
+

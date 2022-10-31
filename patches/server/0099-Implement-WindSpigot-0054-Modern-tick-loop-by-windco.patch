@@ -1,0 +1,637 @@
+From 508eabc6ef146126b051f8bf862a49fb071019aa Mon Sep 17 00:00:00 2001
+From: windcolor-dev <79166388+windcolor-dev@users.noreply.github.com>
+Date: Sun, 5 Jun 2022 19:17:13 +0200
+Subject: [PATCH] Implement [WindSpigot-0054] Modern tick loop by windcolor-dev
+
+
+diff --git a/src/main/java/ga/windpvp/windspigot/tickloop/IAsyncHandler.java b/src/main/java/ga/windpvp/windspigot/tickloop/IAsyncHandler.java
+new file mode 100644
+index 000000000..10fc849e4
+--- /dev/null
++++ b/src/main/java/ga/windpvp/windspigot/tickloop/IAsyncHandler.java
+@@ -0,0 +1,140 @@
++package ga.windpvp.windspigot.tickloop;
++
++import java.util.Queue;
++import java.util.concurrent.CompletableFuture;
++import java.util.concurrent.ConcurrentLinkedQueue;
++import java.util.concurrent.Executor;
++import java.util.concurrent.locks.LockSupport;
++import java.util.function.BooleanSupplier;
++import java.util.function.Supplier;
++import org.apache.logging.log4j.LogManager;
++import org.apache.logging.log4j.Logger;
++
++public abstract class IAsyncHandler<R extends Runnable> implements Executor {
++	private static final Logger LOGGER = LogManager.getLogger();
++	private final String name;
++	private final Queue<R> pendingRunnables = new ConcurrentLinkedQueue<>();
++	private int terminateCount;
++
++	protected IAsyncHandler(String name) {
++		this.name = name;
++	}
++
++	protected abstract R packUpRunnable(Runnable runnable);
++
++	protected abstract boolean shouldRun(R task);
++
++	public boolean isMainThread() {
++		return Thread.currentThread() == this.getMainThread();
++	}
++
++	protected abstract Thread getMainThread();
++
++	protected boolean executables() {
++		return !this.isMainThread();
++	}
++
++	public int getPendingRunnables() {
++		return this.pendingRunnables.size();
++	}
++
++	public String getName() {
++		return this.name;
++	}
++
++	public <V> CompletableFuture<V> submit(Supplier<V> task) {
++		return this.executables() ? CompletableFuture.supplyAsync(task, this)
++				: CompletableFuture.completedFuture(task.get());
++	}
++
++	private CompletableFuture<Void> submitAsync(Runnable runnable) {
++		return CompletableFuture.supplyAsync(() -> {
++			runnable.run();
++			return null;
++		}, this);
++	}
++
++	public CompletableFuture<Void> submit(Runnable task) {
++		if (this.executables()) {
++			return this.submitAsync(task);
++		} else {
++			task.run();
++			return CompletableFuture.completedFuture(null);
++		}
++	}
++
++	public void performBlocking(Runnable runnable) {
++		if (!this.isMainThread()) {
++			this.submitAsync(runnable).join();
++		} else {
++			runnable.run();
++		}
++
++	}
++
++	public void call(R runnable) {
++		this.pendingRunnables.add(runnable);
++		LockSupport.unpark(this.getMainThread());
++	}
++
++	@Override
++	public void execute(Runnable runnable) {
++		if (this.executables()) {
++			this.call(this.packUpRunnable(runnable));
++		} else {
++			runnable.run();
++		}
++
++	}
++
++	protected void clearAllRunnable() {
++		this.pendingRunnables.clear();
++	}
++
++	public void runAllRunnable() {
++		while (this.drawRunnable()) {
++		}
++	}
++
++	public boolean drawRunnable() {
++		R runnable = this.pendingRunnables.peek();
++		if (runnable == null) {
++			return false;
++		} else if (this.terminateCount == 0 && !this.shouldRun(runnable)) {
++			return false;
++		} else {
++			this.doRunnable(this.pendingRunnables.remove());
++			return true;
++		}
++	}
++
++	public void controlTerminate(BooleanSupplier stopCondition) {
++		++this.terminateCount;
++
++		try {
++			while (!stopCondition.getAsBoolean()) {
++				if (!this.drawRunnable()) {
++					this.waitForRuns();
++				}
++			}
++		} finally {
++			--this.terminateCount;
++		}
++
++	}
++
++	protected void waitForRuns() {
++		Thread.yield();
++		LockSupport.parkNanos("waiting for tasks", 100000L);
++	}
++
++	protected void doRunnable(R task) {
++		try {
++			task.run();
++		} catch (Exception e) {
++			if (e.getCause() instanceof ThreadDeath) throw e;
++			LOGGER.fatal("Error executing task on {}", this.getName(), e);
++		}
++
++	}
++}
+\ No newline at end of file
+diff --git a/src/main/java/ga/windpvp/windspigot/tickloop/ReentrantIAsyncHandler.java b/src/main/java/ga/windpvp/windspigot/tickloop/ReentrantIAsyncHandler.java
+new file mode 100644
+index 000000000..fa273afa1
+--- /dev/null
++++ b/src/main/java/ga/windpvp/windspigot/tickloop/ReentrantIAsyncHandler.java
+@@ -0,0 +1,29 @@
++package ga.windpvp.windspigot.tickloop;
++
++public abstract class ReentrantIAsyncHandler<R extends Runnable> extends IAsyncHandler<R> {
++
++	private int count;
++
++	public ReentrantIAsyncHandler(String name) {
++		super(name);
++	}
++
++	@Override
++	protected boolean executables() {
++		return this.runningTask() || super.executables();
++	}
++
++	protected boolean runningTask() {
++		return this.count != 0;
++	}
++
++	@Override
++	protected void doRunnable(R task) {
++		++this.count;
++		try {
++			super.doRunnable(task);
++		} finally {
++			--this.count;
++		}
++	}
++}
+\ No newline at end of file
+diff --git a/src/main/java/ga/windpvp/windspigot/tickloop/TasksPerTick.java b/src/main/java/ga/windpvp/windspigot/tickloop/TasksPerTick.java
+new file mode 100644
+index 000000000..6878289b9
+--- /dev/null
++++ b/src/main/java/ga/windpvp/windspigot/tickloop/TasksPerTick.java
+@@ -0,0 +1,20 @@
++package ga.windpvp.windspigot.tickloop;
++
++public class TasksPerTick implements Runnable {
++	private final int tick;
++	private final Runnable task;
++
++	public TasksPerTick(int creationTicks, Runnable task) {
++		this.tick = creationTicks;
++		this.task = task;
++	}
++
++	public int getTick() {
++		return tick;
++	}
++
++	@Override
++	public void run() {
++		task.run();
++	}
++}
+\ No newline at end of file
+diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
+index 251ca80c3..4f0492bf0 100644
+--- a/src/main/java/net/minecraft/server/DedicatedServer.java
++++ b/src/main/java/net/minecraft/server/DedicatedServer.java
+@@ -41,8 +41,8 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+     private boolean s;
+ 
+     // CraftBukkit start - Signature changed
+-    public DedicatedServer(joptsimple.OptionSet options) {
+-        super(options, Proxy.NO_PROXY, DedicatedServer.a);
++    public DedicatedServer(joptsimple.OptionSet options, Thread thread1) { // WindSpigot - backport modern tick loop
++        super(options, Proxy.NO_PROXY, DedicatedServer.a, thread1);
+         // CraftBukkit end
+         Thread thread = new Thread("Server Infinisleeper") {
+             {
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 3f12941d2..81d84335c 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -10,6 +10,8 @@ import com.mojang.authlib.GameProfile;
+ import com.mojang.authlib.GameProfileRepository;
+ import com.mojang.authlib.minecraft.MinecraftSessionService;
+ import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
++import ga.windpvp.windspigot.tickloop.ReentrantIAsyncHandler;
++import ga.windpvp.windspigot.tickloop.TasksPerTick;
+ import io.netty.buffer.ByteBuf;
+ import io.netty.buffer.ByteBufOutputStream;
+ import io.netty.buffer.Unpooled;
+@@ -34,6 +36,10 @@ import java.util.UUID;
+ import java.util.concurrent.Callable;
+ import java.util.concurrent.Executors;
+ import java.util.concurrent.FutureTask;
++import java.util.concurrent.atomic.AtomicReference;
++import java.util.concurrent.locks.LockSupport;
++import java.util.function.BooleanSupplier;
++import java.util.function.Function;
+ import javax.imageio.ImageIO;
+ import net.titanium.config.TitaniumConfig;
+ import org.apache.commons.lang3.Validate;
+@@ -50,7 +56,7 @@ import org.bukkit.craftbukkit.Main;
+ import co.aikar.timings.SpigotTimings; // Spigot
+ // CraftBukkit end
+ 
+-public abstract class MinecraftServer implements Runnable, ICommandListener, IAsyncTaskHandler, IMojangStatistics {
++public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTick> implements Runnable, ICommandListener, IAsyncTaskHandler, IMojangStatistics {
+ 
+     public static final Logger LOGGER = LogManager.getLogger();
+     public static final File a = new File("usercache.json");
+@@ -119,7 +125,35 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+     public int autosavePeriod;
+     // CraftBukkit end
+ 
+-    public MinecraftServer(OptionSet options, Proxy proxy, File file1) {
++    // WindSpigot - MSPT for tps command
++    private double lastMspt;
++
++    // WindSpigot start - backport modern tick loop
++    private long nextTickTime;
++    private long delayedTasksMaxNextTickTime;
++    private boolean mayHaveDelayedTasks;
++    private boolean forceTicks;
++    private volatile boolean isReady;
++    private long lastOverloadWarning;
++    public long serverStartTime;
++    public volatile Thread shutdownThread; // Paper
++
++    public static <S extends MinecraftServer> S spin(Function<Thread, S> serverFactory) {
++        AtomicReference<S> reference = new AtomicReference<>();
++        Thread thread = new Thread(() -> reference.get().run(), "Server thread");
++
++        thread.setUncaughtExceptionHandler((thread1, throwable) -> MinecraftServer.LOGGER.error(throwable));
++        S server = serverFactory.apply(thread); // CraftBukkit - decompile error
++
++        reference.set(server);
++        thread.setPriority(Thread.NORM_PRIORITY + 2); // Paper - boost priority
++        thread.start();
++        return server;
++    }
++    // WindSpigot end
++
++    public MinecraftServer(OptionSet options, Proxy proxy, File file1, Thread thread) {
++        super("Server"); // WindSpigot - backport modern tick loop
+         io.netty.util.ResourceLeakDetector.setEnabled( false ); // Spigot - disable
+         this.e = proxy;
+         MinecraftServer.l = this;
+@@ -131,6 +165,13 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+         this.V = new YggdrasilAuthenticationService(proxy, UUID.randomUUID().toString());
+         this.W = this.V.createMinecraftSessionService();
+         this.Y = this.V.createProfileRepository();
++
++        // WindSpigot start - backport modern tick loop
++        this.nextTickTime = getMillis();
++        this.serverThread = thread;
++        this.primaryThread = thread;
++        // WindSpigot end
++
+         // CraftBukkit start
+         this.options = options;
+         // PandaSpigot start
+@@ -160,7 +201,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+         // PandaSpigot end
+         Runtime.getRuntime().addShutdownHook(new org.bukkit.craftbukkit.util.ServerShutdownThread(this));
+ 
+-        this.serverThread = primaryThread = new Thread(this, "Server thread"); // Moved from main
++        //this.serverThread = primaryThread = new Thread(this, "Server thread"); // Moved from main
+     }
+ 
+     public abstract PropertyManager getPropertyManager();
+@@ -520,6 +561,10 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+     private static final long SEC_IN_NANO = 1000000000;
+     private static final long TICK_TIME = SEC_IN_NANO / TPS;
+     private static final long MAX_CATCHUP_BUFFER = TICK_TIME * TPS * 60L;
++    // WindSpigot start - backport modern tick loop
++    private long lastTick = 0;
++    private long catchupTime = 0;
++    // WindSpigot end
+     private static final int SAMPLE_INTERVAL = 20;
+     public final RollingAverage tps1 = new RollingAverage(60);
+     public final RollingAverage tps5 = new RollingAverage(60 * 5);
+@@ -570,9 +615,9 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+  
+     public void run() {
+         try {
++            serverStartTime = getNanos(); // Paper
+             if (this.init()) {
+                 this.ab = az();
+-                long i = 0L;
+ 
+                 this.r.setMOTD(new ChatComponentText(this.motd));
+                 this.r.setServerInfo(new ServerPing.ServerData("1.8.8", 47));
+@@ -582,35 +627,24 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+                 // PaperSpigot start - Further improve tick loop
+                 Arrays.fill( recentTps, 20 );
+                 //long lastTick = System.nanoTime(), catchupTime = 0, curTime, wait, tickSection = lastTick;
+-                long start = System.nanoTime(), lastTick = start - TICK_TIME, catchupTime = 0, curTime, wait, tickSection = start;
++                long start = System.nanoTime(), curTime, tickSection = start; // Paper - Further improve server tick loop
++                lastTick = start - TICK_TIME;
+                 // PaperSpigot end
+                 while (this.isRunning) {
+-                    curTime = System.nanoTime();
+-                    // PaperSpigot start - Further improve tick loop
+-                    wait = TICK_TIME - (curTime - lastTick);
+-                    if (wait > 0) {
+-                        if (catchupTime < 2E6) {
+-                            wait += Math.abs(catchupTime);
+-                        }
+-                        if (wait < catchupTime) {
+-                            catchupTime -= wait;
+-                            wait = 0;
+-                        } else if (catchupTime > 2E6) {
+-                            wait -= catchupTime;
+-                            catchupTime -= catchupTime;
+-                        }
+-                    }
+-                    if (wait > 0) {
+-                        Thread.sleep(wait / 1000000);
+-                        wait = TICK_TIME - (curTime - lastTick);
++                    long i = ((curTime = System.nanoTime()) / (1000L * 1000L)) - this.nextTickTime; // Paper
++                    if (i > 5000L && this.nextTickTime - this.lastOverloadWarning >= 30000L && ticks > 500) { // CraftBukkit // WindSpigot - prevent display of overload on first 500 ticks
++                        long j = i / 50L;
++                        if (this.server.getWarnOnOverload()) // CraftBukkit
++                            MinecraftServer.LOGGER.warn("Can't keep up! Is the server overloaded? Running {}ms or {} ticks behind", i, j);
++                        this.nextTickTime += j * 50L;
++                        this.lastOverloadWarning = this.nextTickTime;
+                     }
+ 
+-                    catchupTime = Math.min(MAX_CATCHUP_BUFFER, catchupTime - wait);
+-
+-                    if ( ++MinecraftServer.currentTick % SAMPLE_INTERVAL == 0 )
+-                    {
++                    if (++MinecraftServer.currentTick % MinecraftServer.SAMPLE_INTERVAL == 0) {
+                         final long diff = curTime - tickSection;
++                        //double currentTps = 1E9 / diff * SAMPLE_INTERVAL;
+                         java.math.BigDecimal currentTps = TPS_BASE.divide(new java.math.BigDecimal(diff), 30, java.math.RoundingMode.HALF_UP);
++
+                         tps1.add(currentTps, diff);
+                         tps5.add(currentTps, diff);
+                         tps15.add(currentTps, diff);
+@@ -623,14 +657,15 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+                     }
+                     lastTick = curTime;
+ 
+-                    // NachoSpigot start - backport tick events from Paper
+-                    this.server.getPluginManager().callEvent(new com.destroystokyo.paper.event.server.ServerTickStartEvent(this.ticks+1));
+-                    this.A();
+-                    long endTime = System.nanoTime();
+-                    long remaining = (TICK_TIME - (endTime - lastTick)) - catchupTime;
+-                    this.server.getPluginManager().callEvent(new com.destroystokyo.paper.event.server.ServerTickEndEvent(this.ticks, ((double)(endTime - lastTick) / 1000000D), remaining));
+-                    // NachoSpigot end
+-                    this.Q = true;
++                    this.nextTickTime += 50L;
++                    this.methodProfiler.a("tick"); // push
++                    this.A(this::haveTime);
++                    this.methodProfiler.c("nextTickWait"); // popPush
++                    this.mayHaveDelayedTasks = true;
++                    this.delayedTasksMaxNextTickTime = Math.max(getMillis() + 50L, this.nextTickTime);
++                    this.waitUntilNextTick();
++                    this.methodProfiler.b(); // pop
++                    this.isReady = true;
+                 }
+                 // Spigot end
+             } else {
+@@ -682,6 +717,79 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+ 
+     }
+ 
++    // WindSpigot start - backport modern tick loop
++    private boolean haveTime() {
++        // CraftBukkit start
++        if (isOversleep) return canOversleep();// Paper - because of our changes, this logic is broken
++        return this.forceTicks || this.runningTask() || getMillis() < (this.mayHaveDelayedTasks ? this.delayedTasksMaxNextTickTime : this.nextTickTime);
++    }
++    // Paper start
++    boolean isOversleep = false;
++    private boolean canOversleep() {
++        return this.mayHaveDelayedTasks && getMillis() < this.delayedTasksMaxNextTickTime;
++    }
++
++    private boolean canSleepForTickNoOversleep() {
++        return this.forceTicks || this.runningTask() || getMillis() < this.nextTickTime;
++    }
++    // Paper end
++
++    private void executeModerately() {
++        this.runAllRunnable();
++        LockSupport.parkNanos("executing tasks", 1000L);
++    }
++    // CraftBukkit end
++    protected void waitUntilNextTick() {
++        this.controlTerminate(() -> !this.canSleepForTickNoOversleep());
++    }
++    @Override
++    protected TasksPerTick packUpRunnable(Runnable runnable) {
++        // Paper start - anything that does try to post to main during watchdog crash, run on watchdog
++        if (this.hasStopped && Thread.currentThread().equals(shutdownThread)) {
++            runnable.run();
++            runnable = () -> {};
++        }
++        // Paper end
++        return new TasksPerTick(this.ticks, runnable);
++    }
++
++    @Override
++    protected boolean shouldRun(TasksPerTick task) {
++        return task.getTick() + 3 < this.ticks || this.haveTime();
++    }
++
++    @Override
++    public boolean drawRunnable() {
++        boolean flag = this.pollTaskInternal();
++
++        this.mayHaveDelayedTasks = flag;
++        return flag;
++    }
++
++    // TODO: WorldServer ticker
++    private boolean pollTaskInternal() {
++        if (super.drawRunnable()) {
++            return true;
++        } else {
++            if (this.haveTime()) {
++
++//                for (WorldServer worldserver : this.worldServer) {
++//                    if (worldserver.chunkProviderServer.pollTask()) {
++//                        return true;
++//                    }
++//                }
++            }
++
++            return false;
++        }
++    }
++
++    @Override
++    public Thread getMainThread() {
++        return serverThread;
++    }
++    // WindSpigot end
++
+     private void a(ServerPing serverping) {
+         File file = this.d("server-icon.png");
+ 
+@@ -716,9 +824,21 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+ 
+     protected void z() {}
+ 
+-    protected void A() throws ExceptionWorldConflict { // CraftBukkit - added throws
++    // WindSpigot - backport modern tick loop
++    protected void A(BooleanSupplier shouldKeepTicking) throws ExceptionWorldConflict { // CraftBukkit - added throws
+         co.aikar.timings.TimingsManager.FULL_SERVER_TICK.startTiming(); // Spigot
+-        long i = System.nanoTime();
++
++        // WindSpigot start - backport modern tick loop
++        long i = getNanos();
++
++        // Paper start - move oversleep into full server tick
++        isOversleep = true;
++        this.controlTerminate(() -> !this.canOversleep());
++        isOversleep = false;
++        // Paper end
++
++        this.server.getPluginManager().callEvent(new com.destroystokyo.paper.event.server.ServerTickStartEvent(this.ticks+1)); // Paper
++        // WindSpigot end
+ 
+         ++this.ticks;
+         if (this.T) {
+@@ -762,6 +882,15 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+             SpigotTimings.worldSaveTimer.stopTiming(); // Spigot
+         }
+ 
++        // WindSpigot start - backport modern tick loop
++        // Paper start
++        long endTime = System.nanoTime();
++        long remaining = (TICK_TIME - (endTime - lastTick)) - catchupTime;
++        this.lastMspt = ((double) (endTime - lastTick) / 1000000D);
++        this.server.getPluginManager().callEvent(new com.destroystokyo.paper.event.server.ServerTickEndEvent(this.ticks, this.lastMspt, remaining));
++        // Paper end
++        // WindSpigot end
++
+         this.methodProfiler.a("tallying");
+         this.h[this.ticks % 100] = System.nanoTime() - i;
+         this.methodProfiler.b();
+@@ -954,7 +1083,8 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+         this.p.add(iupdateplayerlistbox);
+     }
+ 
+-    public static void main(final OptionSet options) { // CraftBukkit - replaces main(String[] astring)
++    // WindSpigot start
++    /*public static void main(final OptionSet options) { // CraftBukkit - replaces main(String[] astring)
+         DispenserRegistry.c();
+ 
+         try {
+@@ -1038,7 +1168,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+             });
+             */
+ 
+-            DedicatedServer dedicatedserver = new DedicatedServer(options);
++            /*DedicatedServer dedicatedserver = new DedicatedServer(options);
+ 
+             if (options.has("port")) {
+                 int port = (Integer) options.valueOf("port");
+@@ -1061,7 +1191,8 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+             MinecraftServer.LOGGER.fatal("Failed to start the minecraft server", exception);
+         }
+ 
+-    }
++    }*/
++    // WindSpigot end
+ 
+     public void C() {
+         /* CraftBukkit start - prevent abuse
+@@ -1539,9 +1670,19 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+         return this.e;
+     }
+ 
++    // WindSpigot start - backport modern tick loo
+     public static long az() {
+-        return System.currentTimeMillis();
++        return getMillis();
++    }
++
++    public static long getMillis() {
++        return getNanos() / 1000000L;
++    }
++
++    public static long getNanos() {
++        return System.nanoTime(); // Paper
+     }
++    // WindSpigot end
+ 
+     public int getIdleTimeout() {
+         return this.G;
+diff --git a/src/main/java/org/bukkit/craftbukkit/Main.java b/src/main/java/org/bukkit/craftbukkit/Main.java
+index 109563b91..65ec9c8d3 100644
+--- a/src/main/java/org/bukkit/craftbukkit/Main.java
++++ b/src/main/java/org/bukkit/craftbukkit/Main.java
+@@ -9,6 +9,8 @@ import java.util.logging.Level;
+ import java.util.logging.Logger;
+ import joptsimple.OptionParser;
+ import joptsimple.OptionSet;
++import net.minecraft.server.DedicatedServer;
++import net.minecraft.server.DispenserRegistry;
+ import net.minecraft.server.MinecraftServer;
+ import net.minecrell.terminalconsole.TerminalConsoleAppender; // PandaSpigot
+ 
+@@ -234,7 +236,31 @@ public class Main {
+                 // Spigot End
+                 System.setProperty("library.jansi.version", "PandaSpigot"); // PandaSpigot - set meaningless jansi version to prevent git builds from crashing on Windows
+                 System.out.println("Loading libraries, please wait...");
+-                MinecraftServer.main(options);
++
++                // WindSpigot start
++                DispenserRegistry.c();
++                OptionSet finalOptions = options;
++
++                DedicatedServer server = MinecraftServer.spin(thread -> {
++                    DedicatedServer dedicatedserver = new DedicatedServer(finalOptions, thread);
++
++                    if (finalOptions.has("port")) {
++                        int port = (Integer) finalOptions.valueOf("port");
++                        if (port > 0) {
++                            dedicatedserver.setPort(port);
++                        }
++                    }
++
++                    if (finalOptions.has("universe")) {
++                        dedicatedserver.universe = (File) finalOptions.valueOf("universe");
++                    }
++
++                    if (finalOptions.has("world")) {
++                        dedicatedserver.setWorld((String) finalOptions.valueOf("world"));
++                    }
++                    return dedicatedserver;
++                });
++                // WindSpigot end
+             } catch (Throwable t) {
+                 t.printStackTrace();
+             }
+-- 
+2.36.0.windows.1
+
