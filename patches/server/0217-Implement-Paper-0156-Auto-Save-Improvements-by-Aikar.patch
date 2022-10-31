@@ -1,4 +1,4 @@
-From 0f608ba1f32f2a6df07507c4be78117eaa994460 Mon Sep 17 00:00:00 2001
+From 1d466ec54722a6d7fecb97b4738fcc25c3d85ad7 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Mon, 19 Sep 2016 23:16:39 -0400
 Subject: [PATCH] Implement [Paper-0156] Auto Save Improvements by Aikar
@@ -23,10 +23,10 @@ index eee8537e2..44c1a5b6f 100644
  
      public Random a(long i) {
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index 9aca136a0..a69d45f05 100644
+index 347e290ee..7298ef185 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-@@ -389,7 +389,7 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -388,7 +388,7 @@ public class ChunkProviderServer implements IChunkProvider {
                  this.saveChunk(chunk);
                  chunk.f(false);
                  ++i;
