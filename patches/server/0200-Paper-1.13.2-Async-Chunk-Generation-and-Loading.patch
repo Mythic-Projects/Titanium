@@ -1,4 +1,4 @@
-From 9c573fea3d1cf749d822080d66bec92188c43428 Mon Sep 17 00:00:00 2001
+From ddca11143574fa061663f36cd096febc890ad159 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Fri, 14 Oct 2022 11:59:49 +0200
 Subject: [PATCH] Paper 1.13.2 Async Chunk Generation (and Loading)
@@ -581,7 +581,7 @@ index 1a386ad77..d9e157343 100644
      public Chunk getChunkAt(BlockPosition blockposition) {
          return this.getOrCreateChunk(blockposition.getX() >> 4, blockposition.getZ() >> 4);
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index a34910099..9aca136a0 100644
+index a34910099..347e290ee 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
 @@ -1,35 +1,29 @@
@@ -699,7 +699,7 @@ index a34910099..9aca136a0 100644
      // CraftBukkit start - Add async variant, provide compatibility
      public Chunk getChunkIfLoaded(int x, int z) {
          return chunks.get(LongHash.toLong(x, z));
-@@ -126,7 +180,13 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -126,25 +180,32 @@ public class ChunkProviderServer implements IChunkProvider {
          return getChunkAt(i, j, null);
      }
  
@@ -713,8 +713,10 @@ index a34910099..9aca136a0 100644
          long key = LongHash.toLong(i, j); // IonSpigot - Only create key once
          Chunk chunk = chunks.get(key);
          ChunkRegionLoader loader = null;
-@@ -136,15 +196,17 @@ public class ChunkProviderServer implements IChunkProvider {
  
+         if (this.chunkLoader instanceof ChunkRegionLoader) {
+             loader = (ChunkRegionLoader) this.chunkLoader;
+-
          }
          // We can only use the queue for already generated chunks
 -        if (chunk == null && loader != null && loader.chunkExists(world, i, j)) {
@@ -733,7 +735,7 @@ index a34910099..9aca136a0 100644
          }
  
          unloadQueue.remove(key); // SportPaper
-@@ -157,12 +219,11 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -157,12 +218,11 @@ public class ChunkProviderServer implements IChunkProvider {
      }
      public Chunk originalGetChunkAt(int i, int j) {
          long key = LongHash.toLong(i, j); // IonSpigot - Only create key once
@@ -747,7 +749,7 @@ index a34910099..9aca136a0 100644
              chunk = this.loadChunk(i, j);
              if (chunk == null) {
                  if (this.chunkProvider == null) {
-@@ -171,50 +232,14 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -171,50 +231,14 @@ public class ChunkProviderServer implements IChunkProvider {
                      try {
                          chunk = this.chunkProvider.getOrCreateChunk(i, j);
                      } catch (Throwable throwable) {
@@ -800,7 +802,7 @@ index a34910099..9aca136a0 100644
          }
  
          unloadQueue.remove(key); // SportPaper
-@@ -271,6 +296,43 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -271,6 +295,43 @@ public class ChunkProviderServer implements IChunkProvider {
          }
      }
  
@@ -844,7 +846,7 @@ index a34910099..9aca136a0 100644
      public void saveChunkNOP(Chunk chunk) {
          if (canSave() && this.chunkLoader != null) {
              try {
-@@ -298,50 +360,16 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -298,50 +359,16 @@ public class ChunkProviderServer implements IChunkProvider {
  
      public void getChunkAt(IChunkProvider ichunkprovider, int i, int j) {
          Chunk chunk = this.getOrCreateChunk(i, j);
@@ -900,7 +902,7 @@ index a34910099..9aca136a0 100644
      }
  
      public boolean saveChunks(boolean flag, IProgressUpdate iprogressupdate) {
-@@ -394,16 +422,17 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -394,16 +421,17 @@ public class ChunkProviderServer implements IChunkProvider {
                  server.getPluginManager().callEvent(event);
                  if (!event.isCancelled()) {
  
@@ -921,7 +923,7 @@ index a34910099..9aca136a0 100644
                      for (int x = -2; x < 3; x++) {
                          for (int z = -2; z < 3; z++) {
                              if (x == 0 && z == 0) {
-@@ -416,7 +445,8 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -416,7 +444,8 @@ public class ChunkProviderServer implements IChunkProvider {
                                  chunk.setNeighborUnloaded(x, z);
                              }
                          }
@@ -1723,7 +1725,7 @@ index 000000000..6dcfdb990
 +
 +}
 diff --git a/src/main/java/net/minecraft/server/PlayerChunkMap.java b/src/main/java/net/minecraft/server/PlayerChunkMap.java
-index 506cb2727..f1571037e 100644
+index 506cb2727..dd4bd7313 100644
 --- a/src/main/java/net/minecraft/server/PlayerChunkMap.java
 +++ b/src/main/java/net/minecraft/server/PlayerChunkMap.java
 @@ -7,6 +7,9 @@ import java.util.ArrayList;
@@ -1810,7 +1812,7 @@ index 506cb2727..f1571037e 100644
      public static int getFurthestViewableBlock(int i) {
          return i * 16 - 16;
      }
-@@ -366,10 +391,59 @@ public class PlayerChunkMap {
+@@ -366,10 +391,64 @@ public class PlayerChunkMap {
          private boolean loaded = false;
          private Runnable loadedRunnable = () -> PlayerChunk.this.loaded = true;
          // CraftBukkit end
@@ -1867,11 +1869,16 @@ index 506cb2727..f1571037e 100644
          public PlayerChunk(int i, int j) {
              this.location = new ChunkCoordIntPair(i, j);
 -            PlayerChunkMap.this.a().chunkProviderServer.getChunkAt(i, j, loadedRunnable); // CraftBukkit
-+            this.chunk = PlayerChunkMap.this.a().chunkProviderServer.getChunkAt(i, j, true, true, this.loadedConsumer); // CraftBukkit // Titanium - use new method
++            // Titanium start
++            ChunkProviderServer chunkProvider = PlayerChunkMap.this.getWorld().chunkProviderServer;
++            this.chunk = LEGACY_CHUNK_SYSTEM
++                    ? chunkProvider.getChunkAt(i, j, this.loadedRunnable)
++                    : chunkProvider.getChunkAt(i, j, true, true, this.loadedConsumer);
++            // Titanium end
          }
  
          public void a(final EntityPlayer entityplayer) {  // CraftBukkit - added final to argument
-@@ -387,23 +461,25 @@ public class PlayerChunkMap {
+@@ -387,12 +466,16 @@ public class PlayerChunkMap {
                      playerRunnable = null;
                      entityplayer.chunkCoordIntPairQueue.add(this.location);
                  } else {
@@ -1881,44 +1888,52 @@ index 506cb2727..f1571037e 100644
 -                        }
 -                    };
 -                    PlayerChunkMap.this.a().chunkProviderServer.getChunkAt(this.location.x, this.location.z, playerRunnable);
-+                    this.checkHighPriority(entityplayer);
 +                    // Titanium start
 +                    playerRunnable = () -> entityplayer.chunkCoordIntPairQueue.add(PlayerChunk.this.location);
-+                    PlayerChunkMap.this.a().chunkProviderServer.getChunkAt(this.location.x, this.location.z, true, true, chunk -> playerRunnable.run());
++                    ChunkProviderServer chunkProvider = PlayerChunkMap.this.getWorld().chunkProviderServer;
++                    if (LEGACY_CHUNK_SYSTEM) {
++                        chunkProvider.getChunkAt(this.location.x, this.location.z, playerRunnable);
++                    } else {
++                        this.checkHighPriority(entityplayer);
++                        chunkProvider.getChunkAt(this.location.x, this.location.z, true, true, chunk -> playerRunnable.run());
++                    }
 +                    // Titanium end
                  }
  
                  this.players.put(entityplayer, playerRunnable);
--                // CraftBukkit end
-+                // CraftBukkit end*/
-             }
-         }
- 
+@@ -403,7 +486,7 @@ public class PlayerChunkMap {
          public void b(EntityPlayer entityplayer) {
              if (this.b.contains(entityplayer)) {
-+                // Titanium start
-+                Chunk chunk = this.chunk;
                  // CraftBukkit start - If we haven't loaded yet don't load the chunk just so we can clean it up
 -                if (!this.loaded) {
-+                if (LEGACY_CHUNK_SYSTEM && !this.loaded) {
-+                    // Titanium end
++                if (LEGACY_CHUNK_SYSTEM && !this.loaded) { // Titanium
                      ChunkIOExecutor.dropQueuedChunkLoad(PlayerChunkMap.this.a(), this.location.x, this.location.z, this.players.get(entityplayer));
                      this.b.remove(entityplayer);
                      this.players.remove(entityplayer);
-@@ -418,7 +494,11 @@ public class PlayerChunkMap {
+@@ -418,7 +501,12 @@ public class PlayerChunkMap {
                      return;
                  }
                  // CraftBukkit end
 -                Chunk chunk = PlayerChunkMap.this.world.getChunkAt(this.location.x, this.location.z);
 +                // Titanium start
++                Chunk chunk = this.chunk;
 +                if (chunk == null) {
-+                    chunk = PlayerChunkMap.this.world.getChunkAt(this.location.x, this.location.z);
++                    chunk = PlayerChunkMap.this.getWorld().getChunkAt(this.location.x, this.location.z);
 +                }
 +                // Titanium end
  
                  if (chunk.isReady()) {
                      entityplayer.playerConnection.sendPacket(new PacketPlayOutMapChunk(chunk, true, 0));
-@@ -445,7 +525,13 @@ public class PlayerChunkMap {
+@@ -427,7 +515,7 @@ public class PlayerChunkMap {
+                 this.players.remove(entityplayer); // CraftBukkit
+                 this.b.remove(entityplayer);
+                 entityplayer.chunkCoordIntPairQueue.remove(this.location);
+-                org.bukkit.Bukkit.getPluginManager().callEvent(new io.papermc.paper.event.packet.PlayerChunkUnloadEvent(chunk.bukkitChunk, entityplayer.getBukkitEntity())); // PandaSpigot
++                if (!(chunk instanceof EmptyChunk)) org.bukkit.Bukkit.getPluginManager().callEvent(new io.papermc.paper.event.packet.PlayerChunkUnloadEvent(chunk.bukkitChunk, entityplayer.getBukkitEntity())); // PandaSpigot // Titanium - Add instanceof for EmptyChunk
+                 if (this.b.isEmpty()) {
+                     long i = (long) this.location.x + 2147483647L | (long) this.location.z + 2147483647L << 32;
+ 
+@@ -445,7 +533,13 @@ public class PlayerChunkMap {
          }
  
          public void a() {
