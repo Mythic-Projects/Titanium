@@ -1,4 +1,4 @@
-From a7ce1a30fafa8462122bd2f8263ff0b697a45923 Mon Sep 17 00:00:00 2001
+From 600162b122a80d891ea256b26cfe31dbdbcde94c Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Fri, 14 Oct 2022 11:59:49 +0200
 Subject: [PATCH] Paper 1.13.2 Async Chunk Generation (and Loading)
@@ -581,7 +581,7 @@ index 1a386ad77..d9e157343 100644
      public Chunk getChunkAt(BlockPosition blockposition) {
          return this.getOrCreateChunk(blockposition.getX() >> 4, blockposition.getZ() >> 4);
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index a34910099..347e290ee 100644
+index a34910099..9c841a9b6 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
 @@ -1,35 +1,29 @@
@@ -632,7 +632,7 @@ index a34910099..347e290ee 100644
      public WorldServer world;
  
      public ChunkProviderServer(WorldServer worldserver, IChunkLoader ichunkloader, IChunkProvider ichunkprovider) {
-@@ -117,6 +111,66 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -117,6 +111,68 @@ public class ChunkProviderServer implements IChunkProvider {
  
      }
  
@@ -673,7 +673,9 @@ index a34910099..347e290ee 100644
 +    }
 +
 +    public Chunk getChunkAt(int x, int z, boolean load, boolean gen, AsyncPriority priority, Consumer<Chunk> consumer) {
-+        return this.getChunkAt(x, z, () -> consumer.accept(this.chunks.get(LongHash.toLong(x, z))));
++        return this.getChunkAt(x, z, consumer != null
++                ? () -> consumer.accept(this.chunks.get(LongHash.toLong(x, z)))
++                : null);
 +    }
 +
 +    public Chunk getChunkAt(int x, int z, boolean load, boolean gen) {
@@ -699,7 +701,7 @@ index a34910099..347e290ee 100644
      // CraftBukkit start - Add async variant, provide compatibility
      public Chunk getChunkIfLoaded(int x, int z) {
          return chunks.get(LongHash.toLong(x, z));
-@@ -126,25 +180,32 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -126,25 +182,32 @@ public class ChunkProviderServer implements IChunkProvider {
          return getChunkAt(i, j, null);
      }
  
@@ -735,7 +737,7 @@ index a34910099..347e290ee 100644
          }
  
          unloadQueue.remove(key); // SportPaper
-@@ -157,12 +218,11 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -157,12 +220,11 @@ public class ChunkProviderServer implements IChunkProvider {
      }
      public Chunk originalGetChunkAt(int i, int j) {
          long key = LongHash.toLong(i, j); // IonSpigot - Only create key once
@@ -749,7 +751,7 @@ index a34910099..347e290ee 100644
              chunk = this.loadChunk(i, j);
              if (chunk == null) {
                  if (this.chunkProvider == null) {
-@@ -171,50 +231,14 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -171,50 +233,14 @@ public class ChunkProviderServer implements IChunkProvider {
                      try {
                          chunk = this.chunkProvider.getOrCreateChunk(i, j);
                      } catch (Throwable throwable) {
@@ -802,7 +804,7 @@ index a34910099..347e290ee 100644
          }
  
          unloadQueue.remove(key); // SportPaper
-@@ -271,6 +295,43 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -271,6 +297,43 @@ public class ChunkProviderServer implements IChunkProvider {
          }
      }
  
@@ -846,7 +848,7 @@ index a34910099..347e290ee 100644
      public void saveChunkNOP(Chunk chunk) {
          if (canSave() && this.chunkLoader != null) {
              try {
-@@ -298,50 +359,16 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -298,50 +361,16 @@ public class ChunkProviderServer implements IChunkProvider {
  
      public void getChunkAt(IChunkProvider ichunkprovider, int i, int j) {
          Chunk chunk = this.getOrCreateChunk(i, j);
@@ -902,7 +904,7 @@ index a34910099..347e290ee 100644
      }
  
      public boolean saveChunks(boolean flag, IProgressUpdate iprogressupdate) {
-@@ -394,16 +421,17 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -394,16 +423,17 @@ public class ChunkProviderServer implements IChunkProvider {
                  server.getPluginManager().callEvent(event);
                  if (!event.isCancelled()) {
  
@@ -923,7 +925,7 @@ index a34910099..347e290ee 100644
                      for (int x = -2; x < 3; x++) {
                          for (int z = -2; z < 3; z++) {
                              if (x == 0 && z == 0) {
-@@ -416,7 +444,8 @@ public class ChunkProviderServer implements IChunkProvider {
+@@ -416,7 +446,8 @@ public class ChunkProviderServer implements IChunkProvider {
                                  chunk.setNeighborUnloaded(x, z);
                              }
                          }
