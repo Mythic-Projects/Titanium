@@ -1,4 +1,4 @@
-From 93be086edd55d54f3ac43a6fb5cb19e8539efd2c Mon Sep 17 00:00:00 2001
+From e9b61a7449f1400f4415302ca6caa9e3b855fa9d Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 16 Sep 2022 22:44:31 +0200
 Subject: [PATCH] Option to change brand name
@@ -18,10 +18,10 @@ index 0af306752..146e0d9d1 100644
      }
  
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 1062de358..38a2b3343 100644
+index 5446d9c91..899128cb7 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -1282,6 +1282,18 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+@@ -1293,6 +1293,18 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
          return "Titanium"; // Titanium - Titanium -> // PaperSpigot - PaperSpigot > // Spigot - Spigot > // CraftBukkit - cb > vanilla!
      }
  

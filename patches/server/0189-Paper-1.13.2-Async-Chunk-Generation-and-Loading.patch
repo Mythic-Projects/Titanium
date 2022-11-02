@@ -1,4 +1,4 @@
-From 826e68c1e4b8d4438c2e2214f527d71905094652 Mon Sep 17 00:00:00 2001
+From 2eb8b8774cb03fc74798a9c5d1ae737177b3978c Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Fri, 14 Oct 2022 11:59:49 +0200
 Subject: [PATCH] Paper 1.13.2 Async Chunk Generation (and Loading)
@@ -1032,7 +1032,7 @@ index 49e064626..005b4f1d4 100644
          f %= 360.0F;
          if (f >= 180.0F) {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index bab7d14a3..65246329e 100644
+index 0ea189558..98d54d6ae 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -41,6 +41,8 @@ import java.util.concurrent.locks.LockSupport;
@@ -2377,10 +2377,10 @@ index 2307c87b6..ae22fb53f 100644
                                  }
                              }
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 0ca4bb063..778800b5a 100644
+index aa44522e3..656324907 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
-@@ -822,7 +822,11 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -821,7 +821,11 @@ public class WorldServer extends World implements IAsyncTaskHandler {
              gen = new org.bukkit.craftbukkit.generator.NormalChunkGenerator(this, this.getSeed());
          }
  

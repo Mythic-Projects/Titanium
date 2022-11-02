@@ -1,4 +1,4 @@
-From 0b53d2dc062c398875b93a08a628c774b4e6a29a Mon Sep 17 00:00:00 2001
+From f7b143c64cc7449f3fe7dea3469df8e75a6142f7 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 21 Oct 2022 20:55:45 +0200
 Subject: [PATCH] Move modern tick loop classes to net.titanium
@@ -27,7 +27,7 @@ index dbe2d5059..a1a6ec54e 100644
  public abstract class AsyncPacketThread {
  
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index ab21914d6..7751daf7d 100644
+index 65246329e..20da1c4fb 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -10,8 +10,8 @@ import com.mojang.authlib.GameProfile;

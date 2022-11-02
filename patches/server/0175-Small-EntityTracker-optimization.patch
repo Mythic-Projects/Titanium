@@ -1,14 +1,14 @@
-From cc6a6acd5865ac9e7126371f6b0ab331b4c9481e Mon Sep 17 00:00:00 2001
+From f5d6156eaef16af3024b5e420f0d1696dcfc080e Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 23 Sep 2022 21:33:18 +0200
 Subject: [PATCH] Small EntityTracker optimization
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-index bc05f0e6c..5136cda54 100644
+index 6a94bbb9d..7bb549f61 100644
 --- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 +++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-@@ -228,10 +228,13 @@ public class EntityTrackerEntry {
+@@ -232,10 +232,13 @@ public class EntityTrackerEntry {
                  int k1 = j - this.yLoc;
                  int l1 = k - this.zLoc;
                  Object object = null;
@@ -24,7 +24,7 @@ index bc05f0e6c..5136cda54 100644
                      // CraftBukkit start - Code moved from below
                      if (flag) {
                          this.xLoc = i;
-@@ -239,6 +242,7 @@ public class EntityTrackerEntry {
+@@ -243,6 +246,7 @@ public class EntityTrackerEntry {
                          this.zLoc = k;
                      }
  

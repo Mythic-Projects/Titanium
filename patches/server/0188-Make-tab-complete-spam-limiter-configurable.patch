@@ -1,4 +1,4 @@
-From eb4be270d1bc1ee5b369abf4d820c6f2afff2fa7 Mon Sep 17 00:00:00 2001
+From 98b606ce75a466c3c01fa77a4d3c2d823e118e48 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 17 Oct 2022 22:32:04 +0200
 Subject: [PATCH] Make tab complete spam limiter configurable
@@ -6,10 +6,10 @@ Subject: [PATCH] Make tab complete spam limiter configurable
 Backported from newer paper versions
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 12a50b46b..fd0de7a85 100644
+index fe3a1520a..d3224e131 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
-@@ -1989,7 +1989,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+@@ -2006,7 +2006,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
      public void a(PacketPlayInTabComplete packetplayintabcomplete) {
          //PlayerConnectionUtils.ensureMainThread(packetplayintabcomplete, this, this.player.u()); // Paper - run this async
          // CraftBukkit start

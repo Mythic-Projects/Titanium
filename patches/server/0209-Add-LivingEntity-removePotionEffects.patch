@@ -1,4 +1,4 @@
-From 0e3f984f9d82630b193be58c939acb8b4659ef58 Mon Sep 17 00:00:00 2001
+From a4926bb04d2a48cd97169f1a6d5f17252c183889 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 26 Oct 2022 21:17:20 +0200
 Subject: [PATCH] Add LivingEntity#removePotionEffects

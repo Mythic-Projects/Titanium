@@ -1,4 +1,4 @@
-From 200d28eb36b0a6d366f2937863ef7c51b017d0bc Mon Sep 17 00:00:00 2001
+From 4224842bf3d4a72d47b8eaccca087454046b7b97 Mon Sep 17 00:00:00 2001
 From: RoccoDev <hey@rocco.dev>
 Date: Wed, 24 Mar 2021 22:35:51 +0100
 Subject: [PATCH] Implement [KigPaper-0161] Fix CraftingManager memory leak by
@@ -58,7 +58,7 @@ index 191f47b9d..03116263a 100644
      }
  
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 7ef3c5d6a..7dfe36870 100644
+index 992e8b50c..080ccb496 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -46,6 +46,7 @@ import net.minecraft.server.ChunkProviderServer;

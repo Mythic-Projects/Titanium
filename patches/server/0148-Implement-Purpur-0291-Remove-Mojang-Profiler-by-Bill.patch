@@ -1,4 +1,4 @@
-From f8c4e0d1d27de0859cce0dd5823d19917ec13a7c Mon Sep 17 00:00:00 2001
+From 0f4780228b3ae761a659c8de720708bbcba554d8 Mon Sep 17 00:00:00 2001
 From: BillyGalbreath <blake.galbreath@gmail.com>
 Date: Sat, 16 Jul 2022 21:37:10 -0500
 Subject: [PATCH] Implement [Purpur-0291] Remove Mojang Profiler by
@@ -403,7 +403,7 @@ index 141a1ef8d..a2bfb5b50 100644
                  this.b.add(entity);
              } else {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index fd021f19a..1062de358 100644
+index 1e778c984..5446d9c91 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -659,13 +659,13 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
@@ -517,10 +517,10 @@ index fd021f19a..1062de358 100644
  
                  CrashReport crashreport;
  
-@@ -1025,8 +1025,8 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
-                     throw new ReportedException(crashreport);
-                 }
- 
+@@ -1035,8 +1035,8 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+                     worldserver.getTracker().updatePlayers();
+                 } else {
+                 // WindSpigot end
 -                this.methodProfiler.b();
 -                this.methodProfiler.a("tracker");
 +                //this.methodProfiler.b(); // Purpur
@@ -528,18 +528,19 @@ index fd021f19a..1062de358 100644
                  //worldserver.timings.tracker.startTiming(); // Spigot // Purpur
                  // PandaSpigot start - controlled flush for entity tracker packets
                  List<NetworkManager> disabledFlushes = new ArrayList<>(worldserver.players.size());
-@@ -1049,8 +1049,8 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+@@ -1059,9 +1059,9 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
                  }
                  // PandaSpigot end
                  //worldserver.timings.tracker.stopTiming(); // Spigot // Purpur
 -                this.methodProfiler.b();
--                this.methodProfiler.b();
 +                //this.methodProfiler.b(); // Purpur
+                 } // WindSpigot
+-                this.methodProfiler.b();
 +                //this.methodProfiler.b(); // Purpur
                  worldserver.explosionDensityCache.clear(); // PaperSpigot - Optimize explosions
              // } // CraftBukkit
  
-@@ -1063,15 +1063,15 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+@@ -1074,15 +1074,15 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
          }
          // WindSpigot end
  
@@ -558,7 +559,7 @@ index fd021f19a..1062de358 100644
  
          //SpigotTimings.tickablesTimer.startTiming(); // Spigot // Purpur
          for (i = 0; i < this.p.size(); ++i) {
-@@ -1079,7 +1079,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+@@ -1090,7 +1090,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
          }
          //SpigotTimings.tickablesTimer.stopTiming(); // Spigot // Purpur
  
@@ -567,7 +568,7 @@ index fd021f19a..1062de358 100644
      }
  
      public boolean getAllowNether() {
-@@ -1285,7 +1285,10 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+@@ -1296,7 +1296,10 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
      public CrashReport b(CrashReport crashreport) {
          crashreport.g().a("Profiler Position", new Callable() {
              public String a() throws Exception {
@@ -649,10 +650,10 @@ index b03ba8575..d2066fe64 100644
  
      private boolean a(PathfinderGoalSelector.PathfinderGoalSelectorItem pathfindergoalselector_pathfindergoalselectoritem) {
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 55b7e67be..5f655390e 100644
+index c74ca9b79..1128ccfda 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
-@@ -128,7 +128,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+@@ -131,7 +131,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
      public void c() {
          this.h = false;
          ++this.e;
@@ -661,7 +662,7 @@ index 55b7e67be..5f655390e 100644
          if ((long) this.e - this.k > 40L) {
              this.k = (long) this.e;
              this.j = this.d();
-@@ -136,7 +136,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+@@ -139,7 +139,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
              this.sendPacket(new PacketPlayOutKeepAlive(this.i));
          }
  
@@ -893,10 +894,10 @@ index aabf2396a..ecdeb212e 100644
          }
      }
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 41f3cbbdc..137c84a58 100644
+index 8039eba16..70d303a64 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
-@@ -239,7 +239,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -238,7 +238,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
          }
          // CraftBukkit end
          //timings.doChunkUnload.startTiming(); // Spigot // Purpur
@@ -905,7 +906,7 @@ index 41f3cbbdc..137c84a58 100644
  
          // Only unload if chunkProvider isn't null
          if (this.chunkProvider != null) {
-@@ -258,29 +258,29 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -257,29 +257,29 @@ public class WorldServer extends World implements IAsyncTaskHandler {
          }
  
          //timings.doChunkUnload.stopTiming(); // Spigot // Purpur
@@ -941,7 +942,7 @@ index 41f3cbbdc..137c84a58 100644
          //timings.doSounds.startTiming(); // Spigot // Purpur
          this.ak();
  
-@@ -426,14 +426,14 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -425,14 +425,14 @@ public class WorldServer extends World implements IAsyncTaskHandler {
                  int k = chunkX * 16;
                  int l = chunkZ * 16;
  
@@ -959,7 +960,7 @@ index 41f3cbbdc..137c84a58 100644
                  int i1;
                  BlockPosition blockposition;
  
-@@ -446,7 +446,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -445,7 +445,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
                      }
                  }
  
@@ -968,7 +969,7 @@ index 41f3cbbdc..137c84a58 100644
                  if (!this.paperConfigTitanium.disableIceAndSnow && this.random.nextInt(16) == 0) { // PaperSpigot - Disable ice and snow
                      this.m = this.m * 3 + 1013904223;
                      i1 = this.m >> 2;
-@@ -484,7 +484,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -483,7 +483,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
                      }
                  }
  
@@ -977,7 +978,7 @@ index 41f3cbbdc..137c84a58 100644
                  //timings.chunkTicksBlocks.startTiming(); // Spigot // Purpur
                  i1 = titaniumConfig.disabledGamerules.randomTickSpeed ? 3 : this.getGameRules().c("randomTickSpeed");
                  if (i1 > 0) {
-@@ -644,7 +644,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -643,7 +643,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
                  }
                  // PaperSpigot end
  
@@ -986,7 +987,7 @@ index 41f3cbbdc..137c84a58 100644
  
                  //timings.scheduledBlocksCleanup.startTiming(); // Spigot // Purpur
                  NextTickListEntry nextticklistentry;
-@@ -678,8 +678,8 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -677,8 +677,8 @@ public class WorldServer extends World implements IAsyncTaskHandler {
                  }
                  // PaperSpigot end
  
@@ -997,7 +998,7 @@ index 41f3cbbdc..137c84a58 100644
                  //timings.scheduledBlocksTicking.startTiming(); // Spigot // Purpur
                  Iterator iterator = this.V.iterator();
  
-@@ -711,7 +711,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -710,7 +710,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
                  }
                  //timings.scheduledBlocksTicking.stopTiming(); // Spigot // Purpur
  

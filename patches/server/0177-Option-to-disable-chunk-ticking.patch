@@ -1,14 +1,14 @@
-From dd167902ed0d81049b2c13704ba2584c3dba9e73 Mon Sep 17 00:00:00 2001
+From 017f2b0bb0908209a958d4bde5b5898703f4c057 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 23 Sep 2022 21:56:36 +0200
 Subject: [PATCH] Option to disable chunk ticking
 
 
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 02c90ea85..566b46b56 100644
+index c97664137..f7fe806ff 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
-@@ -405,6 +405,9 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -404,6 +404,9 @@ public class WorldServer extends World implements IAsyncTaskHandler {
      }
  
      protected void h() {
