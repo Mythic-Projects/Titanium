@@ -1,4 +1,4 @@
-From 3eb66ef23f0a964ef77bc2beb1fe8fce13fac9b9 Mon Sep 17 00:00:00 2001
+From e470684a9c856f468e82c0c0219c5dd0d035d909 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Mon, 19 Sep 2016 23:16:39 -0400
 Subject: [PATCH] Implement [Paper-0156] Auto Save Improvements by Aikar
@@ -48,7 +48,7 @@ index a3897b2f5..1b94a0894 100644
      public final MinecraftServer server;
      public final PlayerInteractManager playerInteractManager;
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 7751daf7d..35b656081 100644
+index 20da1c4fb..2959b9a4d 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -126,6 +126,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic

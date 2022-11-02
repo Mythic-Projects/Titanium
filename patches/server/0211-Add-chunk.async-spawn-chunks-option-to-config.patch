@@ -1,4 +1,4 @@
-From facb8b23671bf2a8cbe14ff3cc58b3ab90d8f930 Mon Sep 17 00:00:00 2001
+From d4d6221b9926d4bcd3c71d34244f6eeb169aa13d Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 31 Oct 2022 23:11:16 +0100
 Subject: [PATCH] Add 'chunk.async-spawn-chunks' option to config

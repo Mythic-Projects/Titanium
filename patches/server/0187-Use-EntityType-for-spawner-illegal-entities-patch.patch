@@ -1,4 +1,4 @@
-From 7b15e5fd900c0b371f1713e8582faca9978dcdd5 Mon Sep 17 00:00:00 2001
+From a82a7f52286fa18e7bc952ce235735f96db87301 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 16 Oct 2022 22:52:54 +0200
 Subject: [PATCH] Use EntityType for spawner illegal entities patch

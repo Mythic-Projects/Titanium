@@ -1,22 +1,22 @@
-From c312bd9af88400f5d2d849ef9dc445d18aa5f30e Mon Sep 17 00:00:00 2001
+From 0136cffa9d1ab21c9d77421aef0bce603fd10dd2 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 28 Sep 2022 12:46:07 +0200
 Subject: [PATCH] Standardize Thread naming
 
 
 diff --git a/src/main/java/ga/windpvp/windspigot/async/entitytracker/AsyncEntityTracker.java b/src/main/java/ga/windpvp/windspigot/async/entitytracker/AsyncEntityTracker.java
-index 848f149ff..33c9079b3 100644
+index 13f837a7e..0c8b09f61 100644
 --- a/src/main/java/ga/windpvp/windspigot/async/entitytracker/AsyncEntityTracker.java
 +++ b/src/main/java/ga/windpvp/windspigot/async/entitytracker/AsyncEntityTracker.java
-@@ -14,7 +14,7 @@ import net.titanium.config.TitaniumConfig;
+@@ -11,7 +11,7 @@ import net.titanium.config.TitaniumConfig;
  
  public class AsyncEntityTracker extends EntityTracker {
  
 -    private static final ExecutorService trackingThreadExecutor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("Titanium Entity Tracker Thread").build());
 +    private static final ExecutorService trackingThreadExecutor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("Titanium - Entity Tracker Thread #%d").build());
-     private static final List<NetworkManager> disabledFlushes = Lists.newArrayList();
+     private final int threadCount = TitaniumConfig.get().entityTracker.async.threads;
  
-     private final ResettableLatch latch = new ResettableLatch(TitaniumConfig.get().entityTracker.async.threads);
+     private final ResettableLatch latch = new ResettableLatch(this.threadCount);
 diff --git a/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java b/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java
 index dd1276c28..8cae1fbde 100644
 --- a/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java

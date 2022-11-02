@@ -1,4 +1,4 @@
-From d65ce4564a59059166d830aba11dcc4c13fcdd51 Mon Sep 17 00:00:00 2001
+From 667e75c0284b8b912d4830148d070dae1ad7c31b Mon Sep 17 00:00:00 2001
 From: RoccoDev <hey@rocco.dev>
 Date: Mon, 26 Apr 2021 09:50:16 +0200
 Subject: [PATCH] Implement [KigPaper-0170] Kick after receiving invalid

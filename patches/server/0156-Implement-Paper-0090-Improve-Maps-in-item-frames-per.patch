@@ -1,4 +1,4 @@
-From 5636f939e4a1775f2d528abaa72d86c43d50bba8 Mon Sep 17 00:00:00 2001
+From bd11ef1048981c9b3ab03e06abd2935e6f836005 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Fri, 29 Apr 2016 20:02:00 -0400
 Subject: [PATCH] Implement [Paper-0090] Improve Maps (in item frames)
@@ -25,10 +25,10 @@ index 247c0ae3a..d60fd9dc9 100644
          }
      }
 diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-index 1b70d8a44..bc05f0e6c 100644
+index 4587a8263..6a94bbb9d 100644
 --- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 +++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-@@ -189,11 +189,11 @@ public class EntityTrackerEntry {
+@@ -193,11 +193,11 @@ public class EntityTrackerEntry {
              this.broadcast(new PacketPlayOutAttachEntity(0, this.tracker, this.tracker.vehicle));
          }
  

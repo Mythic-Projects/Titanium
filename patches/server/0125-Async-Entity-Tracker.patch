@@ -1,4 +1,4 @@
-From 6a8922c0e357c3fadf64b052f8f207e83e4432d5 Mon Sep 17 00:00:00 2001
+From 7e9f30122af3d72abb8006de1565eca576f1952e Mon Sep 17 00:00:00 2001
 From: Rastrian <me@rastrian.dev>
 Date: Fri, 17 Jun 2022 01:57:00 +0200
 Subject: [PATCH] Async Entity Tracker
@@ -125,30 +125,27 @@ index 000000000..ab41c6a7e
 +}
 diff --git a/src/main/java/ga/windpvp/windspigot/async/entitytracker/AsyncEntityTracker.java b/src/main/java/ga/windpvp/windspigot/async/entitytracker/AsyncEntityTracker.java
 new file mode 100644
-index 000000000..6a756fe9e
+index 000000000..1291d16c4
 --- /dev/null
 +++ b/src/main/java/ga/windpvp/windspigot/async/entitytracker/AsyncEntityTracker.java
-@@ -0,0 +1,56 @@
+@@ -0,0 +1,53 @@
 +package ga.windpvp.windspigot.async.entitytracker;
 +
-+import com.google.common.collect.Lists;
 +import com.google.common.util.concurrent.ThreadFactoryBuilder;
 +import ga.windpvp.windspigot.async.AsyncUtil;
 +import ga.windpvp.windspigot.async.ResettableLatch;
-+import java.util.List;
 +import java.util.concurrent.ExecutorService;
 +import java.util.concurrent.Executors;
 +import net.minecraft.server.EntityTracker;
-+import net.minecraft.server.NetworkManager;
 +import net.minecraft.server.WorldServer;
 +import net.titanium.config.TitaniumConfig;
 +
 +public class AsyncEntityTracker extends EntityTracker {
 +
 +    private static final ExecutorService trackingThreadExecutor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("Titanium Entity Tracker Thread").build());
-+    private static final List<NetworkManager> disabledFlushes = Lists.newArrayList();
++    private final int threadCount = TitaniumConfig.get().entityTracker.async.threads;
 +
-+    private final ResettableLatch latch = new ResettableLatch(TitaniumConfig.get().entityTracker.async.threads);
++    private final ResettableLatch latch = new ResettableLatch(this.threadCount);
 +
 +    public AsyncEntityTracker(WorldServer worldserver) {
 +        super(worldserver);
@@ -158,12 +155,12 @@ index 000000000..6a756fe9e
 +    public void updatePlayers() {
 +        int offset = 0;
 +
-+        for (int i = 1; i <= TitaniumConfig.get().entityTracker.async.threads; i++) {
++        for (int i = 1; i <= this.threadCount; i++) {
 +            final int finalOffset = offset++;
 +
 +            AsyncUtil.run(() -> {
-+                for (int index = finalOffset; index < c.size(); index += TitaniumConfig.get().entityTracker.async.threads) {
-+                    c.get(index).update();
++                for (int index = finalOffset; index < c.size(); index += this.threadCount) {
++                    this.c.get(index).update();
 +                }
 +                latch.decrement();
 +            }, trackingThreadExecutor);
@@ -616,32 +613,31 @@ index 0f6b3b66e..a3897b2f5 100644
  
      protected void B() {
 diff --git a/src/main/java/net/minecraft/server/EntityTracker.java b/src/main/java/net/minecraft/server/EntityTracker.java
-index addf86937..d098ab348 100644
+index addf86937..45a546749 100644
 --- a/src/main/java/net/minecraft/server/EntityTracker.java
 +++ b/src/main/java/net/minecraft/server/EntityTracker.java
-@@ -1,10 +1,9 @@
+@@ -1,11 +1,9 @@
  package net.minecraft.server;
  
- import com.google.common.collect.Lists;
+-import com.google.common.collect.Lists;
 -import com.google.common.collect.Sets;
 -import java.util.ArrayList;
 +import ga.windpvp.windspigot.commons.ConcurrentIntHashMap;
  import java.util.Iterator;
 -import java.util.Set;
-+import java.util.List;
  import java.util.concurrent.Callable;
++import net.titanium.util.IndexedLinkedSet;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
-@@ -13,19 +12,41 @@ public class EntityTracker {
+ 
+@@ -13,19 +11,38 @@ public class EntityTracker {
  
      private static final Logger a = LogManager.getLogger();
      private final WorldServer world;
-+    // Nacho start - Async entity tracker
-+    public List<EntityTrackerEntry> c = Lists.newCopyOnWriteArrayList();
-+    /*
-     private Set<EntityTrackerEntry> c = new io.papermc.paper.util.maplist.ObjectMapList<>(); // IonSpigot - HashSet -> ObjectMapList
+-    private Set<EntityTrackerEntry> c = new io.papermc.paper.util.maplist.ObjectMapList<>(); // IonSpigot - HashSet -> ObjectMapList
 -    public IntHashMap<EntityTrackerEntry> trackedEntities = new IntHashMap();
-+     */
++    // Nacho start - Async entity tracker
++    protected IndexedLinkedSet<EntityTrackerEntry> c = new IndexedLinkedSet<>();
 +    // Nacho end
 +    public IntHashMap<EntityTrackerEntry> trackedEntities = new ConcurrentIntHashMap<>(); // WindSpigot
 +
@@ -677,7 +673,7 @@ index addf86937..d098ab348 100644
              Iterator iterator = this.c.iterator();
  
              while (iterator.hasNext()) {
-@@ -34,7 +55,8 @@ public class EntityTracker {
+@@ -34,7 +51,8 @@ public class EntityTracker {
                  if (entitytrackerentry.tracker != entityplayer) {
                      entitytrackerentry.updatePlayer(entityplayer);
                  }
@@ -687,7 +683,7 @@ index addf86937..d098ab348 100644
          } else if (entity instanceof EntityFishingHook) {
              this.addEntity(entity, 64, 5, true);
          } else if (entity instanceof EntityArrow) {
-@@ -102,14 +124,20 @@ public class EntityTracker {
+@@ -102,14 +120,20 @@ public class EntityTracker {
  
          try {
              if (this.trackedEntities.b(entity.getId())) {
@@ -710,7 +706,7 @@ index addf86937..d098ab348 100644
          } catch (Throwable throwable) {
              CrashReport crashreport = CrashReport.a(throwable, "Adding entity to track");
              CrashReportSystemDetails crashreportsystemdetails = crashreport.a("Entity To Track");
-@@ -145,11 +173,11 @@ public class EntityTracker {
+@@ -145,11 +169,11 @@ public class EntityTracker {
  
      }
      // IonSpigot start
@@ -725,7 +721,7 @@ index addf86937..d098ab348 100644
          }
      }
      // IonSpigot end
-@@ -177,7 +205,11 @@ public class EntityTracker {
+@@ -177,7 +201,11 @@ public class EntityTracker {
      }
  
      public void updatePlayers() {
@@ -738,7 +734,7 @@ index addf86937..d098ab348 100644
          Iterator iterator = this.c.iterator();
  
          while (iterator.hasNext()) {
-@@ -200,8 +232,8 @@ public class EntityTracker {
+@@ -200,8 +228,8 @@ public class EntityTracker {
                      entitytrackerentry1.updatePlayer(entityplayer);
                  }
              }
@@ -749,7 +745,7 @@ index addf86937..d098ab348 100644
      }
  
      public void a(EntityPlayer entityplayer) {
-@@ -211,7 +243,10 @@ public class EntityTracker {
+@@ -211,7 +239,10 @@ public class EntityTracker {
              EntityTrackerEntry entitytrackerentry = (EntityTrackerEntry) iterator.next();
  
              if (entitytrackerentry.tracker == entityplayer) {
@@ -761,7 +757,7 @@ index addf86937..d098ab348 100644
              } else {
                  entitytrackerentry.updatePlayer(entityplayer);
              }
-@@ -252,7 +287,8 @@ public class EntityTracker {
+@@ -252,7 +283,8 @@ public class EntityTracker {
          return this.c.iterator();
      }
  
@@ -771,7 +767,7 @@ index addf86937..d098ab348 100644
          Iterator iterator = this.c.iterator();
  
          while (iterator.hasNext()) {
-@@ -263,5 +299,6 @@ public class EntityTracker {
+@@ -263,5 +295,6 @@ public class EntityTracker {
              }
          }
  
@@ -780,10 +776,10 @@ index addf86937..d098ab348 100644
 +    // Nacho end
  }
 diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-index 651e5bfa0..1b70d8a44 100644
+index 651e5bfa0..4587a8263 100644
 --- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 +++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-@@ -1,10 +1,13 @@
+@@ -1,10 +1,14 @@
  package net.minecraft.server;
  
  import com.google.common.collect.Sets;
@@ -794,10 +790,11 @@ index 651e5bfa0..1b70d8a44 100644
  import java.util.Set;
 +import java.util.function.Consumer;
 +import net.titanium.config.TitaniumConfig;
++import net.titanium.util.MathUtil;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
-@@ -46,7 +49,16 @@ public class EntityTrackerEntry {
+@@ -46,7 +50,16 @@ public class EntityTrackerEntry {
      public Set<EntityPlayer> trackedPlayers = trackedPlayerMap.keySet();
      // PaperSpigot end
  
@@ -815,7 +812,7 @@ index 651e5bfa0..1b70d8a44 100644
          this.tracker = entity;
          this.b = i;
          this.c = j;
-@@ -58,6 +70,19 @@ public class EntityTrackerEntry {
+@@ -58,8 +71,27 @@ public class EntityTrackerEntry {
          this.xRot = MathHelper.d(entity.pitch * 256.0F / 360.0F);
          this.i = MathHelper.d(entity.getHeadRotation() * 256.0F / 360.0F);
          this.y = entity.onGround;
@@ -834,8 +831,16 @@ index 651e5bfa0..1b70d8a44 100644
 +        // Nacho end
      }
  
++    // Titanium start - Fix Citizens support
++    public EntityTrackerEntry(Entity entity, int i, int j, boolean flag) {
++        this(null, entity, i, j, flag);
++    }
++    // Titanium end
++
      public boolean equals(Object object) {
-@@ -68,6 +93,86 @@ public class EntityTrackerEntry {
+         return object instanceof EntityTrackerEntry ? ((EntityTrackerEntry) object).tracker.getId() == this.tracker.getId() : false;
+     }
+@@ -68,6 +100,83 @@ public class EntityTrackerEntry {
          return this.tracker.getId();
      }
  
@@ -903,26 +908,23 @@ index 651e5bfa0..1b70d8a44 100644
 +        if (!(entity instanceof EntityPlayer)) {
 +            return false; // ensure all non-players are always tracked
 +        }
-+        double xDistSqrd = entity.locX * entity.locX;
-+        double zDistSqrd = entity.locZ * entity.locZ;
++        // Titanium start - Fix Citizens support
++        double xDistSqrd = MathUtil.pow2(entity.locX);
++        double zDistSqrd = MathUtil.pow2(entity.locZ);
 +
-+        int noTrackDistanceSqrd = entityTracker.getNoTrackDistance() * entityTracker.getNoTrackDistance();
++        int noTrackDistance = entityTracker != null ? entityTracker.getNoTrackDistance() : 0;
++        int noTrackDistanceSqrd = MathUtil.pow2(noTrackDistance);
++        // Titanium end
 +        return noTrackDistanceSqrd != 0 && xDistSqrd <= noTrackDistanceSqrd && zDistSqrd <= noTrackDistanceSqrd;
 +    }
 +
-+    private final Consumer<EntityPlayer> addNearPlayersConsumer = new Consumer<EntityPlayer>() {
-+
-+        @Override
-+        public void accept(EntityPlayer entityPlayer) {
-+             updatePlayer(entityPlayer);
-+        }
-+    };
++    private final Consumer<EntityPlayer> addNearPlayersConsumer = this::updatePlayer;
 +    // Nacho end
 +
      public void track(List<EntityHuman> list) {
          this.n = false;
          if (!this.isMoving || this.tracker.e(this.q, this.r, this.s) > 16.0D) {
-@@ -76,7 +181,7 @@ public class EntityTrackerEntry {
+@@ -76,7 +185,7 @@ public class EntityTrackerEntry {
              this.s = this.tracker.locZ;
              this.isMoving = true;
              this.n = true;
@@ -931,7 +933,7 @@ index 651e5bfa0..1b70d8a44 100644
          }
  
          if (this.w != this.tracker.vehicle || this.tracker.vehicle != null && this.m % 60 == 0) {
-@@ -154,9 +259,11 @@ public class EntityTrackerEntry {
+@@ -154,9 +263,11 @@ public class EntityTrackerEntry {
                          this.y = this.tracker.onGround;
                          this.v = 0;
                          // CraftBukkit start - Refresh list of who can see a player before sending teleport packet
@@ -945,7 +947,7 @@ index 651e5bfa0..1b70d8a44 100644
                          // CraftBukkit end
                          object = new PacketPlayOutEntityTeleport(this.tracker.getId(), i, j, k, (byte) l, (byte) i1, this.tracker.onGround);
                      }
-@@ -334,10 +441,11 @@ public class EntityTrackerEntry {
+@@ -334,10 +445,11 @@ public class EntityTrackerEntry {
      }
  
      public void updatePlayer(EntityPlayer entityplayer) {
@@ -958,7 +960,7 @@ index 651e5bfa0..1b70d8a44 100644
                      // CraftBukkit start - respect vanish API
                      if (this.tracker instanceof EntityPlayer) {
                          Player player = ((EntityPlayer) this.tracker).getBukkitEntity();
-@@ -346,7 +454,7 @@ public class EntityTrackerEntry {
+@@ -346,7 +458,7 @@ public class EntityTrackerEntry {
                          }
                      }
  
@@ -967,7 +969,7 @@ index 651e5bfa0..1b70d8a44 100644
                      // CraftBukkit end
                      this.trackedPlayerMap.put(entityplayer, true); // PaperBukkit
                      Packet packet = this.c();
-@@ -455,12 +563,14 @@ public class EntityTrackerEntry {
+@@ -455,12 +567,14 @@ public class EntityTrackerEntry {
          return entityplayer.u().getPlayerChunkMap().a(entityplayer, this.tracker.ae, this.tracker.ag);
      }
  
@@ -984,7 +986,7 @@ index 651e5bfa0..1b70d8a44 100644
  
      protected Packet createPacket() {
          return this.c();
-@@ -576,6 +686,15 @@ public class EntityTrackerEntry {
+@@ -576,6 +690,15 @@ public class EntityTrackerEntry {
          }
      }
  
@@ -1210,6 +1212,109 @@ index d9b5850a0..4b7df8f07 100644
      @Comment("When this option is enabled, the server will create a directory `legacy_configs` with files like bukkit.yml, spigot.yml etc.")
      @Comment("Changing option there will not affect the server, it's only mirror of this file.")
      @Comment("Enable this option only if some of your plugins are not compatible with the new configs.")
+diff --git a/src/main/java/net/titanium/util/IndexedLinkedSet.java b/src/main/java/net/titanium/util/IndexedLinkedSet.java
+new file mode 100644
+index 000000000..7c36c1fd2
+--- /dev/null
++++ b/src/main/java/net/titanium/util/IndexedLinkedSet.java
+@@ -0,0 +1,96 @@
++package net.titanium.util;
++
++import com.google.common.collect.Lists;
++import java.util.Collection;
++import java.util.HashSet;
++import java.util.Iterator;
++import java.util.List;
++import java.util.Set;
++
++public final class IndexedLinkedSet<E> implements Set<E> {
++
++    private final List<E> list = Lists.newCopyOnWriteArrayList();
++
++    @Override
++    public boolean add(E e) {
++        if (this.contains(e)) {
++            return false;
++        }
++        return this.list.add(e);
++    }
++
++    @Override
++    public boolean remove(Object o) {
++        return this.list.remove(o);
++    }
++
++    @Override
++    public boolean containsAll(Collection<?> c) {
++        return new HashSet<>(this.list).containsAll(c);
++    }
++
++    @Override
++    public void clear() {
++        this.list.clear();
++    }
++
++    public E get(int index) {
++        return this.list.get(index);
++    }
++
++    @Override
++    public boolean removeAll(Collection<?> c) {
++        return this.list.removeAll(c);
++    }
++
++    @Override
++    public boolean retainAll(Collection<?> c) {
++        return this.list.retainAll(c);
++    }
++
++    @Override
++    public boolean addAll(Collection<? extends E> c) {
++        boolean modified = false;
++        for (E e : c) {
++            if (this.add(e)) {
++                modified = true;
++            }
++        }
++        return modified;
++    }
++
++    @Override
++    public int size() {
++        return this.list.size();
++    }
++
++    @Override
++    public boolean isEmpty() {
++        return this.list.isEmpty();
++    }
++
++    @Override
++    public boolean contains(Object o) {
++        return this.list.contains(o);
++    }
++
++    @Override
++    public Iterator<E> iterator() {
++        return this.list.iterator();
++    }
++
++    @Override
++    public Object[] toArray() {
++        return this.list.toArray();
++    }
++
++    @Override
++    public <T> T[] toArray(T[] a) {
++        return this.list.toArray(a);
++    }
++
++    public int indexOf(Object o) {
++        return this.list.indexOf(o);
++    }
++
++}
+\ No newline at end of file
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 index 92ce88c62..e2f6b8003 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java

@@ -1,4 +1,4 @@
-From eb4be270d1bc1ee5b369abf4d820c6f2afff2fa7 Mon Sep 17 00:00:00 2001
+From 0f194b255c7e6ff9814e4ceacd3f0c558fed9322 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 17 Oct 2022 22:32:04 +0200
 Subject: [PATCH] Make tab complete spam limiter configurable
