@@ -1,4 +1,4 @@
-From 600162b122a80d891ea256b26cfe31dbdbcde94c Mon Sep 17 00:00:00 2001
+From 826e68c1e4b8d4438c2e2214f527d71905094652 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Fri, 14 Oct 2022 11:59:49 +0200
 Subject: [PATCH] Paper 1.13.2 Async Chunk Generation (and Loading)
@@ -1032,7 +1032,7 @@ index 49e064626..005b4f1d4 100644
          f %= 360.0F;
          if (f >= 180.0F) {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index bab7d14a3..ab21914d6 100644
+index bab7d14a3..65246329e 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -41,6 +41,8 @@ import java.util.concurrent.locks.LockSupport;
@@ -1049,7 +1049,7 @@ index bab7d14a3..ab21914d6 100644
  
                      ++i;
 -                    worldserver.chunkProviderServer.getChunkAt(blockposition.getX() + k >> 4, blockposition.getZ() + l >> 4);
-+                    worldserver.chunkProviderServer.getChunkAt(blockposition.getX() + k >> 4, blockposition.getZ() + l >> 4, true, true, AsyncPriority.HIGH, null); // Titanium - use new methods
++                    worldserver.chunkProviderServer.getChunkAt(blockposition.getX() + k >> 4, blockposition.getZ() + l >> 4, true, true, AsyncPriority.URGENT, null); // Titanium - use new methods
                  }
              }
          }
@@ -2556,7 +2556,7 @@ index 8d62b0304..902d79cf7 100644
  
      public Tnt tnt = new Tnt();
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index bdf0ae2fc..7ef3c5d6a 100644
+index bdf0ae2fc..992e8b50c 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -41,6 +41,7 @@ import java.util.stream.Collectors;
@@ -2594,7 +2594,7 @@ index bdf0ae2fc..7ef3c5d6a 100644
  
                      BlockPosition chunkcoordinates = internal.getSpawn();
 -                    internal.chunkProviderServer.getChunkAt(chunkcoordinates.getX() + j >> 4, chunkcoordinates.getZ() + k >> 4);
-+                    internal.chunkProviderServer.getChunkAt(chunkcoordinates.getX() + j >> 4, chunkcoordinates.getZ() + k >> 4, true, true, AsyncPriority.HIGH, null); // Titanium - use new methods
++                    internal.chunkProviderServer.getChunkAt(chunkcoordinates.getX() + j >> 4, chunkcoordinates.getZ() + k >> 4, true, true, AsyncPriority.URGENT, null); // Titanium - use new methods
                  }
              }
          }

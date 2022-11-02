@@ -1,24 +1,24 @@
-From 19eeaee0ca9b85ed087dc0e61d3f9d2a8b84dd1e Mon Sep 17 00:00:00 2001
+From facb8b23671bf2a8cbe14ff3cc58b3ab90d8f930 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 31 Oct 2022 23:11:16 +0100
 Subject: [PATCH] Add 'chunk.async-spawn-chunks' option to config
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 35b656081..4cad02664 100644
+index 2959b9a4d..06485d4bb 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -498,7 +498,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
                      }
  
                      ++i;
--                    worldserver.chunkProviderServer.getChunkAt(blockposition.getX() + k >> 4, blockposition.getZ() + l >> 4, true, true, AsyncPriority.HIGH, null); // Titanium - use new methods
-+                    worldserver.chunkProviderServer.getChunkAt(blockposition.getX() + k >> 4, blockposition.getZ() + l >> 4, true, true, AsyncPriority.HIGH, TitaniumConfig.get().chunk.asyncSpawnChunks ? c -> {} : null); // Titanium - use new methods
+-                    worldserver.chunkProviderServer.getChunkAt(blockposition.getX() + k >> 4, blockposition.getZ() + l >> 4, true, true, AsyncPriority.URGENT, null); // Titanium - use new methods
++                    worldserver.chunkProviderServer.getChunkAt(blockposition.getX() + k >> 4, blockposition.getZ() + l >> 4, true, true, AsyncPriority.URGENT, TitaniumConfig.get().chunk.asyncSpawnChunks ? c -> {} : null); // Titanium - use new methods
                  }
              }
          }
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index d2922e080..21ac1d019 100644
+index d2922e080..faa2aeeab 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -291,6 +291,10 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -33,15 +33,15 @@ index d2922e080..21ac1d019 100644
  
      public Tnt tnt = new Tnt();
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 7dfe36870..64da9baf6 100644
+index 080ccb496..a7f8b5d68 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -1145,7 +1145,7 @@ public final class CraftServer implements Server {
                      }
  
                      BlockPosition chunkcoordinates = internal.getSpawn();
--                    internal.chunkProviderServer.getChunkAt(chunkcoordinates.getX() + j >> 4, chunkcoordinates.getZ() + k >> 4, true, true, AsyncPriority.HIGH, null); // Titanium - use new methods
-+                    internal.chunkProviderServer.getChunkAt(chunkcoordinates.getX() + j >> 4, chunkcoordinates.getZ() + k >> 4, true, true, AsyncPriority.HIGH, TitaniumConfig.get().chunk.asyncSpawnChunks ? c -> {} : null); // Titanium - use new methods
+-                    internal.chunkProviderServer.getChunkAt(chunkcoordinates.getX() + j >> 4, chunkcoordinates.getZ() + k >> 4, true, true, AsyncPriority.URGENT, null); // Titanium - use new methods
++                    internal.chunkProviderServer.getChunkAt(chunkcoordinates.getX() + j >> 4, chunkcoordinates.getZ() + k >> 4, true, true, AsyncPriority.URGENT, TitaniumConfig.get().chunk.asyncSpawnChunks ? c -> {} : null); // Titanium - use new methods
                  }
              }
          }
