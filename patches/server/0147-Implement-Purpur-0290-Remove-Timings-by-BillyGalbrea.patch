@@ -1,4 +1,4 @@
-From 38e65b2a71127f811454098f22195ee3943ce1d0 Mon Sep 17 00:00:00 2001
+From 2164bee50dd56422f3707cc2234fe728c9023e9a Mon Sep 17 00:00:00 2001
 From: BillyGalbreath <blake.galbreath@gmail.com>
 Date: Sun, 26 Jun 2022 01:10:05 -0500
 Subject: [PATCH] Implement [Purpur-0290] Remove Timings by BillyGalbreath
@@ -163,18 +163,9 @@ index 4f0492bf0..17adad63f 100644
  
      public boolean ae() {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 6d7290b42..fd021f19a 100644
+index fc3bfdf99..1e778c984 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -613,7 +613,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
-     }
-     private static final java.math.BigDecimal TPS_BASE = new java.math.BigDecimal(1E9).multiply(new java.math.BigDecimal(SAMPLE_INTERVAL));
-     // PaperSpigot End
-- 
-+
-     public void run() {
-         try {
-             serverStartTime = getNanos(); // Paper
 @@ -827,7 +827,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
  
      // WindSpigot - backport modern tick loop
@@ -261,10 +252,10 @@ index 6d7290b42..fd021f19a 100644
  
          for (i = 0; i < this.worlds.size(); ++i) {
              long j = System.nanoTime();
-@@ -994,9 +994,9 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
-                 CrashReport crashreport;
- 
-                 try {
+@@ -999,9 +999,9 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+                             player.playerConnection.sendQueuedPackets();
+                         }
+                     }
 -                    worldserver.timings.doTick.startTiming(); // Spigot
 +                    //worldserver.timings.doTick.startTiming(); // Spigot // Purpur
                      worldserver.doTick();
@@ -273,7 +264,7 @@ index 6d7290b42..fd021f19a 100644
                  } catch (Throwable throwable) {
                      // Spigot Start
                      try {
-@@ -1010,9 +1010,9 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+@@ -1015,9 +1015,9 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
                  }
  
                  try {
@@ -285,8 +276,8 @@ index 6d7290b42..fd021f19a 100644
                  } catch (Throwable throwable1) {
                      // Spigot Start
                      try {
-@@ -1027,7 +1027,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
- 
+@@ -1037,7 +1037,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+                 // WindSpigot end
                  this.methodProfiler.b();
                  this.methodProfiler.a("tracker");
 -                worldserver.timings.tracker.startTiming(); // Spigot
@@ -294,16 +285,16 @@ index 6d7290b42..fd021f19a 100644
                  // PandaSpigot start - controlled flush for entity tracker packets
                  List<NetworkManager> disabledFlushes = new ArrayList<>(worldserver.players.size());
                  for (EntityHuman player : worldserver.players) {
-@@ -1048,7 +1048,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+@@ -1058,7 +1058,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
                      }
                  }
                  // PandaSpigot end
 -                worldserver.timings.tracker.stopTiming(); // Spigot
 +                //worldserver.timings.tracker.stopTiming(); // Spigot // Purpur
                  this.methodProfiler.b();
+                 } // WindSpigot
                  this.methodProfiler.b();
-                 worldserver.explosionDensityCache.clear(); // PaperSpigot - Optimize explosions
-@@ -1064,20 +1064,20 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+@@ -1075,20 +1075,20 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
          // WindSpigot end
  
          this.methodProfiler.c("connection");
@@ -331,10 +322,10 @@ index 6d7290b42..fd021f19a 100644
          this.methodProfiler.b();
      }
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 5f20925b5..55b7e67be 100644
+index 30358c611..c74ca9b79 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
-@@ -1202,7 +1202,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+@@ -1219,7 +1219,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
      // CraftBukkit end
  
     private void handleCommand(String s) {
@@ -343,7 +334,7 @@ index 5f20925b5..55b7e67be 100644
         // CraftBukkit start - whole method
          if ( TitaniumConfig.get().spigot.commands.log ) // Spigot
          this.c.info(this.player.getName() + " issued server command: " + s);
-@@ -1213,22 +1213,22 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+@@ -1230,22 +1230,22 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
          this.server.getPluginManager().callEvent(event);
  
          if (event.isCancelled()) {
@@ -497,10 +488,10 @@ index 73511b21e..aabf2396a 100644
                      entity.ak();
                  } else {
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 7a6298489..41f3cbbdc 100644
+index b33fa1875..8039eba16 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
-@@ -232,13 +232,13 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -231,13 +231,13 @@ public class WorldServer extends World implements IAsyncTaskHandler {
          // CraftBukkit start - Only call spawner if we have players online and the world allows for mobs or animals
          long time = this.worldData.getTime();
          if (this.getGameRules().getBoolean("doMobSpawning") && this.worldData.getType() != WorldType.DEBUG_ALL_BLOCK_STATES && (this.allowMonsters || this.allowAnimals) && (this instanceof WorldServer && this.players.size() > 0)) {
@@ -517,7 +508,7 @@ index 7a6298489..41f3cbbdc 100644
          this.methodProfiler.c("chunkSource");
  
          // Only unload if chunkProvider isn't null
-@@ -257,35 +257,35 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -256,35 +256,35 @@ public class WorldServer extends World implements IAsyncTaskHandler {
              this.worldData.setDayTime(this.worldData.getDayTime() + 1L);
          }
  
@@ -566,7 +557,7 @@ index 7a6298489..41f3cbbdc 100644
      }
  
      public BiomeBase.BiomeMeta a(EnumCreatureType enumcreaturetype, BlockPosition blockposition) {
-@@ -485,7 +485,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -484,7 +484,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
                  }
  
                  this.methodProfiler.c("tickBlocks");
@@ -575,7 +566,7 @@ index 7a6298489..41f3cbbdc 100644
                  i1 = titaniumConfig.disabledGamerules.randomTickSpeed ? 3 : this.getGameRules().c("randomTickSpeed");
                  if (i1 > 0) {
                      ChunkSection[] achunksection = chunk.getSections();
-@@ -514,7 +514,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -513,7 +513,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
                          }
                      }
                  }
@@ -584,7 +575,7 @@ index 7a6298489..41f3cbbdc 100644
              }
  
          }
-@@ -646,7 +646,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -645,7 +645,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
  
                  this.methodProfiler.a("cleaning");
  
@@ -593,7 +584,7 @@ index 7a6298489..41f3cbbdc 100644
                  NextTickListEntry nextticklistentry;
  
                  for (int j = 0; j < i; ++j) {
-@@ -659,7 +659,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -658,7 +658,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
                      this.M.remove(nextticklistentry);
                      this.V.add(nextticklistentry);
                  }
@@ -602,7 +593,7 @@ index 7a6298489..41f3cbbdc 100644
  
                  // PaperSpigot start - Allow redstone ticks to bypass the tickNextTickListCap
                  if (paperConfigTitanium.tickNextTickListCapIgnoresRedstone) {
-@@ -680,7 +680,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -679,7 +679,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
  
                  this.methodProfiler.b();
                  this.methodProfiler.a("ticking");
@@ -611,7 +602,7 @@ index 7a6298489..41f3cbbdc 100644
                  Iterator iterator = this.V.iterator();
  
                  while (iterator.hasNext()) {
-@@ -691,7 +691,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -690,7 +690,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
                      if (this.areChunksLoadedBetween(nextticklistentry.a.a(-b0, -b0, -b0), nextticklistentry.a.a(b0, b0, b0))) {
                          IBlockData iblockdata = this.getType(nextticklistentry.a);
                          co.aikar.timings.Timing timing = iblockdata.getBlock().getTiming(); // Spigot
@@ -620,7 +611,7 @@ index 7a6298489..41f3cbbdc 100644
  
                          if (iblockdata.getBlock().getMaterial() != Material.AIR && Block.a(iblockdata.getBlock(), nextticklistentry.a())) {
                              try {
-@@ -704,12 +704,12 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -703,12 +703,12 @@ public class WorldServer extends World implements IAsyncTaskHandler {
                                  throw new ReportedException(crashreport);
                              }
                          }

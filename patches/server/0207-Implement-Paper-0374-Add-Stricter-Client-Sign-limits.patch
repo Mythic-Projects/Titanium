@@ -1,4 +1,4 @@
-From 0b451c291d8c80d4fd9ffd75dbbfe6a1b7075be6 Mon Sep 17 00:00:00 2001
+From a2ec5cbbd970c541fc581d3a9b86eecdb168655e Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Wed, 27 Feb 2019 22:18:40 -0500
 Subject: [PATCH] Implement [Paper-0374] Add Stricter Client Sign limits by
@@ -6,10 +6,10 @@ Subject: [PATCH] Implement [Paper-0374] Add Stricter Client Sign limits by
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index da1b4b2f6..9b3898093 100644
+index 763556acc..a3857e103 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
-@@ -1944,6 +1944,15 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+@@ -1961,6 +1961,15 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
              String[] lines = new String[4];
  
              for (int i = 0; i < aichatbasecomponent.length; ++i) {

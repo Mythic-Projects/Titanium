@@ -1,4 +1,4 @@
-From f4b93c9d894e0ab60b9b7c318d6846b8ea93184e Mon Sep 17 00:00:00 2001
+From e75f80503fffe99e68f2e6deec7fbde2ac70b2e1 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 4 Aug 2022 00:34:23 +0200
 Subject: [PATCH] Implement [PaperBin-????] Optimise
@@ -27,10 +27,10 @@ index 111a25632..247c0ae3a 100644
  
          static final int[] a = new int[EnumDirection.values().length];
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 137c84a58..02c90ea85 100644
+index 70d303a64..c97664137 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
-@@ -357,7 +357,25 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -356,7 +356,25 @@ public class WorldServer extends World implements IAsyncTaskHandler {
      }
  
      public boolean everyoneDeeplySleeping() {
@@ -57,7 +57,7 @@ index 137c84a58..02c90ea85 100644
              Iterator iterator = this.players.iterator();
  
              // CraftBukkit - This allows us to assume that some people are in bed but not really, allowing time to pass in spite of AFKers
-@@ -382,7 +400,8 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -381,7 +399,8 @@ public class WorldServer extends World implements IAsyncTaskHandler {
              return false;
          } else {
              return false;

@@ -1,4 +1,4 @@
-From b0c2d4afa80bc6d6bd225beed75da65b3fb9020f Mon Sep 17 00:00:00 2001
+From cc6e4be3d6f5b5762731146c66fa325f218178e5 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 23 Sep 2022 22:12:12 +0200
 Subject: [PATCH] Option to disable explosion particles
@@ -42,10 +42,10 @@ index ee4cd2c6e..e6a8cbfb9 100644
          Iterator iterator;
          BlockPosition blockposition;
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 566b46b56..0ca4bb063 100644
+index f7fe806ff..aa44522e3 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
-@@ -1103,6 +1103,11 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -1102,6 +1102,11 @@ public class WorldServer extends World implements IAsyncTaskHandler {
              explosion.clearBlocks();
          }
  

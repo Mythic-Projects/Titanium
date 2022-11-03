@@ -1,4 +1,4 @@
-From 7623f99422194e2bebc47a43e79f13e5477aa9ef Mon Sep 17 00:00:00 2001
+From 1cad84dec6a6394c20b6e5f9e299e8d7e5bd5ea6 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 17 Jun 2022 21:02:02 +0200
 Subject: [PATCH] Make messages configurable
@@ -52,10 +52,10 @@ index ed2b7b827..7a9d4e946 100644
                  this.b.close(chatcomponenttext);
              } else {
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index d80fef6e9..74e0fd86e 100644
+index e80bac6bf..5e2eec676 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
-@@ -1210,7 +1210,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+@@ -1227,7 +1227,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
                  return;
              }
          } catch (org.bukkit.command.CommandException ex) {

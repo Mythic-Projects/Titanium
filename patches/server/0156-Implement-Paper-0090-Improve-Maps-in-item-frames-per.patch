@@ -1,4 +1,4 @@
-From bd11ef1048981c9b3ab03e06abd2935e6f836005 Mon Sep 17 00:00:00 2001
+From 40d57d22985f0a09d15b5676411ceefc0e96dca0 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Fri, 29 Apr 2016 20:02:00 -0400
 Subject: [PATCH] Implement [Paper-0090] Improve Maps (in item frames)
@@ -25,11 +25,11 @@ index 247c0ae3a..d60fd9dc9 100644
          }
      }
 diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-index 4587a8263..6a94bbb9d 100644
+index f3377f69f..00db62d04 100644
 --- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 +++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 @@ -193,11 +193,11 @@ public class EntityTrackerEntry {
-             this.broadcast(new PacketPlayOutAttachEntity(0, this.tracker, this.tracker.vehicle));
+             this.broadcastInternal(new PacketPlayOutAttachEntity(0, this.tracker, this.tracker.vehicle)); // WindSpigot - broadcastInternal
          }
  
 -        if (this.tracker instanceof EntityItemFrame /*&& this.m % 10 == 0*/) { // CraftBukkit - Moved below, should always enter this block

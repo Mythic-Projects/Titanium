@@ -1,11 +1,11 @@
-From 14b7237971cb13ad3c0b74a7878c90a0a7fd5966 Mon Sep 17 00:00:00 2001
+From b9cb2e1013b4a6db02f83d9db785a9b9c3a4bf04 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 23 Sep 2022 23:17:20 +0200
 Subject: [PATCH] Option to disable head rotation handling
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-index 7bb549f61..bed54bde1 100644
+index 3e52ef525..d0dd62781 100644
 --- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 +++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 @@ -221,6 +221,8 @@ public class EntityTrackerEntry {
@@ -41,10 +41,10 @@ index 7bb549f61..bed54bde1 100644
              i = MathHelper.d(this.tracker.getHeadRotation() * 256.0F / 360.0F);
 -            if (Math.abs(i - this.i) >= 4) {
 +            if (handleHeadRotation && Math.abs(i - this.i) >= 4) {
-                 this.broadcast(new PacketPlayOutEntityHeadRotation(this.tracker, (byte) i));
+                 this.broadcastInternal(new PacketPlayOutEntityHeadRotation(this.tracker, (byte) i)); // WindSpigot - broadcastInternal
                  this.i = i;
              }
-@@ -527,7 +529,7 @@ public class EntityTrackerEntry {
+@@ -546,7 +548,7 @@ public class EntityTrackerEntry {
                      }
  
                      // CraftBukkit start - Fix for nonsensical head yaw
@@ -53,7 +53,7 @@ index 7bb549f61..bed54bde1 100644
                          this.i = MathHelper.d(this.tracker.getHeadRotation() * 256.0F / 360.0F);
                          // SportPaper start
                          /* This was originally introduced by CraftBukkit, though the implementation is wrong since it's broadcasting
-@@ -711,4 +713,10 @@ public class EntityTrackerEntry {
+@@ -730,4 +732,10 @@ public class EntityTrackerEntry {
          }
  
      }

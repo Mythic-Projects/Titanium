@@ -1,4 +1,4 @@
-From e470684a9c856f468e82c0c0219c5dd0d035d909 Mon Sep 17 00:00:00 2001
+From 8c705a1eb4c3f161305d798bd84e7da6209f4259 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Mon, 19 Sep 2016 23:16:39 -0400
 Subject: [PATCH] Implement [Paper-0156] Auto Save Improvements by Aikar
@@ -48,7 +48,7 @@ index a3897b2f5..1b94a0894 100644
      public final MinecraftServer server;
      public final PlayerInteractManager playerInteractManager;
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 20da1c4fb..2959b9a4d 100644
+index 1220d4262..ae75466f4 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -126,6 +126,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
@@ -136,10 +136,10 @@ index 03116263a..a675874c3 100644
      public void addWhitelist(GameProfile gameprofile) {
          this.whitelist.add(new WhiteListEntry(gameprofile));
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index b42f7cbdc..1c981cac2 100644
+index bae227279..c3e9cc4ad 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
-@@ -988,7 +988,8 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -987,7 +987,8 @@ public class WorldServer extends World implements IAsyncTaskHandler {
  
      public void save(boolean flag, IProgressUpdate iprogressupdate) throws ExceptionWorldConflict {
          if (this.chunkProvider.canSave()) {
@@ -149,7 +149,7 @@ index b42f7cbdc..1c981cac2 100644
              if (iprogressupdate != null) {
                  iprogressupdate.a("Saving level");
              }
-@@ -997,6 +998,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -996,6 +997,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
              if (iprogressupdate != null) {
                  iprogressupdate.c("Saving chunks");
              }
