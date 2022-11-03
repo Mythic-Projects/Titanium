@@ -1,6 +1,5 @@
 plugins {
     id 'com.github.johnrengelman.shadow' version "7.1.2"
-    id 'com.palantir.git-version' version '0.15.0'
 }
 
 allprojects {
@@ -10,6 +9,11 @@ allprojects {
     apply plugin: 'java-library'
     apply plugin: 'maven-publish'
     apply plugin: 'com.github.johnrengelman.shadow'
+
+    ext {
+        gitHash = project.getCurrentGitHash()
+        gitBranch = project.getCurrentGitBranch()
+    }
 
     repositories {
         maven { url 'https://libraries.minecraft.net' }
@@ -143,4 +147,32 @@ subprojects {
             }
         }
     }
+}
+
+def getCurrentGitBranch() {
+    def gitBranch = "Unknown"
+    try {
+        def workingDir = new File("${project.projectDir}")
+        def result = 'git rev-parse --abbrev-ref HEAD'.execute(null, workingDir)
+        result.waitFor()
+        if (result.exitValue() == 0) {
+            gitBranch = result.text.trim()
+        }
+    } catch (ignored) {
+    }
+    return gitBranch
+}
+
+def getCurrentGitHash() {
+    def gitHash = "Unknown"
+    try {
+        def workingDir = new File("${project.projectDir}")
+        def result = 'git rev-parse --short HEAD'.execute(null, workingDir)
+        result.waitFor()
+        if (result.exitValue() == 0) {
+            gitHash = result.text.trim()
+        }
+    } catch (ignored) {
+    }
+    return gitHash
 }

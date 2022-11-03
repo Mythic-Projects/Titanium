@@ -1,19 +1,29 @@
-From c44f95e8e79d5d7d5249e842767fb51bf5bb6acc Mon Sep 17 00:00:00 2001
+From ff959c952419627c52e8ebe5db6a44f5401ce59a Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 24 Oct 2022 11:24:32 +0200
 Subject: [PATCH] Improve versioning and add source & branch to Metrics
 
 
 diff --git a/build.gradle b/build.gradle
-index fcd0b9eb4..23a519515 100644
+index fcd0b9eb4..6f4b4a67b 100644
 --- a/build.gradle
 +++ b/build.gradle
-@@ -73,7 +73,16 @@ jar {
-         def details = versionDetails()
-         def gitBranch = details.branchName
-         def gitHash = details.gitHash
+@@ -1,7 +1,5 @@
+ import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
+ 
+-apply plugin: 'com.palantir.git-version'
+-
+ String minecraftVersion = "1_8_R3"
+ 
+ dependencies {
+@@ -70,10 +68,15 @@ test {
+ 
+ jar {
+     manifest {
+-        def details = versionDetails()
+-        def gitBranch = details.branchName
+-        def gitHash = details.gitHash
 -        def implementationVersion = System.getenv("GITHUB_RUN_NUMBER") ?: gitHash
-+
 +        String implementationVersion = "CUSTOM-${gitBranch}-${gitHash}";
 +        String ghBuildNumber = System.getenv("GITHUB_RUN_NUMBER");
 +        String jenkinsBuildNumber = System.getenv("BUILD_NUMBER");
