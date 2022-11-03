@@ -1,4 +1,4 @@
-From 8d2e2be2324a5c7045224671911b41c963176743 Mon Sep 17 00:00:00 2001
+From 63a54235bde85ceb92edfdcf5a925ccba4c0ef75 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Mon, 19 Dec 2016 23:07:42 -0500
 Subject: [PATCH] Implement [Paper-0186] Prevent Pathfinding out of World
@@ -49,5 +49,5 @@ index 7ea40468e..aee2e095f 100644
      public boolean isInBounds(ChunkCoordIntPair chunkcoordintpair) {
          return isInBounds(chunkcoordintpair.x, chunkcoordintpair.z);
 -- 
-2.36.0.windows.1
+2.38.1.windows.1
 

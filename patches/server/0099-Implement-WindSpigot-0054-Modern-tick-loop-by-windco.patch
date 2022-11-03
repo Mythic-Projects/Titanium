@@ -1,219 +1,9 @@
-From 508eabc6ef146126b051f8bf862a49fb071019aa Mon Sep 17 00:00:00 2001
+From 035e062dec76cf7f730bbcbd304054f98c987785 Mon Sep 17 00:00:00 2001
 From: windcolor-dev <79166388+windcolor-dev@users.noreply.github.com>
 Date: Sun, 5 Jun 2022 19:17:13 +0200
 Subject: [PATCH] Implement [WindSpigot-0054] Modern tick loop by windcolor-dev
 
 
-diff --git a/src/main/java/ga/windpvp/windspigot/tickloop/IAsyncHandler.java b/src/main/java/ga/windpvp/windspigot/tickloop/IAsyncHandler.java
-new file mode 100644
-index 000000000..10fc849e4
---- /dev/null
-+++ b/src/main/java/ga/windpvp/windspigot/tickloop/IAsyncHandler.java
-@@ -0,0 +1,140 @@
-+package ga.windpvp.windspigot.tickloop;
-+
-+import java.util.Queue;
-+import java.util.concurrent.CompletableFuture;
-+import java.util.concurrent.ConcurrentLinkedQueue;
-+import java.util.concurrent.Executor;
-+import java.util.concurrent.locks.LockSupport;
-+import java.util.function.BooleanSupplier;
-+import java.util.function.Supplier;
-+import org.apache.logging.log4j.LogManager;
-+import org.apache.logging.log4j.Logger;
-+
-+public abstract class IAsyncHandler<R extends Runnable> implements Executor {
-+	private static final Logger LOGGER = LogManager.getLogger();
-+	private final String name;
-+	private final Queue<R> pendingRunnables = new ConcurrentLinkedQueue<>();
-+	private int terminateCount;
-+
-+	protected IAsyncHandler(String name) {
-+		this.name = name;
-+	}
-+
-+	protected abstract R packUpRunnable(Runnable runnable);
-+
-+	protected abstract boolean shouldRun(R task);
-+
-+	public boolean isMainThread() {
-+		return Thread.currentThread() == this.getMainThread();
-+	}
-+
-+	protected abstract Thread getMainThread();
-+
-+	protected boolean executables() {
-+		return !this.isMainThread();
-+	}
-+
-+	public int getPendingRunnables() {
-+		return this.pendingRunnables.size();
-+	}
-+
-+	public String getName() {
-+		return this.name;
-+	}
-+
-+	public <V> CompletableFuture<V> submit(Supplier<V> task) {
-+		return this.executables() ? CompletableFuture.supplyAsync(task, this)
-+				: CompletableFuture.completedFuture(task.get());
-+	}
-+
-+	private CompletableFuture<Void> submitAsync(Runnable runnable) {
-+		return CompletableFuture.supplyAsync(() -> {
-+			runnable.run();
-+			return null;
-+		}, this);
-+	}
-+
-+	public CompletableFuture<Void> submit(Runnable task) {
-+		if (this.executables()) {
-+			return this.submitAsync(task);
-+		} else {
-+			task.run();
-+			return CompletableFuture.completedFuture(null);
-+		}
-+	}
-+
-+	public void performBlocking(Runnable runnable) {
-+		if (!this.isMainThread()) {
-+			this.submitAsync(runnable).join();
-+		} else {
-+			runnable.run();
-+		}
-+
-+	}
-+
-+	public void call(R runnable) {
-+		this.pendingRunnables.add(runnable);
-+		LockSupport.unpark(this.getMainThread());
-+	}
-+
-+	@Override
-+	public void execute(Runnable runnable) {
-+		if (this.executables()) {
-+			this.call(this.packUpRunnable(runnable));
-+		} else {
-+			runnable.run();
-+		}
-+
-+	}
-+
-+	protected void clearAllRunnable() {
-+		this.pendingRunnables.clear();
-+	}
-+
-+	public void runAllRunnable() {
-+		while (this.drawRunnable()) {
-+		}
-+	}
-+
-+	public boolean drawRunnable() {
-+		R runnable = this.pendingRunnables.peek();
-+		if (runnable == null) {
-+			return false;
-+		} else if (this.terminateCount == 0 && !this.shouldRun(runnable)) {
-+			return false;
-+		} else {
-+			this.doRunnable(this.pendingRunnables.remove());
-+			return true;
-+		}
-+	}
-+
-+	public void controlTerminate(BooleanSupplier stopCondition) {
-+		++this.terminateCount;
-+
-+		try {
-+			while (!stopCondition.getAsBoolean()) {
-+				if (!this.drawRunnable()) {
-+					this.waitForRuns();
-+				}
-+			}
-+		} finally {
-+			--this.terminateCount;
-+		}
-+
-+	}
-+
-+	protected void waitForRuns() {
-+		Thread.yield();
-+		LockSupport.parkNanos("waiting for tasks", 100000L);
-+	}
-+
-+	protected void doRunnable(R task) {
-+		try {
-+			task.run();
-+		} catch (Exception e) {
-+			if (e.getCause() instanceof ThreadDeath) throw e;
-+			LOGGER.fatal("Error executing task on {}", this.getName(), e);
-+		}
-+
-+	}
-+}
-\ No newline at end of file
-diff --git a/src/main/java/ga/windpvp/windspigot/tickloop/ReentrantIAsyncHandler.java b/src/main/java/ga/windpvp/windspigot/tickloop/ReentrantIAsyncHandler.java
-new file mode 100644
-index 000000000..fa273afa1
---- /dev/null
-+++ b/src/main/java/ga/windpvp/windspigot/tickloop/ReentrantIAsyncHandler.java
-@@ -0,0 +1,29 @@
-+package ga.windpvp.windspigot.tickloop;
-+
-+public abstract class ReentrantIAsyncHandler<R extends Runnable> extends IAsyncHandler<R> {
-+
-+	private int count;
-+
-+	public ReentrantIAsyncHandler(String name) {
-+		super(name);
-+	}
-+
-+	@Override
-+	protected boolean executables() {
-+		return this.runningTask() || super.executables();
-+	}
-+
-+	protected boolean runningTask() {
-+		return this.count != 0;
-+	}
-+
-+	@Override
-+	protected void doRunnable(R task) {
-+		++this.count;
-+		try {
-+			super.doRunnable(task);
-+		} finally {
-+			--this.count;
-+		}
-+	}
-+}
-\ No newline at end of file
-diff --git a/src/main/java/ga/windpvp/windspigot/tickloop/TasksPerTick.java b/src/main/java/ga/windpvp/windspigot/tickloop/TasksPerTick.java
-new file mode 100644
-index 000000000..6878289b9
---- /dev/null
-+++ b/src/main/java/ga/windpvp/windspigot/tickloop/TasksPerTick.java
-@@ -0,0 +1,20 @@
-+package ga.windpvp.windspigot.tickloop;
-+
-+public class TasksPerTick implements Runnable {
-+	private final int tick;
-+	private final Runnable task;
-+
-+	public TasksPerTick(int creationTicks, Runnable task) {
-+		this.tick = creationTicks;
-+		this.task = task;
-+	}
-+
-+	public int getTick() {
-+		return tick;
-+	}
-+
-+	@Override
-+	public void run() {
-+		task.run();
-+	}
-+}
-\ No newline at end of file
 diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
 index 251ca80c3..4f0492bf0 100644
 --- a/src/main/java/net/minecraft/server/DedicatedServer.java
@@ -230,15 +20,15 @@ index 251ca80c3..4f0492bf0 100644
          Thread thread = new Thread("Server Infinisleeper") {
              {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 3f12941d2..81d84335c 100644
+index 3f12941d2..bfa8db3d7 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -10,6 +10,8 @@ import com.mojang.authlib.GameProfile;
  import com.mojang.authlib.GameProfileRepository;
  import com.mojang.authlib.minecraft.MinecraftSessionService;
  import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
-+import ga.windpvp.windspigot.tickloop.ReentrantIAsyncHandler;
-+import ga.windpvp.windspigot.tickloop.TasksPerTick;
++import net.titanium.tickloop.ReentrantIAsyncHandler;
++import net.titanium.tickloop.TasksPerTick;
  import io.netty.buffer.ByteBuf;
  import io.netty.buffer.ByteBufOutputStream;
  import io.netty.buffer.Unpooled;
@@ -586,6 +376,216 @@ index 3f12941d2..81d84335c 100644
  
      public int getIdleTimeout() {
          return this.G;
+diff --git a/src/main/java/net/titanium/tickloop/IAsyncHandler.java b/src/main/java/net/titanium/tickloop/IAsyncHandler.java
+new file mode 100644
+index 000000000..00a0508ef
+--- /dev/null
++++ b/src/main/java/net/titanium/tickloop/IAsyncHandler.java
+@@ -0,0 +1,140 @@
++package net.titanium.tickloop;
++
++import java.util.Queue;
++import java.util.concurrent.CompletableFuture;
++import java.util.concurrent.ConcurrentLinkedQueue;
++import java.util.concurrent.Executor;
++import java.util.concurrent.locks.LockSupport;
++import java.util.function.BooleanSupplier;
++import java.util.function.Supplier;
++import org.apache.logging.log4j.LogManager;
++import org.apache.logging.log4j.Logger;
++
++public abstract class IAsyncHandler<R extends Runnable> implements Executor {
++	private static final Logger LOGGER = LogManager.getLogger();
++	private final String name;
++	private final Queue<R> pendingRunnables = new ConcurrentLinkedQueue<>();
++	private int terminateCount;
++
++	protected IAsyncHandler(String name) {
++		this.name = name;
++	}
++
++	protected abstract R packUpRunnable(Runnable runnable);
++
++	protected abstract boolean shouldRun(R task);
++
++	public boolean isMainThread() {
++		return Thread.currentThread() == this.getMainThread();
++	}
++
++	protected abstract Thread getMainThread();
++
++	protected boolean executables() {
++		return !this.isMainThread();
++	}
++
++	public int getPendingRunnables() {
++		return this.pendingRunnables.size();
++	}
++
++	public String getName() {
++		return this.name;
++	}
++
++	public <V> CompletableFuture<V> submit(Supplier<V> task) {
++		return this.executables() ? CompletableFuture.supplyAsync(task, this)
++				: CompletableFuture.completedFuture(task.get());
++	}
++
++	private CompletableFuture<Void> submitAsync(Runnable runnable) {
++		return CompletableFuture.supplyAsync(() -> {
++			runnable.run();
++			return null;
++		}, this);
++	}
++
++	public CompletableFuture<Void> submit(Runnable task) {
++		if (this.executables()) {
++			return this.submitAsync(task);
++		} else {
++			task.run();
++			return CompletableFuture.completedFuture(null);
++		}
++	}
++
++	public void performBlocking(Runnable runnable) {
++		if (!this.isMainThread()) {
++			this.submitAsync(runnable).join();
++		} else {
++			runnable.run();
++		}
++
++	}
++
++	public void call(R runnable) {
++		this.pendingRunnables.add(runnable);
++		LockSupport.unpark(this.getMainThread());
++	}
++
++	@Override
++	public void execute(Runnable runnable) {
++		if (this.executables()) {
++			this.call(this.packUpRunnable(runnable));
++		} else {
++			runnable.run();
++		}
++
++	}
++
++	protected void clearAllRunnable() {
++		this.pendingRunnables.clear();
++	}
++
++	public void runAllRunnable() {
++		while (this.drawRunnable()) {
++		}
++	}
++
++	public boolean drawRunnable() {
++		R runnable = this.pendingRunnables.peek();
++		if (runnable == null) {
++			return false;
++		} else if (this.terminateCount == 0 && !this.shouldRun(runnable)) {
++			return false;
++		} else {
++			this.doRunnable(this.pendingRunnables.remove());
++			return true;
++		}
++	}
++
++	public void controlTerminate(BooleanSupplier stopCondition) {
++		++this.terminateCount;
++
++		try {
++			while (!stopCondition.getAsBoolean()) {
++				if (!this.drawRunnable()) {
++					this.waitForRuns();
++				}
++			}
++		} finally {
++			--this.terminateCount;
++		}
++
++	}
++
++	protected void waitForRuns() {
++		Thread.yield();
++		LockSupport.parkNanos("waiting for tasks", 100000L);
++	}
++
++	protected void doRunnable(R task) {
++		try {
++			task.run();
++		} catch (Exception e) {
++			if (e.getCause() instanceof ThreadDeath) throw e;
++			LOGGER.fatal("Error executing task on {}", this.getName(), e);
++		}
++
++	}
++}
+\ No newline at end of file
+diff --git a/src/main/java/net/titanium/tickloop/ReentrantIAsyncHandler.java b/src/main/java/net/titanium/tickloop/ReentrantIAsyncHandler.java
+new file mode 100644
+index 000000000..24111f3b9
+--- /dev/null
++++ b/src/main/java/net/titanium/tickloop/ReentrantIAsyncHandler.java
+@@ -0,0 +1,29 @@
++package net.titanium.tickloop;
++
++public abstract class ReentrantIAsyncHandler<R extends Runnable> extends IAsyncHandler<R> {
++
++	private int count;
++
++	public ReentrantIAsyncHandler(String name) {
++		super(name);
++	}
++
++	@Override
++	protected boolean executables() {
++		return this.runningTask() || super.executables();
++	}
++
++	protected boolean runningTask() {
++		return this.count != 0;
++	}
++
++	@Override
++	protected void doRunnable(R task) {
++		++this.count;
++		try {
++			super.doRunnable(task);
++		} finally {
++			--this.count;
++		}
++	}
++}
+\ No newline at end of file
+diff --git a/src/main/java/net/titanium/tickloop/TasksPerTick.java b/src/main/java/net/titanium/tickloop/TasksPerTick.java
+new file mode 100644
+index 000000000..aca388a15
+--- /dev/null
++++ b/src/main/java/net/titanium/tickloop/TasksPerTick.java
+@@ -0,0 +1,20 @@
++package net.titanium.tickloop;
++
++public class TasksPerTick implements Runnable {
++	private final int tick;
++	private final Runnable task;
++
++	public TasksPerTick(int creationTicks, Runnable task) {
++		this.tick = creationTicks;
++		this.task = task;
++	}
++
++	public int getTick() {
++		return tick;
++	}
++
++	@Override
++	public void run() {
++		task.run();
++	}
++}
+\ No newline at end of file
 diff --git a/src/main/java/org/bukkit/craftbukkit/Main.java b/src/main/java/org/bukkit/craftbukkit/Main.java
 index 109563b91..65ec9c8d3 100644
 --- a/src/main/java/org/bukkit/craftbukkit/Main.java
@@ -633,5 +633,5 @@ index 109563b91..65ec9c8d3 100644
                  t.printStackTrace();
              }
 -- 
-2.36.0.windows.1
+2.38.1.windows.1
 

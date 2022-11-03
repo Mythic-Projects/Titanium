@@ -1,4 +1,4 @@
-From d95fbd7f94715a0730144261ec86180291e2e282 Mon Sep 17 00:00:00 2001
+From 59272c1caa41e1a4b47d4ee1bc14e6049234b692 Mon Sep 17 00:00:00 2001
 From: RoccoDev <roccodev.business@gmail.com>
 Date: Sun, 6 Sep 2020 13:41:03 +0200
 Subject: [PATCH] Implement [KigPaper-0110] Backport from Spigot: Enforce
@@ -46,5 +46,5 @@ index e78fc6160..763556acc 100644
  
              try {
 -- 
-2.36.0.windows.1
+2.38.1.windows.1
 

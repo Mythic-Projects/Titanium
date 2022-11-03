@@ -1,4 +1,4 @@
-From a2ec5cbbd970c541fc581d3a9b86eecdb168655e Mon Sep 17 00:00:00 2001
+From 1fbb865713a225450aea36b61fb2da64289ac032 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Wed, 27 Feb 2019 22:18:40 -0500
 Subject: [PATCH] Implement [Paper-0374] Add Stricter Client Sign limits by
@@ -64,5 +64,5 @@ index 902d79cf7..d2922e080 100644
      @Comment("Setting these values prevent players from using NBT overflow exploits.")
      @Comment("See also nbt-read-limiter, maybe you don't have to change these values.")
 -- 
-2.36.0.windows.1
+2.38.1.windows.1
 

@@ -1,11 +1,11 @@
-From d4d6221b9926d4bcd3c71d34244f6eeb169aa13d Mon Sep 17 00:00:00 2001
+From 9b20b47a544e9d2d74393920a27fc2aad610dc14 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 31 Oct 2022 23:11:16 +0100
 Subject: [PATCH] Add 'chunk.async-spawn-chunks' option to config
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 2959b9a4d..06485d4bb 100644
+index ae75466f4..bcf456f12 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -498,7 +498,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
@@ -46,5 +46,5 @@ index 080ccb496..a7f8b5d68 100644
              }
          }
 -- 
-2.36.0.windows.1
+2.38.1.windows.1
 

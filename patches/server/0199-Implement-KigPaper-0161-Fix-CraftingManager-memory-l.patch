@@ -1,4 +1,4 @@
-From 4224842bf3d4a72d47b8eaccca087454046b7b97 Mon Sep 17 00:00:00 2001
+From 0fa39a77f1c9bfa4635e53be38b846c0d8aff6cd Mon Sep 17 00:00:00 2001
 From: RoccoDev <hey@rocco.dev>
 Date: Wed, 24 Mar 2021 22:35:51 +0100
 Subject: [PATCH] Implement [KigPaper-0161] Fix CraftingManager memory leak by
@@ -93,5 +93,5 @@ index 992e8b50c..080ccb496 100644
  
          // Synchronized because access to RegionFileCache.a is guarded by this lock.
 -- 
-2.36.0.windows.1
+2.38.1.windows.1
 

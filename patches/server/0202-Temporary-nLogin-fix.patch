@@ -1,4 +1,4 @@
-From 85c2ceb6fb329c6d5b4a4eec5144b575a46a5b0c Mon Sep 17 00:00:00 2001
+From 5d4e4b07ee7d3e5edccec5bd461e7471cbe31d78 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Tue, 25 Oct 2022 07:56:27 +0200
 Subject: [PATCH] Temporary nLogin fix
@@ -18,5 +18,5 @@ index a9dddef60..027df5315 100644
  
              log("Server Ping Player Sample Count: " + sampleCount);
 -- 
-2.36.0.windows.1
+2.38.1.windows.1
 

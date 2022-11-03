@@ -1,4 +1,4 @@
-From 1c6009f7b29136804a4b43083931d792e3e1470b Mon Sep 17 00:00:00 2001
+From 0cbb8fdf04e1d10ccdd64110ab726c0466f69522 Mon Sep 17 00:00:00 2001
 From: Rastrian <me@rastrian.dev>
 Date: Fri, 24 Jun 2022 21:02:34 +0200
 Subject: [PATCH] Async Combat packet handling
@@ -124,192 +124,16 @@ index 000000000..35a11277e
 +
 +}
 \ No newline at end of file
-diff --git a/src/main/java/ga/windpvp/windspigot/async/thread/AsyncPacketThread.java b/src/main/java/ga/windpvp/windspigot/async/thread/AsyncPacketThread.java
-new file mode 100644
-index 000000000..dbe2d5059
---- /dev/null
-+++ b/src/main/java/ga/windpvp/windspigot/async/thread/AsyncPacketThread.java
-@@ -0,0 +1,170 @@
-+package ga.windpvp.windspigot.async.thread;
-+
-+import ga.windpvp.windspigot.async.netty.Spigot404Write;
-+import ga.windpvp.windspigot.tickloop.ReentrantIAsyncHandler;
-+import ga.windpvp.windspigot.tickloop.TasksPerTick;
-+import io.netty.util.concurrent.Future;
-+import io.netty.util.concurrent.GenericFutureListener;
-+import java.math.BigDecimal;
-+import java.util.Queue;
-+import java.util.concurrent.ConcurrentLinkedQueue;
-+import net.minecraft.server.NetworkManager;
-+import net.minecraft.server.Packet;
-+import org.apache.logging.log4j.LogManager;
-+import org.apache.logging.log4j.Logger;
-+
-+public abstract class AsyncPacketThread {
-+
-+    private static final long SEC_IN_NANO = 1000000000;
-+
-+    private final String name;
-+
-+    private final int tps;
-+    private final long tickTime;
-+    private final long maxCatchupBuffer;
-+
-+    private final Thread thread;
-+
-+    protected final Queue<Runnable> packets = new ConcurrentLinkedQueue<Runnable>();
-+
-+    private int currentTick = 0;
-+    public final RollingAverage tps1;
-+    public final RollingAverage tps5;
-+    public final RollingAverage tps15;
-+    private final java.math.BigDecimal tpsBase;
-+
-+    public AsyncPacketThread(String name, int tps) {
-+        this.name = name;
-+
-+        this.tps = tps;
-+        this.tickTime = SEC_IN_NANO / tps;
-+        this.maxCatchupBuffer = tickTime * tps * 60L;
-+
-+        this.thread = new Thread(AsyncPacketThread.this::loop, AsyncPacketThread.this.name);
-+        this.thread.start();
-+
-+        this.tps1 = new RollingAverage(60);
-+        this.tps5 = new RollingAverage(60 * 5);
-+        this.tps15 = new RollingAverage(60 * 15);
-+
-+        this.tpsBase = new java.math.BigDecimal(1E9).multiply(new java.math.BigDecimal(tps));
-+    }
-+
-+    public void loop() {
-+        long start = System.nanoTime();
-+        long lastTick = start - this.tickTime;
-+        long catchupTime = 0;
-+        long wait;
-+        long tickSection = start;
-+
-+        boolean running = true;
-+        while (running) {
-+            long curTime = System.nanoTime();
-+            wait = tickTime - (curTime - start);
-+
-+            if (wait > 0) {
-+                if (catchupTime < 2E6) {
-+                    wait += Math.abs(catchupTime);
-+                } else if (wait < catchupTime) {
-+                    catchupTime -= wait;
-+                    wait = 0;
-+                } else {
-+                    wait -= catchupTime;
-+                    catchupTime = 0;
-+                }
-+            }
-+
-+            if (wait > 0) {
-+                try {
-+                    // Wait a bit before checking for new packets
-+                    Thread.sleep(wait / 1000000);
-+
-+                    curTime = System.nanoTime();
-+                    wait = this.tickTime - (curTime - lastTick);
-+                } catch (InterruptedException e) {
-+                    e.printStackTrace();
-+                }
-+            }
-+
-+            catchupTime = Math.min(this.maxCatchupBuffer, catchupTime - wait);
-+
-+            if ( ++this.currentTick % this.tps == 0 )
-+            {
-+                final long diff = curTime - tickSection;
-+                BigDecimal currentTps = this.tpsBase.divide(new java.math.BigDecimal(diff), 30, java.math.RoundingMode.HALF_UP);
-+                tps1.add(currentTps, diff);
-+                tps5.add(currentTps, diff);
-+                tps15.add(currentTps, diff);
-+                tickSection = curTime;
-+            }
-+            lastTick = curTime;
-+
-+            // Handle packets
-+            this.run();
-+        }
-+    }
-+
-+    public abstract void run();
-+
-+    public void addPacket(final Packet<?> packet, final NetworkManager manager, final GenericFutureListener<? extends Future<? super Void>>[] agenericfuturelistener) {
-+        this.packets.add(() -> Spigot404Write.writeThenFlush(manager.channel, packet, agenericfuturelistener));
-+    }
-+
-+    public Thread getThread() {
-+        return this.thread;
-+    }
-+
-+    public int getTps() {
-+        return tps;
-+    }
-+
-+    public double[] getTPS() {
-+        return new double[] {
-+                this.tps1.getAverage(),
-+                this.tps5.getAverage(),
-+                this.tps15.getAverage()
-+        };
-+    }
-+
-+    public class RollingAverage {
-+        private final int size;
-+        private long time;
-+        private java.math.BigDecimal total;
-+        private int index = 0;
-+        private final java.math.BigDecimal[] samples;
-+        private final long[] times;
-+
-+        RollingAverage(int size) {
-+            this.size = size;
-+            this.time = size * SEC_IN_NANO;
-+            this.total = dec(AsyncPacketThread.this.tps).multiply(dec(SEC_IN_NANO)).multiply(dec(size));
-+            this.samples = new java.math.BigDecimal[size];
-+            this.times = new long[size];
-+            for (int i = 0; i < size; i++) {
-+                this.samples[i] = dec(AsyncPacketThread.this.tps);
-+                this.times[i] = SEC_IN_NANO;
-+            }
-+        }
-+
-+        private java.math.BigDecimal dec(long t) {
-+            return new java.math.BigDecimal(t);
-+        }
-+
-+        public void add(java.math.BigDecimal x, long t) {
-+            time -= times[index];
-+            total = total.subtract(samples[index].multiply(dec(times[index])));
-+            samples[index] = x;
-+            times[index] = t;
-+            time += t;
-+            total = total.add(x.multiply(dec(t)));
-+            if (++index == size) {
-+                index = 0;
-+            }
-+        }
-+
-+        public double getAverage() {
-+            return total.divide(dec(time), 30, java.math.RoundingMode.HALF_UP).doubleValue();
-+        }
-+    }
-+
-+}
-\ No newline at end of file
 diff --git a/src/main/java/ga/windpvp/windspigot/async/thread/CombatThread.java b/src/main/java/ga/windpvp/windspigot/async/thread/CombatThread.java
 new file mode 100644
-index 000000000..f31d4218e
+index 000000000..a9f4ab47a
 --- /dev/null
 +++ b/src/main/java/ga/windpvp/windspigot/async/thread/CombatThread.java
-@@ -0,0 +1,19 @@
+@@ -0,0 +1,20 @@
 +package ga.windpvp.windspigot.async.thread;
 +
 +import net.titanium.config.TitaniumConfig;
++import net.titanium.util.async.AsyncPacketThread;
 +
 +public class CombatThread extends AsyncPacketThread {
 +
@@ -477,14 +301,188 @@ index c0c84785b..ddc83deed 100644
              " ",
              "&6Memory usage: &a{MEMORY_USED}&a/{MEMORY_MAX} MB",
              "&6Uptime: &a{UPTIME}"
+diff --git a/src/main/java/net/titanium/util/async/AsyncPacketThread.java b/src/main/java/net/titanium/util/async/AsyncPacketThread.java
+new file mode 100644
+index 000000000..b42591f5a
+--- /dev/null
++++ b/src/main/java/net/titanium/util/async/AsyncPacketThread.java
+@@ -0,0 +1,168 @@
++package net.titanium.util.async;
++
++import ga.windpvp.windspigot.async.netty.Spigot404Write;
++import io.netty.util.concurrent.Future;
++import io.netty.util.concurrent.GenericFutureListener;
++import java.math.BigDecimal;
++import java.util.Queue;
++import java.util.concurrent.ConcurrentLinkedQueue;
++import net.minecraft.server.NetworkManager;
++import net.minecraft.server.Packet;
++import org.apache.logging.log4j.LogManager;
++import org.apache.logging.log4j.Logger;
++
++public abstract class AsyncPacketThread {
++
++    private static final long SEC_IN_NANO = 1000000000;
++
++    private final String name;
++
++    private final int tps;
++    private final long tickTime;
++    private final long maxCatchupBuffer;
++
++    private final Thread thread;
++
++    protected final Queue<Runnable> packets = new ConcurrentLinkedQueue<Runnable>();
++
++    private int currentTick = 0;
++    public final RollingAverage tps1;
++    public final RollingAverage tps5;
++    public final RollingAverage tps15;
++    private final java.math.BigDecimal tpsBase;
++
++    public AsyncPacketThread(String name, int tps) {
++        this.name = name;
++
++        this.tps = tps;
++        this.tickTime = SEC_IN_NANO / tps;
++        this.maxCatchupBuffer = tickTime * tps * 60L;
++
++        this.thread = new Thread(AsyncPacketThread.this::loop, AsyncPacketThread.this.name);
++        this.thread.start();
++
++        this.tps1 = new RollingAverage(60);
++        this.tps5 = new RollingAverage(60 * 5);
++        this.tps15 = new RollingAverage(60 * 15);
++
++        this.tpsBase = new java.math.BigDecimal(1E9).multiply(new java.math.BigDecimal(tps));
++    }
++
++    public void loop() {
++        long start = System.nanoTime();
++        long lastTick = start - this.tickTime;
++        long catchupTime = 0;
++        long wait;
++        long tickSection = start;
++
++        boolean running = true;
++        while (running) {
++            long curTime = System.nanoTime();
++            wait = tickTime - (curTime - start);
++
++            if (wait > 0) {
++                if (catchupTime < 2E6) {
++                    wait += Math.abs(catchupTime);
++                } else if (wait < catchupTime) {
++                    catchupTime -= wait;
++                    wait = 0;
++                } else {
++                    wait -= catchupTime;
++                    catchupTime = 0;
++                }
++            }
++
++            if (wait > 0) {
++                try {
++                    // Wait a bit before checking for new packets
++                    Thread.sleep(wait / 1000000);
++
++                    curTime = System.nanoTime();
++                    wait = this.tickTime - (curTime - lastTick);
++                } catch (InterruptedException e) {
++                    e.printStackTrace();
++                }
++            }
++
++            catchupTime = Math.min(this.maxCatchupBuffer, catchupTime - wait);
++
++            if ( ++this.currentTick % this.tps == 0 )
++            {
++                final long diff = curTime - tickSection;
++                BigDecimal currentTps = this.tpsBase.divide(new java.math.BigDecimal(diff), 30, java.math.RoundingMode.HALF_UP);
++                tps1.add(currentTps, diff);
++                tps5.add(currentTps, diff);
++                tps15.add(currentTps, diff);
++                tickSection = curTime;
++            }
++            lastTick = curTime;
++
++            // Handle packets
++            this.run();
++        }
++    }
++
++    public abstract void run();
++
++    public void addPacket(final Packet<?> packet, final NetworkManager manager, final GenericFutureListener<? extends Future<? super Void>>[] agenericfuturelistener) {
++        this.packets.add(() -> Spigot404Write.writeThenFlush(manager.channel, packet, agenericfuturelistener));
++    }
++
++    public Thread getThread() {
++        return this.thread;
++    }
++
++    public int getTps() {
++        return tps;
++    }
++
++    public double[] getTPS() {
++        return new double[] {
++                this.tps1.getAverage(),
++                this.tps5.getAverage(),
++                this.tps15.getAverage()
++        };
++    }
++
++    public class RollingAverage {
++        private final int size;
++        private long time;
++        private java.math.BigDecimal total;
++        private int index = 0;
++        private final java.math.BigDecimal[] samples;
++        private final long[] times;
++
++        RollingAverage(int size) {
++            this.size = size;
++            this.time = size * SEC_IN_NANO;
++            this.total = dec(AsyncPacketThread.this.tps).multiply(dec(SEC_IN_NANO)).multiply(dec(size));
++            this.samples = new java.math.BigDecimal[size];
++            this.times = new long[size];
++            for (int i = 0; i < size; i++) {
++                this.samples[i] = dec(AsyncPacketThread.this.tps);
++                this.times[i] = SEC_IN_NANO;
++            }
++        }
++
++        private java.math.BigDecimal dec(long t) {
++            return new java.math.BigDecimal(t);
++        }
++
++        public void add(java.math.BigDecimal x, long t) {
++            time -= times[index];
++            total = total.subtract(samples[index].multiply(dec(times[index])));
++            samples[index] = x;
++            times[index] = t;
++            time += t;
++            total = total.add(x.multiply(dec(t)));
++            if (++index == size) {
++                index = 0;
++            }
++        }
++
++        public double getAverage() {
++            return total.divide(dec(time), 30, java.math.RoundingMode.HALF_UP).doubleValue();
++        }
++    }
++
++}
+\ No newline at end of file
 diff --git a/src/main/java/org/spigotmc/TicksPerSecondCommand.java b/src/main/java/org/spigotmc/TicksPerSecondCommand.java
-index f775f05f4..7087735af 100644
+index f775f05f4..83e1022db 100644
 --- a/src/main/java/org/spigotmc/TicksPerSecondCommand.java
 +++ b/src/main/java/org/spigotmc/TicksPerSecondCommand.java
-@@ -1,8 +1,11 @@
+@@ -1,8 +1,10 @@
  package org.spigotmc;
  
-+import ga.windpvp.windspigot.async.thread.AsyncPacketThread;
 +import ga.windpvp.windspigot.async.thread.CombatThread;
  import java.util.Arrays;
  import java.util.List;
@@ -493,7 +491,7 @@ index f775f05f4..7087735af 100644
  import net.titanium.config.message.MessageConfig;
  import org.apache.commons.lang3.time.DurationFormatUtils;
  import org.bukkit.Bukkit;
-@@ -37,6 +40,37 @@ public class TicksPerSecondCommand extends Command
+@@ -37,6 +39,37 @@ public class TicksPerSecondCommand extends Command
          for (int i = 0; i < tps.length; i++) {
              tpsAvg[i] = formatTps(tps[i]);
          }
@@ -531,7 +529,7 @@ index f775f05f4..7087735af 100644
  
          // Titanium start - make messages configurable
          List<String> message = MessageConfig.get().ticksPerSeconds;
-@@ -50,6 +84,16 @@ public class TicksPerSecondCommand extends Command
+@@ -50,6 +83,16 @@ public class TicksPerSecondCommand extends Command
                      messageLine = messageLine.replace("{TPS_1M}", tpsAvg[0]);
                      messageLine = messageLine.replace("{TPS_5M}", tpsAvg[1]);
                      messageLine = messageLine.replace("{TPS_15M}", tpsAvg[2]);
@@ -548,7 +546,7 @@ index f775f05f4..7087735af 100644
                      // MEMORY
                      messageLine = messageLine.replace("{MEMORY_USED}", formatMemoryUsage(runtime.totalMemory() - runtime.freeMemory(), runtime.maxMemory()));
                      messageLine = messageLine.replace("{MEMORY_FREE}", formatFreeMemory(runtime.freeMemory(), runtime.maxMemory()));
-@@ -75,9 +119,27 @@ public class TicksPerSecondCommand extends Command
+@@ -75,9 +118,27 @@ public class TicksPerSecondCommand extends Command
  
      private static String formatTps(double tps) // PaperSpigot - made static
      {
@@ -578,5 +576,5 @@ index f775f05f4..7087735af 100644
      // Titanium start
      private static String formatMemoryUsage(long usage, long max) {
 -- 
-2.36.0.windows.1
+2.38.1.windows.1
 

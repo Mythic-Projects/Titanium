@@ -1,4 +1,4 @@
-From caf372fdf8edbaa0538a83b17062460d789c22e5 Mon Sep 17 00:00:00 2001
+From 013e1524f156b279a944d02daf6a9948f5571015 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Mon, 26 Sep 2016 01:51:30 -0400
 Subject: [PATCH] Implement [Paper-0161] Disable Vanilla Chunk GC by Aikar
@@ -31,5 +31,5 @@ index 656324907..bae227279 100644
      }
  
 -- 
-2.36.0.windows.1
+2.38.1.windows.1
 

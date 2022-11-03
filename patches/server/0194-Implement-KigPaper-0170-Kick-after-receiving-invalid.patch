@@ -1,4 +1,4 @@
-From e5a9c3f213c90591c7f3da6d8a9070e09e63bb3e Mon Sep 17 00:00:00 2001
+From da12fabcb9f043eecd4a8f50236f79f88ceb970b Mon Sep 17 00:00:00 2001
 From: RoccoDev <hey@rocco.dev>
 Date: Mon, 26 Apr 2021 09:50:16 +0200
 Subject: [PATCH] Implement [KigPaper-0170] Kick after receiving invalid
@@ -19,5 +19,5 @@ index d3224e131..e78fc6160 100644
  
      }
 -- 
-2.36.0.windows.1
+2.38.1.windows.1
 

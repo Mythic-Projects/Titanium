@@ -1,4 +1,4 @@
-From 2fff0be394cdfa064947197c29801097157e0b14 Mon Sep 17 00:00:00 2001
+From 2e6663fce99d21a18604101d8b05a4f382190b0d Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Mon, 26 Nov 2018 19:44:01 -0500
 Subject: [PATCH] Implement [Paper-0369] Prevent rayTrace from loading chunks
@@ -30,5 +30,5 @@ index 2fd831617..70d2d2279 100644
  
                      if (!flag1 || block1.a(this, blockposition, iblockdata1) != null) {
 -- 
-2.36.0.windows.1
+2.38.1.windows.1
 

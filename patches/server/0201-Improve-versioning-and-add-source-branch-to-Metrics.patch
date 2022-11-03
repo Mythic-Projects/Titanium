@@ -1,4 +1,4 @@
-From 1d3341f7969fd9451da3f13aca7c94ee54bf23b5 Mon Sep 17 00:00:00 2001
+From c44f95e8e79d5d7d5249e842767fb51bf5bb6acc Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 24 Oct 2022 11:24:32 +0200
 Subject: [PATCH] Improve versioning and add source & branch to Metrics

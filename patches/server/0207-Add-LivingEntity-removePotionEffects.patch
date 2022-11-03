@@ -1,4 +1,4 @@
-From a4926bb04d2a48cd97169f1a6d5f17252c183889 Mon Sep 17 00:00:00 2001
+From 8ba08f0587cfb36c700b000f1455fe627820f1c8 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 26 Oct 2022 21:17:20 +0200
 Subject: [PATCH] Add LivingEntity#removePotionEffects
@@ -23,5 +23,5 @@ index cb0a5b90f..2f09cbef0 100644
          List<PotionEffect> effects = new ArrayList<PotionEffect>();
          for (Object raw : getHandle().effects.values()) {
 -- 
-2.36.0.windows.1
+2.38.1.windows.1
 

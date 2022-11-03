@@ -1,4 +1,4 @@
-From 8c705a1eb4c3f161305d798bd84e7da6209f4259 Mon Sep 17 00:00:00 2001
+From 557a7c097558d0307dbba8543d21b30cc853aa17 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Mon, 19 Sep 2016 23:16:39 -0400
 Subject: [PATCH] Implement [Paper-0156] Auto Save Improvements by Aikar
@@ -185,5 +185,5 @@ index 9897a8ece..ad52f0faf 100644
      public GeneratorSettings generatorSettings = new GeneratorSettings();
  
 -- 
-2.36.0.windows.1
+2.38.1.windows.1
 

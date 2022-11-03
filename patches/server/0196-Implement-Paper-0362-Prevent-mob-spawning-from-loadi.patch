@@ -1,4 +1,4 @@
-From 68dc539c550e72090065763b2b59a4f532e7cafd Mon Sep 17 00:00:00 2001
+From 3621f7909d4509f861d8ffcb865202c42115bc3b Mon Sep 17 00:00:00 2001
 From: Shane Freeder <theboyetronic@gmail.com>
 Date: Mon, 8 Oct 2018 17:51:52 +0100
 Subject: [PATCH] Implement [Paper-0362] Prevent mob spawning from
@@ -53,5 +53,5 @@ index e830d20c6..1092defac 100644
                                                          biomebase_biomemeta = worldserver.a(enumcreaturetype, blockposition2);
                                                          if (biomebase_biomemeta == null) {
 -- 
-2.36.0.windows.1
+2.38.1.windows.1
 
