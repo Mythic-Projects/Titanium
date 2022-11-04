@@ -12,7 +12,7 @@ allprojects {
 
     ext {
         gitHash = project.getCurrentGitHash()
-        gitBranch = project.getCurrentGitBranch()
+        gitBranch = System.getenv("BRANCH_NAME") ?: project.getCurrentGitBranch()
     }
 
     repositories {
