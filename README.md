@@ -67,7 +67,9 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Spigot-5294] Cancelled EntityPickupItemEvent and PlayerPickupItemEvent alter on-ground stacks by md_5
 [Spigot-5428] Better handling of some ItemMeta by Mathias
 
+[Paper-0009] Version Command 2.0 by Zach Brown
 [Paper-0008/0013] Add command line option to load extra plugin jars not in the plugins folder by Jason Penilla
+[Paper-0019] Implement Paper VersionChecker by Zach Brown
 [Paper-0022] Further improve server tick loop by Aikar
 [Paper-0044] Use UserCache for player heads
 [Paper-0072] Fix Furnace cook time bug when lagging by Aikar

@@ -1,0 +1,166 @@
+From e287143a0564758a618d88ef6647087d96d4b784 Mon Sep 17 00:00:00 2001
+From: Zach Brown <zach@zachbr.io>
+Date: Fri, 4 Nov 2022 16:56:56 +0100
+Subject: [PATCH] Implement [Paper-0009] Version Command 2.0 by Zach Brown
+
+
+diff --git a/src/main/java/com/destroystokyo/paper/util/VersionFetcher.java b/src/main/java/com/destroystokyo/paper/util/VersionFetcher.java
+new file mode 100644
+index 00000000..46af13c9
+--- /dev/null
++++ b/src/main/java/com/destroystokyo/paper/util/VersionFetcher.java
+@@ -0,0 +1,43 @@
++package com.destroystokyo.paper.util;
++
++import org.bukkit.Bukkit;
++import org.jetbrains.annotations.NotNull;
++
++public interface VersionFetcher {
++    /**
++     * Amount of time to cache results for in milliseconds
++     * <p>
++     * Negative values will never cache.
++     *
++     * @return cache time
++     */
++    long getCacheTime();
++
++    /**
++     * Gets the version message to cache and show to command senders.
++     *
++     * <p>NOTE: This is run in a new thread separate from that of the command processing thread</p>
++     *
++     * @param serverVersion the current version of the server (will match {@link Bukkit#getVersion()})
++     * @return the message to show when requesting a version
++     */
++    @NotNull
++    String getVersionMessage(@NotNull String serverVersion);
++
++    class DummyVersionFetcher implements VersionFetcher {
++
++        @Override
++        public long getCacheTime() {
++            return -1;
++        }
++
++        @NotNull
++        @Override
++        public String getVersionMessage(@NotNull String serverVersion) {
++            Bukkit.getLogger().warning("Version provider has not been set, cannot check for updates!");
++            Bukkit.getLogger().info("Override the default implementation of org.bukkit.UnsafeValues#getVersionFetcher()");
++            new Throwable().printStackTrace();
++            return "Unable to check for updates. No version provider set.";
++        }
++    }
++}
+\ No newline at end of file
+diff --git a/src/main/java/org/bukkit/UnsafeValues.java b/src/main/java/org/bukkit/UnsafeValues.java
+index 73dd599c..a7d571f7 100644
+--- a/src/main/java/org/bukkit/UnsafeValues.java
++++ b/src/main/java/org/bukkit/UnsafeValues.java
+@@ -36,4 +36,14 @@ public interface UnsafeValues {
+ 
+     ItemStack deserializeItem(byte[] data);
+     // PandaSpigot end
++
++    // Paper start
++    /**
++     * Called once by the version command on first use, then cached.
++     */
++    default com.destroystokyo.paper.util.VersionFetcher getVersionFetcher() {
++        return new com.destroystokyo.paper.util.VersionFetcher.DummyVersionFetcher();
++    }
++    // Paper end
++
+ }
+diff --git a/src/main/java/org/bukkit/command/defaults/VersionCommand.java b/src/main/java/org/bukkit/command/defaults/VersionCommand.java
+index d49d0ded..d4b5c757 100644
+--- a/src/main/java/org/bukkit/command/defaults/VersionCommand.java
++++ b/src/main/java/org/bukkit/command/defaults/VersionCommand.java
+@@ -1,5 +1,6 @@
+ package org.bukkit.command.defaults;
+ 
++import com.destroystokyo.paper.util.VersionFetcher;
+ import com.google.common.base.Charsets;
+ import java.util.ArrayList;
+ import java.util.Arrays;
+@@ -29,6 +30,17 @@ import org.json.simple.parser.JSONParser;
+ import org.json.simple.parser.ParseException;
+ 
+ public class VersionCommand extends BukkitCommand {
++    // Paper start
++    private VersionFetcher versionFetcher;
++    private VersionFetcher getVersionFetcher() { // lazy load because unsafe isn't available at command registration
++        if (versionFetcher == null) {
++            versionFetcher = Bukkit.getUnsafe().getVersionFetcher();
++        }
++
++        return versionFetcher;
++    }
++    // Paper end
++
+     public VersionCommand(String name) {
+         super(name);
+ 
+@@ -43,7 +55,7 @@ public class VersionCommand extends BukkitCommand {
+         if (!testPermission(sender)) return true;
+ 
+         if (args.length == 0) {
+-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&8>> &7This server is running &5Titanium &8(&fMC: 1.8.8&8) - &7Implementing API version &f" + Bukkit.getBukkitVersion()));
++            //sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&8>> &7This server is running &5Titanium &8(&fMC: 1.8.8&8) - &7Implementing API version &f" + Bukkit.getBukkitVersion())); // Paper - moved to setVersionMessage
+             sendVersion(sender);
+         } else {
+             StringBuilder name = new StringBuilder();
+@@ -150,7 +162,7 @@ public class VersionCommand extends BukkitCommand {
+ 
+     private void sendVersion(CommandSender sender) {
+         if (hasVersion) {
+-            if (System.currentTimeMillis() - lastCheck > 21600000) {
++            if (System.currentTimeMillis() - lastCheck > getVersionFetcher().getCacheTime()) { // Paper - use version supplier
+                 lastCheck = System.currentTimeMillis();
+                 hasVersion = false;
+             } else {
+@@ -165,7 +177,7 @@ public class VersionCommand extends BukkitCommand {
+                 return;
+             }
+             versionWaiters.add(sender);
+-            sender.sendMessage("Checking version, please wait...");
++            sender.sendMessage(ChatColor.ITALIC + "Checking version, please wait..."); // Paper - Italic
+             if (!versionTaskStarted) {
+                 versionTaskStarted = true;
+                 new Thread(new Runnable() {
+@@ -183,6 +195,13 @@ public class VersionCommand extends BukkitCommand {
+ 
+     private void obtainVersion() {
+         String version = Bukkit.getVersion();
++        // Paper start
++        if (version == null || version.startsWith("null")) { // running from ide?
++            setVersionMessage(ChatColor.YELLOW + "Unknown version, custom build?");
++            return;
++        }
++        setVersionMessage(getVersionFetcher().getVersionMessage(version));
++        /*
+         if (version == null) version = "Custom";
+         // PaperSpigot start
+         if (version.startsWith("git-PaperSpigot-")) {
+@@ -227,11 +246,16 @@ public class VersionCommand extends BukkitCommand {
+         } else {
+             setVersionMessage("Unknown version, custom build?");
+         }
++         */
++        // Paper end
+     }
+ 
+     private void setVersionMessage(String msg) {
+         lastCheck = System.currentTimeMillis();
+-        versionMessage = msg;
++        // Paper start
++        String message = ChatColor.translateAlternateColorCodes('&', "&8>> &7This server is running &5Titanium &8(&fMC: 1.8.8&8) - &7Implementing API version &f" + Bukkit.getBukkitVersion());
++        versionMessage = message + "\n" + msg;
++        // Paper end
+         versionLock.lock();
+         try {
+             hasVersion = true;
+-- 
+2.38.1.windows.1
+
