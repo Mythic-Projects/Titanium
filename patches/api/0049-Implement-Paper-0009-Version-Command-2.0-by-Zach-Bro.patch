@@ -1,4 +1,4 @@
-From e287143a0564758a618d88ef6647087d96d4b784 Mon Sep 17 00:00:00 2001
+From b0c32d6282439a944487a4200d08b745dc5e7097 Mon Sep 17 00:00:00 2001
 From: Zach Brown <zach@zachbr.io>
 Date: Fri, 4 Nov 2022 16:56:56 +0100
 Subject: [PATCH] Implement [Paper-0009] Version Command 2.0 by Zach Brown
@@ -55,22 +55,21 @@ index 00000000..46af13c9
 +}
 \ No newline at end of file
 diff --git a/src/main/java/org/bukkit/UnsafeValues.java b/src/main/java/org/bukkit/UnsafeValues.java
-index 73dd599c..a7d571f7 100644
+index ee915631..205ac3ca 100644
 --- a/src/main/java/org/bukkit/UnsafeValues.java
 +++ b/src/main/java/org/bukkit/UnsafeValues.java
-@@ -36,4 +36,14 @@ public interface UnsafeValues {
+@@ -35,5 +35,13 @@ public interface UnsafeValues {
+     byte[] serializeItem(ItemStack item);
  
      ItemStack deserializeItem(byte[] data);
-     // PandaSpigot end
 +
-+    // Paper start
 +    /**
 +     * Called once by the version command on first use, then cached.
 +     */
 +    default com.destroystokyo.paper.util.VersionFetcher getVersionFetcher() {
 +        return new com.destroystokyo.paper.util.VersionFetcher.DummyVersionFetcher();
 +    }
-+    // Paper end
+     // Paper end
 +
  }
 diff --git a/src/main/java/org/bukkit/command/defaults/VersionCommand.java b/src/main/java/org/bukkit/command/defaults/VersionCommand.java

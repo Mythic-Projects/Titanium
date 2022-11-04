@@ -1,0 +1,216 @@
+From 0e23b3c6de52023d9eadaedaabf07a7625b52e60 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Tue, 14 Jun 2022 17:52:25 +0200
+Subject: [PATCH] Add /setslots command
+
+
+diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
+index 2e7b040d4..827fbb75a 100644
+--- a/src/main/java/net/minecraft/server/PlayerList.java
++++ b/src/main/java/net/minecraft/server/PlayerList.java
+@@ -62,7 +62,7 @@ public abstract class PlayerList {
+     private final Map<UUID, ServerStatisticManager> o;
+     public IPlayerFileData playerFileData;
+     private boolean hasWhitelist;
+-    protected int maxPlayers;
++    public int maxPlayers; // Titanium - make public
+     private int r;
+     private WorldSettings.EnumGamemode s;
+     private boolean t;
+diff --git a/src/main/java/net/titanium/Titanium.java b/src/main/java/net/titanium/Titanium.java
+index 4e85f8b45..e0d19630c 100644
+--- a/src/main/java/net/titanium/Titanium.java
++++ b/src/main/java/net/titanium/Titanium.java
+@@ -15,10 +15,10 @@ public class Titanium {
+ 
+     private static Titanium INSTANCE;
+ 
+-    public final MinecraftServer server;
++    private final MinecraftServer server;
+ 
+-    public TitaniumConfig serverConfig;
+-    public KnockbackConfig knockbackConfig;
++    private TitaniumConfig serverConfig;
++    private KnockbackConfig knockbackConfig;
+ 
+     public Titanium(MinecraftServer server) {
+         INSTANCE = this;
+@@ -29,10 +29,14 @@ public class Titanium {
+         this.loadKnockbackConfig();
+     }
+ 
+-    public Titanium get() {
++    public static Titanium get() {
+         return INSTANCE;
+     }
+ 
++    public MinecraftServer getServer() {
++        return server;
++    }
++
+     public TitaniumConfig getServerConfig() {
+         return serverConfig;
+     }
+diff --git a/src/main/java/net/titanium/command/PingCommand.java b/src/main/java/net/titanium/command/PingCommand.java
+index a0721f594..2e0bf26e3 100644
+--- a/src/main/java/net/titanium/command/PingCommand.java
++++ b/src/main/java/net/titanium/command/PingCommand.java
+@@ -9,8 +9,11 @@ import org.bukkit.entity.Player;
+ 
+ public class PingCommand extends Command {
+ 
+-    public PingCommand(String name) {
++    private final TitaniumConfig config;
++
++    public PingCommand(TitaniumConfig config, String name) {
+         super(name);
++        this.config = config;
+         this.description = "Shows ping of player";
+         this.usageMessage = "/ping [player]";
+         this.setPermission("titanium.command.ping");
+@@ -23,8 +26,6 @@ public class PingCommand extends Command {
+         Player player;
+         String pingMessage;
+ 
+-        TitaniumConfig titaniumConfig = TitaniumConfig.get();
+-
+         if (args.length >= 1) {
+             if (!testPermission(sender, this.getPermission() + ".other")) return true;
+ 
+@@ -34,7 +35,7 @@ public class PingCommand extends Command {
+                 return true;
+             }
+ 
+-            pingMessage = titaniumConfig.spigot.messages.ping.someonePing;
++            pingMessage = config.spigot.messages.ping.someonePing;
+         } else {
+             if (!(sender instanceof Player)) {
+                 sender.sendMessage("You must specify which player you wish to perform this action on.");
+@@ -42,13 +43,13 @@ public class PingCommand extends Command {
+             }
+ 
+             player = (Player) sender;
+-            pingMessage = titaniumConfig.spigot.messages.ping.yourPing;
++            pingMessage = config.spigot.messages.ping.yourPing;
+         }
+ 
+         int pingValue = player.spigot().getPing();
+ 
+         pingMessage = pingMessage
+-                .replace("{FORMATTED-PING}", NumberRange.inRangeToString(pingValue, titaniumConfig.spigot.messages.ping.pingFormat, true, true))
++                .replace("{FORMATTED-PING}", NumberRange.inRangeToString(pingValue, config.spigot.messages.ping.pingFormat, true, true))
+                 .replace("{PING}", Integer.toString(pingValue))
+                 .replace("{PLAYER}", player.getName());
+ 
+diff --git a/src/main/java/net/titanium/command/SetSlotsCommand.java b/src/main/java/net/titanium/command/SetSlotsCommand.java
+new file mode 100644
+index 000000000..f99f92e70
+--- /dev/null
++++ b/src/main/java/net/titanium/command/SetSlotsCommand.java
+@@ -0,0 +1,58 @@
++package net.titanium.command;
++
++import java.util.Arrays;
++import net.minecraft.server.MinecraftServer;
++import net.titanium.Titanium;
++import net.titanium.config.TitaniumConfig;
++import org.bukkit.ChatColor;
++import org.bukkit.command.Command;
++import org.bukkit.command.CommandSender;
++
++public class SetSlotsCommand extends Command {
++
++    private final TitaniumConfig config;
++    private final MinecraftServer server;
++
++    public SetSlotsCommand(TitaniumConfig config, String name) {
++        super(name);
++        this.config = config;
++        this.server = Titanium.get().getServer();
++        this.description = "Sets the number of slots for a player";
++        this.usageMessage = "/setslots [slots]";
++        this.setPermission("titanium.command.setslots");
++        this.setAliases(Arrays.asList("changeslots"));
++    }
++
++    @Override
++    public boolean execute(CommandSender sender, String commandLabel, String[] args) {
++        if (!testPermission(sender)) return true;
++
++        if (args.length < 1) {
++            sender.sendMessage(ChatColor.RED + "Usage: " + usageMessage);
++            return false;
++        }
++
++        int slots = -1;
++
++        try {
++            slots = Integer.parseInt(args[0]);
++        } catch (NumberFormatException ignored) {
++        }
++
++        if (slots < 0) {
++            sender.sendMessage(config.spigot.messages.setSlots.invalidValue
++                    .replace("{VALUE}", args[0]));
++            return true;
++        }
++
++        int oldSlots = server.getPlayerList().maxPlayers;
++        server.getPlayerList().maxPlayers = slots;
++
++        sender.sendMessage(config.spigot.messages.setSlots.set
++                .replace("{NEW_SLOTS}", Integer.toString(slots))
++                .replace("{OLD_SLOTS}", Integer.toString(oldSlots)));
++
++        return true;
++    }
++
++}
+diff --git a/src/main/java/net/titanium/config/SpigotConfig.java b/src/main/java/net/titanium/config/SpigotConfig.java
+index 19ae5ed01..d25c9541c 100644
+--- a/src/main/java/net/titanium/config/SpigotConfig.java
++++ b/src/main/java/net/titanium/config/SpigotConfig.java
+@@ -169,6 +169,18 @@ public class SpigotConfig extends TitaniumConfigSection {
+ 
+         }
+ 
++        public SetSlots setSlots = new SetSlots();
++
++        public static class SetSlots extends TitaniumConfigSection {
++
++            @Comment("Supported placeholders: {NEW_SLOTS}, {OLD_SLOTS}")
++            public String set = "&7You set the slot of the server to &e{NEW_SLOTS}";
++
++            @Comment("Supported placeholders: {VALUE}")
++            public String invalidValue = "&7Value &e{VALUE} &7is invalid slots number!";
++
++        }
++
+     }
+ 
+     public Commands commands = new Commands();
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index 201d83c3b..d9b5850a0 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -17,6 +17,7 @@ import java.util.Set;
+ import java.util.logging.Level;
+ import net.minecraft.server.MinecraftServer;
+ import net.titanium.command.PingCommand;
++import net.titanium.command.SetSlotsCommand;
+ import net.titanium.util.Pair;
+ import org.bukkit.Bukkit;
+ import org.bukkit.ChatColor;
+@@ -225,7 +226,8 @@ TitaniumConfig extends TitaniumConfigSection {
+             this.ionConfigHelper.saveSectionToFile();
+         }
+ 
+-        this.registerCommand("ping", new PingCommand("ping"));
++        this.registerCommand("ping", new PingCommand(this, "ping"));
++        this.registerCommand("setslots", new SetSlotsCommand(this, "setslots"));
+ 
+         return this;
+     }
+-- 
+2.38.1.windows.1
+

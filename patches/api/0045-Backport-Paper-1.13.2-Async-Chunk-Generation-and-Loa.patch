@@ -1,4 +1,4 @@
-From 283b34e95fd2a3e8c8285e205eb7ac599a8537f2 Mon Sep 17 00:00:00 2001
+From 0e784a4739c275ebea8c16c2c4af83740d502393 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Fri, 14 Oct 2022 11:59:49 +0200
 Subject: [PATCH] Backport Paper 1.13.2 Async Chunk Generation (and Loading)
@@ -574,7 +574,7 @@ index 9cd5770f..f36906eb 100644
  
      Titanium titanium();
 diff --git a/src/main/java/org/bukkit/entity/Entity.java b/src/main/java/org/bukkit/entity/Entity.java
-index 6c28f121..d64cd41b 100644
+index 6c28f121..ecd9e79c 100644
 --- a/src/main/java/org/bukkit/entity/Entity.java
 +++ b/src/main/java/org/bukkit/entity/Entity.java
 @@ -107,7 +107,8 @@ public interface Entity extends Metadatable, CommandSender {
@@ -587,10 +587,12 @@ index 6c28f121..d64cd41b 100644
       * @param loc Location to teleport to
       * @return A future that will be completed with the result of the teleport
       */
-@@ -117,6 +118,7 @@ public interface Entity extends Metadatable, CommandSender {
+@@ -116,7 +117,8 @@ public interface Entity extends Metadatable, CommandSender {
+         return teleportAsync(loc, TeleportCause.PLUGIN);
      }
      /**
-      * Loads the Chunk asynchronously, and then teleports the entity when the chunk is ready.
+-     * Loads the Chunk asynchronously, and then teleports the entity when the chunk is ready.
++     * Loads (or generates if possible) the Chunk asynchronously, and then teleports the entity when the chunk is ready.
 +     *
       * @param loc Location to teleport to
       * @param cause Reason for teleport
@@ -600,10 +602,10 @@ index 6c28f121..d64cd41b 100644
      public default java.util.concurrent.CompletableFuture<Boolean> teleportAsync(@NotNull Location loc, @NotNull TeleportCause cause) {
          java.util.concurrent.CompletableFuture<Boolean> future = new java.util.concurrent.CompletableFuture<>();
 -        loc.getWorld().titanium().getChunkAtAsync(loc)
-+        loc.getWorld().getChunkAtAsync(loc)
++        loc.getWorld().getChunkAtAsyncUrgently(loc)
                  .thenAccept(chunk -> future.complete(teleport(loc, cause)))
                  .exceptionally(ex -> {
                      future.completeExceptionally(ex);
 -- 
-2.36.0.windows.1
+2.38.1.windows.1
 

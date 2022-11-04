@@ -1,0 +1,33 @@
+From 5a604f0b9f3ad94aa619c62fe6f3899d3aca5ad3 Mon Sep 17 00:00:00 2001
+From: Aikar <aikar@aikar.co>
+Date: Sun, 18 Mar 2018 11:45:57 -0400
+Subject: [PATCH] Implement [Paper-0277] Ability to change PlayerProfile in
+ AsyncPreLoginEvent by Aikar
+
+This will allow you to change the players name or skin on login.
+
+diff --git a/src/main/java/net/minecraft/server/LoginListener.java b/src/main/java/net/minecraft/server/LoginListener.java
+index 812d9a947..ef6cc267e 100644
+--- a/src/main/java/net/minecraft/server/LoginListener.java
++++ b/src/main/java/net/minecraft/server/LoginListener.java
+@@ -254,8 +254,16 @@ public class LoginListener implements PacketLoginInListener, IUpdatePlayerListBo
+                             java.util.UUID uniqueId = i.getId();
+                             final org.bukkit.craftbukkit.CraftServer server = LoginListener.this.server.server;
+ 
+-                            AsyncPlayerPreLoginEvent asyncEvent = new AsyncPlayerPreLoginEvent(playerName, address, uniqueId);
++                            // Paper start - Ability to change PlayerProfile in AsyncPreLoginEvent
++                            com.destroystokyo.paper.profile.PlayerProfile profile = com.destroystokyo.paper.profile.CraftPlayerProfile.asBukkitCopy(i);
++                            AsyncPlayerPreLoginEvent asyncEvent = new AsyncPlayerPreLoginEvent(playerName, address, uniqueId, profile);
+                             server.getPluginManager().callEvent(asyncEvent);
++                            profile = asyncEvent.getPlayerProfile();
++                            profile.complete();
++                            i = com.destroystokyo.paper.profile.CraftPlayerProfile.asAuthlib(profile);
++                            playerName = i.getName();
++                            uniqueId = i.getId();
++                            // Paper end
+ 
+                             if (PlayerPreLoginEvent.getHandlerList().getRegisteredListeners().length != 0) {
+                                 final PlayerPreLoginEvent event = new PlayerPreLoginEvent(playerName, address, uniqueId);
+-- 
+2.38.1.windows.1
+

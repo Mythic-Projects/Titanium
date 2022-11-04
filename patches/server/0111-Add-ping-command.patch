@@ -1,0 +1,468 @@
+From a63526396d6ef2c2c677275ce4135baef2166d09 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 10 Jun 2022 09:12:17 +0200
+Subject: [PATCH] Add /ping command
+
+
+diff --git a/src/main/java/net/titanium/command/PingCommand.java b/src/main/java/net/titanium/command/PingCommand.java
+new file mode 100644
+index 000000000..a0721f594
+--- /dev/null
++++ b/src/main/java/net/titanium/command/PingCommand.java
+@@ -0,0 +1,60 @@
++package net.titanium.command;
++
++import net.titanium.config.TitaniumConfig;
++import net.titanium.util.range.NumberRange;
++import org.bukkit.Bukkit;
++import org.bukkit.command.Command;
++import org.bukkit.command.CommandSender;
++import org.bukkit.entity.Player;
++
++public class PingCommand extends Command {
++
++    public PingCommand(String name) {
++        super(name);
++        this.description = "Shows ping of player";
++        this.usageMessage = "/ping [player]";
++        this.setPermission("titanium.command.ping");
++    }
++
++    @Override
++    public boolean execute(CommandSender sender, String commandLabel, String[] args) {
++        if (!testPermission(sender)) return true;
++
++        Player player;
++        String pingMessage;
++
++        TitaniumConfig titaniumConfig = TitaniumConfig.get();
++
++        if (args.length >= 1) {
++            if (!testPermission(sender, this.getPermission() + ".other")) return true;
++
++            player = Bukkit.getPlayerExact(args[0]);
++            if (player == null) {
++                sender.sendMessage("Can't find player " + args[0]);
++                return true;
++            }
++
++            pingMessage = titaniumConfig.spigot.messages.ping.someonePing;
++        } else {
++            if (!(sender instanceof Player)) {
++                sender.sendMessage("You must specify which player you wish to perform this action on.");
++                return true;
++            }
++
++            player = (Player) sender;
++            pingMessage = titaniumConfig.spigot.messages.ping.yourPing;
++        }
++
++        int pingValue = player.spigot().getPing();
++
++        pingMessage = pingMessage
++                .replace("{FORMATTED-PING}", NumberRange.inRangeToString(pingValue, titaniumConfig.spigot.messages.ping.pingFormat, true, true))
++                .replace("{PING}", Integer.toString(pingValue))
++                .replace("{PLAYER}", player.getName());
++
++        sender.sendMessage(pingMessage);
++
++        return true;
++    }
++
++}
+diff --git a/src/main/java/net/titanium/config/SpigotConfig.java b/src/main/java/net/titanium/config/SpigotConfig.java
+index 63f4492b2..fbac6bd5b 100644
+--- a/src/main/java/net/titanium/config/SpigotConfig.java
++++ b/src/main/java/net/titanium/config/SpigotConfig.java
+@@ -18,10 +18,13 @@ import java.util.concurrent.TimeUnit;
+ import java.util.logging.Level;
+ import net.minecraft.server.AttributeRanged;
+ import net.minecraft.server.GenericAttributes;
++import net.titanium.util.range.RangeFormatting;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.core.LoggerContext;
+ import org.apache.logging.log4j.core.config.Configuration;
+ import org.bukkit.Bukkit;
++import org.spigotmc.RestartCommand;
++import org.spigotmc.TicksPerSecondCommand;
+ import org.spigotmc.WatchdogThread;
+ import static net.titanium.config.TitaniumConfig.log;
+ 
+@@ -130,6 +133,7 @@ public class SpigotConfig extends TitaniumConfigSection {
+     @Comment("Various messages sent to clients for errors.")
+     public Messages messages = new Messages();
+ 
++    //TODO Move this to separate file (like messages.yml or smh)
+     public static class Messages extends TitaniumConfigSection {
+ 
+         public String restart = "&cServer is restarting!";
+@@ -145,6 +149,26 @@ public class SpigotConfig extends TitaniumConfigSection {
+         public String internalErrorCommand = "&cAn internal error occurred while attempting to perform this command";
+         public String internalErrorTabComplete = "&cAn internal error occurred while attempting to tab-complete this command";
+ 
++        public Ping ping = new Ping();
++
++        public static class Ping extends TitaniumConfigSection {
++
++            @Comment("Supported placeholders: {PLAYER}, {PING}, {FORMATTED-PING}")
++            public String yourPing = "&7Your current ping is: &a{PING}";
++            @Comment("Supported placeholders: {PLAYER}, {PING}, {FORMATTED-PING}")
++            public String someonePing = "&7Ping of &e{PLAYER}&7 is: &a{PING}";
++
++            @Comment("Formatting of {FORMATTED-PING} to for eg. show low ping on green and high on red.")
++            @Comment("Use * to format all values from preset min value to max value (for simplification to \"infinity\").")
++            @Comment("For eg. 100-* &c{PING}")
++            public List<RangeFormatting> pingFormat = Arrays.asList(
++                    new RangeFormatting(0, 50, "&a{PING}"),
++                    new RangeFormatting(51, 100, "&e{PING}"),
++                    new RangeFormatting(101, Integer.MAX_VALUE, "&c{PING}")
++            );
++
++        }
++
+     }
+ 
+     public Commands commands = new Commands();
+@@ -252,4 +276,11 @@ public class SpigotConfig extends TitaniumConfigSection {
+ 
+     public SpigotWorldConfig worldSettings = new SpigotWorldConfig();
+ 
++    @Override
++    public void loadProcessedProperties() {
++        TitaniumConfig titaniumConfig = TitaniumConfig.get();
++        titaniumConfig.registerCommand("restart", "Spigot", new RestartCommand("restart"));
++        titaniumConfig.registerCommand("tps", "Spigot", new TicksPerSecondCommand("tps"));
++    }
++
+ }
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index 6c9f254ca..25c914253 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -16,6 +16,7 @@ import java.util.Map;
+ import java.util.Set;
+ import java.util.logging.Level;
+ import net.minecraft.server.MinecraftServer;
++import net.titanium.command.PingCommand;
+ import net.titanium.util.Pair;
+ import org.bukkit.Bukkit;
+ import org.bukkit.ChatColor;
+@@ -208,8 +209,7 @@ public class TitaniumConfig extends TitaniumConfigSection {
+ 
+         this.loadProperties();
+ 
+-        registerCommand("restart", "Spigot", new RestartCommand("restart"));
+-        registerCommand("tps", "Spigot", new TicksPerSecondCommand("tps"));
++        this.registerCommand("ping", new PingCommand("ping"));
+ 
+         return this;
+     }
+diff --git a/src/main/java/net/titanium/config/TitaniumConfigSection.java b/src/main/java/net/titanium/config/TitaniumConfigSection.java
+index 4294759c5..3ea4cae2f 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfigSection.java
++++ b/src/main/java/net/titanium/config/TitaniumConfigSection.java
+@@ -2,12 +2,11 @@ package net.titanium.config;
+ 
+ import eu.okaeri.configs.OkaeriConfig;
+ import eu.okaeri.configs.annotation.Exclude;
+-import java.io.File;
+ import java.lang.reflect.Field;
+ import java.util.List;
+-import java.util.Map;
+-import java.util.Set;
++import java.util.Objects;
+ import java.util.logging.Level;
++import java.util.stream.Collectors;
+ import org.bukkit.Bukkit;
+ 
+ public abstract class TitaniumConfigSection extends OkaeriConfig {
+@@ -47,8 +46,18 @@ public abstract class TitaniumConfigSection extends OkaeriConfig {
+                 field.set(this, TitaniumConfig.color((String) field.get(this)));
+                 return true;
+             } else if (field.getType().equals(List.class)) {
+-                List<String> list = (List<String>) field.get(this);
+-                list.replaceAll(TitaniumConfig::color);
++                //TODO Find better and more secure way to check if list is List<String>
++                List<?> list = (List<?>) field.get(this);
++                if (!(list.get(0) instanceof String)) {
++                    return false;
++                }
++
++                List<String> listString = list.stream()
++                        .map(Objects::toString)
++                        .map(TitaniumConfig::color)
++                        .collect(Collectors.toList());
++
++                field.set(this, listString);
+                 return true;
+             }
+         } catch (Exception ex) {
+diff --git a/src/main/java/net/titanium/config/serdes/RangeFormattingTransformer.java b/src/main/java/net/titanium/config/serdes/RangeFormattingTransformer.java
+new file mode 100644
+index 000000000..f0c9004cf
+--- /dev/null
++++ b/src/main/java/net/titanium/config/serdes/RangeFormattingTransformer.java
+@@ -0,0 +1,25 @@
++package net.titanium.config.serdes;
++
++import eu.okaeri.configs.schema.GenericsPair;
++import eu.okaeri.configs.serdes.BidirectionalTransformer;
++import eu.okaeri.configs.serdes.SerdesContext;
++import net.titanium.util.range.RangeFormatting;
++
++public class RangeFormattingTransformer extends BidirectionalTransformer<String, RangeFormatting> {
++
++    @Override
++    public GenericsPair<String, RangeFormatting> getPair() {
++        return this.genericsPair(String.class, RangeFormatting.class);
++    }
++
++    @Override
++    public RangeFormatting leftToRight(String data, SerdesContext serdesContext) {
++        return new RangeFormatting(data);
++    }
++
++    @Override
++    public String rightToLeft(RangeFormatting data, SerdesContext serdesContext) {
++        return data.toString();
++    }
++
++}
+diff --git a/src/main/java/net/titanium/util/range/NumberRange.java b/src/main/java/net/titanium/util/range/NumberRange.java
+new file mode 100644
+index 000000000..426276632
+--- /dev/null
++++ b/src/main/java/net/titanium/util/range/NumberRange.java
+@@ -0,0 +1,154 @@
++package net.titanium.util.range;
++
++import java.util.List;
++import java.util.Map;
++import java.util.Objects;
++import java.util.Optional;
++import java.util.regex.Matcher;
++import java.util.regex.Pattern;
++import org.bukkit.ChatColor;
++
++public class NumberRange {
++
++    private static final Pattern RANGE_PATTERN = Pattern.compile("(-?[\\d.*]+)-(-?[\\d.*]+)");
++
++    private final Number min;
++    private final Number max;
++
++    public NumberRange(Number min, Number max) {
++        this.min = min;
++        this.max = max;
++    }
++
++    public NumberRange(String string) {
++        Matcher matcher = RANGE_PATTERN.matcher(string);
++
++        Number min = Integer.MIN_VALUE;
++        Number max = Integer.MAX_VALUE;
++        if (matcher.matches()) {
++            min = parseNumber(matcher.group(1), Integer.MIN_VALUE);
++            max = parseNumber(matcher.group(2), Integer.MAX_VALUE);
++        }
++
++        this.min = min;
++        this.max = max;
++    }
++
++    public Number getMax() {
++        return max;
++    }
++
++    public Number getMin() {
++        return min;
++    }
++
++    public static <V> V inRange(Number value, Map<NumberRange, V> rangeMap) {
++        return rangeMap.entrySet().stream()
++                .filter((entry) -> isNumberInRange(entry, value))
++                .findFirst()
++                .map(Map.Entry::getValue)
++                .orElse(null);
++    }
++
++    private static boolean isNumberInRange(Map.Entry<NumberRange, ?> range, Number value) {
++        return isNumberInRange(range.getKey(), value);
++    }
++
++    private static boolean isNumberInRange(NumberRange range, Number value) {
++        Number min = range.getMin();
++        Number max = range.getMax();
++
++        float floatValue = value.floatValue();
++        // If we have integer we could determine upper range
++        if (min instanceof Integer && max instanceof Integer) {
++            return floatValue >= min.intValue() && floatValue <= max.intValue();
++        }
++        // If we have float we can't so as upper value we use probably start of other range
++        return floatValue >= min.floatValue() && floatValue < max.floatValue();
++    }
++
++    public static <V> String inRangeToString(Number value, Map<NumberRange, V> rangeMap, boolean color, boolean useValueIfNull) {
++        V rangeValue = inRange(value, rangeMap);
++        if (rangeValue == null && useValueIfNull) {
++            return Objects.toString(value);
++        }
++
++        String rangeValueString = Objects.toString(rangeValue);
++        return color
++                ? ChatColor.translateAlternateColorCodes('&', rangeValueString)
++                : rangeValueString;
++    }
++
++    public static String inRangeToString(Number value, List<RangeFormatting> formattingList, boolean color, boolean useValueIfNull) {
++        return inRangeToString(value, RangeFormatting.toRangeMap(formattingList), color, useValueIfNull);
++    }
++
++    public static <V> String inRangeToString(Number value, Map<NumberRange, V> rangeMap) {
++        return inRangeToString(value, rangeMap, false, false);
++    }
++
++    public static String inRangeToString(Number value, List<RangeFormatting> formattingList) {
++        return inRangeToString(value, RangeFormatting.toRangeMap(formattingList));
++    }
++
++    @Override
++    public boolean equals(Object obj) {
++        if (this == obj) {
++            return true;
++        }
++
++        if (!(obj instanceof NumberRange)) {
++            return false;
++        }
++        NumberRange range = (NumberRange) obj;
++
++        return this.min.equals(range.min) && this.max.equals(range.max);
++    }
++
++    private static Number parseNumber(String numberString, Number borderValue) {
++        try {
++            if (numberString.contains("*")) {
++                return borderValue;
++            }
++            else {
++                if (numberString.contains(".")) {
++                    return Double.parseDouble(numberString);
++                }
++                else {
++                    return Integer.parseInt(numberString);
++                }
++            }
++        } catch (NumberFormatException exception) {
++            exception.printStackTrace();
++            return borderValue;
++        }
++    }
++
++    @Override
++    public int hashCode() {
++        return Objects.hash(min, max);
++    }
++
++    @Override
++    public String toString() {
++        return simplifyAndString(min)+"-"+simplifyAndString(max);
++    }
++
++    private static String simplifyAndString(Number number) {
++        int intNumber = number.intValue();
++        if (intNumber <= Integer.MIN_VALUE) {
++            return "-*";
++        }
++
++        if (intNumber >= Integer.MAX_VALUE) {
++            return "*";
++        }
++
++        if (number instanceof Integer) {
++            return Integer.toString(intNumber);
++        }
++
++        return Float.toString(number.floatValue());
++    }
++
++}
+diff --git a/src/main/java/net/titanium/util/range/RangeFormatting.java b/src/main/java/net/titanium/util/range/RangeFormatting.java
+new file mode 100644
+index 000000000..53d9319e4
+--- /dev/null
++++ b/src/main/java/net/titanium/util/range/RangeFormatting.java
+@@ -0,0 +1,49 @@
++package net.titanium.util.range;
++
++import java.util.HashMap;
++import java.util.List;
++import java.util.Map;
++
++public class RangeFormatting {
++
++    private final NumberRange range;
++    private final String value;
++
++    public RangeFormatting(NumberRange range, String value) {
++        this.range = range;
++        this.value = value;
++    }
++
++    public RangeFormatting(Number min, Number max, String value) {
++        this(new NumberRange(min, max), value);
++    }
++
++    public RangeFormatting(String string) {
++        String[] splitString = string.split(" ", 2);
++
++        this.range = new NumberRange(splitString[0]);
++        this.value = splitString[1];
++    }
++
++    public NumberRange getRange() {
++        return range;
++    }
++
++    public String getValue() {
++        return value;
++    }
++
++    public static Map<NumberRange, String> toRangeMap(List<RangeFormatting> rangeFormattingList) {
++        Map<NumberRange, String> rangeMap = new HashMap<>();
++        for (RangeFormatting rangeFormatting : rangeFormattingList) {
++            rangeMap.put(rangeFormatting.getRange(), rangeFormatting.getValue());
++        }
++        return rangeMap;
++    }
++
++    @Override
++    public String toString() {
++        return range.toString() + " " + value;
++    }
++
++}
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 4f7946fd2..143454477 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -83,6 +83,7 @@ import net.titanium.config.BukkitConfig;
+ import net.titanium.config.LegacyConfigHelper;
+ import net.titanium.config.TitaniumConfig;
+ import net.titanium.config.serdes.DecolorTransformer;
++import net.titanium.config.serdes.RangeFormattingTransformer;
+ import net.titanium.config.serdes.WarningStateTransformer;
+ import org.apache.commons.lang.Validate;
+ import org.bukkit.BanList;
+@@ -252,6 +253,7 @@ public final class CraftServer implements Server {
+             it.withSerdesPack(registry -> {
+                 registry.register(new DecolorTransformer());
+                 registry.register(new WarningStateTransformer());
++                registry.register(new RangeFormattingTransformer());
+             });
+             it.withBindFile((File) console.options.valueOf("titanium-settings"));
+             it.withRemoveOrphans(false);
+-- 
+2.38.1.windows.1
+

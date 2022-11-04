@@ -1,15 +1,15 @@
-From 177e027364788de91f9520bea1efdf7d77de18d1 Mon Sep 17 00:00:00 2001
+From d3f0c57c10b3a6a59de2c2c7249c9f7dac6c2aa9 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 5 Jun 2022 16:10:39 +0200
 Subject: [PATCH] Remove unused fields in config
 
 
 diff --git a/build.gradle b/build.gradle
-index 36c61cbee..f33372641 100644
+index 93aeca9e3..02bdc89c8 100644
 --- a/build.gradle
 +++ b/build.gradle
-@@ -27,11 +27,6 @@ dependencies {
-     implementation 'net.jafama:jafama:2.3.2' // Titanium - Use faster math library
+@@ -26,11 +26,6 @@ dependencies {
+ 
      implementation 'com.eatthepath:fast-uuid:0.2.0' // Nacho - Use jchambers' FAST UUID methods
  
 -    // Titanium start - Use okaeri-configs for server configuration
@@ -135,5 +135,5 @@ index 14da2bd19..cb77d6474 100644
              it.load(true);
          });
 -- 
-2.36.0.windows.1
+2.38.1.windows.1
 

@@ -1,4 +1,4 @@
-From 032862314c34252d53c39475698a15dba6746b4c Mon Sep 17 00:00:00 2001
+From 4312c5778a217b04bed743908a118ab3bc74fd5b Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 29 May 2022 10:00:04 +0200
 Subject: [PATCH] Setup Gradle project
@@ -20,10 +20,10 @@ index 73c16b1d5..f92f6c5d7 100644
  
 diff --git a/build.gradle b/build.gradle
 new file mode 100644
-index 000000000..410d5975e
+index 000000000..fea68dea8
 --- /dev/null
 +++ b/build.gradle
-@@ -0,0 +1,91 @@
+@@ -0,0 +1,90 @@
 +import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
 +
 +apply plugin: 'com.github.johnrengelman.shadow'
@@ -50,7 +50,6 @@ index 000000000..410d5975e
 +    implementation 'com.mojang:authlib:1.5.21'
 +    // Minecraft libraries end
 +
-+    implementation 'net.jafama:jafama:2.3.2' // Titanium - Use faster math library
 +    implementation 'com.eatthepath:fast-uuid:0.2.0' // Nacho - Use jchambers' FAST UUID methods
 +
 +    // Titanium start - Use okaeri-configs for server configuration
@@ -677,5 +676,5 @@ index 193c3621c..6de0f4fa0 100644
   * @param <P> The type of parameter you provide to make the object that will be created. It should implement {@link Object#hashCode()} and {@link Object#equals(Object)} if you want to get the value early.
   * @param <T> The type of object you provide. This is created in stage 1, and passed to stage 2, 3, and returned if get() is called.
 -- 
-2.36.0.windows.1
+2.38.1.windows.1
 

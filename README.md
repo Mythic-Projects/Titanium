@@ -73,6 +73,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0022] Further improve server tick loop by Aikar
 [Paper-0044] Use UserCache for player heads
 [Paper-0072] Fix Furnace cook time bug when lagging by Aikar
+[Paper-0072] Only process BlockPhysicsEvent if a plugin has a listener by Aikar
 [Paper-0076] Optimized light level comaprsions by Aikar
 [Paper-0085] Use a Shared Random for Entities
 [Paper-0090] Improve Maps (in item frames) performance and bug fixes by Aikar
@@ -84,6 +85,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0156] Auto Save Improvements by Aikar
 [Paper-0161] Disable Vanilla Chunk GC by Aikar
 [Paper-0168] Disable ticking of snow blocks
+[Paper-0168] Cache user authenticator threads by vemacs
 [Paper-0173] Optimize World.isLoaded(BlockPosition)
 [Paper-0180] Server Tick Events
 [Paper-0186] Prevent Pathfinding out of World Border by Aikar
@@ -92,6 +94,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0202] Shame on you Mojang moves chunk loading off https thread
 [Paper-0232] Fix MC-117075: TE Unload Lag Spike by mezz
 [Paper-0276] Improved Async Task Scheduler by Aikar
+[Paper-0088/0277] Ability to change PlayerProfile in AsyncPreLoginEvent by Aikar
 [Paper-0287] MC-124833 by Zach Brown
 [Paper-0302] Don't load chunks for villager door check by Aikar
 [Paper-0313] Optimized world time updates by Aikar
@@ -108,7 +111,10 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0362] Prevent mob spawning from loading/generating chunks by Shane Freeder
 [Paper-0369] Prevent rayTrace from loading chunks by Aikar
 [Paper-0374] Add Stricter Client Sign limits by Aikar
+[Paper-0378] Performance improvement for Chunk.getEntities by wea_ondara
 [Paper-0387] Reduce memory footprint of NBTTagCompound by Spottedleaf
+[Paper-0206/0432] Add Raw Byte ItemStack Serialization by Mariell Hoversholm
+[Paper-0242/0614] Player Chunk Load/Unload Events by ysl3000
 [Paper-0797] Use Velocity compression and cipher natives by Elier
 
 [Taco-0006] Fix hopper lag by making entities look for hoppers by Techcable
@@ -168,19 +174,13 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [PandaSpigot-0011] Allow controlled flushing for network manager by hpfxd
 [PandaSpigot-0012] Consolidate flush calls for entity tracker packets by hpfxd
 [PandaSpigot-0013] Optimise non-flush packet sending by hpfxd
-[PandaSpigot-0008/0024] Player Chunk Load/Unload Events by ysl3000
 [PandaSpigot-0028] Avoid blocking on Network Manager creation by hpfxd
 [PandaSpigot-0033] Configurable arrow trajectory by hpfxd
 [PandaSpigot-0034] Prevent fishing hooks from using portals by hpfxd
-[PandaSpigot-0035] Cache user authenticator threads by hpfxd
 [PandaSpigot-0010/0037] Backport PlayerProfile API by hpfxd
 [PandaSpigot-0039] Optimize VarInt reading and writing by hpfxd
 [PandaSpigot-0040] Various micro-optimizations for PacketDataSerializer by hpfxd
 [PandaSpigot-0041] Use TerminalConsoleAppender for console improvements by hpfxd
-[PandaSpigot-0012/0045] Ability to change PlayerProfile in AsyncPreLoginEvent by Aikar
-[PandaSpigot-0046] Performance improvement for Chunk.getEntities by hpfxd
-[PandaSpigot-0013/0047] Add Raw Byte ItemStack Serialization
-[PandaSpigot-0048] Only process BlockPhysicsEvent if a plugin has a listener by Aikar
 [PandaSpigpt-0049] Add setting for proxy online mode status by hpfxd
 [PandaSpigot-0050] Metrics by hpfxd
 [PandaSpigot-0054] Disconnect for payload errors by uRyanxD

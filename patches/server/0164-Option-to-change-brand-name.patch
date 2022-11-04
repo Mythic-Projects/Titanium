@@ -1,0 +1,83 @@
+From fd392a887b9e33acdfed97cc50ad63afec267af6 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 16 Sep 2022 22:44:31 +0200
+Subject: [PATCH] Option to change brand name
+
+
+diff --git a/src/main/java/com/destroystokyo/paper/network/PaperServerListPingEventImpl.java b/src/main/java/com/destroystokyo/paper/network/PaperServerListPingEventImpl.java
+index d41b9d0d8..c9c6b66ca 100644
+--- a/src/main/java/com/destroystokyo/paper/network/PaperServerListPingEventImpl.java
++++ b/src/main/java/com/destroystokyo/paper/network/PaperServerListPingEventImpl.java
+@@ -14,7 +14,7 @@ class PaperServerListPingEventImpl extends PaperServerListPingEvent {
+ 
+     PaperServerListPingEventImpl(MinecraftServer server, StatusClient client, int protocolVersion, @Nullable CachedServerIcon icon) {
+         super(client, server.getMotd(), server.getPlayerList().getPlayerCount(), server.getPlayerList().getMaxPlayers(),
+-                server.getServerModName() + ' ' + "1.8.8", protocolVersion, icon);
++                server.getServerBrandName(), protocolVersion, icon);
+         this.server = server;
+     }
+ 
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 9253329f1..0a307856c 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -1293,6 +1293,18 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+         return "Titanium"; // Titanium - Titanium -> // PaperSpigot - PaperSpigot > // Spigot - Spigot > // CraftBukkit - cb > vanilla!
+     }
+ 
++    // Titanium start - option  to set custom brand name
++    public String getServerBrandName() {
++        String brandName = this.server.messageConfig.brand.brandName;
++        return brandName == null || brandName.isEmpty() ? this.getServerModName() : brandName;
++    }
++
++    public String getServerDebugBrandName() {
++        String brandName = this.server.messageConfig.brand.debugBrandName;
++        return brandName == null || brandName.isEmpty() ? this.getServerModName() : brandName;
++    }
++    // Titanium end
++
+     public CrashReport b(CrashReport crashreport) {
+         crashreport.g().a("Profiler Position", new Callable() {
+             public String a() throws Exception {
+diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
+index b60791ebf..191f47b9d 100644
+--- a/src/main/java/net/minecraft/server/PlayerList.java
++++ b/src/main/java/net/minecraft/server/PlayerList.java
+@@ -152,7 +152,7 @@ public abstract class PlayerList {
+ 
+         playerconnection.sendPacket(new PacketPlayOutLogin(entityplayer.getId(), entityplayer.playerInteractManager.getGameMode(), worlddata.isHardcore(), worldserver.worldProvider.getDimension(), worldserver.getDifficulty(), Math.min(this.getMaxPlayers(), 60), worlddata.getType(), worldserver.getGameRules().getBoolean("reducedDebugInfo"))); // CraftBukkit - cap player list to 60
+         entityplayer.getBukkitEntity().sendSupportedChannels(); // CraftBukkit
+-        playerconnection.sendPacket(new PacketPlayOutCustomPayload("MC|Brand", (new PacketDataSerializer(Unpooled.buffer())).a(this.getServer().getServerModName())));
++        playerconnection.sendPacket(new PacketPlayOutCustomPayload("MC|Brand", (new PacketDataSerializer(Unpooled.buffer())).a(this.getServer().getServerDebugBrandName()))); // Titanium - option to customize server brand
+         playerconnection.sendPacket(new PacketPlayOutServerDifficulty(worlddata.getDifficulty(), worlddata.isDifficultyLocked()));
+         playerconnection.sendPacket(new PacketPlayOutSpawnPosition(blockposition));
+         playerconnection.sendPacket(new PacketPlayOutAbilities(entityplayer.abilities));
+diff --git a/src/main/java/net/titanium/config/message/MessageConfig.java b/src/main/java/net/titanium/config/message/MessageConfig.java
+index ddc83deed..b77b36be2 100644
+--- a/src/main/java/net/titanium/config/message/MessageConfig.java
++++ b/src/main/java/net/titanium/config/message/MessageConfig.java
+@@ -24,6 +24,20 @@ public class MessageConfig extends TitaniumConfigSection implements Server.Titan
+     @Exclude
+     private static MessageConfig INSTANCE;
+ 
++    public Brand brand = new Brand();
++
++    public static class Brand extends TitaniumConfigSection {
++
++        @Comment("Brand name shown in the server list if player is using wrong version.")
++        @Comment("If null, the server will use server mod name.")
++        public String brandName = "Titanium 1.8.8";
++
++        @Comment("Brand name shown in debug menu (F3).")
++        @Comment("If null, the server will use server mod name.")
++        public String debugBrandName = "Titanium";
++
++    }
++
+     public String restart = "&cServer is restarting!";
+     public String whitelist = "&cYou are not on the whitelist!";
+     public String serverFull = "&cThe server is full!";
+-- 
+2.38.1.windows.1
+

@@ -1,0 +1,34 @@
+From b84a3455d052204bc3d438c9de04872e11d81d08 Mon Sep 17 00:00:00 2001
+From: wea_ondara <wea_ondara@alpenblock.net>
+Date: Sat, 4 Jun 2022 13:02:23 +0200
+Subject: [PATCH] Implement [Paper-0378] Performance improvement for
+ Chunk.getEntities Add
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftChunk.java b/src/main/java/org/bukkit/craftbukkit/CraftChunk.java
+index 8a33e282c..4f472e4b2 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftChunk.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftChunk.java
+@@ -86,14 +86,15 @@ public class CraftChunk implements Chunk {
+         Entity[] entities = new Entity[count];
+ 
+         for (int i = 0; i < 16; i++) {
+-
+-            for (Object obj : chunk.entitySlices[i].toArray()) {
+-                if (!(obj instanceof net.minecraft.server.Entity)) {
++            // Paper start - speed up (was with chunk.entitySlices[i].toArray() and cast checks which costs a lot of performance if called often)
++            for (net.minecraft.server.Entity entity : chunk.entitySlices[i]) {
++                if (entity == null) {
+                     continue;
+                 }
+ 
+-                entities[index++] = ((net.minecraft.server.Entity) obj).getBukkitEntity();
++                entities[index++] = entity.getBukkitEntity();
+             }
++            // Paper end
+         }
+ 
+         return entities;
+-- 
+2.38.1.windows.1
+
