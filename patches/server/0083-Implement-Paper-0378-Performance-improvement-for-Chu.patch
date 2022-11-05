@@ -2,7 +2,7 @@ From b84a3455d052204bc3d438c9de04872e11d81d08 Mon Sep 17 00:00:00 2001
 From: wea_ondara <wea_ondara@alpenblock.net>
 Date: Sat, 4 Jun 2022 13:02:23 +0200
 Subject: [PATCH] Implement [Paper-0378] Performance improvement for
- Chunk.getEntities Add
+ Chunk.getEntities by wea_oandra
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftChunk.java b/src/main/java/org/bukkit/craftbukkit/CraftChunk.java
