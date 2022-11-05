@@ -78,6 +78,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0085] Use a Shared Random for Entities
 [Paper-0090] Improve Maps (in item frames) performance and bug fixes by Aikar
 [Paper-0101] Do not load chunks for light check by Aikar
+[Paper-0116] Fix Bugs with Spigot Mob Spawn Logic by Aikar
 [Paper-0118] Prevent Fire from loading chunks by Aikar
 [Paper-0121] Reduce IO ops opening a new region
 [Paper-0127] Do not load chunks for pathfinding by Aikar
