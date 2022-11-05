@@ -91,6 +91,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0186] Prevent Pathfinding out of World Border by Aikar
 [Paper-0192] Make legacy ping handler more reliable by Minecrell
 [Paper-0196] Fix block break desync by Michael Himing
+[Paper-0201] Remove CraftScheduler Async Task Debugger by Aikar
 [Paper-0202] Shame on you Mojang moves chunk loading off https thread
 [Paper-0232] Fix MC-117075: TE Unload Lag Spike by mezz
 [Paper-0276] Improved Async Task Scheduler by Aikar
