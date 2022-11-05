@@ -1,0 +1,68 @@
+From 94aa1795e58f9eaf321d2b636935bb3b26741232 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sat, 5 Nov 2022 21:30:38 +0100
+Subject: [PATCH] Improve versioning API - Server.Titanium.VersionInfo
+
+
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index aaaa3366..f745a42a 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -1098,6 +1098,30 @@ public interface Server extends PluginMessageRecipient {
+ 
+     public class Titanium {
+ 
++        public VersionInfo getVersionInfo() {
++            throw new UnsupportedOperationException("Not supported yet.");
++        }
++
++        public class VersionInfo {
++
++            public String getVersion() {
++                throw new UnsupportedOperationException("Not supported yet.");
++            }
++
++            public String getSource() {
++                throw new UnsupportedOperationException("Not supported yet.");
++            }
++
++            public String getBranch() {
++                throw new UnsupportedOperationException("Not supported yet.");
++            }
++
++            public String getBuild() {
++                throw new UnsupportedOperationException("Not supported yet.");
++            }
++
++        }
++
+         //TODO document it
+         public OkaeriConfig getServerConfig() {
+             throw new UnsupportedOperationException("Not supported yet.");
+diff --git a/src/main/java/org/bukkit/command/defaults/VersionCommand.java b/src/main/java/org/bukkit/command/defaults/VersionCommand.java
+index d4b5c757..275e1ba4 100644
+--- a/src/main/java/org/bukkit/command/defaults/VersionCommand.java
++++ b/src/main/java/org/bukkit/command/defaults/VersionCommand.java
+@@ -9,6 +9,7 @@ import java.util.List;
+ import org.apache.commons.lang.Validate;
+ import org.bukkit.Bukkit;
+ import org.bukkit.ChatColor;
++import org.bukkit.Server;
+ import org.bukkit.command.CommandSender;
+ import org.bukkit.plugin.Plugin;
+ import org.bukkit.plugin.PluginDescriptionFile;
+@@ -253,7 +254,10 @@ public class VersionCommand extends BukkitCommand {
+     private void setVersionMessage(String msg) {
+         lastCheck = System.currentTimeMillis();
+         // Paper start
+-        String message = ChatColor.translateAlternateColorCodes('&', "&8>> &7This server is running &5Titanium &8(&fMC: 1.8.8&8) - &7Implementing API version &f" + Bukkit.getBukkitVersion());
++        // Titanium start - Improve versioning
++        Server.Titanium.VersionInfo version = Bukkit.titanium().getVersionInfo();
++        String message = ChatColor.translateAlternateColorCodes('&', "&8>> &7This server is running &5Titanium &8(&f" + version.getSource() + "-" + version.getBranch() + "-" + version.getBuild() + "&8) - &7Implementing API version &f" + Bukkit.getBukkitVersion());
++        // Titanium end
+         versionMessage = message + "\n" + msg;
+         // Paper end
+         versionLock.lock();
+-- 
+2.38.1.windows.1
+
