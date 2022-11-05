@@ -1,4 +1,4 @@
-From 65945c01191e52ecf1754491dea3e109877ca443 Mon Sep 17 00:00:00 2001
+From b9b0aac64b2cd1719485a091da44f3d9ca6a08e7 Mon Sep 17 00:00:00 2001
 From: Rastrian <me@rastrian.dev>
 Date: Fri, 17 Jun 2022 01:57:00 +0200
 Subject: [PATCH] Async Entity Tracker
@@ -218,10 +218,10 @@ index 000000000..4b5ec7c85
 +}
 diff --git a/src/main/java/me/rastrian/dev/PlayerMap.java b/src/main/java/me/rastrian/dev/PlayerMap.java
 new file mode 100644
-index 000000000..7e2371849
+index 000000000..70d4abbd2
 --- /dev/null
 +++ b/src/main/java/me/rastrian/dev/PlayerMap.java
-@@ -0,0 +1,203 @@
+@@ -0,0 +1,209 @@
 +package me.rastrian.dev;
 +
 +import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
@@ -268,6 +268,12 @@ index 000000000..7e2371849
 +        // do remove
 +        long key = xzToKey(player.playerMapX, player.playerMapZ);
 +        List<EntityPlayer> list = map.get(key);
++        // Titanium start - Fix NPE
++        if (list == null) {
++            this.add(player);
++            return;
++        }
++        // Titanium end
 +        list.remove(player);
 +        if (list.isEmpty()) {
 +            map.remove(key);
