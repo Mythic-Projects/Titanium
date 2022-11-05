@@ -117,6 +117,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0378] Performance improvement for Chunk.getEntities by wea_ondara
 [Paper-0387] Reduce memory footprint of NBTTagCompound by Spottedleaf
 [Paper-0206/0432] Add Raw Byte ItemStack Serialization by Mariell Hoversholm
+[Paper-0451] Load Chunks for Login Asynchronously by Aikar
 [Paper-0242/0614] Player Chunk Load/Unload Events by ysl3000
 [Paper-0797] Use Velocity compression and cipher natives by Elier
 
