@@ -165,7 +165,7 @@ index 0690f514b..88a1143e6 100644
 @@ -22,6 +23,8 @@ import java.net.SocketAddress;
  import java.util.Queue;
  import javax.crypto.SecretKey;
- import me.elier.minecraft.util.CryptException;
+ import dev.cobblesword.nachospigot.commons.minecraft.CryptException;
 +import net.titanium.Titanium;
 +import net.titanium.config.TitaniumConfig;
  import org.apache.commons.lang3.ArrayUtils;

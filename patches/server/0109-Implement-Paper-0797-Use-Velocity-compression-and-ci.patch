@@ -26,13 +26,13 @@ index 02bdc89c8..2cd9f0ed7 100644
  
      testImplementation 'junit:junit:4.13.2' // Titanium - Updated junit to 4.13.2
      testImplementation 'org.hamcrest:hamcrest-library:1.3'
-diff --git a/src/main/java/me/elier/minecraft/util/CryptException.java b/src/main/java/me/elier/minecraft/util/CryptException.java
+diff --git a/src/main/java/dev/cobblesword/nachospigot/commons/minecraft/CryptException.java b/src/main/java/dev/cobblesword/nachospigot/commons/minecraft/CryptException.java
 new file mode 100644
 index 000000000..68e93d580
 --- /dev/null
-+++ b/src/main/java/me/elier/minecraft/util/CryptException.java
++++ b/src/main/java/dev/cobblesword/nachospigot/commons/minecraft/CryptException.java
 @@ -0,0 +1,7 @@
-+package me.elier.minecraft.util;
++package dev.cobblesword.nachospigot.commons.minecraft;
 +
 +public class CryptException extends Exception {
 +    public CryptException(Throwable throwable) {
@@ -80,7 +80,7 @@ index 5b92d7897..1908500a1 100644
  import java.net.SocketAddress;
  import java.util.Queue;
  import javax.crypto.SecretKey;
-+import me.elier.minecraft.util.CryptException;
++import dev.cobblesword.nachospigot.commons.minecraft.CryptException;
  import org.apache.commons.lang3.ArrayUtils;
  import org.apache.commons.lang3.Validate;
  import org.apache.logging.log4j.LogManager;

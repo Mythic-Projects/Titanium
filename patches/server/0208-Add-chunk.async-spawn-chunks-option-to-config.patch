@@ -12,8 +12,8 @@ index 68757c380..d4260afc0 100644
                      }
  
                      ++i;
--                    worldserver.chunkProviderServer.getChunkAt(blockposition.getX() + k >> 4, blockposition.getZ() + l >> 4, true, true, AsyncPriority.URGENT, null); // Titanium - use new methods
-+                    worldserver.chunkProviderServer.getChunkAt(blockposition.getX() + k >> 4, blockposition.getZ() + l >> 4, true, true, AsyncPriority.URGENT, TitaniumConfig.get().chunk.asyncSpawnChunks ? c -> {} : null); // Titanium - use new methods
+-                    worldserver.chunkProviderServer.getChunkAt(blockposition.getX() + k >> 4, blockposition.getZ() + l >> 4, true, true, AsyncPriority.HIGH, null); // Titanium - use new methods
++                    worldserver.chunkProviderServer.getChunkAt(blockposition.getX() + k >> 4, blockposition.getZ() + l >> 4, true, true, AsyncPriority.HIGH, TitaniumConfig.get().chunk.asyncSpawnChunks ? c -> {} : null); // Titanium - use new methods
                  }
              }
          }
@@ -40,8 +40,8 @@ index 080ccb496..a7f8b5d68 100644
                      }
  
                      BlockPosition chunkcoordinates = internal.getSpawn();
--                    internal.chunkProviderServer.getChunkAt(chunkcoordinates.getX() + j >> 4, chunkcoordinates.getZ() + k >> 4, true, true, AsyncPriority.URGENT, null); // Titanium - use new methods
-+                    internal.chunkProviderServer.getChunkAt(chunkcoordinates.getX() + j >> 4, chunkcoordinates.getZ() + k >> 4, true, true, AsyncPriority.URGENT, TitaniumConfig.get().chunk.asyncSpawnChunks ? c -> {} : null); // Titanium - use new methods
+-                    internal.chunkProviderServer.getChunkAt(chunkcoordinates.getX() + j >> 4, chunkcoordinates.getZ() + k >> 4, true, true, AsyncPriority.HIGH, null); // Titanium - use new methods
++                    internal.chunkProviderServer.getChunkAt(chunkcoordinates.getX() + j >> 4, chunkcoordinates.getZ() + k >> 4, true, true, AsyncPriority.HIGH, TitaniumConfig.get().chunk.asyncSpawnChunks ? c -> {} : null); // Titanium - use new methods
                  }
              }
          }

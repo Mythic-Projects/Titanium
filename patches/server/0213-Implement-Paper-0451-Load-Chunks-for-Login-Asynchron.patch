@@ -156,7 +156,7 @@ index a675874c3..b7c48d2fa 100644
          this.sendScoreboard((ScoreboardServer) worldserver.getScoreboard(), entityplayer);
          this.server.aH();
 +        // Paper start - async load spawn in chunk
-+        worldserver.chunkProviderServer.getChunkAt(loc.getBlockX() >> 4, loc.getBlockZ() >> 4, true, true, AsyncPriority.HIGH, chunk -> {
++        worldserver.chunkProviderServer.getChunkAt(loc.getBlockX() >> 4, loc.getBlockZ() >> 4, true, true, AsyncPriority.URGENT, chunk -> {
 +            playerconnection.playerJoinReady = () -> {
 +                this.postChunkLoadJoin(entityplayer, networkmanager, playerconnection, nbttagcompound, Objects.toString(networkmanager.getSocketAddress(), "local"), lastKnownName);
 +            };
