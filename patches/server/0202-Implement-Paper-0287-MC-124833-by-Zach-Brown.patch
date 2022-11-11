@@ -1,4 +1,4 @@
-From 76725e3b60d7526dc7002ef0979b3b8488b5f52e Mon Sep 17 00:00:00 2001
+From df949aa1ef9388fa1e755a659b0382afe4c231b7 Mon Sep 17 00:00:00 2001
 From: Zach Brown <zach.brown@destroystokyo.com>
 Date: Wed, 4 Apr 2018 21:00:43 -0400
 Subject: [PATCH] Implement [Paper-0287] MC-124833 by Zach Brown

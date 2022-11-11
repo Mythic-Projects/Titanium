@@ -1,4 +1,4 @@
-From 6d4720f8a574f07090fe7cb97aa6c4f49fca78a3 Mon Sep 17 00:00:00 2001
+From 256d03fdc6af933d26c6f55e500144c24b15849f Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Sun, 19 Apr 2020 04:28:29 -0400
 Subject: [PATCH] Implement [Paper-0451] Load Chunks for Login Asynchronously
@@ -131,7 +131,7 @@ index a3857e103..5fd898f15 100644
          if ((long) this.e - this.k > 40L) {
              this.k = (long) this.e;
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index a675874c3..8160d9d2d 100644
+index a675874c3..c5a3774c7 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -16,7 +16,9 @@ import java.util.HashSet;

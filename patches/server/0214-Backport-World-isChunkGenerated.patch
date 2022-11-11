@@ -1,4 +1,4 @@
-From 0c6ee54229dc9e060ed5c44b6c4169b898996066 Mon Sep 17 00:00:00 2001
+From f11ceb5d8239358ba5416a08b885ec6dc02523fb Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sat, 5 Nov 2022 21:53:17 +0100
 Subject: [PATCH] Backport World#isChunkGenerated

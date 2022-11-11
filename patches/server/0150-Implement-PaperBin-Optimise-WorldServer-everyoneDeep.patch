@@ -1,4 +1,4 @@
-From 4e93c12b41c61a8382f4f16887922e45b5755ede Mon Sep 17 00:00:00 2001
+From 4c37d7763b7724bcbd121db7a4dd2336d69dbeb8 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 4 Aug 2022 00:34:23 +0200
 Subject: [PATCH] Implement [PaperBin-????] Optimise
@@ -6,10 +6,10 @@ Subject: [PATCH] Implement [PaperBin-????] Optimise
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
-index 111a25632..247c0ae3a 100644
+index 2b7aa9e69..f6db5de1c 100644
 --- a/src/main/java/net/minecraft/server/EntityHuman.java
 +++ b/src/main/java/net/minecraft/server/EntityHuman.java
-@@ -1781,6 +1781,16 @@ public abstract class EntityHuman extends EntityLiving {
+@@ -1785,6 +1785,16 @@ public abstract class EntityHuman extends EntityLiving {
          }
      }
  

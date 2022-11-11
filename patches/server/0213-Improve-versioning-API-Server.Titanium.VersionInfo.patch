@@ -1,4 +1,4 @@
-From 1839f2361e0c68fa67ac6577e1a09ac04faa1052 Mon Sep 17 00:00:00 2001
+From 4f5b9032d1c3b5a6f7343eb6bd466b95ac34e60d Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sat, 5 Nov 2022 21:30:37 +0100
 Subject: [PATCH] Improve versioning API - Server.Titanium.VersionInfo

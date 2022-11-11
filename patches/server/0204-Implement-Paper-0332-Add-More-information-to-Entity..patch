@@ -1,4 +1,4 @@
-From ebdb16ecd74b7ff2583b2231f0150c08f59c37ec Mon Sep 17 00:00:00 2001
+From b90f99c4fe2175388937b24c38eb3212e908dc45 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Thu, 19 Jul 2018 01:13:28 -0400
 Subject: [PATCH] Implement [Paper-0332] Add More information to

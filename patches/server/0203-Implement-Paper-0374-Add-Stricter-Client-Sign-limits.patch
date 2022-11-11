@@ -1,4 +1,4 @@
-From 527a0c2b212236a82b93925013035d15f8ac0d71 Mon Sep 17 00:00:00 2001
+From 899143c6d87efe4394183f05bbc397a4c58c04f2 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Wed, 27 Feb 2019 22:18:40 -0500
 Subject: [PATCH] Implement [Paper-0374] Add Stricter Client Sign limits by

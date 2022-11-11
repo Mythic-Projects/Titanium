@@ -1,4 +1,4 @@
-From 1f16246d0282e36d29497fd0059a9858dd5b1600 Mon Sep 17 00:00:00 2001
+From 02e30c0d78afa44264f4a42dbb120348c9934c06 Mon Sep 17 00:00:00 2001
 From: cswhite2000 <18whitechristop@gmail.com>
 Date: Wed, 8 Aug 2018 17:08:31 -0700
 Subject: [PATCH] Implement [SportPaper-0058] Potion effect events by
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [SportPaper-0058] Potion effect events by
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index 053f720da..aac13ff81 100644
+index bc77b4ce6..2c6ba6d09 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
 @@ -18,11 +18,16 @@ import com.google.common.collect.Lists;

@@ -1,4 +1,4 @@
-From 54f71d8825dc05a003f7597b1ff37814510d2a8f Mon Sep 17 00:00:00 2001
+From 27ea8828466b31633569f570fc0d16236c2eadf9 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 13 Jun 2022 17:56:32 +0200
 Subject: [PATCH] Knockback profiles
@@ -123,13 +123,29 @@ index 00000000..8c1506db
 \ No newline at end of file
 diff --git a/src/main/java/net/titanium/knockback/KnockbackProfile.java b/src/main/java/net/titanium/knockback/KnockbackProfile.java
 new file mode 100644
-index 00000000..c3b8a1ef
+index 00000000..507f8b42
 --- /dev/null
 +++ b/src/main/java/net/titanium/knockback/KnockbackProfile.java
-@@ -0,0 +1,5 @@
+@@ -0,0 +1,21 @@
 +package net.titanium.knockback;
 +
 +public interface KnockbackProfile extends dev.cobblesword.nachospigot.knockback.KnockbackProfile { // We extend nacho KnockbackProfile to not modify their KnockbackProfile if we'd like to add our custom functionality
++
++    double getHorizontalMin();
++
++    void setHorizontalMin(double horizontalMin);
++
++    double getHorizontalMax();
++
++    void setHorizontalMax(double horizontalMax);
++
++    double getWTapExtraHorizontal();
++
++    void setWTapExtraHorizontal(double wTapHorizontal);
++
++    double getWTapExtraVertical();
++
++    void setWTapExtraVertical(double wTapVertical);
 +
 +}
 diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
@@ -304,5 +320,5 @@ index 48e25089..6ea3cbd8 100644
       * Gets the player identified as the killer of the living entity.
       * <p>
 -- 
-2.36.0.windows.1
+2.38.1.windows.1
 

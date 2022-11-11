@@ -1,4 +1,4 @@
-From 53dd295a01eb7e6a65b1052d169eca0e317874a0 Mon Sep 17 00:00:00 2001
+From c1853fbcd01a29132109475bac81c4a50ae9eaf7 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Mon, 19 Sep 2016 23:16:39 -0400
 Subject: [PATCH] Implement [Paper-0156] Auto Save Improvements by Aikar
@@ -36,7 +36,7 @@ index 9c841a9b6..593017bb9 100644
                  }
              }
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index a3897b2f5..1b94a0894 100644
+index d88128a68..2285cdcf2 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
 @@ -29,6 +29,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
@@ -48,7 +48,7 @@ index a3897b2f5..1b94a0894 100644
      public final MinecraftServer server;
      public final PlayerInteractManager playerInteractManager;
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 40443c0f4..68757c380 100644
+index 0a3c4ef8a..e1fe12478 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -126,6 +126,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic

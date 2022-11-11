@@ -1,4 +1,4 @@
-From 216e3fc548ec42e9922cb2ba93e109ca9813af79 Mon Sep 17 00:00:00 2001
+From 5ed26291cadea12917d14f701bde4eef9d2c5f82 Mon Sep 17 00:00:00 2001
 From: BillyGalbreath <blake.galbreath@gmail.com>
 Date: Sat, 16 Jul 2022 21:37:10 -0500
 Subject: [PATCH] Implement [Purpur-0291] Remove Mojang Profiler by
@@ -268,7 +268,7 @@ index 027f700ec..920790d12 100644
  
      protected void E() {}
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index 75e8a29c3..237e97526 100644
+index dbd2186b3..bc77b4ce6 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
 @@ -173,7 +173,7 @@ public abstract class EntityLiving extends Entity {
@@ -289,7 +289,7 @@ index 75e8a29c3..237e97526 100644
      }
  
      // CraftBukkit start
-@@ -1586,10 +1586,10 @@ public abstract class EntityLiving extends Entity {
+@@ -1592,10 +1592,10 @@ public abstract class EntityLiving extends Entity {
          }
  
          this.aS += (f3 - this.aS) * 0.3F;
@@ -303,7 +303,7 @@ index 75e8a29c3..237e97526 100644
  
          while (this.yaw - this.lastYaw < -180.0F) {
              this.lastYaw -= 360.0F;
-@@ -1623,7 +1623,7 @@ public abstract class EntityLiving extends Entity {
+@@ -1629,7 +1629,7 @@ public abstract class EntityLiving extends Entity {
              this.aL += 360.0F;
          }
  
@@ -312,7 +312,7 @@ index 75e8a29c3..237e97526 100644
          this.aT += f2;
      }
  
-@@ -1688,20 +1688,20 @@ public abstract class EntityLiving extends Entity {
+@@ -1694,20 +1694,20 @@ public abstract class EntityLiving extends Entity {
              this.motZ = 0.0D;
          }
  
@@ -338,7 +338,7 @@ index 75e8a29c3..237e97526 100644
          if (this.aY) {
              if (this.V()) {
                  this.bG();
-@@ -1715,19 +1715,19 @@ public abstract class EntityLiving extends Entity {
+@@ -1721,19 +1721,19 @@ public abstract class EntityLiving extends Entity {
              this.bn = 0;
          }
  

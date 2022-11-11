@@ -1,4 +1,4 @@
-From 2b2e41d0d9789cd22f8c94b0a5c09587063c570c Mon Sep 17 00:00:00 2001
+From 253eec3e6a7fed72534817fef20786f85c7cb9cf Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 26 Oct 2022 21:17:20 +0200
 Subject: [PATCH] Add LivingEntity#removePotionEffects
@@ -23,5 +23,5 @@ index 6ea3cbd8..d304391a 100644
       * Returns all currently active {@link PotionEffect}s on the living
       * entity.
 -- 
-2.36.0.windows.1
+2.38.1.windows.1
 

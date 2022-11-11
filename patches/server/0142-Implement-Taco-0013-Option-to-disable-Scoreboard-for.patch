@@ -1,4 +1,4 @@
-From 6f18a66c46b8da8d385fbb3f159af7e4d0a70c9d Mon Sep 17 00:00:00 2001
+From 2b06b27b90a0e5f838e08b0b721083da17de36bd Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Tue, 8 Mar 2016 23:25:45 -0500
 Subject: [PATCH] Implement [Taco-0013] Option to disable Scoreboard for non
@@ -18,10 +18,10 @@ index 27d08a7de..fdbf259a7 100644
  
                          if (scoreboard.addPlayerToTeam(s2, s)) {
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index 9852a986b..75e8a29c3 100644
+index 9077f53ac..dbd2186b3 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
-@@ -1892,6 +1892,7 @@ public abstract class EntityLiving extends Entity {
+@@ -1898,6 +1898,7 @@ public abstract class EntityLiving extends Entity {
      }
  
      public ScoreboardTeamBase getScoreboardTeam() {

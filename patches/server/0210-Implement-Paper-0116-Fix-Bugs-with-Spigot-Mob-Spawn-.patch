@@ -1,4 +1,4 @@
-From 480506f4310f19db99daa6e1cf92e6c97c986dca Mon Sep 17 00:00:00 2001
+From 22c5cace11fa2d7fe7b476e1058e209c2c97ee5d Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Thu, 14 Apr 2016 21:01:39 -0400
 Subject: [PATCH] Implement [Paper-0116] Fix Bugs with Spigot Mob Spawn Logic
