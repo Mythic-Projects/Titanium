@@ -205,7 +205,7 @@ index 000000000..38152bd5b
 +        @Comment("Does entities movements should be cached.")
 +        @Comment("Enabled by default because shouldn't cause any bugs.")
 +        @Comment("Disable this if some bugs actually occur.")
-+        public boolean cache = true;
++        public boolean cache = false;
 +
 +    }
 +
