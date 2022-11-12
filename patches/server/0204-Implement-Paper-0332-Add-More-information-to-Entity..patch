@@ -1,4 +1,4 @@
-From b90f99c4fe2175388937b24c38eb3212e908dc45 Mon Sep 17 00:00:00 2001
+From 9296610102a05b77536b18f1ecd1d9f032ba368f Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Thu, 19 Jul 2018 01:13:28 -0400
 Subject: [PATCH] Implement [Paper-0332] Add More information to
@@ -6,10 +6,10 @@ Subject: [PATCH] Implement [Paper-0332] Add More information to
 
 
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 4e7a5ee51..658fd93ed 100644
+index ab9c007c3..f73dc3d9d 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
-@@ -2027,7 +2027,7 @@ public abstract class Entity implements ICommandListener {
+@@ -2028,7 +2028,7 @@ public abstract class Entity implements ICommandListener {
      }
  
      public String toString() {

@@ -1,4 +1,4 @@
-From 197564cb1d6b07b5bfae94013ea5d89741c24dae Mon Sep 17 00:00:00 2001
+From 06b9203a92420cff2596c3798b2bd3d7d643d97f Mon Sep 17 00:00:00 2001
 From: windcolor-dev <teaglehao@gmail.com>
 Date: Sun, 28 Aug 2022 15:10:51 +0200
 Subject: [PATCH] Implement [WindSpigot-0014] Async entity path searching by
@@ -391,7 +391,7 @@ index 45d385d31..b9ab623fa 100644
          int i = (blockposition.getX() >> 4) - this.a;
          int j = (blockposition.getZ() >> 4) - this.b;
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 38383d57e..4e7a5ee51 100644
+index 6fc857763..ab9c007c3 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
 @@ -9,6 +9,7 @@ import java.util.concurrent.Callable;
@@ -402,7 +402,7 @@ index 38383d57e..4e7a5ee51 100644
  import org.apache.logging.log4j.LogManager;
  import org.bukkit.Bukkit;
  import org.bukkit.Location;
-@@ -1169,9 +1170,20 @@ public abstract class Entity implements ICommandListener {
+@@ -1170,9 +1171,20 @@ public abstract class Entity implements ICommandListener {
      }
  
      public double c(BlockPosition blockposition) {
@@ -424,7 +424,7 @@ index 38383d57e..4e7a5ee51 100644
      public double f(double d0, double d1, double d2) {
          double d3 = this.locX - d0;
          double d4 = this.locY - d1;
-@@ -1180,6 +1192,7 @@ public abstract class Entity implements ICommandListener {
+@@ -1181,6 +1193,7 @@ public abstract class Entity implements ICommandListener {
          return (double) MathHelper.sqrt(d3 * d3 + d4 * d4 + d5 * d5);
      }
  

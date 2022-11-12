@@ -1,4 +1,4 @@
-From 5ed26291cadea12917d14f701bde4eef9d2c5f82 Mon Sep 17 00:00:00 2001
+From 93ba162ce721b19d7e83ca320fa5b5ab681f5e11 Mon Sep 17 00:00:00 2001
 From: BillyGalbreath <blake.galbreath@gmail.com>
 Date: Sat, 16 Jul 2022 21:37:10 -0500
 Subject: [PATCH] Implement [Purpur-0291] Remove Mojang Profiler by
@@ -62,7 +62,7 @@ index c1b6e3cd0..6558679ef 100644
          this.a((ICommand) (new CommandSay()));
          this.a((ICommand) (new CommandSpawnpoint()));
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index cada26e02..38383d57e 100644
+index 638fddae4..6fc857763 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
 @@ -299,7 +299,7 @@ public abstract class Entity implements ICommandListener {
@@ -110,7 +110,7 @@ index cada26e02..38383d57e 100644
              double d3 = this.locX;
              double d4 = this.locY;
              double d5 = this.locZ;
-@@ -734,8 +734,8 @@ public abstract class Entity implements ICommandListener {
+@@ -735,8 +735,8 @@ public abstract class Entity implements ICommandListener {
                  }
              }
  
@@ -121,7 +121,7 @@ index cada26e02..38383d57e 100644
              this.recalcPosition();
              this.positionChanged = d6 != d0 || d8 != d2;
              this.E = d7 != d1;
-@@ -864,7 +864,7 @@ public abstract class Entity implements ICommandListener {
+@@ -865,7 +865,7 @@ public abstract class Entity implements ICommandListener {
                  this.fireTicks = -this.maxFireTicks;
              }
  
@@ -130,7 +130,7 @@ index cada26e02..38383d57e 100644
          }
      }
  
-@@ -2038,7 +2038,7 @@ public abstract class Entity implements ICommandListener {
+@@ -2039,7 +2039,7 @@ public abstract class Entity implements ICommandListener {
  
      public void c(int i) {
          if (!this.world.isClientSide && !this.dead) {
@@ -139,7 +139,7 @@ index cada26e02..38383d57e 100644
              MinecraftServer minecraftserver = MinecraftServer.getServer();
              // CraftBukkit start - Move logic into new function "teleportToLocation"
              // int j = this.dimension;
-@@ -2087,7 +2087,7 @@ public abstract class Entity implements ICommandListener {
+@@ -2088,7 +2088,7 @@ public abstract class Entity implements ICommandListener {
  
              this.world.kill(this);
              this.dead = false;
@@ -148,7 +148,7 @@ index cada26e02..38383d57e 100644
              // CraftBukkit start - Ensure chunks are loaded in case TravelAgent is not used which would initially cause chunks to load during find/create
              // minecraftserver.getPlayerList().changeWorld(this, j, worldserver, worldserver1);
              boolean before = worldserver1.chunkProviderServer.forceChunkLoad;
-@@ -2095,7 +2095,7 @@ public abstract class Entity implements ICommandListener {
+@@ -2096,7 +2096,7 @@ public abstract class Entity implements ICommandListener {
              worldserver1.getMinecraftServer().getPlayerList().repositionEntity(this, exit, portal);
              worldserver1.chunkProviderServer.forceChunkLoad = before;
              // CraftBukkit end
@@ -157,7 +157,7 @@ index cada26e02..38383d57e 100644
              Entity entity = EntityTypes.createEntityByName(EntityTypes.b(this), worldserver1);
  
              if (entity != null) {
-@@ -2120,10 +2120,10 @@ public abstract class Entity implements ICommandListener {
+@@ -2121,10 +2121,10 @@ public abstract class Entity implements ICommandListener {
              }
  
              this.dead = true;

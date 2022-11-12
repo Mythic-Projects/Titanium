@@ -1,14 +1,14 @@
-From 7ef03cf545b9482d318f22b57aacd6c9d865d9f1 Mon Sep 17 00:00:00 2001
+From a559575837529f19d1d03f4e21b3958754e345f6 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 22 May 2022 23:06:55 +0200
 Subject: [PATCH] Implement [Taco-0025] Fix east/west cannoning
 
 
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 1b59d7e99..cb1cf8855 100644
+index 1b59d7e99..776d8b18f 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
-@@ -583,16 +583,37 @@ public abstract class Entity implements ICommandListener {
+@@ -583,11 +583,31 @@ public abstract class Entity implements ICommandListener {
              this.a(this.getBoundingBox().c(0.0D, d1, 0.0D));
              boolean flag1 = this.onGround || d7 != d1 && d7 < 0.0D;
  
@@ -42,12 +42,15 @@ index 1b59d7e99..cb1cf8855 100644
              for (iterator1 = list.iterator(); iterator1.hasNext(); d0 = axisalignedbb2.a(this.getBoundingBox(), d0)) {
                  axisalignedbb2 = (AxisAlignedBB) iterator1.next();
              }
+@@ -601,6 +621,8 @@ public abstract class Entity implements ICommandListener {
+             }
  
-             this.a(this.getBoundingBox().c(d0, 0.0D, 0.0D));
+             this.a(this.getBoundingBox().c(0.0D, 0.0D, d2));
 +            }
- 
-             if(axisScan) list = this.world.getCubes(this, this.getBoundingBox().a(0, 0, d2)); // TacoSpigot - get z axis blocks
- 
++
+             if (this.S > 0.0F && flag1 && (d6 != d0 || d8 != d2)) {
+                 double d10 = d0;
+                 double d11 = d1;
 diff --git a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
 index 3a356dd35..c8eb27730 100644
 --- a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
@@ -63,5 +66,5 @@ index 3a356dd35..c8eb27730 100644
  
      public static class Tnt extends TitaniumConfigSection {
 -- 
-2.36.0.windows.1
+2.38.1.windows.1
 

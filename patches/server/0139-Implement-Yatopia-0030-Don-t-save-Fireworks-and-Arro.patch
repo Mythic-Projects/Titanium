@@ -1,4 +1,4 @@
-From 405684ce042414f49728a1e82c0bc32691de22dd Mon Sep 17 00:00:00 2001
+From d08dbfa445c663bba30c82ab54c08ee25e94f7a4 Mon Sep 17 00:00:00 2001
 From: tr7zw <tr7zw@live.de>
 Date: Wed, 26 Feb 2020 21:39:58 +0100
 Subject: [PATCH] Implement [Yatopia-0030] Don't save Fireworks and Arrows by
@@ -6,10 +6,10 @@ Subject: [PATCH] Implement [Yatopia-0030] Don't save Fireworks and Arrows by
 
 
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 59d11f795..cada26e02 100644
+index f3e296b48..638fddae4 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
-@@ -1278,6 +1278,11 @@ public abstract class Entity implements ICommandListener {
+@@ -1279,6 +1279,11 @@ public abstract class Entity implements ICommandListener {
      public void b(Entity entity, int i) {}
  
      public boolean c(NBTTagCompound nbttagcompound) {
