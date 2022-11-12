@@ -1,0 +1,21 @@
+From e875b8559a174d27fb3de6628d328d2c288eac60 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sat, 4 Jun 2022 12:39:26 +0200
+Subject: [PATCH] Improve publishing project to maven repository
+
+
+diff --git a/build.gradle b/build.gradle
+index fea68dea8..93aeca9e3 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -1,6 +1,6 @@
+ import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
+ 
+-apply plugin: 'com.github.johnrengelman.shadow'
++apply plugin: 'com.palantir.git-version'
+ 
+ String minecraftVersion = "1_8_R3"
+ 
+-- 
+2.38.1.windows.1
+

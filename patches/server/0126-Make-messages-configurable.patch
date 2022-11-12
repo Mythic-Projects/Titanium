@@ -1,0 +1,758 @@
+From 418ace3c7ad58f8a272c42fc33c266c07897e967 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 17 Jun 2022 21:02:02 +0200
+Subject: [PATCH] Make messages configurable
+
+
+diff --git a/src/main/java/net/minecraft/server/CommandAbstract.java b/src/main/java/net/minecraft/server/CommandAbstract.java
+index 112188084..759513a07 100644
+--- a/src/main/java/net/minecraft/server/CommandAbstract.java
++++ b/src/main/java/net/minecraft/server/CommandAbstract.java
+@@ -11,6 +11,7 @@ import java.util.Collections;
+ import java.util.Iterator;
+ import java.util.List;
+ import java.util.UUID;
++import net.titanium.config.message.MessageConfig;
+ 
+ public abstract class CommandAbstract implements ICommand {
+ 
+@@ -130,7 +131,7 @@ public abstract class CommandAbstract implements ICommand {
+         if (icommandlistener instanceof EntityPlayer) {
+             return (EntityPlayer) icommandlistener;
+         } else {
+-            throw new ExceptionPlayerNotFound("You must specify which player you wish to perform this action on.", new Object[0]);
++            throw new ExceptionPlayerNotFound(MessageConfig.get().errors.missingPlayer);
+         }
+     }
+ 
+diff --git a/src/main/java/net/minecraft/server/HandshakeListener.java b/src/main/java/net/minecraft/server/HandshakeListener.java
+index ed2b7b827..7a9d4e946 100644
+--- a/src/main/java/net/minecraft/server/HandshakeListener.java
++++ b/src/main/java/net/minecraft/server/HandshakeListener.java
+@@ -4,6 +4,7 @@ package net.minecraft.server;
+ import java.net.InetAddress;
+ import java.util.HashMap;
+ import net.titanium.config.TitaniumConfig;
++import net.titanium.config.message.MessageConfig;
+ // CraftBukkit end
+ 
+ public class HandshakeListener implements PacketHandshakingInListener {
+@@ -66,11 +67,11 @@ public class HandshakeListener implements PacketHandshakingInListener {
+             // CraftBukkit end
+ 
+             if (packethandshakinginsetprotocol.b() > 47) {
+-                chatcomponenttext = new ChatComponentText( java.text.MessageFormat.format( TitaniumConfig.get().spigot.messages.outdatedServer.replaceAll("'", "''"), "1.8.8" ) ); // Spigot
++                chatcomponenttext = new ChatComponentText( java.text.MessageFormat.format( MessageConfig.get().outdatedServer.replaceAll("'", "''"), "1.8.8" ) ); // Spigot
+                 this.b.handle(new PacketLoginOutDisconnect(chatcomponenttext));
+                 this.b.close(chatcomponenttext);
+             } else if (packethandshakinginsetprotocol.b() < 47) {
+-                chatcomponenttext = new ChatComponentText( java.text.MessageFormat.format( TitaniumConfig.get().spigot.messages.outdatedClient.replaceAll("'", "''"), "1.8.8" ) ); // Spigot
++                chatcomponenttext = new ChatComponentText( java.text.MessageFormat.format( MessageConfig.get().outdatedClient.replaceAll("'", "''"), "1.8.8" ) ); // Spigot
+                 this.b.handle(new PacketLoginOutDisconnect(chatcomponenttext));
+                 this.b.close(chatcomponenttext);
+             } else {
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index e80bac6bf..5e2eec676 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -1227,7 +1227,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+                 return;
+             }
+         } catch (org.bukkit.command.CommandException ex) {
+-            player.sendMessage(server.serverConfig.spigot.messages.internalErrorCommand);
++            player.sendMessage(server.messageConfig.internalErrorCommand);
+             java.util.logging.Logger.getLogger(PlayerConnection.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+             SpigotTimings.playerCommandTimer.stopTiming(); // Spigot
+             return;
+diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
+index c48b878c0..0010fbbbd 100644
+--- a/src/main/java/net/minecraft/server/PlayerList.java
++++ b/src/main/java/net/minecraft/server/PlayerList.java
+@@ -17,6 +17,7 @@ import java.util.Iterator;
+ import java.util.List;
+ import java.util.Map;
+ import java.util.UUID;
++import net.titanium.config.message.MessageConfig;
+ import net.titanium.config.TitaniumConfig;
+ import net.titanium.console.TitaniumConsoleCommandSender;
+ import org.apache.logging.log4j.LogManager;
+@@ -456,7 +457,7 @@ public abstract class PlayerList {
+             if (!gameprofilebanentry.hasExpired()) event.disallow(PlayerLoginEvent.Result.KICK_BANNED, s); // Spigot
+         } else if (!this.isWhitelisted(gameprofile)) {
+             // return "You are not white-listed on this server!";
+-            event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, TitaniumConfig.get().spigot.messages.whitelist); // Spigot
++            event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, MessageConfig.get().whitelist); // Spigot
+         } else if (getIPBans().isBanned(socketaddress) && !getIPBans().get(socketaddress).hasExpired()) {
+             IpBanEntry ipbanentry = this.l.get(socketaddress);
+ 
+@@ -470,7 +471,7 @@ public abstract class PlayerList {
+         } else {
+             // return this.players.size() >= this.maxPlayers && !this.f(gameprofile) ? "The server is full!" : null;
+             if (this.players.size() >= this.maxPlayers && !this.f(gameprofile)) {
+-                event.disallow(PlayerLoginEvent.Result.KICK_FULL, TitaniumConfig.get().spigot.messages.serverFull); // Spigot
++                event.disallow(PlayerLoginEvent.Result.KICK_FULL, MessageConfig.get().serverFull); // Spigot
+             }
+         }
+ 
+diff --git a/src/main/java/net/titanium/Titanium.java b/src/main/java/net/titanium/Titanium.java
+index e0d19630c..96e10acf3 100644
+--- a/src/main/java/net/titanium/Titanium.java
++++ b/src/main/java/net/titanium/Titanium.java
+@@ -7,6 +7,8 @@ import java.io.File;
+ import net.minecraft.server.MinecraftServer;
+ import net.titanium.config.TitaniumConfig;
+ import net.titanium.config.knockback.KnockbackConfig;
++import net.titanium.config.message.MessageConfig;
++import net.titanium.config.migration.S0001_Migrate_messages_into_separate_file;
+ import net.titanium.config.serdes.DecolorTransformer;
+ import net.titanium.config.serdes.RangeFormattingTransformer;
+ import net.titanium.config.serdes.WarningStateTransformer;
+@@ -18,6 +20,7 @@ public class Titanium {
+     private final MinecraftServer server;
+ 
+     private TitaniumConfig serverConfig;
++    private MessageConfig messageConfig;
+     private KnockbackConfig knockbackConfig;
+ 
+     public Titanium(MinecraftServer server) {
+@@ -26,6 +29,7 @@ public class Titanium {
+         this.server = server;
+ 
+         this.loadServerConfig();
++        this.loadMessageConfig();
+         this.loadKnockbackConfig();
+     }
+ 
+@@ -41,8 +45,8 @@ public class Titanium {
+         return serverConfig;
+     }
+ 
+-    public void loadServerConfig() {
+-        serverConfig = ConfigManager.create(TitaniumConfig.class, (it) -> {
++    public TitaniumConfig createServerConfig() {
++        return ConfigManager.create(TitaniumConfig.class, (it) -> {
+             it.withConfigurer(new YamlBukkitConfigurer(), new SerdesCommons());
+             it.withSerdesPack(registry -> {
+                 registry.register(new DecolorTransformer());
+@@ -53,9 +57,38 @@ public class Titanium {
+             it.withRemoveOrphans(false);
+             it.saveDefaults();
+             it.load(true);
++            it.migrate(
++                    new S0001_Migrate_messages_into_separate_file()
++            );
+         });
+     }
+ 
++    public TitaniumConfig loadServerConfig() {
++        return serverConfig = this.createServerConfig();
++    }
++
++    public MessageConfig getMessageConfig() {
++        return messageConfig;
++    }
++
++    public MessageConfig createMessageConfig() {
++        return ConfigManager.create(MessageConfig.class, (it) -> {
++            it.withConfigurer(new YamlBukkitConfigurer(), new SerdesCommons());
++            it.withSerdesPack(registry -> {
++                registry.register(new DecolorTransformer());
++                registry.register(new RangeFormattingTransformer());
++            });
++            it.withBindFile((File) server.options.valueOf("titanium-messages"));
++            it.withRemoveOrphans(false);
++            it.saveDefaults();
++            it.load(true);
++        });
++    }
++
++    public MessageConfig loadMessageConfig() {
++        return messageConfig = this.createMessageConfig();
++    }
++
+     public KnockbackConfig getKnockbackConfig() {
+         return knockbackConfig;
+     }
+diff --git a/src/main/java/net/titanium/command/PingCommand.java b/src/main/java/net/titanium/command/PingCommand.java
+index 2e0bf26e3..8246e4ae4 100644
+--- a/src/main/java/net/titanium/command/PingCommand.java
++++ b/src/main/java/net/titanium/command/PingCommand.java
+@@ -1,6 +1,7 @@
+ package net.titanium.command;
+ 
+ import net.titanium.config.TitaniumConfig;
++import net.titanium.config.message.MessageConfig;
+ import net.titanium.util.range.NumberRange;
+ import org.bukkit.Bukkit;
+ import org.bukkit.command.Command;
+@@ -9,11 +10,8 @@ import org.bukkit.entity.Player;
+ 
+ public class PingCommand extends Command {
+ 
+-    private final TitaniumConfig config;
+-
+-    public PingCommand(TitaniumConfig config, String name) {
++    public PingCommand(String name) {
+         super(name);
+-        this.config = config;
+         this.description = "Shows ping of player";
+         this.usageMessage = "/ping [player]";
+         this.setPermission("titanium.command.ping");
+@@ -26,30 +24,32 @@ public class PingCommand extends Command {
+         Player player;
+         String pingMessage;
+ 
++        MessageConfig messages = MessageConfig.get();
++
+         if (args.length >= 1) {
+             if (!testPermission(sender, this.getPermission() + ".other")) return true;
+ 
+             player = Bukkit.getPlayerExact(args[0]);
+             if (player == null) {
+-                sender.sendMessage("Can't find player " + args[0]);
++                sender.sendMessage(messages.errors.unknownPlayer.replace("{PLAYER}", args[0]));
+                 return true;
+             }
+ 
+-            pingMessage = config.spigot.messages.ping.someonePing;
++            pingMessage = messages.ping.someonePing;
+         } else {
+             if (!(sender instanceof Player)) {
+-                sender.sendMessage("You must specify which player you wish to perform this action on.");
++                sender.sendMessage(messages.errors.missingPlayer);
+                 return true;
+             }
+ 
+             player = (Player) sender;
+-            pingMessage = config.spigot.messages.ping.yourPing;
++            pingMessage = messages.ping.yourPing;
+         }
+ 
+         int pingValue = player.spigot().getPing();
+ 
+         pingMessage = pingMessage
+-                .replace("{FORMATTED-PING}", NumberRange.inRangeToString(pingValue, config.spigot.messages.ping.pingFormat, true, true))
++                .replace("{FORMATTED-PING}", NumberRange.inRangeToString(pingValue, messages.ping.pingFormat, true, true))
+                 .replace("{PING}", Integer.toString(pingValue))
+                 .replace("{PLAYER}", player.getName());
+ 
+diff --git a/src/main/java/net/titanium/command/SetSlotsCommand.java b/src/main/java/net/titanium/command/SetSlotsCommand.java
+index e3607b5c5..7db3b64f7 100644
+--- a/src/main/java/net/titanium/command/SetSlotsCommand.java
++++ b/src/main/java/net/titanium/command/SetSlotsCommand.java
+@@ -4,6 +4,7 @@ import java.util.Arrays;
+ import net.minecraft.server.MinecraftServer;
+ import net.titanium.Titanium;
+ import net.titanium.config.TitaniumConfig;
++import net.titanium.config.message.MessageConfig;
+ import org.bukkit.Bukkit;
+ import org.bukkit.ChatColor;
+ import org.bukkit.command.Command;
+@@ -11,11 +12,8 @@ import org.bukkit.command.CommandSender;
+ 
+ public class SetSlotsCommand extends Command {
+ 
+-    private final TitaniumConfig config;
+-
+-    public SetSlotsCommand(TitaniumConfig config, String name) {
++    public SetSlotsCommand(String name) {
+         super(name);
+-        this.config = config;
+         this.description = "Sets the number of slots for a player";
+         this.usageMessage = "/setslots [slots]";
+         this.setPermission("titanium.command.setslots");
+@@ -26,20 +24,21 @@ public class SetSlotsCommand extends Command {
+     public boolean execute(CommandSender sender, String commandLabel, String[] args) {
+         if (!testPermission(sender)) return true;
+ 
++        MessageConfig messages = MessageConfig.get();
++
+         if (args.length < 1) {
+-            sender.sendMessage(ChatColor.RED + "Usage: " + usageMessage);
++            sender.sendMessage(messages.errors.correctUsage.replace("{USAGE}", usageMessage));
+             return false;
+         }
+ 
+         int slots = -1;
+-
+         try {
+             slots = Integer.parseInt(args[0]);
+         } catch (NumberFormatException ignored) {
+         }
+ 
+         if (slots < 0) {
+-            sender.sendMessage(config.spigot.messages.setSlots.invalidValue
++            sender.sendMessage(messages.setSlots.invalidValue
+                     .replace("{VALUE}", args[0]));
+             return true;
+         }
+@@ -47,7 +46,7 @@ public class SetSlotsCommand extends Command {
+         int oldSlots = Bukkit.getMaxPlayers();
+         Bukkit.setMaxPlayers(slots);
+ 
+-        sender.sendMessage(config.spigot.messages.setSlots.set
++        sender.sendMessage(messages.setSlots.set
+                 .replace("{NEW_SLOTS}", Integer.toString(slots))
+                 .replace("{OLD_SLOTS}", Integer.toString(oldSlots)));
+ 
+diff --git a/src/main/java/net/titanium/config/SpigotConfig.java b/src/main/java/net/titanium/config/SpigotConfig.java
+index d25c9541c..dd47b50c5 100644
+--- a/src/main/java/net/titanium/config/SpigotConfig.java
++++ b/src/main/java/net/titanium/config/SpigotConfig.java
+@@ -130,59 +130,6 @@ public class SpigotConfig extends TitaniumConfigSection {
+ 
+     }
+ 
+-    @Comment("Various messages sent to clients for errors.")
+-    public Messages messages = new Messages();
+-
+-    //TODO Move this to separate file (like messages.yml or smh)
+-    public static class Messages extends TitaniumConfigSection {
+-
+-        public String restart = "&cServer is restarting!";
+-        public String whitelist = "&cYou are not on the whitelist!";
+-        public String serverFull = "&cThe server is full!";
+-        @Comment("You can use {0} to insert the server version.")
+-        public String outdatedClient = "&7Outdated client! Please use &c{0}";
+-        @Comment("You can use {0} to insert the server version.")
+-        public String outdatedServer = "&7Outdated server! Server is on &c{0}";
+-
+-        @Comment("You can use {0} to insert the command that was tried to use (without slash).")
+-        public String unknownCommand = "&7Unknown command. Type &c/help &7for help.";
+-        public String internalErrorCommand = "&cAn internal error occurred while attempting to perform this command";
+-        public String internalErrorTabComplete = "&cAn internal error occurred while attempting to tab-complete this command";
+-
+-        public Ping ping = new Ping();
+-
+-        public static class Ping extends TitaniumConfigSection {
+-
+-            @Comment("Supported placeholders: {PLAYER}, {PING}, {FORMATTED-PING}")
+-            public String yourPing = "&7Your current ping is: &a{PING}";
+-            @Comment("Supported placeholders: {PLAYER}, {PING}, {FORMATTED-PING}")
+-            public String someonePing = "&7Ping of &e{PLAYER}&7 is: &a{PING}";
+-
+-            @Comment("Formatting of {FORMATTED-PING} to for eg. show low ping on green and high on red.")
+-            @Comment("Use * to format all values from preset min value to max value (for simplification to \"infinity\").")
+-            @Comment("For eg. 100-* &c{PING}")
+-            public List<RangeFormatting> pingFormat = Arrays.asList(
+-                    new RangeFormatting(0, 50, "&a{PING}"),
+-                    new RangeFormatting(51, 100, "&e{PING}"),
+-                    new RangeFormatting(101, Integer.MAX_VALUE, "&c{PING}")
+-            );
+-
+-        }
+-
+-        public SetSlots setSlots = new SetSlots();
+-
+-        public static class SetSlots extends TitaniumConfigSection {
+-
+-            @Comment("Supported placeholders: {NEW_SLOTS}, {OLD_SLOTS}")
+-            public String set = "&7You set the slot of the server to &e{NEW_SLOTS}";
+-
+-            @Comment("Supported placeholders: {VALUE}")
+-            public String invalidValue = "&7Value &e{VALUE} &7is invalid slots number!";
+-
+-        }
+-
+-    }
+-
+     public Commands commands = new Commands();
+ 
+     public static class Commands extends TitaniumConfigSection {
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index 065b8aa4e..b67970d70 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -30,8 +30,7 @@ import org.bukkit.command.Command;
+ @Header("It's collect all the settings from bukkit.yml, spigot.yml etc.")
+ @Header("Command aliases also go in this file, just put what you would normally put in commands.yml under a commands: tag")
+ @Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
+-public class
+-TitaniumConfig extends TitaniumConfigSection {
++public class TitaniumConfig extends TitaniumConfigSection {
+ 
+     // For tests to work properly
+     @Exclude
+@@ -289,8 +288,8 @@ TitaniumConfig extends TitaniumConfigSection {
+             this.ionConfigHelper.saveSectionToFile();
+         }
+ 
+-        this.registerCommand("ping", new PingCommand(this, "ping"));
+-        this.registerCommand("setslots", new SetSlotsCommand(this, "setslots"));
++        this.registerCommand("ping", new PingCommand("ping"));
++        this.registerCommand("setslots", new SetSlotsCommand( "setslots"));
+ 
+         return this;
+     }
+diff --git a/src/main/java/net/titanium/config/message/MessageConfig.java b/src/main/java/net/titanium/config/message/MessageConfig.java
+new file mode 100644
+index 000000000..c0c84785b
+--- /dev/null
++++ b/src/main/java/net/titanium/config/message/MessageConfig.java
+@@ -0,0 +1,111 @@
++package net.titanium.config.message;
++
++import eu.okaeri.configs.OkaeriConfig;
++import eu.okaeri.configs.annotation.Comment;
++import eu.okaeri.configs.annotation.Exclude;
++import eu.okaeri.configs.annotation.Header;
++import eu.okaeri.configs.annotation.NameModifier;
++import eu.okaeri.configs.annotation.NameStrategy;
++import eu.okaeri.configs.annotation.Names;
++import eu.okaeri.configs.exception.OkaeriException;
++import java.util.Arrays;
++import java.util.List;
++import net.titanium.config.TitaniumConfigSection;
++import net.titanium.util.range.RangeFormatting;
++import org.bukkit.Server;
++import org.spigotmc.TicksPerSecondCommand;
++
++@Header("Various messages sent to clients.")
++@Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
++public class MessageConfig extends TitaniumConfigSection implements Server.Titanium.Messages {
++
++    @Exclude
++    private static MessageConfig INSTANCE;
++
++    public String restart = "&cServer is restarting!";
++    public String whitelist = "&cYou are not on the whitelist!";
++    public String serverFull = "&cThe server is full!";
++    @Comment("You can use {0} to insert the server version.")
++    public String outdatedClient = "&7Outdated client! Please use &c{0}";
++    @Comment("You can use {0} to insert the server version.")
++    public String outdatedServer = "&7Outdated server! Server is on &c{0}";
++
++    @Comment("You can use {0} to insert the command that was tried to use (without slash).")
++    public String unknownCommand = "&7Unknown command. Type &c/help &7for help.";
++    public String internalErrorCommand = "&cAn internal error occurred while attempting to perform this command.";
++    public String internalErrorTabComplete = "&cAn internal error occurred while attempting to tab-complete this command.";
++
++    public Errors errors = new Errors();
++
++    public static class Errors extends TitaniumConfigSection {
++
++        @Comment("Supported placeholders: {PERMISSION}")
++        public String missingPermission = "&cI'm sorry, but you do not have permission to perform this command. Please contact the server administrators if you believe that this is in error.";
++        public String missingPlayer = "&cYou must specify which player you wish to perform this action on.";
++        @Comment("Supported placeholders: {PLAYER}")
++        public String unknownPlayer = "&cCan't find player {PLAYER}";
++        @Comment("Supported placeholders: {USAGE}")
++        public String correctUsage = "&cUsage: &f{USAGE}";
++
++    }
++
++    @Comment("Supported placeholders: {TPS_AVG}, {TPS_1M}, {TPS_5M}, {TPS_15M}, {MEMORY_USED}, {FREE_MEMORY}, {MAX_MEMORY}, {UPTIME}")
++    public List<String> ticksPerSeconds = Arrays.asList(
++            "&6TPS from last 1m, 5m, 15m: &f{TPS_AVG}",
++            " ",
++            "&6Memory usage: &a{MEMORY_USED}&a/{MEMORY_MAX} MB",
++            "&6Uptime: &a{UPTIME}"
++    );
++
++    public Ping ping = new Ping();
++
++    public static class Ping extends TitaniumConfigSection {
++
++        @Comment("Supported placeholders: {PLAYER}, {PING}, {FORMATTED-PING}")
++        public String yourPing = "&7Your current ping is: &a{PING}";
++        @Comment("Supported placeholders: {PLAYER}, {PING}, {FORMATTED-PING}")
++        public String someonePing = "&7Ping of &e{PLAYER}&7 is: &a{PING}";
++
++        @Comment("Formatting of {FORMATTED-PING} to for eg. show low ping on green and high on red.")
++        @Comment("Use * to format all values from preset min value to max value (for simplification to \"infinity\").")
++        @Comment("For eg. 100-* &c{PING}")
++        public List<RangeFormatting> pingFormat = Arrays.asList(
++                new RangeFormatting(0, 50, "&a{PING}"),
++                new RangeFormatting(51, 100, "&e{PING}"),
++                new RangeFormatting(101, Integer.MAX_VALUE, "&c{PING}")
++        );
++
++    }
++
++    public SetSlots setSlots = new SetSlots();
++
++    public static class SetSlots extends TitaniumConfigSection {
++
++        @Comment("Supported placeholders: {NEW_SLOTS}, {OLD_SLOTS}")
++        public String set = "&7You set the slot of the server to &e{NEW_SLOTS}";
++
++        @Comment("Supported placeholders: {VALUE}")
++        public String invalidValue = "&7Value &e{VALUE} &7is invalid slots number!";
++
++    }
++
++    @Override
++    public OkaeriConfig load() throws OkaeriException {
++        INSTANCE = this;
++
++        super.load();
++        this.loadProperties();
++
++        return this;
++    }
++
++    @Override
++    public String getMissingPermissionCommand() {
++        return errors.missingPermission;
++    }
++
++    public static MessageConfig get() {
++        return INSTANCE;
++    }
++
++}
+diff --git a/src/main/java/net/titanium/config/migration/S0001_Migrate_messages_into_separate_file.java b/src/main/java/net/titanium/config/migration/S0001_Migrate_messages_into_separate_file.java
+new file mode 100644
+index 000000000..b9e2212f0
+--- /dev/null
++++ b/src/main/java/net/titanium/config/migration/S0001_Migrate_messages_into_separate_file.java
+@@ -0,0 +1,63 @@
++package net.titanium.config.migration;
++
++import eu.okaeri.configs.migrate.ConfigMigration;
++import eu.okaeri.configs.migrate.builtin.NamedMigration;
++import eu.okaeri.configs.migrate.view.RawConfigView;
++import java.util.Objects;
++import net.titanium.Titanium;
++import net.titanium.config.message.MessageConfig;
++
++public class S0001_Migrate_messages_into_separate_file extends NamedMigration {
++
++    private static MessageConfig messageConfig;
++    private static RawConfigView messageView;
++
++    public S0001_Migrate_messages_into_separate_file() {
++        super(
++                "Migrate messages from titanium.yml into messages.yml",
++                moveToMessageConfig("restart"),
++                moveToMessageConfig("whitelist"),
++                moveToMessageConfig("server-full"),
++                moveToMessageConfig("outdated-client"),
++                moveToMessageConfig("outdated-server"),
++                moveToMessageConfig("unknown-command"),
++                moveToMessageConfig("internal-error-command"),
++                moveToMessageConfig("internal-error-tab-complete"),
++                moveToMessageConfig("ping.your-ping"),
++                moveToMessageConfig("ping.someone-ping"),
++                moveToMessageConfig("ping.ping-format"),
++                moveToMessageConfig("set-slots.set"),
++                moveToMessageConfig("set-slots.invalid-value")
++        );
++    }
++
++    private static ConfigMigration moveToMessageConfig(String key) {
++        return moveToMessageConfig(key, key);
++    }
++
++    private static ConfigMigration moveToMessageConfig(String localKey, String messageKey) {
++        return (config, view) -> {
++            if (!view.exists("spigot.messages." + localKey)) {
++                return false;
++            }
++            Object targetValue = view.remove("spigot.messages." + localKey);
++            Object oldValue = updateMessageConfig(messageKey, targetValue);
++            return !Objects.equals(targetValue, oldValue);
++        };
++    }
++
++    private static Object updateMessageConfig(String key, Object value) {
++        if (messageConfig == null) {
++            messageConfig = Titanium.get().createMessageConfig();
++        }
++        if (messageView == null) {
++            messageView = new RawConfigView(messageConfig);
++        }
++
++        Object oldValue = messageView.set(key, value);
++        messageConfig.save();
++
++        return oldValue;
++    }
++
++}
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index c1ab4e8d2..d13fd3606 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -41,6 +41,7 @@ import net.titanium.config.BukkitConfig;
+ import net.titanium.config.LegacyConfigHelper;
+ import net.titanium.config.TitaniumConfig;
+ import net.titanium.config.knockback.KnockbackConfig;
++import net.titanium.config.message.MessageConfig;
+ import net.titanium.knockback.KnockbackProfile;
+ import net.titanium.knockback.TitaniumKnockbackProfile;
+ import org.apache.commons.lang.Validate;
+@@ -169,6 +170,7 @@ public final class CraftServer implements Server {
+     // Titanium start
+     public final net.titanium.Titanium titaniumServer;
+     public final TitaniumConfig serverConfig;
++    public final MessageConfig messageConfig;
+     public final KnockbackConfig knockbackConfig;
+ 
+     public KnockbackProfile knockbackProfile;
+@@ -229,6 +231,7 @@ public final class CraftServer implements Server {
+         titaniumServer = new net.titanium.Titanium(console);
+ 
+         serverConfig = titaniumServer.getServerConfig();
++        messageConfig = titaniumServer.getMessageConfig();
+         knockbackConfig = titaniumServer.getKnockbackConfig();
+ 
+         // Titanium - we don't need them since we have a custom configuration system
+@@ -714,7 +717,7 @@ public final class CraftServer implements Server {
+         int spaceIndex = commandLine.indexOf(' ');
+         String commandSubstring = commandLine.substring(0, spaceIndex != -1 ? spaceIndex : commandLine.length());
+ 
+-        sender.sendMessage(java.text.MessageFormat.format(TitaniumConfig.get().spigot.messages.unknownCommand, commandSubstring));
++        sender.sendMessage(java.text.MessageFormat.format(MessageConfig.get().unknownCommand, commandSubstring));
+ 
+         return false;
+     }
+@@ -743,6 +746,7 @@ public final class CraftServer implements Server {
+ 
+         // Titanium start
+         serverConfig.reload();
++        messageConfig.load();
+         knockbackConfig.load();
+         // Titanium end
+ 
+@@ -1752,7 +1756,7 @@ public final class CraftServer implements Server {
+                 completions = getCommandMap().tabComplete(player, message.substring(1), new Location(player.getWorld(), blockPosition.getX(), blockPosition.getY(), blockPosition.getZ()));
+             }
+         } catch (CommandException ex) {
+-            player.sendMessage(serverConfig.spigot.messages.internalErrorTabComplete);
++            player.sendMessage(messageConfig.internalErrorTabComplete);
+             getLogger().log(Level.SEVERE, "Exception when " + player.getName() + " attempted to tab complete " + message, ex);
+         }
+ 
+@@ -1986,6 +1990,11 @@ public final class CraftServer implements Server {
+             return serverConfig;
+         }
+ 
++        @Override
++        public Messages getMessages() {
++            return messageConfig;
++        }
++
+         @Override
+         public Instant getStartTime() {
+             return startTime;
+diff --git a/src/main/java/org/bukkit/craftbukkit/Main.java b/src/main/java/org/bukkit/craftbukkit/Main.java
+index 31525c89c..ed4453c99 100644
+--- a/src/main/java/org/bukkit/craftbukkit/Main.java
++++ b/src/main/java/org/bukkit/craftbukkit/Main.java
+@@ -148,6 +148,12 @@ public class Main {
+                         .defaultsTo(new File("titanium.yml"))
+                         .describedAs("Yml file");
+ 
++                acceptsAll(asList("TM", "titanium-messages"), "File for titanium messages")
++                        .withRequiredArg()
++                        .ofType(File.class)
++                        .defaultsTo(new File("messages.yml"))
++                        .describedAs("Yml file");
++
+                 acceptsAll(asList("KS", "knockback-settings"), "File for titanium knockback settings")
+                         .withRequiredArg()
+                         .ofType(File.class)
+diff --git a/src/main/java/org/spigotmc/RestartCommand.java b/src/main/java/org/spigotmc/RestartCommand.java
+index e2828dfa2..c34de5946 100644
+--- a/src/main/java/org/spigotmc/RestartCommand.java
++++ b/src/main/java/org/spigotmc/RestartCommand.java
+@@ -5,6 +5,7 @@ import java.util.List;
+ import net.minecraft.server.EntityPlayer;
+ import net.minecraft.server.MinecraftServer;
+ import net.titanium.config.TitaniumConfig;
++import net.titanium.config.message.MessageConfig;
+ import org.bukkit.command.Command;
+ import org.bukkit.command.CommandSender;
+ 
+@@ -61,7 +62,7 @@ public class RestartCommand extends Command
+                 // Kick all players
+                 for ( EntityPlayer p : (List< EntityPlayer>) MinecraftServer.getServer().getPlayerList().players )
+                 {
+-                    p.playerConnection.disconnect(TitaniumConfig.get().spigot.messages.restart);
++                    p.playerConnection.disconnect(MessageConfig.get().restart);
+                 }
+                 // Give the socket a chance to send the packets
+                 try
+diff --git a/src/main/java/org/spigotmc/TicksPerSecondCommand.java b/src/main/java/org/spigotmc/TicksPerSecondCommand.java
+index 5da2b2148..f775f05f4 100644
+--- a/src/main/java/org/spigotmc/TicksPerSecondCommand.java
++++ b/src/main/java/org/spigotmc/TicksPerSecondCommand.java
+@@ -1,6 +1,9 @@
+ package org.spigotmc;
+ 
+ import java.util.Arrays;
++import java.util.List;
++import java.util.stream.Collectors;
++import net.titanium.config.message.MessageConfig;
+ import org.apache.commons.lang3.time.DurationFormatUtils;
+ import org.bukkit.Bukkit;
+ import org.bukkit.ChatColor;
+@@ -34,11 +37,37 @@ public class TicksPerSecondCommand extends Command
+         for (int i = 0; i < tps.length; i++) {
+             tpsAvg[i] = formatTps(tps[i]);
+         }
++
++        // Titanium start - make messages configurable
++        List<String> message = MessageConfig.get().ticksPerSeconds;
++
++        Runtime runtime = Runtime.getRuntime();
++
++        message.stream()
++                .map(messageLine -> {
++                    // TPS
++                    messageLine = messageLine.replace("{TPS_AVG}", "{TPS_1M}, {TPS_5M}, {TPS_15M}");
++                    messageLine = messageLine.replace("{TPS_1M}", tpsAvg[0]);
++                    messageLine = messageLine.replace("{TPS_5M}", tpsAvg[1]);
++                    messageLine = messageLine.replace("{TPS_15M}", tpsAvg[2]);
++                    // MEMORY
++                    messageLine = messageLine.replace("{MEMORY_USED}", formatMemoryUsage(runtime.totalMemory() - runtime.freeMemory(), runtime.maxMemory()));
++                    messageLine = messageLine.replace("{MEMORY_FREE}", formatFreeMemory(runtime.freeMemory(), runtime.maxMemory()));
++                    messageLine = messageLine.replace("{MEMORY_MAX}", String.valueOf(runtime.maxMemory() / 1024 / 1024));
++                    // UPTIME
++                    messageLine = messageLine.replace("{UPTIME}", formatUptime(Bukkit.titanium().getUptime().toMillis()));
++
++                    return messageLine;
++                })
++                .forEach(sender::sendMessage);
++        // Titanium end
++        /* // Titanium - make messages configurable
+         sender.sendMessage(ChatColor.GOLD + "TPS from last 1m, 5m, 15m: " + org.apache.commons.lang.StringUtils.join(tpsAvg, ", "));
+-        // Titanium start
++        // Titanium start - add memory usage and uptime
+         Runtime runtime = Runtime.getRuntime();
+         sender.sendMessage(ChatColor.GOLD + "Memory Usage: " + formatMemoryUsage(runtime.totalMemory() - runtime.freeMemory(), runtime.maxMemory()));
+         sender.sendMessage(ChatColor.GOLD + "Uptime: " + ChatColor.GREEN + formatUptime(Bukkit.titanium().getUptime().toMillis()));
++         */
+         // Titanium end
+ 
+         return true;
+@@ -56,12 +85,23 @@ public class TicksPerSecondCommand extends Command
+         max = max / 1024 / 1024;
+ 
+         double usagePer = (double) usage / (double) max;
+-        String usageFormated = ((usagePer > 0.8) ?
++        return ((usagePer > 0.8) ?
+                 ChatColor.RED
+                 : (usagePer > 0.6)
+                 ? ChatColor.YELLOW
+                 : ChatColor.GREEN) + String.valueOf(usage);
+-        return usageFormated + ChatColor.GREEN + "/" + max + " MB";
++    }
++
++    private static String formatFreeMemory(long free, long max) {
++        free = free / 1024 / 1024;
++        max = max / 1024 / 1024;
++
++        double freePer = (double) free / (double) max;
++        return ((freePer > 0.8) ?
++                ChatColor.GREEN
++                : (freePer > 0.6)
++                ? ChatColor.YELLOW
++                : ChatColor.RED) + String.valueOf(free);
+     }
+ 
+     private static String formatUptime(long uptime) {
+-- 
+2.38.1.windows.1
+

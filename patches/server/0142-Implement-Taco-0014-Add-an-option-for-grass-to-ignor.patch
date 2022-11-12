@@ -1,0 +1,35 @@
+From b74354255b1daf896e5a8d40222c57ce0c2ea85d Mon Sep 17 00:00:00 2001
+From: Techcable <Techcable@outlook.com>
+Date: Thu, 10 Mar 2016 13:19:17 -0700
+Subject: [PATCH] Implement [Taco-0014] Add an option for grass to ignore light
+ by Techcable
+
+
+diff --git a/src/main/java/net/minecraft/server/BlockGrass.java b/src/main/java/net/minecraft/server/BlockGrass.java
+index 381d40209..e46f98779 100644
+--- a/src/main/java/net/minecraft/server/BlockGrass.java
++++ b/src/main/java/net/minecraft/server/BlockGrass.java
+@@ -51,7 +51,7 @@ public class BlockGrass extends Block implements IBlockFragilePlantElement {
+                     lightLevel = world.getLightLevel(blockposition.up());
+                 }
+ 
+-                if (lightLevel >= 9) {
++                if (world.tacoConfigTitanium.grassIgnoresLight || lightLevel >= 9) {
+                     for (int i = 0; i < Math.min(4, Math.max(20, (int) (4 * 100F / world.growthOdds))); ++i) { // Spigot
+                         BlockPosition blockposition1 = blockposition.a(random.nextInt(3) - 1, random.nextInt(5) - 3, random.nextInt(3) - 1);
+                         Block block = world.getType(blockposition1.up()).getBlock();
+diff --git a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
+index 8773f724e..b249233f5 100644
+--- a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
++++ b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
+@@ -49,4 +49,7 @@ public class TacoSpigotWorldConfig extends TitaniumConfigSection {
+     @Comment("Whether to allow non-players (animals, monsters etc.) to be on scoreboard.")
+     public boolean allowNonPlayerEntitiesOnScoreboard = true;
+ 
++    @Comment("Whether to grass should ignore light level (and grow in the dark).")
++    public boolean grassIgnoresLight = false;
++
+ }
+-- 
+2.38.1.windows.1
+

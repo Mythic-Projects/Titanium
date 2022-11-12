@@ -1,0 +1,52 @@
+From 109081dd92c4a56c459865588e49ddd5f6c2f66d Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sat, 5 Nov 2022 21:53:17 +0100
+Subject: [PATCH] Backport World#isChunkGenerated
+
+
+diff --git a/src/main/java/net/minecraft/server/ChunkRegionLoader.java b/src/main/java/net/minecraft/server/ChunkRegionLoader.java
+index 32b584440..3f648ff36 100644
+--- a/src/main/java/net/minecraft/server/ChunkRegionLoader.java
++++ b/src/main/java/net/minecraft/server/ChunkRegionLoader.java
+@@ -41,6 +41,11 @@ public class ChunkRegionLoader implements IChunkLoader, IAsyncChunkSaver {
+         return region != null && region.chunkExists(i & 31, j & 31); // PaperSpigot
+     }
+     // CraftBukkit end
++    // Titanium start
++    public boolean chunkExists(int i, int j) {
++        return this.chunkExists(null, i, j);
++    }
++    // Titanium end
+ 
+     // CraftBukkit start - Add async variant, provide compatibility
+     public Chunk a(World world, int i, int j) throws IOException {
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+index be4a5fc3c..fac98d03f 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+@@ -149,6 +149,22 @@ public class CraftWorld implements World {
+         return world.chunkProviderServer.isChunkLoaded(x, z);
+     }
+ 
++    // Titanium start - Backport World#isChunkGenerated
++    @Override
++    public boolean isChunkGenerated(int x, int z) {
++        if (isChunkLoaded(x, z)) {
++            return true;
++        }
++
++        // Titanium start - add instanceof check
++        if (!(world.chunkProviderServer.chunkLoader instanceof ChunkRegionLoader)) {
++            return false;
++        }
++        // Titanium end
++        return ((ChunkRegionLoader) world.chunkProviderServer.chunkLoader).chunkExists(x, z);
++    }
++    // Titanium end
++
+     public Chunk[] getLoadedChunks() {
+         Object[] chunks = world.chunkProviderServer.chunks.values().toArray();
+         org.bukkit.Chunk[] craftChunks = new CraftChunk[chunks.length];
+-- 
+2.38.1.windows.1
+

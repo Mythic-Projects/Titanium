@@ -203,13 +203,11 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [IonSpigot-0037] Fast Cannon Entity Tracker by SuicidalKids
 
 [Migot-0005] Fix Occasional Client Side Unloading of Chunk 0 0
+[Migot-0007] Optimize Idle Furnaces by Poweruser
 [Migot-0009] Prevent creature spawning in unloaded chunks
 [Migot-0027] Enable Concurrent Chunk Decoration
 [Migot-0032] Thread Local IntCache
 [Migot-0036] Check for lava only once per tick
-
-[MineTick-0011] Optimize Idle Furnaces
-[MineTick-0023] Fix chunk coordinates miscalculations
 
 [KigPaper-0108] Fix CraftPlayer setFlying not working by RoccoDev
 [KigPaper-0110] Backport from Spigot: Enforce cooldowns on book edits by RoccoDev
@@ -217,7 +215,6 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [KigPaper-0138] Fix some more memory leaks by RoccoDev
 [KigPaper-0161] Fix CraftingManager memory leak by RoccoDev
 [KigPaper-0170] Kick after receiving invalid creative action packet by RoccoDev
-[KigPaper-0070/0233] Prevent billion laughs attacks
 
 [Purpur-0150] Tick fluids config
 [Purpur-0046/0280] Spark Profiler by BillyGalbreath

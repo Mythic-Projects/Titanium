@@ -1,0 +1,58 @@
+From 88a5a339f620bb4c5e4aabd72ea88275c3b286a1 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sat, 5 Nov 2022 21:53:26 +0100
+Subject: [PATCH] Backport World#isChunkGenerated
+
+@@ -496,6 +496,26 @@ public class Location implements Cloneable, ConfigurationSerializable {
+     }
+
+     // Paper start
++    /**
++     * Check if a {@link Chunk} has been loaded at this location.
++     *
++     * @return true if the chunk has been loaded at this location
++     */
++    public boolean isChunkLoaded() {
++        Preconditions.checkNotNull(world, "Location has no world!");
++        return world.isChunkLoaded(locToBlock(x) >> 4, locToBlock(z) >> 4);
++    }
++
++    /**
++     * Checks if a {@link Chunk} has been generated at this location.
++     *
++     * @return true if a chunk has been generated at this location
++     */
++    public boolean isGenerated() {
++        Preconditions.checkNotNull(world, "Location has no world!");
++        return world.isChunkGenerated(locToBlock(x) >> 4, locToBlock(z) >> 4);
++    }
++
+     /**
+      * Sets the position of this Location and returns itself
+      *
+
+diff --git a/src/main/java/org/bukkit/World.java b/src/main/java/org/bukkit/World.java
+index f36906eb..74a52dd1 100644
+--- a/src/main/java/org/bukkit/World.java
++++ b/src/main/java/org/bukkit/World.java
+@@ -631,6 +631,17 @@ public interface World extends PluginMessageRecipient, Metadatable {
+      */
+     public boolean isChunkLoaded(int x, int z);
+ 
++    // Titanium start - Backport #isChunkGenerated
++    /**
++     * Checks if the {@link Chunk} at the specified coordinates is generated
++     *
++     * @param x X-coordinate of the chunk
++     * @param z Z-coordinate of the chunk
++     * @return true if the chunk is generated, otherwise false
++     */
++    public boolean isChunkGenerated(int x, int z);
++    // Titanium end
++
+     /**
+      * Checks if the {@link Chunk} at the specified coordinates is loaded and
+      * in use by one or more players
+-- 
+2.38.1.windows.1
+

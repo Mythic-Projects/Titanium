@@ -1,0 +1,39 @@
+From 91e0030a832d4e698b20009f2e0b0e790bc67a6e Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 23 Sep 2022 21:56:36 +0200
+Subject: [PATCH] Option to disable chunk ticking
+
+
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index 93eb7e728..8424b5f17 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -404,6 +404,9 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+     }
+ 
+     protected void h() {
++        if (this.server.server.titaniumServer.getServerConfig().gameMechanics.disableChunkTicking) {
++            return;
++        }
+         super.h();
+         if (this.worldData.getType() == WorldType.DEBUG_ALL_BLOCK_STATES) {
+             // Spigot start
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index 49021bd85..633efdb9f 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -107,6 +107,11 @@ public class TitaniumConfig extends TitaniumConfigSection {
+         @Comment("Of course it's not vanilla mechanic.")
+         public boolean disableStatistics = false;
+ 
++        @Comment("Whether to disable chunk ticking.")
++        @Comment("It could be huge performance improvement, but also could cause a lot of issues.")
++        @Comment("Be careful with this option and use it only if you know what are you doing.")
++        public boolean disableChunkTicking = false;
++
+     }
+ 
+     @Comment("Whether saving of fireworks and arrows should be disabled.")
+-- 
+2.38.1.windows.1
+

@@ -1,0 +1,146 @@
+From 93980cb7a1f5a883f964f041a1f9e81036fdde9b Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 5 Jun 2022 20:25:48 +0200
+Subject: [PATCH] Improve Async Chunk API
+
+
+diff --git a/src/main/java/org/bukkit/World.java b/src/main/java/org/bukkit/World.java
+index 325d65a3..e8de1b37 100644
+--- a/src/main/java/org/bukkit/World.java
++++ b/src/main/java/org/bukkit/World.java
+@@ -1,17 +1,25 @@
+ package org.bukkit;
+ 
+ import java.io.File;
+-import org.bukkit.generator.ChunkGenerator;
+ import java.util.Collection;
+ import java.util.HashMap;
+ import java.util.List;
+ import java.util.Map;
+ import java.util.UUID;
+-
++import java.util.concurrent.CompletableFuture;
+ import org.bukkit.block.Biome;
+ import org.bukkit.block.Block;
+-import org.bukkit.entity.*;
++import org.bukkit.entity.Arrow;
++import org.bukkit.entity.CreatureType;
++import org.bukkit.entity.Entity;
++import org.bukkit.entity.EntityType;
++import org.bukkit.entity.FallingBlock;
++import org.bukkit.entity.Item;
++import org.bukkit.entity.LightningStrike;
++import org.bukkit.entity.LivingEntity;
++import org.bukkit.entity.Player;
+ import org.bukkit.generator.BlockPopulator;
++import org.bukkit.generator.ChunkGenerator;
+ import org.bukkit.inventory.ItemStack;
+ import org.bukkit.metadata.Metadatable;
+ import org.bukkit.plugin.messaging.PluginMessageRecipient;
+@@ -292,7 +300,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
+      * @param x X-coordinate of the chunk
+      * @param z Z-coordinate of the chunk
+      * @return Whether the chunk was actually refreshed
+-     * 
++     *
+      * @deprecated This method is not guaranteed to work suitably across all client implementations.
+      */
+     @Deprecated
+@@ -425,7 +433,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
+     /**
+      * Get a collection of all entities in this World matching the given
+      * class/interface
+-     * 
++     *
+      * @param <T> an entity subclass
+      * @param cls The class representing the type of entity to match
+      * @return A List of all Entities currently residing in this world that
+@@ -1079,7 +1087,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
+      * <p>
+      * <b>Note:</b> If set to a negative number the world will use the
+      * server-wide spawn limit instead.
+-     * 
++     *
+      * @param limit the new mob limit
+      */
+     void setMonsterSpawnLimit(int limit);
+@@ -1098,7 +1106,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
+      * <p>
+      * <b>Note:</b> If set to a negative number the world will use the
+      * server-wide spawn limit instead.
+-     * 
++     *
+      * @param limit the new mob limit
+      */
+     void setAnimalSpawnLimit(int limit);
+@@ -1117,7 +1125,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
+      * <p>
+      * <b>Note:</b> If set to a negative number the world will use the
+      * server-wide spawn limit instead.
+-     * 
++     *
+      * @param limit the new mob limit
+      */
+     void setWaterAnimalSpawnLimit(int limit);
+@@ -1136,7 +1144,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
+      * <p>
+      * <b>Note:</b> If set to a negative number the world will use the
+      * server-wide spawn limit instead.
+-     * 
++     *
+      * @param limit the new mob limit
+      */
+     void setAmbientSpawnLimit(int limit);
+@@ -1237,19 +1245,19 @@ public interface World extends PluginMessageRecipient, Metadatable {
+         {
+             throw new UnsupportedOperationException( "Not supported yet." );
+         }
+-        
++
+         /**
+          * Strikes lightning at the given {@link Location} and possibly without sound
+          *
+          * @param loc The location to strike lightning
+          * @param isSilent Whether this strike makes no sound
+          * @return The lightning entity.
+-         */        
++         */
+         public LightningStrike strikeLightning(Location loc, boolean isSilent)
+         {
+             throw new UnsupportedOperationException( "Not supported yet." );
+         }
+-        
++
+         /**
+          * Strikes lightning at the given {@link Location} without doing damage and possibly without sound
+          *
+@@ -1266,6 +1274,26 @@ public interface World extends PluginMessageRecipient, Metadatable {
+     Spigot spigot();
+     // Spigot end
+ 
++    // Titanium start
++    public class Titanium {
++
++        public CompletableFuture<Chunk> getChunkAtAsync(int x, int z) {
++            throw new UnsupportedOperationException("Not supported yet.");
++        }
++
++        public CompletableFuture<Chunk> getChunkAtAsync(Location location) {
++            throw new UnsupportedOperationException("Not supported yet.");
++        }
++
++        public CompletableFuture<Chunk> getChunkAtAsync(Block block) {
++            throw new UnsupportedOperationException("Not supported yet.");
++        }
++
++    }
++
++    Titanium titanium();
++    // Titanium end
++
+     /**
+      * Gets the world border for this world.
+      *
+-- 
+2.38.1.windows.1
+

@@ -1,0 +1,24 @@
+From 573e371a5ffa8a085c000218ed595b27c65749ed Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Tue, 7 Jun 2022 14:54:06 +0200
+Subject: [PATCH] Update gson and guava
+
+
+diff --git a/build.gradle b/build.gradle
+index 6a9770f1..33b6a6ee 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -7,8 +7,8 @@ dependencies {
+     api 'net.md-5:bungeecord-chat:1.8-SNAPSHOT'
+ 
+     // bundled with Minecraft, should be kept in sync
+-    api 'com.google.guava:guava:17.0'
+-    api 'com.google.code.gson:gson:2.2.4'
++    api 'com.google.guava:guava:21.0' // Titanium - update guava to 21.0
++    api 'com.google.code.gson:gson:2.8.0' // Titanium - update gson to 2.8.0
+ 
+     compileOnlyApi 'net.sf.trove4j:trove4j:3.0.3' // provided by CraftBukkit
+     // Minecraft libraries end
+-- 
+2.38.1.windows.1
+

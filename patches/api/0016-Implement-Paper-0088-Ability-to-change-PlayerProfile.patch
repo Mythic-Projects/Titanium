@@ -1,0 +1,84 @@
+From bd038742041d773dd2976eea7d6309cc99ddc2e2 Mon Sep 17 00:00:00 2001
+From: Aikar <aikar@aikar.co>
+Date: Sun, 18 Mar 2018 11:43:30 -0400
+Subject: [PATCH] Implement [Paper-0088] Ability to change PlayerProfile in
+ AsyncPreLoginEvent by Aikar
+
+This will allow you to change the players name or skin on login.
+
+diff --git a/src/main/java/org/bukkit/event/player/AsyncPlayerPreLoginEvent.java b/src/main/java/org/bukkit/event/player/AsyncPlayerPreLoginEvent.java
+index 1d571889..bbb6bd68 100644
+--- a/src/main/java/org/bukkit/event/player/AsyncPlayerPreLoginEvent.java
++++ b/src/main/java/org/bukkit/event/player/AsyncPlayerPreLoginEvent.java
+@@ -15,22 +15,46 @@ public class AsyncPlayerPreLoginEvent extends Event {
+     private static final HandlerList handlers = new HandlerList();
+     private Result result;
+     private String message;
+-    private final String name;
++    //private final String name; // Paper - Not used anymore
+     private final InetAddress ipAddress;
+-    private final UUID uniqueId;
++    //private final UUID uniqueId; // Paper - Not used anymore
+ 
+     @Deprecated
+     public AsyncPlayerPreLoginEvent(final String name, final InetAddress ipAddress) {
+         this(name, ipAddress, null);
+     }
+ 
++    // Paper start - Ability to change PlayerProfile in AsyncPreLoginEvent
+     public AsyncPlayerPreLoginEvent(final String name, final InetAddress ipAddress, final UUID uniqueId) {
++        this(name, ipAddress, uniqueId, org.bukkit.Bukkit.createProfile(uniqueId, name));
++    }
++    private com.destroystokyo.paper.profile.PlayerProfile profile;
++
++    /**
++     * Gets the PlayerProfile of the player logging in
++     * @return The Profile
++     */
++    public com.destroystokyo.paper.profile.PlayerProfile getPlayerProfile() {
++        return profile;
++    }
++
++    /**
++     * Changes the PlayerProfile the player will login as
++     * @param profile The profile to use
++     */
++    public void setPlayerProfile(com.destroystokyo.paper.profile.PlayerProfile profile) {
++        this.profile = profile;
++    }
++
++    public AsyncPlayerPreLoginEvent(final String name, final InetAddress ipAddress, final UUID uniqueId, final com.destroystokyo.paper.profile.PlayerProfile profile) {
+         super(true);
++        this.profile = profile;
++    // Paper end
+         this.result = Result.ALLOWED;
+         this.message = "";
+-        this.name = name;
++        //this.name = name; // Paper - Not used anymore
+         this.ipAddress = ipAddress;
+-        this.uniqueId = uniqueId;
++        //this.uniqueId = uniqueId; // Paper - Not used anymore
+     }
+ 
+     /**
+@@ -136,7 +160,7 @@ public class AsyncPlayerPreLoginEvent extends Event {
+      * @return the player's name
+      */
+     public String getName() {
+-        return name;
++        return profile.getName(); // Paper - Use profile
+     }
+ 
+     /**
+@@ -154,7 +178,7 @@ public class AsyncPlayerPreLoginEvent extends Event {
+      * @return The unique ID
+      */
+     public UUID getUniqueId() {
+-        return uniqueId;
++        return profile.getId(); // Paper - Use profile
+     }
+ 
+     @Override
+-- 
+2.38.1.windows.1
+

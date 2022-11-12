@@ -1,0 +1,42 @@
+From d5f027ad6aae43376addd35a945559e3b1ccef2d Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Mon, 23 May 2022 21:18:15 +0200
+Subject: [PATCH] Implement [PandaSpigot-0012] Consolidate flush calls for
+ entity tracker packets
+
+
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 9e18e3fb6..f1107aff8 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -886,7 +886,26 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+                 this.methodProfiler.b();
+                 this.methodProfiler.a("tracker");
+                 worldserver.timings.tracker.startTiming(); // Spigot
+-                worldserver.getTracker().updatePlayers();
++                // PandaSpigot start - controlled flush for entity tracker packets
++                List<NetworkManager> disabledFlushes = new ArrayList<>(worldserver.players.size());
++                for (EntityHuman player : worldserver.players) {
++                    if (!(player instanceof EntityPlayer)) continue; // skip non-player entities
++                    PlayerConnection connection = ((EntityPlayer) player).playerConnection;
++                    if (connection != null) {
++                        connection.networkManager.disableAutomaticFlush();
++                        disabledFlushes.add(connection.networkManager);
++                    }
++                }
++                try {
++                    // PandaSpigot end
++                    worldserver.getTracker().updatePlayers();
++                    // PandaSpigot start - controlled flush for entity tracker packets
++                } finally {
++                    for (NetworkManager networkManager : disabledFlushes) {
++                        networkManager.enableAutomaticFlush();
++                    }
++                }
++                // PandaSpigot end
+                 worldserver.timings.tracker.stopTiming(); // Spigot
+                 this.methodProfiler.b();
+                 this.methodProfiler.b();
+-- 
+2.38.1.windows.1
+

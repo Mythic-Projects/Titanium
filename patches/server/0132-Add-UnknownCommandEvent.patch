@@ -1,0 +1,40 @@
+From 48b87b717aab2b8d450aa1d32fa000d71cbfb50e Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 24 Jun 2022 22:55:48 +0200
+Subject: [PATCH] Add UnknownCommandEvent
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index d13fd3606..24862180b 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -42,6 +42,7 @@ import net.titanium.config.LegacyConfigHelper;
+ import net.titanium.config.TitaniumConfig;
+ import net.titanium.config.knockback.KnockbackConfig;
+ import net.titanium.config.message.MessageConfig;
++import net.titanium.event.UnknownCommandEvent;
+ import net.titanium.knockback.KnockbackProfile;
+ import net.titanium.knockback.TitaniumKnockbackProfile;
+ import org.apache.commons.lang.Validate;
+@@ -714,11 +715,13 @@ public final class CraftServer implements Server {
+             return true;
+         }
+ 
+-        int spaceIndex = commandLine.indexOf(' ');
+-        String commandSubstring = commandLine.substring(0, spaceIndex != -1 ? spaceIndex : commandLine.length());
+-
+-        sender.sendMessage(java.text.MessageFormat.format(MessageConfig.get().unknownCommand, commandSubstring));
+-
++        // Titanium start - UnknownCommandEvent
++        UnknownCommandEvent event = new UnknownCommandEvent(sender, commandLine);
++        this.pluginManager.callEvent(event);
++        if (!event.isCancelled()) {
++            sender.sendMessage(java.text.MessageFormat.format(MessageConfig.get().unknownCommand, event.getCommand())); // Titanium - placeholder of what command was tried to use
++        }
++        // Titanium end
+         return false;
+     }
+ 
+-- 
+2.38.1.windows.1
+

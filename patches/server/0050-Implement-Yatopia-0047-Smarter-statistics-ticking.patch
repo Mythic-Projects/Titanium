@@ -1,0 +1,47 @@
+From 6290ddba8301ab98b7d50ec1214e3d191309eded Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 22 May 2022 22:47:33 +0200
+Subject: [PATCH] Implement [Yatopia-0047] Smarter statistics ticking
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
+index 318477b30..ed4648325 100644
+--- a/src/main/java/net/minecraft/server/EntityHuman.java
++++ b/src/main/java/net/minecraft/server/EntityHuman.java
+@@ -9,6 +9,7 @@ import java.util.List;
+ import java.util.UUID;
+ 
+ // CraftBukkit start
++import net.titanium.config.TitaniumConfig;
+ import org.bukkit.craftbukkit.entity.CraftHumanEntity;
+ import org.bukkit.craftbukkit.entity.CraftItem;
+ import org.bukkit.craftbukkit.inventory.CraftItemStack;
+@@ -1330,8 +1331,10 @@ public abstract class EntityHuman extends EntityLiving {
+ 
+     }
+ 
++    private final int interval = TitaniumConfig.get().playerTimeStatisticsInterval;
++
+     public void b(Statistic statistic) {
+-        this.a(statistic, 1);
++        this.a(statistic, interval);
+     }
+ 
+     public void a(Statistic statistic, int i) {}
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index 73fc33e5a..01ba17d0b 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -68,6 +68,9 @@ public class TitaniumConfig extends TitaniumConfigSection {
+ 
+     }
+ 
++    //TODO comment this
++    public int playerTimeStatisticsInterval = 20;
++
+     public Chunk chunk = new Chunk();
+ 
+     public static class Chunk extends TitaniumConfigSection {
+-- 
+2.38.1.windows.1
+

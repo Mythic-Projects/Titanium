@@ -1,0 +1,22 @@
+From 0d28bc89e68f2ca85e179596f97ccaf55828d3f4 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Tue, 25 Oct 2022 07:56:27 +0200
+Subject: [PATCH] Temporary nLogin fix
+
+
+diff --git a/src/main/java/net/titanium/config/SpigotConfig.java b/src/main/java/net/titanium/config/SpigotConfig.java
+index a9dddef60..027df5315 100644
+--- a/src/main/java/net/titanium/config/SpigotConfig.java
++++ b/src/main/java/net/titanium/config/SpigotConfig.java
+@@ -120,6 +120,8 @@ public class SpigotConfig extends TitaniumConfigSection {
+                 log("Debug logging is disabled");
+             }
+ 
++            org.spigotmc.SpigotConfig.bungee = this.bungeecord; //TODO: Find better way to do this
++
+             WatchdogThread.doStart(timeoutTime, restartOnCrash);
+ 
+             log("Server Ping Player Sample Count: " + sampleCount);
+-- 
+2.38.1.windows.1
+

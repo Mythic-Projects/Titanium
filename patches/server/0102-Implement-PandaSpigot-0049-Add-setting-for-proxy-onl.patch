@@ -1,0 +1,55 @@
+From 0040e2a8f8fe091a26405f54f9d9ffad899dd341 Mon Sep 17 00:00:00 2001
+From: hpfxd <me@hpfxd.com>
+Date: Sun, 8 May 2022 19:16:14 -0400
+Subject: [PATCH] Implement [PandaSpigot-0049] Add setting for proxy online
+ mode status by hpfxd
+
+
+diff --git a/src/main/java/net/minecraft/server/NameReferencingFileConverter.java b/src/main/java/net/minecraft/server/NameReferencingFileConverter.java
+index 4ad369ae4..88f4d5eff 100644
+--- a/src/main/java/net/minecraft/server/NameReferencingFileConverter.java
++++ b/src/main/java/net/minecraft/server/NameReferencingFileConverter.java
+@@ -68,7 +68,7 @@ public class NameReferencingFileConverter {
+             }
+         }), String.class);
+ 
+-        if (minecraftserver.getOnlineMode() || TitaniumConfig.get().spigot.settings.bungeecord) { // Spigot: bungee = online mode, for now.
++        if (minecraftserver.getOnlineMode() || TitaniumConfig.get().isProxyOnlineMode()) { // Spigot: bungee = online mode, for now.
+             minecraftserver.getGameProfileRepository().findProfilesByNames(astring, Agent.MINECRAFT, profilelookupcallback);
+         } else {
+             String[] astring1 = astring;
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index 88d3aa855..6c9f254ca 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -53,6 +53,14 @@ public class TitaniumConfig extends TitaniumConfigSection {
+     @Comment("Configuration from ion.yml")
+     public IonConfig ion = new IonConfig();
+ 
++    @Comment("Instructs the server how to handle player UUIDs and data when behind a proxy.")
++    @Comment("Set to match your proxy's online-mode setting.")
++    public boolean proxyOnlineMode = true;
++
++    public boolean isProxyOnlineMode() {
++        return Bukkit.getOnlineMode() || (spigot.settings.bungeecord && this.proxyOnlineMode);
++    }
++
+     @Comment("Blocks through which enderpearls will pass through (AKA Taliban Pearls)")
+     public PearlPassthrough pearlPassthrough = new PearlPassthrough();
+ 
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 49b658c89..fdbea92ff 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -1404,7 +1404,7 @@ public final class CraftServer implements Server {
+             // Spigot Start
+             GameProfile profile = null;
+             // Only fetch an online UUID in online mode
+-            if ( MinecraftServer.getServer().getOnlineMode() || serverConfig.spigot.settings.bungeecord )
++            if ( MinecraftServer.getServer().getOnlineMode() || serverConfig.isProxyOnlineMode())
+             {
+                 profile = MinecraftServer.getServer().getUserCache().getProfile( name );
+             }
+-- 
+2.38.1.windows.1
+

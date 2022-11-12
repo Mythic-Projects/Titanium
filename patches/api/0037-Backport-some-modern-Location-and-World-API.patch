@@ -1,0 +1,656 @@
+From bbd30a2d3ed00f7bd3dae1f3c75a07aef025eb0c Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Mon, 29 Aug 2022 15:18:41 +0200
+Subject: [PATCH] Backport some modern Location and World API
+
+
+diff --git a/src/main/java/org/bukkit/Location.java b/src/main/java/org/bukkit/Location.java
+index e7af316d..1ac9652e 100644
+--- a/src/main/java/org/bukkit/Location.java
++++ b/src/main/java/org/bukkit/Location.java
+@@ -1,13 +1,21 @@
+ package org.bukkit;
+ 
++import com.google.common.base.Preconditions;
++import java.util.Collection;
+ import java.util.HashMap;
+ import java.util.Map;
+ 
++import java.util.function.Predicate;
+ import org.bukkit.block.Block;
+ import org.bukkit.configuration.serialization.ConfigurationSerializable;
++import org.bukkit.entity.Entity;
++import org.bukkit.entity.LivingEntity;
++import org.bukkit.entity.Player;
+ import org.bukkit.util.NumberConversions;
+ import static org.bukkit.util.NumberConversions.checkFinite;
+ import org.bukkit.util.Vector;
++import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
+ 
+ /**
+  * Represents a 3-dimensional position in a world
+@@ -487,6 +495,335 @@ public class Location implements Cloneable, ConfigurationSerializable {
+         return this;
+     }
+ 
++    // Paper start
++    /**
++     * Sets the position of this Location and returns itself
++     *
++     * This mutates this object, clone first.
++     * @param x X coordinate
++     * @param y Y coordinate
++     * @param z Z coordinate
++     * @return self (not cloned)
++     */
++    @NotNull
++    public Location set(double x, double y, double z) {
++        this.x = x;
++        this.y = y;
++        this.z = z;
++        return this;
++    }
++
++    /**
++     * Takes the x/y/z from base and adds the specified x/y/z to it and returns self
++     *
++     * This mutates this object, clone first.
++     * @param base The base coordinate to modify
++     * @param x X coordinate to add to base
++     * @param y Y coordinate to add to base
++     * @param z Z coordinate to add to base
++     * @return self (not cloned)
++     */
++    @NotNull
++    public Location add(@NotNull Location base, double x, double y, double z) {
++        return this.set(base.x + x, base.y + y, base.z + z);
++    }
++
++    /**
++     * Takes the x/y/z from base and subtracts the specified x/y/z to it and returns self
++     *
++     * This mutates this object, clone first.
++     * @param base The base coordinate to modify
++     * @param x X coordinate to subtract from base
++     * @param y Y coordinate to subtract from base
++     * @param z Z coordinate to subtract from base
++     * @return self (not cloned)
++     */
++    @NotNull
++    public Location subtract(@NotNull Location base, double x, double y, double z) {
++        return this.set(base.x - x, base.y - y, base.z - z);
++    }
++
++    /**
++     * @return A new location where X/Y/Z are on the Block location (integer value of X/Y/Z)
++     */
++    @NotNull
++    public Location toBlockLocation() {
++        Location blockLoc = this.clone();
++        blockLoc.setX(this.getBlockX());
++        blockLoc.setY(this.getBlockY());
++        blockLoc.setZ(this.getBlockZ());
++        return blockLoc;
++    }
++
++    /**
++     * @return A new location where X/Y/Z are the center of the block
++     */
++    @NotNull
++    public Location toCenterLocation() {
++        Location centerLoc = clone();
++        centerLoc.setX(getBlockX() + 0.5);
++        centerLoc.setY(getBlockY() + 0.5);
++        centerLoc.setZ(getBlockZ() + 0.5);
++        return centerLoc;
++    }
++
++    /**
++     * Returns a copy of this location except with y = getWorld().getHighestBlockYAt(this.getBlockX(), this.getBlockZ())
++     * @return A copy of this location except with y = getWorld().getHighestBlockYAt(this.getBlockX(), this.getBlockZ())
++     * @throws NullPointerException if {{@link #getWorld()}} is {@code null}
++     */
++    @NotNull
++    public Location toHighestLocation() {
++        Location ret = this.clone();
++        ret.setY(this.getWorld().getHighestBlockYAt(this));
++        return ret;
++    }
++    // Paper end
++
++    // Paper start
++    /**
++     * Returns a list of entities within a bounding box centered around a Location.
++     *
++     * Some implementations may impose artificial restrictions on the size of the search bounding box.
++     *
++     * @param x 1/2 the size of the box along x axis
++     * @param y 1/2 the size of the box along y axis
++     * @param z 1/2 the size of the box along z axis
++     * @return the collection of entities near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public Collection<Entity> getNearbyEntities(double x, double y, double z) {
++        World world = this.getWorld();
++        if (world == null) {
++            throw new IllegalArgumentException("Location has no world");
++        }
++        return world.getNearbyEntities(this, x, y, z);
++    }
++
++    /**
++     * Gets nearby players within the specified radius (bounding box)
++     * @param radius X Radius
++     * @return the collection of entities near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public Collection<LivingEntity> getNearbyLivingEntities(double radius) {
++        return getNearbyEntitiesByType(org.bukkit.entity.LivingEntity.class, radius, radius, radius);
++    }
++
++    /**
++     * Gets nearby players within the specified radius (bounding box)
++     * @param xzRadius X/Z Radius
++     * @param yRadius Y Radius
++     * @return the collection of living entities near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public Collection<LivingEntity> getNearbyLivingEntities(double xzRadius, double yRadius) {
++        return getNearbyEntitiesByType(org.bukkit.entity.LivingEntity.class, xzRadius, yRadius, xzRadius);
++    }
++
++    /**
++     * Gets nearby players within the specified radius (bounding box)
++     * @param xRadius X Radius
++     * @param yRadius Y Radius
++     * @param zRadius Z radius
++     * @return the collection of living entities near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public Collection<LivingEntity> getNearbyLivingEntities(double xRadius, double yRadius, double zRadius) {
++        return getNearbyEntitiesByType(org.bukkit.entity.LivingEntity.class, xRadius, yRadius, zRadius);
++    }
++
++    /**
++     * Gets nearby players within the specified radius (bounding box)
++     * @param radius Radius
++     * @param predicate a predicate used to filter results
++     * @return the collection of living entities near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public Collection<LivingEntity> getNearbyLivingEntities(double radius, @Nullable Predicate<LivingEntity> predicate) {
++        return getNearbyEntitiesByType(org.bukkit.entity.LivingEntity.class, radius, radius, radius, predicate);
++    }
++
++    /**
++     * Gets nearby players within the specified radius (bounding box)
++     * @param xzRadius X/Z Radius
++     * @param yRadius Y Radius
++     * @param predicate a predicate used to filter results
++     * @return the collection of living entities near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public Collection<LivingEntity> getNearbyLivingEntities(double xzRadius, double yRadius, @Nullable Predicate<LivingEntity> predicate) {
++        return getNearbyEntitiesByType(org.bukkit.entity.LivingEntity.class, xzRadius, yRadius, xzRadius, predicate);
++    }
++
++    /**
++     * Gets nearby players within the specified radius (bounding box)
++     * @param xRadius X Radius
++     * @param yRadius Y Radius
++     * @param zRadius Z radius
++     * @param predicate a predicate used to filter results
++     * @return the collection of living entities near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public Collection<LivingEntity> getNearbyLivingEntities(double xRadius, double yRadius, double zRadius, @Nullable Predicate<LivingEntity> predicate) {
++        return getNearbyEntitiesByType(org.bukkit.entity.LivingEntity.class, xRadius, yRadius, zRadius, predicate);
++    }
++
++    /**
++     * Gets nearby players within the specified radius (bounding box)
++     * @param radius X/Y/Z Radius
++     * @return the collection of players near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public Collection<Player> getNearbyPlayers(double radius) {
++        return getNearbyEntitiesByType(org.bukkit.entity.Player.class, radius, radius, radius);
++    }
++
++    /**
++     * Gets nearby players within the specified radius (bounding box)
++     * @param xzRadius X/Z Radius
++     * @param yRadius Y Radius
++     * @return the collection of players near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public Collection<Player> getNearbyPlayers(double xzRadius, double yRadius) {
++        return getNearbyEntitiesByType(org.bukkit.entity.Player.class, xzRadius, yRadius, xzRadius);
++    }
++
++    /**
++     * Gets nearby players within the specified radius (bounding box)
++     * @param xRadius X Radius
++     * @param yRadius Y Radius
++     * @param zRadius Z Radius
++     * @return the collection of players near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public Collection<Player> getNearbyPlayers(double xRadius, double yRadius, double zRadius) {
++        return getNearbyEntitiesByType(org.bukkit.entity.Player.class, xRadius, yRadius, zRadius);
++    }
++
++    /**
++     * Gets nearby players within the specified radius (bounding box)
++     * @param radius X/Y/Z Radius
++     * @param predicate a predicate used to filter results
++     * @return the collection of players near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public Collection<Player> getNearbyPlayers(double radius, @Nullable Predicate<Player> predicate) {
++        return getNearbyEntitiesByType(org.bukkit.entity.Player.class, radius, radius, radius, predicate);
++    }
++
++    /**
++     * Gets nearby players within the specified radius (bounding box)
++     * @param xzRadius X/Z Radius
++     * @param yRadius Y Radius
++     * @param predicate a predicate used to filter results
++     * @return the collection of players near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public Collection<Player> getNearbyPlayers(double xzRadius, double yRadius, @Nullable Predicate<Player> predicate) {
++        return getNearbyEntitiesByType(org.bukkit.entity.Player.class, xzRadius, yRadius, xzRadius, predicate);
++    }
++
++    /**
++     * Gets nearby players within the specified radius (bounding box)
++     * @param xRadius X Radius
++     * @param yRadius Y Radius
++     * @param zRadius Z Radius
++     * @param predicate a predicate used to filter results
++     * @return the collection of players near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public Collection<Player> getNearbyPlayers(double xRadius, double yRadius, double zRadius, @Nullable Predicate<Player> predicate) {
++        return getNearbyEntitiesByType(org.bukkit.entity.Player.class, xRadius, yRadius, zRadius, predicate);
++    }
++
++    /**
++     * Gets all nearby entities of the specified type, within the specified radius (bounding box)
++     * @param clazz Type to filter by
++     * @param radius X/Y/Z radius to search within
++     * @param <T> the entity type
++     * @return the collection of entities of type clazz near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public <T extends Entity> Collection<T> getNearbyEntitiesByType(@Nullable Class<? extends T> clazz, double radius) {
++        return getNearbyEntitiesByType(clazz, radius, radius, radius, null);
++    }
++
++    /**
++     * Gets all nearby entities of the specified type, within the specified radius, with x and x radius matching (bounding box)
++     * @param clazz Type to filter by
++     * @param xzRadius X/Z radius to search within
++     * @param yRadius Y radius to search within
++     * @param <T> the entity type
++     * @return the collection of entities near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public <T extends Entity> Collection<T> getNearbyEntitiesByType(@Nullable Class<? extends T> clazz, double xzRadius, double yRadius) {
++        return getNearbyEntitiesByType(clazz, xzRadius, yRadius, xzRadius, null);
++    }
++
++    /**
++     * Gets all nearby entities of the specified type, within the specified radius (bounding box)
++     * @param clazz Type to filter by
++     * @param xRadius X Radius
++     * @param yRadius Y Radius
++     * @param zRadius Z Radius
++     * @param <T> the entity type
++     * @return the collection of entities near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public <T extends Entity> Collection<T> getNearbyEntitiesByType(@Nullable Class<? extends T> clazz, double xRadius, double yRadius, double zRadius) {
++        return getNearbyEntitiesByType(clazz, xRadius, yRadius, zRadius, null);
++    }
++
++    /**
++     * Gets all nearby entities of the specified type, within the specified radius (bounding box)
++     * @param clazz Type to filter by
++     * @param radius X/Y/Z radius to search within
++     * @param predicate a predicate used to filter results
++     * @param <T> the entity type
++     * @return the collection of entities near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public <T extends Entity> Collection<T> getNearbyEntitiesByType(@Nullable Class<? extends T> clazz, double radius, @Nullable Predicate<T> predicate) {
++        return getNearbyEntitiesByType(clazz, radius, radius, radius, predicate);
++    }
++
++    /**
++     * Gets all nearby entities of the specified type, within the specified radius, with x and x radius matching (bounding box)
++     * @param clazz Type to filter by
++     * @param xzRadius X/Z radius to search within
++     * @param yRadius Y radius to search within
++     * @param predicate a predicate used to filter results
++     * @param <T> the entity type
++     * @return the collection of entities near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public <T extends Entity> Collection<T> getNearbyEntitiesByType(@Nullable Class<? extends T> clazz, double xzRadius, double yRadius, @Nullable Predicate<T> predicate) {
++        return getNearbyEntitiesByType(clazz, xzRadius, yRadius, xzRadius, predicate);
++    }
++
++    /**
++     * Gets all nearby entities of the specified type, within the specified radius (bounding box)
++     * @param clazz Type to filter by
++     * @param xRadius X Radius
++     * @param yRadius Y Radius
++     * @param zRadius Z Radius
++     * @param predicate a predicate used to filter results
++     * @param <T> the entity type
++     * @return the collection of entities near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public <T extends Entity> Collection<T> getNearbyEntitiesByType(@Nullable Class<? extends Entity> clazz, double xRadius, double yRadius, double zRadius, @Nullable Predicate<T> predicate) {
++        World world = this.getWorld();
++        if (world == null) {
++            throw new IllegalArgumentException("Location has no world");
++        }
++        return world.getNearbyEntitiesByType(clazz, this, xRadius, yRadius, zRadius, predicate);
++    }
++    // Paper end
++
+     @Override
+     public boolean equals(Object obj) {
+         if (obj == null) {
+diff --git a/src/main/java/org/bukkit/World.java b/src/main/java/org/bukkit/World.java
+index e8de1b37..9cd5770f 100644
+--- a/src/main/java/org/bukkit/World.java
++++ b/src/main/java/org/bukkit/World.java
+@@ -1,12 +1,14 @@
+ package org.bukkit;
+ 
+ import java.io.File;
++import java.util.ArrayList;
+ import java.util.Collection;
+ import java.util.HashMap;
+ import java.util.List;
+ import java.util.Map;
+ import java.util.UUID;
+ import java.util.concurrent.CompletableFuture;
++import java.util.function.Predicate;
+ import org.bukkit.block.Biome;
+ import org.bukkit.block.Block;
+ import org.bukkit.entity.Arrow;
+@@ -24,6 +26,8 @@ import org.bukkit.inventory.ItemStack;
+ import org.bukkit.metadata.Metadatable;
+ import org.bukkit.plugin.messaging.PluginMessageRecipient;
+ import org.bukkit.util.Vector;
++import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
+ 
+ /**
+  * Represents a world, which may contain entities, chunks and blocks
+@@ -471,6 +475,256 @@ public interface World extends PluginMessageRecipient, Metadatable {
+      */
+     public Collection<Entity> getNearbyEntities(Location location, double x, double y, double z);
+ 
++    // Paper start
++    /**
++     * Gets nearby players within the specified radius (bounding box)
++     * @param loc Center location
++     * @param radius Radius
++     * @return the collection of entities near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public default Collection<LivingEntity> getNearbyLivingEntities(@NotNull Location loc, double radius) {
++        return getNearbyEntitiesByType(org.bukkit.entity.LivingEntity.class, loc, radius, radius, radius);
++    }
++
++    /**
++     * Gets nearby players within the specified radius (bounding box)
++     * @param loc Center location
++     * @param xzRadius X/Z Radius
++     * @param yRadius Y Radius
++     * @return the collection of entities near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public default Collection<LivingEntity> getNearbyLivingEntities(@NotNull Location loc, double xzRadius, double yRadius) {
++        return getNearbyEntitiesByType(org.bukkit.entity.LivingEntity.class, loc, xzRadius, yRadius, xzRadius);
++    }
++
++    /**
++     * Gets nearby players within the specified radius (bounding box)
++     * @param loc Center location
++     * @param xRadius X Radius
++     * @param yRadius Y Radius
++     * @param zRadius Z radius
++     * @return the collection of entities near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public default Collection<LivingEntity> getNearbyLivingEntities(@NotNull Location loc, double xRadius, double yRadius, double zRadius) {
++        return getNearbyEntitiesByType(org.bukkit.entity.LivingEntity.class, loc, xRadius, yRadius, zRadius);
++    }
++
++    /**
++     * Gets nearby players within the specified radius (bounding box)
++     * @param loc Center location
++     * @param radius X Radius
++     * @param predicate a predicate used to filter results
++     * @return the collection of living entities near location. This will always be a non-null collection
++     */
++    @NotNull
++    public default Collection<LivingEntity> getNearbyLivingEntities(@NotNull Location loc, double radius, @Nullable Predicate<LivingEntity> predicate) {
++        return getNearbyEntitiesByType(org.bukkit.entity.LivingEntity.class, loc, radius, radius, radius, predicate);
++    }
++
++    /**
++     * Gets nearby players within the specified radius (bounding box)
++     * @param loc Center location
++     * @param xzRadius X/Z Radius
++     * @param yRadius Y Radius
++     * @param predicate a predicate used to filter results
++     * @return the collection of living entities near location. This will always be a non-null collection
++     */
++    @NotNull
++    public default Collection<LivingEntity> getNearbyLivingEntities(@NotNull Location loc, double xzRadius, double yRadius, @Nullable Predicate<LivingEntity> predicate) {
++        return getNearbyEntitiesByType(org.bukkit.entity.LivingEntity.class, loc, xzRadius, yRadius, xzRadius, predicate);
++    }
++
++    /**
++     * Gets nearby players within the specified radius (bounding box)
++     * @param loc Center location
++     * @param xRadius X Radius
++     * @param yRadius Y Radius
++     * @param zRadius Z radius
++     * @param predicate a predicate used to filter results
++     * @return the collection of living entities near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public default Collection<LivingEntity> getNearbyLivingEntities(@NotNull Location loc, double xRadius, double yRadius, double zRadius, @Nullable Predicate<LivingEntity> predicate) {
++        return getNearbyEntitiesByType(org.bukkit.entity.LivingEntity.class, loc, xRadius, yRadius, zRadius, predicate);
++    }
++
++    /**
++     * Gets nearby players within the specified radius (bounding box)
++     * @param loc Center location
++     * @param radius X/Y/Z Radius
++     * @return the collection of living entities near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public default Collection<Player> getNearbyPlayers(@NotNull Location loc, double radius) {
++        return getNearbyEntitiesByType(org.bukkit.entity.Player.class, loc, radius, radius, radius);
++    }
++
++    /**
++     * Gets nearby players within the specified radius (bounding box)
++     * @param loc Center location
++     * @param xzRadius X/Z Radius
++     * @param yRadius Y Radius
++     * @return the collection of living entities near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public default Collection<Player> getNearbyPlayers(@NotNull Location loc, double xzRadius, double yRadius) {
++        return getNearbyEntitiesByType(org.bukkit.entity.Player.class, loc, xzRadius, yRadius, xzRadius);
++    }
++
++    /**
++     * Gets nearby players within the specified radius (bounding box)
++     * @param loc Center location
++     * @param xRadius X Radius
++     * @param yRadius Y Radius
++     * @param zRadius Z Radius
++     * @return the collection of players near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public default Collection<Player> getNearbyPlayers(@NotNull Location loc, double xRadius, double yRadius, double zRadius) {
++        return getNearbyEntitiesByType(org.bukkit.entity.Player.class, loc, xRadius, yRadius, zRadius);
++    }
++
++    /**
++     * Gets nearby players within the specified radius (bounding box)
++     * @param loc Center location
++     * @param radius X/Y/Z Radius
++     * @param predicate a predicate used to filter results
++     * @return the collection of players near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public default Collection<Player> getNearbyPlayers(@NotNull Location loc, double radius, @Nullable Predicate<Player> predicate) {
++        return getNearbyEntitiesByType(org.bukkit.entity.Player.class, loc, radius, radius, radius, predicate);
++    }
++
++    /**
++     * Gets nearby players within the specified radius (bounding box)
++     * @param loc Center location
++     * @param xzRadius X/Z Radius
++     * @param yRadius Y Radius
++     * @param predicate a predicate used to filter results
++     * @return the collection of players near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public default Collection<Player> getNearbyPlayers(@NotNull Location loc, double xzRadius, double yRadius, @Nullable Predicate<Player> predicate) {
++        return getNearbyEntitiesByType(org.bukkit.entity.Player.class, loc, xzRadius, yRadius, xzRadius, predicate);
++    }
++
++    /**
++     * Gets nearby players within the specified radius (bounding box)
++     * @param loc Center location
++     * @param xRadius X Radius
++     * @param yRadius Y Radius
++     * @param zRadius Z Radius
++     * @param predicate a predicate used to filter results
++     * @return the collection of players near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public default Collection<Player> getNearbyPlayers(@NotNull Location loc, double xRadius, double yRadius, double zRadius, @Nullable Predicate<Player> predicate) {
++        return getNearbyEntitiesByType(org.bukkit.entity.Player.class, loc, xRadius, yRadius, zRadius, predicate);
++    }
++
++    /**
++     * Gets all nearby entities of the specified type, within the specified radius (bounding box)
++     * @param clazz Type to filter by
++     * @param loc Center location
++     * @param radius X/Y/Z radius to search within
++     * @param <T> the entity type
++     * @return the collection of entities near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public default <T extends Entity> Collection<T> getNearbyEntitiesByType(@Nullable Class<? extends T> clazz, @NotNull Location loc, double radius) {
++        return getNearbyEntitiesByType(clazz, loc, radius, radius, radius, null);
++    }
++
++    /**
++     * Gets all nearby entities of the specified type, within the specified radius, with x and x radius matching (bounding box)
++     * @param clazz Type to filter by
++     * @param loc Center location
++     * @param xzRadius X/Z radius to search within
++     * @param yRadius Y radius to search within
++     * @param <T> the entity type
++     * @return the collection of entities near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public default <T extends Entity> Collection<T> getNearbyEntitiesByType(@Nullable Class<? extends T> clazz, @NotNull Location loc, double xzRadius, double yRadius) {
++        return getNearbyEntitiesByType(clazz, loc, xzRadius, yRadius, xzRadius, null);
++    }
++
++    /**
++     * Gets all nearby entities of the specified type, within the specified radius (bounding box)
++     * @param clazz Type to filter by
++     * @param loc Center location
++     * @param xRadius X Radius
++     * @param yRadius Y Radius
++     * @param zRadius Z Radius
++     * @param <T> the entity type
++     * @return the collection of entities near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public default <T extends Entity> Collection<T> getNearbyEntitiesByType(@Nullable Class<? extends T> clazz, @NotNull Location loc, double xRadius, double yRadius, double zRadius) {
++        return getNearbyEntitiesByType(clazz, loc, xRadius, yRadius, zRadius, null);
++    }
++
++    /**
++     * Gets all nearby entities of the specified type, within the specified radius (bounding box)
++     * @param clazz Type to filter by
++     * @param loc Center location
++     * @param radius X/Y/Z radius to search within
++     * @param predicate a predicate used to filter results
++     * @param <T> the entity type
++     * @return the collection of entities near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public default <T extends Entity> Collection<T> getNearbyEntitiesByType(@Nullable Class<? extends T> clazz, @NotNull Location loc, double radius, @Nullable Predicate<T> predicate) {
++        return getNearbyEntitiesByType(clazz, loc, radius, radius, radius, predicate);
++    }
++
++    /**
++     * Gets all nearby entities of the specified type, within the specified radius, with x and x radius matching (bounding box)
++     * @param clazz Type to filter by
++     * @param loc Center location
++     * @param xzRadius X/Z radius to search within
++     * @param yRadius Y radius to search within
++     * @param predicate a predicate used to filter results
++     * @param <T> the entity type
++     * @return the collection of entities near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public default <T extends Entity> Collection<T> getNearbyEntitiesByType(@Nullable Class<? extends T> clazz, @NotNull Location loc, double xzRadius, double yRadius, @Nullable Predicate<T> predicate) {
++        return getNearbyEntitiesByType(clazz, loc, xzRadius, yRadius, xzRadius, predicate);
++    }
++
++    /**
++     * Gets all nearby entities of the specified type, within the specified radius (bounding box)
++     * @param clazz Type to filter by
++     * @param loc Center location
++     * @param xRadius X Radius
++     * @param yRadius Y Radius
++     * @param zRadius Z Radius
++     * @param predicate a predicate used to filter results
++     * @param <T> the entity type
++     * @return the collection of entities near location. This will always be a non-null collection.
++     */
++    @NotNull
++    public default <T extends Entity> Collection<T> getNearbyEntitiesByType(@Nullable Class<? extends Entity> clazz, @NotNull Location loc, double xRadius, double yRadius, double zRadius, @Nullable Predicate<T> predicate) {
++        if (clazz == null) {
++            clazz = Entity.class;
++        }
++        List<T> nearby = new ArrayList<>();
++        for (Entity bukkitEntity : getNearbyEntities(loc, xRadius, yRadius, zRadius)) {
++            //noinspection unchecked
++            if (clazz.isAssignableFrom(bukkitEntity.getClass()) && (predicate == null || predicate.test((T) bukkitEntity))) {
++                //noinspection unchecked
++                nearby.add((T) bukkitEntity);
++            }
++        }
++        return nearby;
++    }
++    // Paper end
++
+     /**
+      * Gets the unique name of this world
+      *
+-- 
+2.38.1.windows.1
+

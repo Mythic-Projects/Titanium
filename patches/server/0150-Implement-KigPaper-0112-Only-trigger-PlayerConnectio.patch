@@ -1,0 +1,42 @@
+From 069fcf8047b74becd4b9b361c5143be8e97e8289 Mon Sep 17 00:00:00 2001
+From: RoccoDev <roccodev.business@gmail.com>
+Date: Tue, 15 Sep 2020 12:24:14 +0200
+Subject: [PATCH] Implement [KigPaper-0112] Only trigger
+ PlayerConnection#disconnect once by RoccoDev
+
+
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index 1128ccfda..c10ff1faa 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -93,6 +93,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+     private double q;
+     private boolean checkMovement = true;
+     private boolean processedDisconnect; // CraftBukkit - added
++    private boolean disconnecting; // KigPaper - added
+     private final Queue<Packet<?>> queuedPackets = Queues.newLinkedBlockingQueue();  // WindSpigot - queue-able packets
+ 
+     public PlayerConnection(MinecraftServer minecraftserver, NetworkManager networkmanager, EntityPlayer entityplayer) {
+@@ -165,6 +166,9 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+     }
+ 
+     public void disconnect(String s) {
++        // KigPaper - if already disconnecting, do nothing
++        if(disconnecting) return;
++
+         // CraftBukkit start - fire PlayerKickEvent
+         String leaveMessage = EnumChatFormat.YELLOW + this.player.getName() + " left the game.";
+ 
+@@ -178,6 +182,9 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+             // Do not kick the player
+             return;
+         }
++        // KigPaper - mark the player as disconnecting, so all other disconnect requests are ignored.
++        disconnecting = true;
++
+         // Send the possibly modified leave message
+         s = event.getReason();
+         // CraftBukkit end
+-- 
+2.38.1.windows.1
+

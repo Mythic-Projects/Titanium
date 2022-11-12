@@ -1,0 +1,116 @@
+From f3578ec41f93073b05f6a355a85e38f263042524 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sat, 5 Nov 2022 21:30:37 +0100
+Subject: [PATCH] Improve versioning API - Server.Titanium.VersionInfo
+
+
+diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
+index e60f87391..6231631fc 100644
+--- a/src/main/java/net/minecraft/server/DedicatedServer.java
++++ b/src/main/java/net/minecraft/server/DedicatedServer.java
+@@ -362,18 +362,14 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+         if (idx != -1) {
+             bukkitVersion = bukkitVersion.substring(0, idx);
+         }
+-        String source = "Unknown";
+-        String branch = "Unknown";
+-        java.util.regex.Matcher versionMatcher = java.util.regex.Pattern.compile("(git-Titanium-)([a-zA-Z0-9]+)-([a-zA-Z0-9]+)-([a-zA-Z0-9]+)").matcher(bukkitVersion);
+-        if (versionMatcher.find()) {
+-            source = versionMatcher.group(2);
+-            if (source.equalsIgnoreCase("GH")) {
+-                source = "GitHub";
+-            } else {
+-                source = versionMatcher.group(2).toLowerCase();
+-                source = source.substring(0, 1).toUpperCase() + source.substring(1);
+-            }
+-            branch = versionMatcher.group(3);
++        org.bukkit.Server.Titanium.VersionInfo version = Bukkit.titanium().getVersionInfo();
++        String source = version.getSource();
++        String branch = version.getBranch();
++        if (source.equalsIgnoreCase("GH")) {
++            source = "GitHub";
++        } else {
++            source = source.toLowerCase();
++            source = source.substring(0, 1).toUpperCase() + source.substring(1);
+         }
+         metrics.addCustomChart(new net.titanium.Metrics.SimplePie("source", source));
+         metrics.addCustomChart(new net.titanium.Metrics.SimplePie("branch", branch));
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 971d0b254..d9521560d 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -2085,6 +2085,71 @@ public final class CraftServer implements Server {
+ 
+     public final Titanium titanium = new Titanium() {
+ 
++        public final VersionInfo versionInfo = new VersionInfo() {
++
++            private String version;
++            private String source;
++            private String branch;
++            private String build;
++
++            @Override
++            public String getVersion() {
++                if (this.version == null) {
++                    this.version = Bukkit.getVersion();
++                    int idx = this.version.indexOf(" (MC: ");
++                    if (idx != -1) {
++                        this.version = this.version.substring(0, idx);
++                    }
++
++                    java.util.regex.Matcher versionMatcher = java.util.regex.Pattern.compile("(git-Titanium-)([a-zA-Z0-9]+)-([a-zA-Z0-9]+)-([a-zA-Z0-9]+)").matcher(this.version);
++                    if (versionMatcher.find()) {
++                        this.source = versionMatcher.group(2);
++                        this.branch = versionMatcher.group(3);
++                        this.build = versionMatcher.group(4);
++                    } else {
++                        this.source = "Unknown";
++                        this.branch = "Unknown";
++                        this.build = "Unknown";
++                    }
++                }
++                return this.version;
++            }
++
++            @Override
++            public String getSource() {
++                if (this.source == null) {
++                    this.getVersion();
++                }
++                return this.source;
++            }
++
++            @Override
++            public String getBranch() {
++                if (this.branch == null) {
++                    this.getVersion();
++                }
++                return this.branch;
++            }
++
++            @Override
++            public String getBuild() {
++                if (this.build == null) {
++                    this.getVersion();
++                }
++                return this.build;
++            }
++
++            @Override
++            public String toString() {
++                return this.getVersion();
++            }
++        };
++
++        @Override
++        public VersionInfo getVersionInfo() {
++            return versionInfo;
++        }
++
+         @Override
+         public OkaeriConfig getServerConfig() {
+             return serverConfig;
+-- 
+2.38.1.windows.1
+

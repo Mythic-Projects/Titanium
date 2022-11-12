@@ -1,0 +1,157 @@
+From 210af42b4703888d9dff57e6e4815e13d158d339 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 16 Sep 2022 23:49:08 +0200
+Subject: [PATCH] Add MCUtil
+
+
+diff --git a/src/main/java/net/minecraft/server/MCUtil.java b/src/main/java/net/minecraft/server/MCUtil.java
+new file mode 100644
+index 000000000..a32f75812
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/MCUtil.java
+@@ -0,0 +1,82 @@
++package net.minecraft.server;
++
++import java.util.Queue;
++import java.util.function.Supplier;
++import net.titanium.util.async.AsyncUtil;
++import org.bukkit.Location;
++import org.spigotmc.AsyncCatcher;
++
++public final class MCUtil {
++
++    private MCUtil() {
++    }
++
++    public static boolean isMainThread() {
++        return MinecraftServer.getServer().isMainThread();
++    }
++
++    public static Queue<Runnable> getProcessQueue() {
++        return MinecraftServer.getServer().processQueue;
++    }
++
++    public static void ensureMain(Runnable run) {
++        ensureMain(null, run);
++    }
++
++    /**
++     * Ensures the target code is running on the main thread
++     *
++     * @param reason
++     * @param run
++     * @return
++     */
++    public static void ensureMain(String reason, Runnable run) {
++        if (AsyncCatcher.enabled && Thread.currentThread() != MinecraftServer.getServer().primaryThread) {
++            if (reason != null) {
++                new IllegalStateException("Asynchronous " + reason + "!").printStackTrace();
++            }
++            AsyncUtil.runNextTick(run);
++            return;
++        }
++        run.run();
++    }
++
++    public static <T> T ensureMain(Supplier<T> run) {
++        return ensureMain(null, run);
++    }
++
++    /**
++     * Ensures the target code is running on the main thread
++     *
++     * @param reason
++     * @param run
++     * @param <T>
++     * @return
++     */
++    public static <T> T ensureMain(String reason, Supplier<T> run) {
++        if (AsyncCatcher.enabled && Thread.currentThread() != MinecraftServer.getServer().primaryThread) {
++            if (reason != null) {
++                new IllegalStateException("Asynchronous " + reason + "! Blocking thread until it returns ").printStackTrace();
++            }
++            return AsyncUtil.supplyNextTick(run);
++        }
++        return run.get();
++    }
++
++    /**
++     * Converts a NMS World/BlockPosition to Bukkit Location
++     *
++     * @param world
++     * @param pos
++     * @return
++     */
++    public static Location toLocation(World world, BlockPosition pos) {
++        // Titanium start
++        if (pos == null) {
++            return null;
++        }
++        // Titanium end
++        return new Location(world.getWorld(), pos.getX(), pos.getY(), pos.getZ());
++    }
++
++}
+diff --git a/src/main/java/net/titanium/util/async/AsyncUtil.java b/src/main/java/net/titanium/util/async/AsyncUtil.java
+index b4dce733c..6ae626464 100644
+--- a/src/main/java/net/titanium/util/async/AsyncUtil.java
++++ b/src/main/java/net/titanium/util/async/AsyncUtil.java
+@@ -1,9 +1,12 @@
+ package net.titanium.util.async;
+ 
++import java.util.concurrent.ExecutionException;
+ import java.util.concurrent.Executor;
+ import java.util.concurrent.ForkJoinPool;
+ import java.util.function.Supplier;
++import net.minecraft.server.MCUtil;
+ import net.minecraft.server.MinecraftServer;
++import org.bukkit.craftbukkit.util.Waitable;
+ 
+ public class AsyncUtil {
+ 
+@@ -23,12 +26,12 @@ public class AsyncUtil {
+ 	public static void run(Runnable runnable, Executor executor) {
+ 		executor.execute(runnable);
+ 	}
+-	
++
+ 	/**
+ 	 * Runs a given task the next tick on the main thread
+ 	 * @param runnable The task to run
+ 	 */
+-	public static void runSyncNextTick(Runnable runnable) {
++	public static void runNextTick(Runnable runnable) {
+ 		MinecraftServer.getServer().processQueue.add(runnable);
+ 	}
+ 	
+@@ -40,6 +43,27 @@ public class AsyncUtil {
+ 		MinecraftServer.getServer().priorityProcessQueue.add(runnable);
+ 	}
+ 
++	/**
++	 * Runs a given task the next tick on the main thread and return value
++	 * @param supplier The task to run
++	 */
++	public static <T> T supplyNextTick(Supplier<T> supplier) {
++		Waitable<T> wait = new Waitable<T>() {
++			@Override
++			protected T evaluate() {
++				return supplier.get();
++			}
++		};
++
++		MCUtil.getProcessQueue().add(wait);
++		try {
++			return wait.get();
++		} catch (InterruptedException | ExecutionException e) {
++			e.printStackTrace();
++		}
++		return null;
++	}
++
+ 	/**
+ 	 * Runs a given task if it is synchronized on an object
+ 	 * @param monitor The object to check for locking
+-- 
+2.38.1.windows.1
+

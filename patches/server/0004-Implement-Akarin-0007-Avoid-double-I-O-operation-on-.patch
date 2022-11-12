@@ -1,0 +1,33 @@
+From de54fc3e89a72459c9f80a0ea432284007434b96 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 9 Apr 2021 14:41:18 +0200
+Subject: [PATCH] Implement [Akarin-0007] Avoid double I/O operation on load
+ player file
+
+
+diff --git a/src/main/java/net/minecraft/server/WorldNBTStorage.java b/src/main/java/net/minecraft/server/WorldNBTStorage.java
+index b4056a28a..eab418042 100644
+--- a/src/main/java/net/minecraft/server/WorldNBTStorage.java
++++ b/src/main/java/net/minecraft/server/WorldNBTStorage.java
+@@ -207,7 +207,8 @@ public class WorldNBTStorage implements IDataManager, IPlayerFileData {
+             File file = new File(this.playerDir, entityhuman.getUniqueID().toString() + ".dat");
+             // Spigot Start
+             boolean usingWrongFile = false;
+-            if ( org.bukkit.Bukkit.getOnlineMode() && !file.exists() ) // PaperSpigot - Check online mode first
++            boolean normalFile = file.exists() && file.isFile(); // Akarin - ensures normal file
++            if ( org.bukkit.Bukkit.getOnlineMode() && !normalFile ) // Paper - Check online mode first // Akarin - ensures normal file
+             {
+                 file = new File( this.playerDir, UUID.nameUUIDFromBytes( ( "OfflinePlayer:" + entityhuman.getName() ).getBytes( "UTF-8" ) ).toString() + ".dat");
+                 if ( file.exists() )
+@@ -218,7 +219,7 @@ public class WorldNBTStorage implements IDataManager, IPlayerFileData {
+             }
+             // Spigot End
+ 
+-            if (file.exists() && file.isFile()) {
++            if (normalFile) { // Akarin - avoid double I/O operation
+                 nbttagcompound = NBTCompressedStreamTools.a((InputStream) (new FileInputStream(file)));
+             }
+             // Spigot Start
+-- 
+2.38.1.windows.1
+

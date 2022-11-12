@@ -1,0 +1,86 @@
+From 1668c0b3c4163d4b4c865300a5c8565a7877c42f Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 10 Jun 2022 09:12:56 +0200
+Subject: [PATCH] Add Command#testPermission for custom permission
+
+
+diff --git a/src/main/java/org/bukkit/command/Command.java b/src/main/java/org/bukkit/command/Command.java
+index c126a1e7..eebb817f 100644
+--- a/src/main/java/org/bukkit/command/Command.java
++++ b/src/main/java/org/bukkit/command/Command.java
+@@ -182,6 +182,7 @@ public abstract class Command {
+         this.permission = permission;
+     }
+ 
++    // Titanium start - add testPermission with custom permission
+     /**
+      * Tests the given {@link CommandSender} to see if they can perform this
+      * command.
+@@ -192,8 +193,8 @@ public abstract class Command {
+      * @param target User to test
+      * @return true if they can use it, otherwise false
+      */
+-    public boolean testPermission(CommandSender target) {
+-        if (testPermissionSilent(target)) {
++    public boolean testPermission(CommandSender target, String permission) {
++        if (testPermissionSilent(target, permission)) {
+             return true;
+         }
+ 
+@@ -207,7 +208,23 @@ public abstract class Command {
+ 
+         return false;
+     }
++    // Titanium end
++
++    /**
++     * Tests the given {@link CommandSender} to see if they can perform this
++     * command.
++     * <p>
++     * If they do not have permission, they will be informed that they cannot
++     * do this.
++     *
++     * @param target User to test
++     * @return true if they can use it, otherwise false
++     */
++    public boolean testPermission(CommandSender target) {
++        return testPermission(target, this.permission); // Titanium
++    }
+ 
++    // Titanium start - add testPermission with custom permission
+     /**
+      * Tests the given {@link CommandSender} to see if they can perform this
+      * command.
+@@ -217,7 +234,7 @@ public abstract class Command {
+      * @param target User to test
+      * @return true if they can use it, otherwise false
+      */
+-    public boolean testPermissionSilent(CommandSender target) {
++    public boolean testPermissionSilent(CommandSender target, String permission) {
+         if ((permission == null) || (permission.length() == 0)) {
+             return true;
+         }
+@@ -230,6 +247,20 @@ public abstract class Command {
+ 
+         return false;
+     }
++    // Titanium end
++
++    /**
++     * Tests the given {@link CommandSender} to see if they can perform this
++     * command.
++     * <p>
++     * No error is sent to the sender.
++     *
++     * @param target User to test
++     * @return true if they can use it, otherwise false
++     */
++    public boolean testPermissionSilent(CommandSender target) {
++        return this.testPermissionSilent(target, this.permission); // Titanium
++    }
+ 
+     /**
+      * Returns the label for this command
+-- 
+2.38.1.windows.1
+
