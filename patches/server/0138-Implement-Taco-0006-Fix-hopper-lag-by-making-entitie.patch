@@ -1,4 +1,4 @@
-From 37476a0ffbef8faf14f0fa20d306600890cf8e1a Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Techcable <Techcable@outlook.com>
 Date: Fri, 24 Jul 2015 16:20:18 -0700
 Subject: [PATCH] Implement [Taco-0006] Fix hopper lag by making entities look
@@ -14,7 +14,7 @@ Pushing out of hoppers causes a bouding box lookup, which this patch replaces wi
 This patch may causes a decrease in the performance of dropped items, which is why it can be disabled in the configuration.
 
 diff --git a/src/main/java/net/minecraft/server/EntityItem.java b/src/main/java/net/minecraft/server/EntityItem.java
-index 2275b1cfa..8e1692bf8 100644
+index 2275b1cfaba83b27e1e3ad60cc27443fbcbfc2b5..8e1692bf859845aa147c5362002dbafa7eb4dd49 100644
 --- a/src/main/java/net/minecraft/server/EntityItem.java
 +++ b/src/main/java/net/minecraft/server/EntityItem.java
 @@ -4,8 +4,15 @@ import java.util.Iterator;
@@ -52,7 +52,7 @@ index 2275b1cfa..8e1692bf8 100644
          int elapsedTicks = MinecraftServer.currentTick - this.lastTick;
          if (this.pickupDelay != 32767) this.pickupDelay -= elapsedTicks;
 diff --git a/src/main/java/net/minecraft/server/EntityMinecartContainer.java b/src/main/java/net/minecraft/server/EntityMinecartContainer.java
-index c6487f216..7368f16bb 100644
+index c6487f21646f542304984f2a19fd9299e5aa4f55..7368f16bbadc0f9bd780f9302a59e7b974ce8f10 100644
 --- a/src/main/java/net/minecraft/server/EntityMinecartContainer.java
 +++ b/src/main/java/net/minecraft/server/EntityMinecartContainer.java
 @@ -7,8 +7,16 @@ import org.bukkit.craftbukkit.entity.CraftHumanEntity;
@@ -95,7 +95,7 @@ index c6487f216..7368f16bb 100644
          return this.items[i];
      }
 diff --git a/src/main/java/net/minecraft/server/TileEntityHopper.java b/src/main/java/net/minecraft/server/TileEntityHopper.java
-index e83e93216..2f03ff0c5 100644
+index e83e932163cd07f24e3bfd9f783729787671b226..2f03ff0c5284a018f7d8985cc631a26afb899de7 100644
 --- a/src/main/java/net/minecraft/server/TileEntityHopper.java
 +++ b/src/main/java/net/minecraft/server/TileEntityHopper.java
 @@ -11,6 +11,7 @@ import org.bukkit.event.inventory.InventoryMoveItemEvent;
@@ -200,7 +200,7 @@ index e83e93216..2f03ff0c5 100644
      }
 diff --git a/src/main/java/net/techcable/tacospigot/HopperHelper.java b/src/main/java/net/techcable/tacospigot/HopperHelper.java
 new file mode 100644
-index 000000000..58b3b7283
+index 0000000000000000000000000000000000000000..58b3b7283b1249d3c565bf898a3ea0a9f2b99898
 --- /dev/null
 +++ b/src/main/java/net/techcable/tacospigot/HopperHelper.java
 @@ -0,0 +1,35 @@
@@ -241,7 +241,7 @@ index 000000000..58b3b7283
 +}
 diff --git a/src/main/java/net/techcable/tacospigot/HopperPusher.java b/src/main/java/net/techcable/tacospigot/HopperPusher.java
 new file mode 100644
-index 000000000..137fe6c29
+index 0000000000000000000000000000000000000000..137fe6c2927f9219a031a8bf513622f4d9f6cbbb
 --- /dev/null
 +++ b/src/main/java/net/techcable/tacospigot/HopperPusher.java
 @@ -0,0 +1,65 @@
@@ -311,7 +311,7 @@ index 000000000..137fe6c29
 +
 +}
 diff --git a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
-index 1ab14d47a..e04621edc 100644
+index 1ab14d47a202afa2b530350745815edc38d3a8d6..e04621edc0cb0b256ca2f55ab18027b9f3898c26 100644
 --- a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
 +++ b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
 @@ -25,4 +25,14 @@ public class TacoSpigotWorldConfig extends TitaniumConfigSection {
@@ -329,6 +329,3 @@ index 1ab14d47a..e04621edc 100644
 +    }
 +
  }
--- 
-2.38.1.windows.1
-

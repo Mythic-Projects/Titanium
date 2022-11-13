@@ -1,4 +1,4 @@
-From 21e7e50ae992566d50fa3f2d91470d5d47795557 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 22 May 2022 22:26:25 +0200
 Subject: [PATCH] Implement [IonSpigot-0013] Implement PandaWire
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [IonSpigot-0013] Implement PandaWire
 
 diff --git a/src/main/java/me/suicidalkids/ion/blocks/redstone/PandaRedstoneWire.java b/src/main/java/me/suicidalkids/ion/blocks/redstone/PandaRedstoneWire.java
 new file mode 100644
-index 000000000..aa118132b
+index 0000000000000000000000000000000000000000..aa118132b6e486d4b7f1d28103511038cdbb8eef
 --- /dev/null
 +++ b/src/main/java/me/suicidalkids/ion/blocks/redstone/PandaRedstoneWire.java
 @@ -0,0 +1,476 @@
@@ -488,7 +488,7 @@ index 000000000..aa118132b
 +}
 diff --git a/src/main/java/me/suicidalkids/ion/blocks/redstone/ReflectUtil.java b/src/main/java/me/suicidalkids/ion/blocks/redstone/ReflectUtil.java
 new file mode 100644
-index 000000000..bb0361f0c
+index 0000000000000000000000000000000000000000..bb0361f0cca34b3f836bfbcc701d7356dfa793d3
 --- /dev/null
 +++ b/src/main/java/me/suicidalkids/ion/blocks/redstone/ReflectUtil.java
 @@ -0,0 +1,30 @@
@@ -523,7 +523,7 @@ index 000000000..bb0361f0c
 +
 +}
 diff --git a/src/main/java/net/minecraft/server/Block.java b/src/main/java/net/minecraft/server/Block.java
-index 69155130e..86f111df7 100644
+index 69155130eaa290032eeba25e635c30b01eca7ae2..86f111df74e8f09265a56f2fe017d725a8c09db1 100644
 --- a/src/main/java/net/minecraft/server/Block.java
 +++ b/src/main/java/net/minecraft/server/Block.java
 @@ -3,6 +3,8 @@ package net.minecraft.server;
@@ -546,7 +546,7 @@ index 69155130e..86f111df7 100644
          a(58, "crafting_table", (new BlockWorkbench()).c(2.5F).a(Block.f).c("workbench"));
 diff --git a/src/main/java/net/titanium/config/IonConfig.java b/src/main/java/net/titanium/config/IonConfig.java
 new file mode 100644
-index 000000000..282ab263d
+index 0000000000000000000000000000000000000000..282ab263da89ab21364c48044b079b2b17473f67
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/IonConfig.java
 @@ -0,0 +1,29 @@
@@ -580,7 +580,7 @@ index 000000000..282ab263d
 +
 +}
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index a3ce72a70..5da1c1fd6 100644
+index a3ce72a70c06eaf1d2bba545b79801f5e23da843..5da1c1fd6463cd854b9a0aefdc8233a0cb4b20ed 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -47,6 +47,9 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -620,7 +620,7 @@ index a3ce72a70..5da1c1fd6 100644
          return ChatColor.translateAlternateColorCodes('&', input);
      }
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index bbb1f03c5..a1eeae7c2 100644
+index bbb1f03c553ed085630c387e64e0b8d2bb1c0b54..a1eeae7c2d0a7627e1e6b63b6fbdea6b5f7e13d1 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -1869,6 +1869,14 @@ public final class CraftServer implements Server {
@@ -638,6 +638,3 @@ index bbb1f03c5..a1eeae7c2 100644
          @Override
          public void restart() {
              org.spigotmc.RestartCommand.restart();
--- 
-2.38.1.windows.1
-

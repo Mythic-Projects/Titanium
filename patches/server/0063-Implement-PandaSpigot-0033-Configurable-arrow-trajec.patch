@@ -1,11 +1,11 @@
-From 462e3186b66094d9ea25ed411d448f8d8ffc0059 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 23 May 2022 21:41:21 +0200
 Subject: [PATCH] Implement [PandaSpigot-0033] Configurable arrow trajectory
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityArrow.java b/src/main/java/net/minecraft/server/EntityArrow.java
-index 80c1e71e0..1d3a3e39e 100644
+index 80c1e71e03e168821152f2e1b19ea19a9de02b50..1d3a3e39e1b631669ab219ef04b40ff42cf435c4 100644
 --- a/src/main/java/net/minecraft/server/EntityArrow.java
 +++ b/src/main/java/net/minecraft/server/EntityArrow.java
 @@ -3,6 +3,7 @@ package net.minecraft.server;
@@ -38,7 +38,7 @@ index 80c1e71e0..1d3a3e39e 100644
          d1 *= (double) f;
          d2 *= (double) f;
 diff --git a/src/main/java/net/titanium/config/PaperConfig.java b/src/main/java/net/titanium/config/PaperConfig.java
-index f9ad4c6f3..589f0103f 100644
+index f9ad4c6f34ba76333c28dcbb9605b9dd6fa16738..589f0103f53f357d12ee3f72d8e0bb9bfc0b8d74 100644
 --- a/src/main/java/net/titanium/config/PaperConfig.java
 +++ b/src/main/java/net/titanium/config/PaperConfig.java
 @@ -59,10 +59,10 @@ public class PaperConfig extends TitaniumConfigSection {
@@ -55,6 +55,3 @@ index f9ad4c6f3..589f0103f 100644
          public boolean includeRandomnessInArrowDamage = true;
  
          @Comment("Number of ticks between player data saves to disk.")
--- 
-2.38.1.windows.1
-

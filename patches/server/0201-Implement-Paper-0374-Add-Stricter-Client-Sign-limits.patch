@@ -1,4 +1,4 @@
-From 2988ac80036adabd17cbd028b97d75d99834fe5b Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Wed, 27 Feb 2019 22:18:40 -0500
 Subject: [PATCH] Implement [Paper-0374] Add Stricter Client Sign limits by
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0374] Add Stricter Client Sign limits by
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 763556acc..a3857e103 100644
+index 763556accc3ce66348a684fe96796d4b45b8d841..a3857e103481acd5ee140644b22557414589426a 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -1961,6 +1961,15 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
@@ -26,7 +26,7 @@ index 763556acc..a3857e103 100644
              }
              SignChangeEvent event = new SignChangeEvent((org.bukkit.craftbukkit.block.CraftBlock) player.getWorld().getBlockAt(x, y, z), this.server.getPlayer(this.player), lines);
 diff --git a/src/main/java/net/minecraft/server/TileEntitySign.java b/src/main/java/net/minecraft/server/TileEntitySign.java
-index e927fd237..9300731d1 100644
+index e927fd237d4ac6a0752045d65f27ee947b7b0636..9300731d1bfec7f5e8603b85bb2e30b79aba8f88 100644
 --- a/src/main/java/net/minecraft/server/TileEntitySign.java
 +++ b/src/main/java/net/minecraft/server/TileEntitySign.java
 @@ -1,6 +1,7 @@
@@ -46,7 +46,7 @@ index e927fd237..9300731d1 100644
      public TileEntitySign() {}
  
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 902d79cf7..d2922e080 100644
+index 902d79cf730498b73bc440c80cf33aac049d0993..d2922e080b2e3f715112d19c3d73957f5d86051f 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -152,6 +152,13 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -63,6 +63,3 @@ index 902d79cf7..d2922e080 100644
      @Comment("Configuration of book limits.")
      @Comment("Setting these values prevent players from using NBT overflow exploits.")
      @Comment("See also nbt-read-limiter, maybe you don't have to change these values.")
--- 
-2.38.1.windows.1
-

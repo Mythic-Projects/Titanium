@@ -1,4 +1,4 @@
-From 8be748f5a4b75594ab89ffbde3e10c7ac03bd03e Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: uRyanxD <familiarodrigues123ro@gmail.com>
 Date: Sun, 5 Jun 2022 16:21:54 +0200
 Subject: [PATCH] Implement [PandaSpigot-0056] Faster redstone torch rapid
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [PandaSpigot-0056] Faster redstone torch rapid
 
 
 diff --git a/src/main/java/net/minecraft/server/BlockRedstoneTorch.java b/src/main/java/net/minecraft/server/BlockRedstoneTorch.java
-index 649bc605c..0de4404f6 100644
+index 649bc605c643790642cd9d083ca2bafdcf374147..0de4404f69756995d5937aa942195d4220612d9e 100644
 --- a/src/main/java/net/minecraft/server/BlockRedstoneTorch.java
 +++ b/src/main/java/net/minecraft/server/BlockRedstoneTorch.java
 @@ -116,9 +116,17 @@ public class BlockRedstoneTorch extends BlockTorch {
@@ -38,6 +38,3 @@ index 649bc605c..0de4404f6 100644
  
          public RedstoneUpdateInfo(BlockPosition blockposition, long i) {
              this.a = blockposition;
--- 
-2.38.1.windows.1
-

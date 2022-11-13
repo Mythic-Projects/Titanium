@@ -1,11 +1,11 @@
-From e241e6a4776c95f268c4bdd9ff5b6e35d6ad3366 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 6 Jul 2022 11:00:37 +0200
 Subject: [PATCH] Backport EntityPlaceEvent
 
 
 diff --git a/src/main/java/net/minecraft/server/ItemArmorStand.java b/src/main/java/net/minecraft/server/ItemArmorStand.java
-index d8de61902..46d941099 100644
+index d8de619021b61e7c57c69c4339d6f9ac68e014a7..46d941099f2360c9926d95b8a06bce3d2002085a 100644
 --- a/src/main/java/net/minecraft/server/ItemArmorStand.java
 +++ b/src/main/java/net/minecraft/server/ItemArmorStand.java
 @@ -2,6 +2,7 @@ package net.minecraft.server;
@@ -30,7 +30,7 @@ index d8de61902..46d941099 100644
                          }
  
 diff --git a/src/main/java/net/minecraft/server/ItemBoat.java b/src/main/java/net/minecraft/server/ItemBoat.java
-index eb62bbb68..0b9bedebb 100644
+index eb62bbb68c0a37aa837052d5a3e18229fcbe7da2..0b9bedebbcc88540f76cca7fc5cf1e5f6dc7285c 100644
 --- a/src/main/java/net/minecraft/server/ItemBoat.java
 +++ b/src/main/java/net/minecraft/server/ItemBoat.java
 @@ -1,6 +1,7 @@
@@ -55,7 +55,7 @@ index eb62bbb68..0b9bedebb 100644
                      }
  
 diff --git a/src/main/java/net/minecraft/server/ItemMinecart.java b/src/main/java/net/minecraft/server/ItemMinecart.java
-index e9fc40e93..8ef1a9757 100644
+index e9fc40e936b2dd963bb7a7460cdbeb8ca5222f9d..8ef1a975709af2fec1a57f3968f5f29743274f0e 100644
 --- a/src/main/java/net/minecraft/server/ItemMinecart.java
 +++ b/src/main/java/net/minecraft/server/ItemMinecart.java
 @@ -1,6 +1,7 @@
@@ -80,7 +80,7 @@ index e9fc40e93..8ef1a9757 100644
              }
  
 diff --git a/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java b/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
-index 54fa1a2a2..72d21f366 100644
+index 54fa1a2a232167cdf199f05570829c2f1a8289be..72d21f366b69767402f9503b4c94db4cf056ea42 100644
 --- a/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
 +++ b/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
 @@ -19,6 +19,7 @@ import org.bukkit.block.Block;
@@ -117,6 +117,3 @@ index 54fa1a2a2..72d21f366 100644
      /**
       * Bucket methods
       */
--- 
-2.38.1.windows.1
-

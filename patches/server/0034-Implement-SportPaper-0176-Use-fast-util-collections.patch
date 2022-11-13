@@ -1,11 +1,11 @@
-From 94d3630bc058ad0fd88558e5400565c4e46c4573 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 19 May 2022 22:47:27 +0200
 Subject: [PATCH] Implement [SportPaper-0176] Use fast util collections
 
 
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index 56274b833..662f53300 100644
+index 56274b833c288db1748efd12852393c18987f414..662f533006776a2fe88a7dee01a8127a170c6d64 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
 @@ -25,16 +25,23 @@ import org.bukkit.event.world.ChunkUnloadEvent;
@@ -68,7 +68,7 @@ index 56274b833..662f53300 100644
                  if (chunk == null) continue;
  
 diff --git a/src/main/java/net/minecraft/server/DataWatcher.java b/src/main/java/net/minecraft/server/DataWatcher.java
-index dec091e73..f3203900a 100644
+index dec091e7311056650dd03a980b2c4aa8299fac4b..f3203900ab6e3acc78c2fd3d37bd8e3acd4daaf6 100644
 --- a/src/main/java/net/minecraft/server/DataWatcher.java
 +++ b/src/main/java/net/minecraft/server/DataWatcher.java
 @@ -10,18 +10,25 @@ import java.util.Map;
@@ -131,7 +131,7 @@ index dec091e73..f3203900a 100644
          for ( int i = 0; i < arraylist.size(); i++ )
          {
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 87529552a..fcb31e75b 100644
+index 87529552aa27fc89a542130a27a6b2bfdda44ccd..fcb31e75b78502d5f63651e49209f29fac3f8a8e 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
 @@ -402,7 +402,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
@@ -144,7 +144,7 @@ index 87529552a..fcb31e75b 100644
                      iter.remove();
                      continue;
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
-index 764007093..a7dd39dd0 100644
+index 7640070937b361aeda4d200710deddfbbbc4fb42..a7dd39dd09c057b9f5500d0232ed21858b97914e 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 @@ -219,8 +219,10 @@ public class CraftWorld implements World {
@@ -191,6 +191,3 @@ index 764007093..a7dd39dd0 100644
                  continue;
              }
  
--- 
-2.38.1.windows.1
-

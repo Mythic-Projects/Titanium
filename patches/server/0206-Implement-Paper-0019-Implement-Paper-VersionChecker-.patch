@@ -1,4 +1,4 @@
-From ff19a1c0c16ecc014d34e82205b723a25868a791 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Zach Brown <zach@zachbr.io>
 Date: Fri, 4 Nov 2022 16:56:52 +0100
 Subject: [PATCH] Implement [Paper-0019] Implement Paper VersionChecker by Zach
@@ -7,7 +7,7 @@ Subject: [PATCH] Implement [Paper-0019] Implement Paper VersionChecker by Zach
 
 diff --git a/src/main/java/com/destroystokyo/paper/PaperVersionFetcher.java b/src/main/java/com/destroystokyo/paper/PaperVersionFetcher.java
 new file mode 100644
-index 000000000..2bba71915
+index 0000000000000000000000000000000000000000..2bba719159b16d4cc212d81a38f74ab2bdb17ef8
 --- /dev/null
 +++ b/src/main/java/com/destroystokyo/paper/PaperVersionFetcher.java
 @@ -0,0 +1,119 @@
@@ -131,7 +131,7 @@ index 000000000..2bba71915
 +
 +}
 diff --git a/src/main/java/org/bukkit/craftbukkit/util/CraftMagicNumbers.java b/src/main/java/org/bukkit/craftbukkit/util/CraftMagicNumbers.java
-index 573e375dc..f92d303ed 100644
+index 573e375dcf702711eed2391940d1d0cc8919510b..f92d303ed4e5a4253ce4e34b147c5d27dc520b5e 100644
 --- a/src/main/java/org/bukkit/craftbukkit/util/CraftMagicNumbers.java
 +++ b/src/main/java/org/bukkit/craftbukkit/util/CraftMagicNumbers.java
 @@ -172,5 +172,11 @@ public final class CraftMagicNumbers implements UnsafeValues {
@@ -146,6 +146,3 @@ index 573e375dc..f92d303ed 100644
      // Paper end
 +
  }
--- 
-2.38.1.windows.1
-

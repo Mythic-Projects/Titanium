@@ -1,11 +1,11 @@
-From 29e6d6ebdfa5971a5794235632b977cc853c7a4b Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 5 Jun 2022 17:10:31 +0200
 Subject: [PATCH] Add option to change internal error message
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 4e4610b24..d30402e4b 100644
+index 4e4610b248f2b55dd586bcb03ab9e650a888dc27..d30402e4b70b886c871cacb8a3e26b7c3eb02e8e 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -1193,7 +1193,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
@@ -18,7 +18,7 @@ index 4e4610b24..d30402e4b 100644
              SpigotTimings.playerCommandTimer.stopTiming(); // Spigot
              return;
 diff --git a/src/main/java/net/titanium/config/SpigotConfig.java b/src/main/java/net/titanium/config/SpigotConfig.java
-index 899694cde..22d1073d4 100644
+index 899694cde317c5856d5cfb6859fab20a97ccea52..22d1073d4824ba8d625c609f382efff47d0e3fe9 100644
 --- a/src/main/java/net/titanium/config/SpigotConfig.java
 +++ b/src/main/java/net/titanium/config/SpigotConfig.java
 @@ -134,11 +134,14 @@ public class SpigotConfig extends TitaniumConfigSection {
@@ -38,7 +38,7 @@ index 899694cde..22d1073d4 100644
  
      public Commands commands = new Commands();
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 235b8f8bb..49b658c89 100644
+index 235b8f8bbd0ebe4fd9b4f2e8fa48b60c9faff3ad..49b658c89620178ce3fbfd4e09053c6e61b7f37b 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -1728,7 +1728,7 @@ public final class CraftServer implements Server {
@@ -50,6 +50,3 @@ index 235b8f8bb..49b658c89 100644
              getLogger().log(Level.SEVERE, "Exception when " + player.getName() + " attempted to tab complete " + message, ex);
          }
  
--- 
-2.38.1.windows.1
-

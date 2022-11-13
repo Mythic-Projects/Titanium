@@ -1,4 +1,4 @@
-From a391f41e81550e65799118521e1c5388b5973faa Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Tue, 10 May 2022 20:25:51 +0200
 Subject: [PATCH] Implement [IonSpigot-0014] Faster Chunk Entity List
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [IonSpigot-0014] Faster Chunk Entity List
 
 diff --git a/src/main/java/io/papermc/paper/util/maplist/ObjectMapList.java b/src/main/java/io/papermc/paper/util/maplist/ObjectMapList.java
 new file mode 100644
-index 000000000..8fc248c8b
+index 0000000000000000000000000000000000000000..8fc248c8b0d6fce81d40396be221f71bb7314131
 --- /dev/null
 +++ b/src/main/java/io/papermc/paper/util/maplist/ObjectMapList.java
 @@ -0,0 +1,200 @@
@@ -212,7 +212,7 @@ index 000000000..8fc248c8b
 +}
 \ No newline at end of file
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index ab0d41cad..7a0001d0d 100644
+index ab0d41cadabe4c010751994515925525df66dace..7a0001d0d21081a240294dbf6e276ac90a27d06f 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
 @@ -144,7 +144,7 @@ public class Chunk {
@@ -224,6 +224,3 @@ index ab0d41cad..7a0001d0d 100644
          }
  
          Arrays.fill(this.f, -999);
--- 
-2.38.1.windows.1
-

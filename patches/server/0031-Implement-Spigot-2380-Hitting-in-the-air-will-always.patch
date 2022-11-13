@@ -1,4 +1,4 @@
-From 73c5cd166d85cbb85091dc683c6d61afb094f7b9 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 19 May 2022 19:36:03 +0200
 Subject: [PATCH] Implement [Spigot-2380] Hitting in the air will always load
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Spigot-2380] Hitting in the air will always load
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java b/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
-index db915033b..54fa1a2a2 100644
+index db915033b217518a918e3553d90d1c193d78e67b..54fa1a2a232167cdf199f05570829c2f1a8289be 100644
 --- a/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
 +++ b/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
 @@ -188,7 +188,7 @@ public class CraftEventFactory {
@@ -42,6 +42,3 @@ index db915033b..54fa1a2a2 100644
          if (itemInHand.getType() == Material.AIR || itemInHand.getAmount() == 0) {
              itemInHand = null;
          }
--- 
-2.38.1.windows.1
-

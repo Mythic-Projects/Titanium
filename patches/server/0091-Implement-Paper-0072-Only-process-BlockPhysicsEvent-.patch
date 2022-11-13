@@ -1,4 +1,4 @@
-From 4b5ef034e40105372b5c1093e9928aacc00dd0e6 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Sun, 5 Jun 2022 16:32:35 +0200
 Subject: [PATCH] Implement [Paper-0072] Only process BlockPhysicsEvent if a
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0072] Only process BlockPhysicsEvent if a
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 53fc1b6bf..d671d2e20 100644
+index 53fc1b6bfa92c226c5a5577406cc8cbbd2769d63..d671d2e20de2aed97c92486310915ae5a6ab352c 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -843,6 +843,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
@@ -18,7 +18,7 @@ index 53fc1b6bf..d671d2e20 100644
                  this.methodProfiler.a(worldserver.getWorldData().getName());
                  /* Drop global time updates
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 6645e4cb4..2af353222 100644
+index 6645e4cb4598f14400342508ab96f9641e7b51a8..2af35322287456b9604848deb41a768f6fcdb910 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -611,7 +611,7 @@ public abstract class World implements IBlockAccess {
@@ -31,7 +31,7 @@ index 6645e4cb4..2af353222 100644
                      this.getServer().getPluginManager().callEvent(event);
  
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 1b7b28f98..3ff74dd9b 100644
+index 1b7b28f9897f04141bdbaa86180fc923dcb962cf..3ff74dd9b95f1474739eaaf133e441a96c294f72 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
 @@ -51,6 +51,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
@@ -42,6 +42,3 @@ index 1b7b28f98..3ff74dd9b 100644
  
      // CraftBukkit start
      public final int dimension;
--- 
-2.38.1.windows.1
-

@@ -1,11 +1,11 @@
-From 971c5f962728653541269e98a3f5ace6c99325e0 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 19 May 2022 23:28:31 +0200
 Subject: [PATCH] Implement [Paper-0344] [MC-111480] Start Entity ID's at 1
 
 
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 9580599f1..d7ad9edcd 100644
+index 9580599f175c68002d82076664d7db7abfa8d7bf..d7ad9edcdef05de8d5d95acd8863cc9cc4f2dfd5 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
 @@ -48,7 +48,7 @@ public abstract class Entity implements ICommandListener {
@@ -17,6 +17,3 @@ index 9580599f1..d7ad9edcd 100644
      private int id;
      public double j;
      public boolean k;
--- 
-2.38.1.windows.1
-

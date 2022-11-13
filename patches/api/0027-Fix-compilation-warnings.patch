@@ -1,11 +1,11 @@
-From 9fcd6373bedf3c22fc615d0f6c038c847a794eb7 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sat, 18 Jun 2022 20:22:25 +0200
 Subject: [PATCH] Fix compilation warnings
 
 
 diff --git a/src/main/java/org/bukkit/ChatColor.java b/src/main/java/org/bukkit/ChatColor.java
-index b92e337b..984db3b0 100644
+index b92e337b50a1301f62b178a1f5aa617a0cf98fc7..984db3b0ca395e02e7b1aaa55697b47b8b59b039 100644
 --- a/src/main/java/org/bukkit/ChatColor.java
 +++ b/src/main/java/org/bukkit/ChatColor.java
 @@ -313,10 +313,10 @@ public enum ChatColor{
@@ -22,7 +22,7 @@ index b92e337b..984db3b0 100644
      public static String decolor(String input) {
          if (input == null) {
 diff --git a/src/main/java/org/bukkit/material/Door.java b/src/main/java/org/bukkit/material/Door.java
-index e02d8e66..07a40a00 100644
+index e02d8e662e443fc40d3f6ffcb6154321d7b7ec98..07a40a00f06fef9e8bdb200d30cc7acdc9d79ea8 100644
 --- a/src/main/java/org/bukkit/material/Door.java
 +++ b/src/main/java/org/bukkit/material/Door.java
 @@ -11,13 +11,13 @@ import org.bukkit.block.BlockFace;
@@ -177,7 +177,7 @@ index e02d8e66..07a40a00 100644
      public static Material getWoodDoorOfSpecies(TreeSpecies species) {
          switch (species) {
 diff --git a/src/test/java/org/bukkit/metadata/FixedMetadataValueTest.java b/src/test/java/org/bukkit/metadata/FixedMetadataValueTest.java
-index 5583b274..677a5517 100644
+index 5583b274b3e934cc694d0622df43f9dfac618555..677a55176384a71498f99dc219976a84115f67c0 100644
 --- a/src/test/java/org/bukkit/metadata/FixedMetadataValueTest.java
 +++ b/src/test/java/org/bukkit/metadata/FixedMetadataValueTest.java
 @@ -13,15 +13,15 @@ public class FixedMetadataValueTest {
@@ -200,6 +200,3 @@ index 5583b274..677a5517 100644
          assertEquals(5, subject.asInt());
          assertEquals(true, subject.asBoolean());
          assertEquals(5, subject.asByte());
--- 
-2.38.1.windows.1
-

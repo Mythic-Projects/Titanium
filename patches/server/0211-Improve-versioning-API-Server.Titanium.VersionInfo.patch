@@ -1,11 +1,11 @@
-From f3578ec41f93073b05f6a355a85e38f263042524 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sat, 5 Nov 2022 21:30:37 +0100
 Subject: [PATCH] Improve versioning API - Server.Titanium.VersionInfo
 
 
 diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
-index e60f87391..6231631fc 100644
+index e60f87391288a8172057d2f85eeb833056e4f242..6231631fcf8d26ba546975b5d2fcc2e21e941679 100644
 --- a/src/main/java/net/minecraft/server/DedicatedServer.java
 +++ b/src/main/java/net/minecraft/server/DedicatedServer.java
 @@ -362,18 +362,14 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
@@ -36,7 +36,7 @@ index e60f87391..6231631fc 100644
          metrics.addCustomChart(new net.titanium.Metrics.SimplePie("source", source));
          metrics.addCustomChart(new net.titanium.Metrics.SimplePie("branch", branch));
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 971d0b254..d9521560d 100644
+index 971d0b254dea0523b036c40a3a0fb630e270e513..d9521560d2a57b6fe12bedb770659dc26c335506 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -2085,6 +2085,71 @@ public final class CraftServer implements Server {
@@ -111,6 +111,3 @@ index 971d0b254..d9521560d 100644
          @Override
          public OkaeriConfig getServerConfig() {
              return serverConfig;
--- 
-2.38.1.windows.1
-

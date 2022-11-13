@@ -1,11 +1,11 @@
-From 9952a01f640febc1db08b812da626f37aab47305 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 23 Sep 2022 22:17:59 +0200
 Subject: [PATCH] Option to disable TNT in water sync
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityTNTPrimed.java b/src/main/java/net/minecraft/server/EntityTNTPrimed.java
-index f99cd3a61..c0b2742cd 100644
+index f99cd3a616da133b5da4c568ced5d9df379c5cf6..c0b2742cd004c8dce1fc304b49b56e5c8ef813e1 100644
 --- a/src/main/java/net/minecraft/server/EntityTNTPrimed.java
 +++ b/src/main/java/net/minecraft/server/EntityTNTPrimed.java
 @@ -193,7 +193,7 @@ public class EntityTNTPrimed extends Entity {
@@ -18,7 +18,7 @@ index f99cd3a61..c0b2742cd 100644
              // This does pretty well at keeping their clients in sync with the server.
              EntityTrackerEntry ete = ((WorldServer) this.getWorld()).getTracker().trackedEntities.get(this.getId());
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index b4dd72325..67b096a91 100644
+index b4dd723254f6196e1094cd7a7fa89425092031be..67b096a9102ba5ccc2024b84a3dc90f8147b03c4 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -96,15 +96,16 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -49,6 +49,3 @@ index b4dd72325..67b096a91 100644
      }
  
      @Comment("Whether saving of fireworks and arrows should be disabled.")
--- 
-2.38.1.windows.1
-

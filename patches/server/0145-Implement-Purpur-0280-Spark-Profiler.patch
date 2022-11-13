@@ -1,11 +1,11 @@
-From 8e596876e7e4285f30a43754c36ce3bf18100e18 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 24 Jul 2022 18:27:52 +0200
 Subject: [PATCH] Implement [Purpur-0280] Spark Profiler
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 6e8e1d9a6..ae6d22cba 100644
+index 6e8e1d9a6085264f73d7c9087b4a870f6866352e..ae6d22cba01aca5771103f7baa4119d338e80ff1 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -17,6 +17,7 @@ import java.io.File;
@@ -65,6 +65,3 @@ index 6e8e1d9a6..ae6d22cba 100644
              // Paper end
              for (Plugin plugin : plugins) {
                  try {
--- 
-2.38.1.windows.1
-

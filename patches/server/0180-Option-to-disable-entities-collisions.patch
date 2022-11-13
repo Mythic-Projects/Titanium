@@ -1,11 +1,11 @@
-From 27403b7bdb8b61cddc0df57b90548c4b6008666a Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 23 Sep 2022 23:25:14 +0200
 Subject: [PATCH] Option to disable entities collisions
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityInsentient.java b/src/main/java/net/minecraft/server/EntityInsentient.java
-index 6ef9663fc..302af42f4 100644
+index 6ef9663fcc12ae5823cd9feaaeae6cf079a73c02..302af42f49a7c437186ff396c47c499068c4c11f 100644
 --- a/src/main/java/net/minecraft/server/EntityInsentient.java
 +++ b/src/main/java/net/minecraft/server/EntityInsentient.java
 @@ -6,6 +6,7 @@ import java.util.List;
@@ -33,7 +33,7 @@ index 6ef9663fc..302af42f4 100644
 +
  }
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index e045a5942..b9c2f36d9 100644
+index e045a59423b3b60cdf69652e89e4c387497450c9..b9c2f36d9dd2a800f95e885f583b6af294d37fa1 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -1337,6 +1337,8 @@ public abstract class World implements IBlockAccess {
@@ -46,7 +46,7 @@ index e045a5942..b9c2f36d9 100644
  
          if (entity instanceof EntityTNTPrimed) return arraylist; // TacoSpigot - Optimize tnt entity movement
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 118b52b18..716648ad6 100644
+index 118b52b18e4b70a941e0039b36192dda55246ea6..716648ad64f0854c6bde94f1bb2d86703d09d08c 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -124,6 +124,9 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -59,6 +59,3 @@ index 118b52b18..716648ad6 100644
          public LightDetector lightDetector = new LightDetector();
  
          public static class LightDetector extends TitaniumConfigSection {
--- 
-2.38.1.windows.1
-

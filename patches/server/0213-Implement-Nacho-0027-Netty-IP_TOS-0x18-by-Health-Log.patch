@@ -1,4 +1,4 @@
-From 92d5388733442d3d6eff42e990043ec67227575c Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Heath Logan Campbell <github@heathlogancampbell.com>
 Date: Fri, 31 Jul 2020 12:43:00 +0200
 Subject: [PATCH] Implement [Nacho-0027] Netty IP_TOS 0x18 by Health Logan
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Nacho-0027] Netty IP_TOS 0x18 by Health Logan
 
 
 diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
-index 4a2a1b565..d21a9293d 100644
+index 86e3d7825857c4f6c4d291101b48c9ffc1463b3a..18f9cc26ac4645bd4ddbb9930c993dcb30a1835d 100644
 --- a/src/main/java/net/minecraft/server/ServerConnection.java
 +++ b/src/main/java/net/minecraft/server/ServerConnection.java
 @@ -117,6 +117,7 @@ public class ServerConnection {
@@ -17,6 +17,3 @@ index 4a2a1b565..d21a9293d 100644
                      } catch (ChannelException channelexception) {
                          ;
                      }
--- 
-2.38.1.windows.1
-

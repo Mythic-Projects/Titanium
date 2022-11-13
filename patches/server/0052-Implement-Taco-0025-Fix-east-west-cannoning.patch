@@ -1,11 +1,11 @@
-From 562d11cb0ce72c21b464a647cb75594453104fcd Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 22 May 2022 23:06:55 +0200
 Subject: [PATCH] Implement [Taco-0025] Fix east/west cannoning
 
 
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index dbaeee4c1..42c3f113f 100644
+index dbaeee4c1979f39a0dd391b05ff781aaba573554..42c3f113f3cf597e4bf49231a53b4b99038f1413 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
 @@ -583,11 +583,31 @@ public abstract class Entity implements ICommandListener {
@@ -52,7 +52,7 @@ index dbaeee4c1..42c3f113f 100644
                  double d10 = d0;
                  double d11 = d1;
 diff --git a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
-index 3a356dd35..c8eb27730 100644
+index 3a356dd3567b3b9f151a6ed5a699a5c9ecaa31a8..c8eb27730b207aca7b3ae6356df97badf82f87a3 100644
 --- a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
 +++ b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
 @@ -7,6 +7,9 @@ import eu.okaeri.configs.annotation.Names;
@@ -65,6 +65,3 @@ index 3a356dd35..c8eb27730 100644
      public Tnt tnt = new Tnt();
  
      public static class Tnt extends TitaniumConfigSection {
--- 
-2.38.1.windows.1
-

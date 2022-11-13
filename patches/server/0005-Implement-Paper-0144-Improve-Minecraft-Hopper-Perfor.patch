@@ -1,11 +1,11 @@
-From 968e20661cf6f249eaea3fe5bf17e77446b19f63 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 9 Apr 2021 15:10:40 +0200
 Subject: [PATCH] Implement [Paper-0144] Improve Minecraft Hopper Performance
 
 
 diff --git a/src/main/java/net/minecraft/server/TileEntity.java b/src/main/java/net/minecraft/server/TileEntity.java
-index f68b132fb..dd9efebad 100644
+index f68b132fb9d0b38f2ebc1e4c8c4ca6ef993fc72a..dd9efebad318b9421770f233363ef3d8f47d89ef 100644
 --- a/src/main/java/net/minecraft/server/TileEntity.java
 +++ b/src/main/java/net/minecraft/server/TileEntity.java
 @@ -22,6 +22,7 @@ public abstract class TileEntity {
@@ -25,7 +25,7 @@ index f68b132fb..dd9efebad 100644
  
              this.h = iblockdata.getBlock().toLegacyData(iblockdata);
 diff --git a/src/main/java/net/minecraft/server/TileEntityHopper.java b/src/main/java/net/minecraft/server/TileEntityHopper.java
-index 760a0767e..49a004b20 100644
+index 760a0767eae7c148efd27c78a4a2f142507b75b7..49a004b200a79231ca0a91c2dfc20d8caf5ee804 100644
 --- a/src/main/java/net/minecraft/server/TileEntityHopper.java
 +++ b/src/main/java/net/minecraft/server/TileEntityHopper.java
 @@ -504,7 +504,9 @@ public class TileEntityHopper extends TileEntityContainer implements IHopper, IU
@@ -46,6 +46,3 @@ index 760a0767e..49a004b20 100644
      public boolean n() {
          return this.g > 0;
      }
--- 
-2.38.1.windows.1
-

@@ -1,4 +1,4 @@
-From bbaee60b129cd10b89463a7a8faa68640f9da20a Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 13 Jun 2022 17:56:32 +0200
 Subject: [PATCH] Knockback profiles
@@ -6,7 +6,7 @@ Subject: [PATCH] Knockback profiles
 
 diff --git a/src/main/java/dev/cobblesword/nachospigot/knockback/KnockbackProfile.java b/src/main/java/dev/cobblesword/nachospigot/knockback/KnockbackProfile.java
 new file mode 100644
-index 00000000..8c1506db
+index 0000000000000000000000000000000000000000..8c1506db5da8a3da2a196c5abf6f8ce42219e4d0
 --- /dev/null
 +++ b/src/main/java/dev/cobblesword/nachospigot/knockback/KnockbackProfile.java
 @@ -0,0 +1,110 @@
@@ -123,7 +123,7 @@ index 00000000..8c1506db
 \ No newline at end of file
 diff --git a/src/main/java/net/titanium/knockback/KnockbackProfile.java b/src/main/java/net/titanium/knockback/KnockbackProfile.java
 new file mode 100644
-index 00000000..507f8b42
+index 0000000000000000000000000000000000000000..507f8b423064cca35e3a67ca702243253639a24a
 --- /dev/null
 +++ b/src/main/java/net/titanium/knockback/KnockbackProfile.java
 @@ -0,0 +1,21 @@
@@ -149,7 +149,7 @@ index 00000000..507f8b42
 +
 +}
 diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
-index 2ba2788e..7696b6f7 100644
+index 2ba2788e8348d0694b553758c04f8aefb42d9cb6..7696b6f70c90700def3ccb0af3a9b94fc152a460 100644
 --- a/src/main/java/org/bukkit/Bukkit.java
 +++ b/src/main/java/org/bukkit/Bukkit.java
 @@ -1203,4 +1203,5 @@ public final class Bukkit {
@@ -159,7 +159,7 @@ index 2ba2788e..7696b6f7 100644
 +
  }
 diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
-index 4d9d066f..0242faa4 100644
+index 4d9d066fb18a9570e885103ab4b61f0723eefd41..0242faa47655bfee9985009284a30345bad0ec1f 100644
 --- a/src/main/java/org/bukkit/Server.java
 +++ b/src/main/java/org/bukkit/Server.java
 @@ -1,5 +1,7 @@
@@ -288,7 +288,7 @@ index 4d9d066f..0242faa4 100644
  
      }
 diff --git a/src/main/java/org/bukkit/entity/LivingEntity.java b/src/main/java/org/bukkit/entity/LivingEntity.java
-index 48e25089..6ea3cbd8 100644
+index 48e2508941299ce55f672979ff85a2969fc1c64b..6ea3cbd87e67232cee41de41c73405523794f61b 100644
 --- a/src/main/java/org/bukkit/entity/LivingEntity.java
 +++ b/src/main/java/org/bukkit/entity/LivingEntity.java
 @@ -5,6 +5,7 @@ import java.util.HashSet;
@@ -319,6 +319,3 @@ index 48e25089..6ea3cbd8 100644
      /**
       * Gets the player identified as the killer of the living entity.
       * <p>
--- 
-2.38.1.windows.1
-

@@ -1,4 +1,4 @@
-From 0147e8de8f6989a3056a0f99c4735cac0a87aba0 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: SuicidalKids <kfian294ma4@gmail.com>
 Date: Tue, 15 Sep 2020 05:06:25 +0100
 Subject: [PATCH] Implement [IonSpigot-0003] Explosion Improvements by
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [IonSpigot-0003] Explosion Improvements by
 
 
 diff --git a/src/main/java/net/minecraft/server/BlockPosition.java b/src/main/java/net/minecraft/server/BlockPosition.java
-index e8f475836..7719ba332 100644
+index e8f4758367eae77389fc1be6830ef37a7f58274b..7719ba3326552c0186aeea24074bc168783f6077 100644
 --- a/src/main/java/net/minecraft/server/BlockPosition.java
 +++ b/src/main/java/net/minecraft/server/BlockPosition.java
 @@ -305,6 +305,12 @@ public class BlockPosition extends BaseBlockPosition {
@@ -23,7 +23,7 @@ index e8f475836..7719ba332 100644
              setX(i);
              setY(j);
 diff --git a/src/main/java/net/minecraft/server/Explosion.java b/src/main/java/net/minecraft/server/Explosion.java
-index 560d15777..ee4cd2c6e 100644
+index 560d15777064b28665eebd429f0beff526156d6b..ee4cd2c6e46af52ba6021ead5d876670a0c18dad 100644
 --- a/src/main/java/net/minecraft/server/Explosion.java
 +++ b/src/main/java/net/minecraft/server/Explosion.java
 @@ -3,6 +3,8 @@ package net.minecraft.server;
@@ -411,7 +411,7 @@ index 560d15777..ee4cd2c6e 100644
      // PaperSpigot end
  }
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 0895ac9af..e045a5942 100644
+index 0895ac9af6ad470947394354e6f86db2cc91ee83..e045a59423b3b60cdf69652e89e4c387497450c9 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -149,7 +149,12 @@ public abstract class World implements IBlockAccess {
@@ -429,7 +429,7 @@ index 0895ac9af..e045a5942 100644
      public final MovementCache movementCache = new MovementCache(); // IonSpigot - Movement Cache
  
 diff --git a/src/main/java/net/titanium/config/IonWorldConfig.java b/src/main/java/net/titanium/config/IonWorldConfig.java
-index 3e7abe020..1eb4876d8 100644
+index 3e7abe0200a387d5df865206933f9e9ddf49db19..1eb4876d8b442eee3df88dd9d637ccbd755cf199 100644
 --- a/src/main/java/net/titanium/config/IonWorldConfig.java
 +++ b/src/main/java/net/titanium/config/IonWorldConfig.java
 @@ -19,6 +19,20 @@ public class IonWorldConfig extends TitaniumConfigSection {
@@ -453,6 +453,3 @@ index 3e7abe020..1eb4876d8 100644
      public Tnt tnt = new Tnt();
  
      public static class Tnt extends TitaniumConfigSection {
--- 
-2.38.1.windows.1
-

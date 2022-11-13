@@ -1,4 +1,4 @@
-From a4019eaa9f0814892956a76ef29a220699a4384f Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Sun, 5 Feb 2017 00:04:04 -0500
 Subject: [PATCH] Implement [Paper-0201] Remove CraftScheduler Async Task
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0201] Remove CraftScheduler Async Task
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftScheduler.java b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftScheduler.java
-index 74c6099cc..53519d9a4 100644
+index 74c6099cc9ec4785e4a0eabcf46dd197dfce20e2..53519d9a4fa4d2d085d59cdadfc230df22aa1b9d 100644
 --- a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftScheduler.java
 +++ b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftScheduler.java
 @@ -76,8 +76,8 @@ public class CraftScheduler implements BukkitScheduler {
@@ -55,6 +55,3 @@ index 74c6099cc..53519d9a4 100644
      }
  
      @Deprecated
--- 
-2.38.1.windows.1
-

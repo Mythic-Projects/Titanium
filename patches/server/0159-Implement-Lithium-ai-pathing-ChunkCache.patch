@@ -1,11 +1,11 @@
-From 3e904cefb7fe77a06fb2439beff03d7f57a436d0 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 14 Sep 2022 16:51:41 +0200
 Subject: [PATCH] Implement [Lithium-ai/pathing/ChunkCache]
 
 
 diff --git a/src/main/java/net/minecraft/server/ChunkCache.java b/src/main/java/net/minecraft/server/ChunkCache.java
-index b9ab623fa..a64d03085 100644
+index b9ab623fa63d3c5ad132504673b28fbe44bbea0b..a64d03085c767e6538694853f64fc9edb430651a 100644
 --- a/src/main/java/net/minecraft/server/ChunkCache.java
 +++ b/src/main/java/net/minecraft/server/ChunkCache.java
 @@ -1,6 +1,7 @@
@@ -90,6 +90,3 @@ index b9ab623fa..a64d03085 100644
      }
  
      public boolean isEmpty(BlockPosition blockposition) {
--- 
-2.38.1.windows.1
-

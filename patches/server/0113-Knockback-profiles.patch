@@ -1,11 +1,11 @@
-From d90f641c6ef8e7119fe33e4d4f21326d8df32616 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 13 Jun 2022 17:56:45 +0200
 Subject: [PATCH] Knockback profiles
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
-index 7b814c1f0..2b7aa9e69 100644
+index 7b814c1f001626a2c84239544e7c0f33ae4b3b51..2b7aa9e699e6cbd225b6b38b6d9a04db08190402 100644
 --- a/src/main/java/net/minecraft/server/EntityHuman.java
 +++ b/src/main/java/net/minecraft/server/EntityHuman.java
 @@ -10,6 +10,7 @@ import java.util.UUID;
@@ -48,7 +48,7 @@ index 7b814c1f0..2b7aa9e69 100644
  
                          if (entity instanceof EntityPlayer && entity.velocityChanged) {
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index e9531e847..9077f53ac 100644
+index e9531e84784312965bcf371e7e85fb1f2f62e73e..9077f53ac4bcd291970255f23ca4f49fffdbb502 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
 @@ -15,6 +15,8 @@ import java.util.UUID;
@@ -204,7 +204,7 @@ index e9531e847..9077f53ac 100644
 +    // Titanium end
  }
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index a6434e8a3..e070a0938 100644
+index a6434e8a30e932204e8b26b07a7bd8d6c042aa4e..e070a093877a608ae853b653fff303848df50da8 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -1275,10 +1275,12 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
@@ -222,7 +222,7 @@ index a6434e8a3..e070a0938 100644
          case 5:
 diff --git a/src/main/java/net/titanium/Titanium.java b/src/main/java/net/titanium/Titanium.java
 new file mode 100644
-index 000000000..4e85f8b45
+index 0000000000000000000000000000000000000000..4e85f8b45d4c46f25477098be4a4955282e67b6b
 --- /dev/null
 +++ b/src/main/java/net/titanium/Titanium.java
 @@ -0,0 +1,63 @@
@@ -290,7 +290,7 @@ index 000000000..4e85f8b45
 +
 +}
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 8118e21c4..201d83c3b 100644
+index 8118e21c48fd6b5fcd26dbcd5cedb4a5461917da..201d83c3b8f535a6044246f8312885696d7220e2 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -28,7 +28,8 @@ import org.spigotmc.TicksPerSecondCommand;
@@ -357,7 +357,7 @@ index 8118e21c4..201d83c3b 100644
      }
 diff --git a/src/main/java/net/titanium/config/knockback/KnockbackConfig.java b/src/main/java/net/titanium/config/knockback/KnockbackConfig.java
 new file mode 100644
-index 000000000..0ed86a75c
+index 0000000000000000000000000000000000000000..0ed86a75caec494592f015f9308c79d437e07ca5
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/knockback/KnockbackConfig.java
 @@ -0,0 +1,211 @@
@@ -574,7 +574,7 @@ index 000000000..0ed86a75c
 +}
 diff --git a/src/main/java/net/titanium/knockback/TitaniumKnockbackProfile.java b/src/main/java/net/titanium/knockback/TitaniumKnockbackProfile.java
 new file mode 100644
-index 000000000..4169ed628
+index 0000000000000000000000000000000000000000..4169ed628b28e941bf2798050cbe542285677705
 --- /dev/null
 +++ b/src/main/java/net/titanium/knockback/TitaniumKnockbackProfile.java
 @@ -0,0 +1,411 @@
@@ -990,7 +990,7 @@ index 000000000..4169ed628
 +
 +}
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index e29a2e99c..3a9e51740 100644
+index e29a2e99cec1d952e787724435e920011e97bd29..3a9e51740c2fdba037dae07d84f7abe30c9116fa 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -1,11 +1,16 @@
@@ -1146,7 +1146,7 @@ index e29a2e99c..3a9e51740 100644
  
      public Titanium titanium() {
 diff --git a/src/main/java/org/bukkit/craftbukkit/Main.java b/src/main/java/org/bukkit/craftbukkit/Main.java
-index 65ec9c8d3..31525c89c 100644
+index 65ec9c8d376c35b31bdc0beea4d2fe2a997d5a1f..31525c89c3b6de0cebbfd0e85e9db779a0fb920f 100644
 --- a/src/main/java/org/bukkit/craftbukkit/Main.java
 +++ b/src/main/java/org/bukkit/craftbukkit/Main.java
 @@ -147,6 +147,12 @@ public class Main {
@@ -1163,7 +1163,7 @@ index 65ec9c8d3..31525c89c 100644
              }
          };
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
-index 3e3a04808..cb0a5b90f 100644
+index 3e3a04808196e722fd1dcdae638bfcf45a79f4d9..cb0a5b90f6d4bb19a9d110f007dcaf1860f84dba 100644
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
 +++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
 @@ -30,6 +30,7 @@ import net.minecraft.server.GenericAttributes;
@@ -1193,7 +1193,7 @@ index 3e3a04808..cb0a5b90f 100644
 +
  }
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-index edad1260e..afed8b691 100644
+index edad1260e98c95c36c33ea97c4e087539414197b..afed8b6915f3e66dbd1d8bc394e91a46820e7f76 100644
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
 @@ -25,6 +25,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
@@ -1204,6 +1204,3 @@ index edad1260e..afed8b691 100644
  import org.apache.commons.lang.Validate;
  import org.apache.commons.lang.NotImplementedException;
  import org.bukkit.*;
--- 
-2.38.1.windows.1
-

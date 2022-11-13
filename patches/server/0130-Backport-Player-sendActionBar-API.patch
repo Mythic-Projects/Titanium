@@ -1,11 +1,11 @@
-From 99c7d495f7f94a9c8d23b88c0dfca054d8c50fdf Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 22 Jun 2022 09:05:11 +0200
 Subject: [PATCH] Backport Player#sendActionBar API
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-index ed8338ce8..8970f6ef7 100644
+index ed8338ce834559adc30e6b79641cd52471bafcf6..8970f6ef737515f9538ebde07ab789e3c8e7ce6a 100644
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
 @@ -260,6 +260,16 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
@@ -25,6 +25,3 @@ index ed8338ce8..8970f6ef7 100644
      @Override
      public String getDisplayName() {
          return getHandle().displayName;
--- 
-2.38.1.windows.1
-

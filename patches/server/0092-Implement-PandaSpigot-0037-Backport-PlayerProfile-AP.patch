@@ -1,4 +1,4 @@
-From 283dfe1bfdaaa7c092a4d46f8c32d25543aed30e Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: hpfxd <me@hpfxd.com>
 Date: Thu, 4 Nov 2021 13:10:10 -0400
 Subject: [PATCH] Implement [PandaSpigot-0037] Backport PlayerProfile API by
@@ -7,7 +7,7 @@ Subject: [PATCH] Implement [PandaSpigot-0037] Backport PlayerProfile API by
 
 diff --git a/src/main/java/com/destroystokyo/paper/profile/CraftPlayerProfile.java b/src/main/java/com/destroystokyo/paper/profile/CraftPlayerProfile.java
 new file mode 100644
-index 000000000..33d34a780
+index 0000000000000000000000000000000000000000..33d34a78008f24b2b12dce6d06d3cfe76b8e65e4
 --- /dev/null
 +++ b/src/main/java/com/destroystokyo/paper/profile/CraftPlayerProfile.java
 @@ -0,0 +1,295 @@
@@ -307,7 +307,7 @@ index 000000000..33d34a780
 +    }
 +}
 diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
-index ed4648325..7b814c1f0 100644
+index ed464832567b67660553459621240b99a83bcc45..7b814c1f001626a2c84239544e7c0f33ae4b3b51 100644
 --- a/src/main/java/net/minecraft/server/EntityHuman.java
 +++ b/src/main/java/net/minecraft/server/EntityHuman.java
 @@ -58,7 +58,7 @@ public abstract class EntityHuman extends EntityLiving {
@@ -320,7 +320,7 @@ index ed4648325..7b814c1f0 100644
      public EntityFishingHook hookedFish;
      public boolean affectsSpawning = true; // PaperSpigot
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index d671d2e20..68cff09ef 100644
+index d671d2e20de2aed97c92486310915ae5a6ab352c..68cff09ef0bb91f8c5569222f7dc83247df05932 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -1554,6 +1554,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
@@ -332,7 +332,7 @@ index d671d2e20..68cff09ef 100644
          return this.W;
      }
 diff --git a/src/main/java/net/minecraft/server/UserCache.java b/src/main/java/net/minecraft/server/UserCache.java
-index 581899291..277268a4f 100644
+index 581899291851d9449392c313cdbf0ee9fe54db61..277268a4fda9a8c02793f174d5282f9a6cb1dddc 100644
 --- a/src/main/java/net/minecraft/server/UserCache.java
 +++ b/src/main/java/net/minecraft/server/UserCache.java
 @@ -95,6 +95,7 @@ public class UserCache {
@@ -365,7 +365,7 @@ index 581899291..277268a4f 100644
          UserCache.UserCacheEntry usercache_usercacheentry = (UserCache.UserCacheEntry) this.d.get(uuid);
  
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 9173676ba..235b8f8bb 100644
+index 9173676baac7e387849a84831f8138c9f78a89b0..235b8f8bbd0ebe4fd9b4f2e8fa48b60c9faff3ad 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -1833,6 +1833,27 @@ public final class CraftServer implements Server {
@@ -405,7 +405,7 @@ index 9173676ba..235b8f8bb 100644
  
      public Titanium titanium() {
 diff --git a/src/main/java/org/bukkit/craftbukkit/block/CraftSkull.java b/src/main/java/org/bukkit/craftbukkit/block/CraftSkull.java
-index 77f5dcc67..02e4866cc 100644
+index 77f5dcc67f716a517c0dec6c5308469a91bbbe23..02e4866cccf1a3a8e3d68f3973014ef9becd30f8 100644
 --- a/src/main/java/org/bukkit/craftbukkit/block/CraftSkull.java
 +++ b/src/main/java/org/bukkit/craftbukkit/block/CraftSkull.java
 @@ -172,6 +172,18 @@ public class CraftSkull extends CraftBlockState implements Skull {
@@ -428,7 +428,7 @@ index 77f5dcc67..02e4866cc 100644
      	return getBlockFace(rotation);
      }
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-index 96e216539..edad1260e 100644
+index 96e216539642695deebc7b0492af87970bacd30f..edad1260e98c95c36c33ea97c4e087539414197b 100644
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
 @@ -973,9 +973,14 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
@@ -516,7 +516,7 @@ index 96e216539..edad1260e 100644
      public void removeDisconnectingPlayer(Player player) {
          hiddenPlayers.remove(player.getUniqueId());
 diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaSkull.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaSkull.java
-index 80224ab28..011df7db3 100644
+index 80224ab28d398d9c50126e53dd1b974222fe4dc8..011df7db3c14283874257a7f02b44719f1b791ca 100644
 --- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaSkull.java
 +++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaSkull.java
 @@ -150,6 +150,18 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
@@ -538,6 +538,3 @@ index 80224ab28..011df7db3 100644
      @Override
      int applyHash() {
          final int original;
--- 
-2.38.1.windows.1
-

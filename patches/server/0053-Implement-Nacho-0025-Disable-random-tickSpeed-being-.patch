@@ -1,4 +1,4 @@
-From e5fa436f13c1c5762e54507a9930773ea708dde6 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 22 May 2022 23:11:39 +0200
 Subject: [PATCH] Implement [Nacho-0025] Disable random tickSpeed being
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Nacho-0025] Disable random tickSpeed being
 
 
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 16441d096..46ffc14d0 100644
+index 16441d096f33ee96484a0a38df7a476442b58b82..46ffc14d0bc6ec6ab0a8c53562697e9eeaf13d01 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -10,6 +10,7 @@ import net.titanium.config.PaperWorldConfig;
@@ -34,7 +34,7 @@ index 16441d096..46ffc14d0 100644
          this.paperConfigTitanium = serverConfig.paper.worldSettings;
          this.tacoConfigTitanium = serverConfig.taco.worldSettings;
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 8fa99c50f..1b7b28f98 100644
+index 8fa99c50f679a275f00cd1e9a7fa99c8f91274b8..1b7b28f9897f04141bdbaa86180fc923dcb962cf 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
 @@ -479,7 +479,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
@@ -47,7 +47,7 @@ index 8fa99c50f..1b7b28f98 100644
                      ChunkSection[] achunksection = chunk.getSections();
                      int j1 = achunksection.length;
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index a88915383..c17d5b554 100644
+index a88915383ee0412a2f60468f41ac0ddd3a2d7d51..c17d5b55403eb91371cc62bd3979f8dfba75ef2b 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -102,6 +102,8 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -61,7 +61,7 @@ index a88915383..c17d5b554 100644
      public static class Commands extends TitaniumConfigSection {
 diff --git a/src/main/java/net/titanium/config/TitaniumWorldConfig.java b/src/main/java/net/titanium/config/TitaniumWorldConfig.java
 new file mode 100644
-index 000000000..1b1bc1384
+index 0000000000000000000000000000000000000000..1b1bc1384c428efe05b4de2d4ecefc355398fe51
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/TitaniumWorldConfig.java
 @@ -0,0 +1,19 @@
@@ -84,6 +84,3 @@ index 000000000..1b1bc1384
 +    }
 +
 +}
--- 
-2.38.1.windows.1
-

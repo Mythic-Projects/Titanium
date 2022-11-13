@@ -1,4 +1,4 @@
-From 5a6ddaf60ae5b6136707bec9f826aae15bd4e613 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Sun, 18 Mar 2018 11:45:57 -0400
 Subject: [PATCH] Implement [Paper-0277] Ability to change PlayerProfile in
@@ -7,7 +7,7 @@ Subject: [PATCH] Implement [Paper-0277] Ability to change PlayerProfile in
 This will allow you to change the players name or skin on login.
 
 diff --git a/src/main/java/net/minecraft/server/LoginListener.java b/src/main/java/net/minecraft/server/LoginListener.java
-index 812d9a947..ef6cc267e 100644
+index 812d9a94712f359f30a6d74efb49e13503265d65..ef6cc267e4815761b51ceb6309a8326036228542 100644
 --- a/src/main/java/net/minecraft/server/LoginListener.java
 +++ b/src/main/java/net/minecraft/server/LoginListener.java
 @@ -254,8 +254,16 @@ public class LoginListener implements PacketLoginInListener, IUpdatePlayerListBo
@@ -28,6 +28,3 @@ index 812d9a947..ef6cc267e 100644
  
                              if (PlayerPreLoginEvent.getHandlerList().getRegisteredListeners().length != 0) {
                                  final PlayerPreLoginEvent event = new PlayerPreLoginEvent(playerName, address, uniqueId);
--- 
-2.38.1.windows.1
-

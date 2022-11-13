@@ -1,4 +1,4 @@
-From b74354255b1daf896e5a8d40222c57ce0c2ea85d Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Techcable <Techcable@outlook.com>
 Date: Thu, 10 Mar 2016 13:19:17 -0700
 Subject: [PATCH] Implement [Taco-0014] Add an option for grass to ignore light
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Taco-0014] Add an option for grass to ignore light
 
 
 diff --git a/src/main/java/net/minecraft/server/BlockGrass.java b/src/main/java/net/minecraft/server/BlockGrass.java
-index 381d40209..e46f98779 100644
+index 381d40209d233f1ca5675e9737a6cd6a23b25a2b..e46f9877936adb6de8a693ec20a06d5d45c22a9b 100644
 --- a/src/main/java/net/minecraft/server/BlockGrass.java
 +++ b/src/main/java/net/minecraft/server/BlockGrass.java
 @@ -51,7 +51,7 @@ public class BlockGrass extends Block implements IBlockFragilePlantElement {
@@ -19,7 +19,7 @@ index 381d40209..e46f98779 100644
                          BlockPosition blockposition1 = blockposition.a(random.nextInt(3) - 1, random.nextInt(5) - 3, random.nextInt(3) - 1);
                          Block block = world.getType(blockposition1.up()).getBlock();
 diff --git a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
-index 8773f724e..b249233f5 100644
+index 8773f724ef495d09360a62126b29c388a641f15e..b249233f599e7f81d3682ed13d97a5b1900e92ed 100644
 --- a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
 +++ b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
 @@ -49,4 +49,7 @@ public class TacoSpigotWorldConfig extends TitaniumConfigSection {
@@ -30,6 +30,3 @@ index 8773f724e..b249233f5 100644
 +    public boolean grassIgnoresLight = false;
 +
  }
--- 
-2.38.1.windows.1
-

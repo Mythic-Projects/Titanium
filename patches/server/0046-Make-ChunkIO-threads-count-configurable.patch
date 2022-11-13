@@ -1,11 +1,11 @@
-From bae02cfdb9304d19c5baaec70ca7738469e5e70f Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 22 May 2022 22:29:04 +0200
 Subject: [PATCH] Make ChunkIO threads count configurable
 
 
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 5da1c1fd6..3dc4f7ebe 100644
+index 5da1c1fd6463cd854b9a0aefdc8233a0cb4b20ed..3dc4f7ebeb7f93bb6640f8e11ee4187c223dce8f 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -50,13 +50,33 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -44,7 +44,7 @@ index 5da1c1fd6..3dc4f7ebe 100644
  
          public Set<String> commandBlockOverrides = new HashSet<>();
 diff --git a/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOExecutor.java b/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOExecutor.java
-index 69e5da4c6..f02cb1783 100644
+index 69e5da4c65da46ad9d1456266cd4ad15b136f6e4..f02cb17838ad6f9d6d36ba9d828ce8fb7a8c3b7f 100644
 --- a/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOExecutor.java
 +++ b/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOExecutor.java
 @@ -4,11 +4,12 @@ import net.minecraft.server.Chunk;
@@ -62,6 +62,3 @@ index 69e5da4c6..f02cb1783 100644
  
      private static final AsynchronousExecutor<QueuedChunk, Chunk, Runnable, RuntimeException> instance = new AsynchronousExecutor<QueuedChunk, Chunk, Runnable, RuntimeException>(new ChunkIOProvider(), BASE_THREADS);
  
--- 
-2.38.1.windows.1
-

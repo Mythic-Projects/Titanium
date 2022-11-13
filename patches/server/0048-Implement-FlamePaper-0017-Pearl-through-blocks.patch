@@ -1,11 +1,11 @@
-From 71898e882ebc83692ad02c79f1f4c5d6bb61be8c Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 22 May 2022 22:36:59 +0200
 Subject: [PATCH] Implement [FlamePaper-0017] Pearl through blocks
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityEnderPearl.java b/src/main/java/net/minecraft/server/EntityEnderPearl.java
-index 80f2c1166..2ed7f2790 100644
+index 80f2c116629321d0496ebb09cf183417769207c4..2ed7f2790217b5596005b80a8ed5e6ff133bc413 100644
 --- a/src/main/java/net/minecraft/server/EntityEnderPearl.java
 +++ b/src/main/java/net/minecraft/server/EntityEnderPearl.java
 @@ -1,6 +1,7 @@
@@ -49,7 +49,7 @@ index 80f2c1166..2ed7f2790 100644
              this.world.addParticle(EnumParticle.PORTAL, this.locX, this.locY + this.random.nextDouble() * 2.0D, this.locZ, this.random.nextGaussian(), 0.0D, this.random.nextGaussian(), new int[0]);
          }
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index e5954d898..73fc33e5a 100644
+index e5954d898840396a0292229624522987f98e2edd..73fc33e5af90f64d1647873f410682db7b76a40b 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -50,6 +50,24 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -77,6 +77,3 @@ index e5954d898..73fc33e5a 100644
      public Chunk chunk = new Chunk();
  
      public static class Chunk extends TitaniumConfigSection {
--- 
-2.38.1.windows.1
-

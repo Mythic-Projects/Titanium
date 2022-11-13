@@ -1,11 +1,11 @@
-From 4b5018e55e1d92409a1dff9e9c2d8215ec00e59e Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 19 May 2022 22:54:27 +0200
 Subject: [PATCH] Implement [IonSpigot-0009] Reduce Unload Queue Complexity
 
 
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index 4f21d2543..c08454465 100644
+index 4f21d2543b1aa4ad623c50565e25521d11b4d8a3..c08454465cd1755ac117bee2670dfa62fed33821 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
 @@ -1,6 +1,7 @@
@@ -25,6 +25,3 @@ index 4f21d2543..c08454465 100644
      public Chunk emptyChunk;
      public IChunkProvider chunkProvider;
      private IChunkLoader chunkLoader;
--- 
-2.38.1.windows.1
-

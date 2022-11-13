@@ -1,4 +1,4 @@
-From 5863d323237ae682648ea987a13788f203bce448 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Mathias <mail@mathias.is>
 Date: Mon, 16 Dec 2019 19:11:10 +0200
 Subject: [PATCH] Backport [Spigot-5428] Better handling of some ItemMeta by
@@ -6,7 +6,7 @@ Subject: [PATCH] Backport [Spigot-5428] Better handling of some ItemMeta by
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBanner.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBanner.java
-index 80f9ffa9b..d6fd5bf82 100644
+index 80f9ffa9bb5c1acfa52019ca5c3e261580a1e148..d6fd5bf82d9c8ef34eb4af014399ef36177991b6 100644
 --- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBanner.java
 +++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBanner.java
 @@ -52,7 +52,14 @@ public class CraftMetaBanner extends CraftMetaItem implements BannerMeta {
@@ -26,7 +26,7 @@ index 80f9ffa9b..d6fd5bf82 100644
          }
      }
 diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaCharge.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaCharge.java
-index 6c6fde739..9e188d9a0 100644
+index 6c6fde739d9d96117a33adb266c5ed14bcdd91d1..9e188d9a07edaadee42eec564889702752abfb35 100644
 --- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaCharge.java
 +++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaCharge.java
 @@ -36,7 +36,13 @@ class CraftMetaCharge extends CraftMetaItem implements FireworkEffectMeta {
@@ -45,7 +45,7 @@ index 6c6fde739..9e188d9a0 100644
      }
  
 diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaFirework.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaFirework.java
-index 5a409aebb..62d43088a 100644
+index 5a409aebbb483c3327c2517ba1ee1a05a8f696fa..62d43088a02f019c7b2c9607478451857080995d 100644
 --- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaFirework.java
 +++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaFirework.java
 @@ -92,7 +92,13 @@ class CraftMetaFirework extends CraftMetaItem implements FireworkMeta {
@@ -63,6 +63,3 @@ index 5a409aebb..62d43088a 100644
          }
      }
  
--- 
-2.38.1.windows.1
-

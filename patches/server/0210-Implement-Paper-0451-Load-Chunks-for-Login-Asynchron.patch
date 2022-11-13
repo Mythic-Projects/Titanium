@@ -1,4 +1,4 @@
-From 344d47dc65f11c98ebfbd3bcbe90f20e9388765e Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Sun, 19 Apr 2020 04:28:29 -0400
 Subject: [PATCH] Implement [Paper-0451] Load Chunks for Login Asynchronously
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0451] Load Chunks for Login Asynchronously
 
 
 diff --git a/src/main/java/net/minecraft/server/ChunkCoordIntPair.java b/src/main/java/net/minecraft/server/ChunkCoordIntPair.java
-index 652c07975..8bee6acc7 100644
+index 652c07975c7b3a3c5e3dc68cb60ca5fc52e1848c..8bee6acc74b4640542f4311e767f16fec3f8c833 100644
 --- a/src/main/java/net/minecraft/server/ChunkCoordIntPair.java
 +++ b/src/main/java/net/minecraft/server/ChunkCoordIntPair.java
 @@ -65,6 +65,8 @@ public class ChunkCoordIntPair {
@@ -19,7 +19,7 @@ index 652c07975..8bee6acc7 100644
          return "[" + this.x + ", " + this.z + "]";
      }
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index 593017bb9..3984c2c60 100644
+index 593017bb9f29a5a57fdc7ecf8a2600ce984dcdaf..3984c2c608d1bc9b909c28bbd97f2cd9779e1c67 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
 @@ -120,6 +120,12 @@ public class ChunkProviderServer implements IChunkProvider {
@@ -36,7 +36,7 @@ index 593017bb9..3984c2c60 100644
          List<ChunkCoordIntPair> list = new ArrayList<>();
  
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index 2285cdcf2..0c9bc3199 100644
+index 2285cdcf2ff316c8dbd2b0b7e18a608216d8d479..0c9bc31992680ea7dd2608f37bfdbd94b20d5ac6 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
 @@ -31,6 +31,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
@@ -56,7 +56,7 @@ index 2285cdcf2..0c9bc3199 100644
      // Spigot start
      public boolean collidesWithEntities = true;
 diff --git a/src/main/java/net/minecraft/server/LoginListener.java b/src/main/java/net/minecraft/server/LoginListener.java
-index 0e5f1ea39..06ed38e41 100644
+index 0e5f1ea39c26a0735a4fafaab240cc69882e8134..06ed38e415b51047fa18f9dfc74ca413406194e0 100644
 --- a/src/main/java/net/minecraft/server/LoginListener.java
 +++ b/src/main/java/net/minecraft/server/LoginListener.java
 @@ -59,7 +59,7 @@ public class LoginListener implements PacketLoginInListener, IUpdatePlayerListBo
@@ -78,7 +78,7 @@ index 0e5f1ea39..06ed38e41 100644
              if (entityplayer != null) {
                  this.g = LoginListener.EnumProtocolState.e;
 diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
-index 268dec691..9cdd56c34 100644
+index 268dec691a8bcc80a35b957920a525d2f7b454d9..9cdd56c34e7a50765100f2a33a049387c186c736 100644
 --- a/src/main/java/net/minecraft/server/NetworkManager.java
 +++ b/src/main/java/net/minecraft/server/NetworkManager.java
 @@ -222,6 +222,14 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
@@ -105,7 +105,7 @@ index 268dec691..9cdd56c34 100644
              hitDetectionThread.addPacket(packet, this, agenericfuturelistener);
              return;
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index a3857e103..5fd898f15 100644
+index a3857e103481acd5ee140644b22557414589426a..5fd898f15bba703e9ec6f2f63b00c48ad5814a20 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -76,6 +76,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
@@ -131,7 +131,7 @@ index a3857e103..5fd898f15 100644
          if ((long) this.e - this.k > 40L) {
              this.k = (long) this.e;
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index a1abe9428..2c46e1c2e 100644
+index a1abe94280c4996a0541938678b0e6eaca62994d..2c46e1c2e6c65c9c6c638b1193c28f8b8e00a726 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -16,7 +16,9 @@ import java.util.HashSet;
@@ -291,6 +291,3 @@ index a1abe9428..2c46e1c2e 100644
      public EntityPlayer a(UUID uuid) {
          return (EntityPlayer) this.j.get(uuid);
      }
--- 
-2.38.1.windows.1
-

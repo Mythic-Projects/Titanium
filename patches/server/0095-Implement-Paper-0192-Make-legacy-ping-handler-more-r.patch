@@ -1,4 +1,4 @@
-From efc42eaa65753a6d13c888b91c2c4f39dbee7a4a Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Minecrell <minecrell@minecrell.net>
 Date: Thu, 22 Sep 2022 22:19:40 +0200
 Subject: [PATCH] Implement [Paper-0192] Make legacy ping handler more reliable
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0192] Make legacy ping handler more reliable
 
 
 diff --git a/src/main/java/net/minecraft/server/LegacyPingHandler.java b/src/main/java/net/minecraft/server/LegacyPingHandler.java
-index a7990660e..48acf6364 100644
+index a7990660e17f9e4d1f3834fc7eb61f5df8c75343..48acf63644761ed2a5ae5a1cbdc7705bc6afe75f 100644
 --- a/src/main/java/net/minecraft/server/LegacyPingHandler.java
 +++ b/src/main/java/net/minecraft/server/LegacyPingHandler.java
 @@ -7,6 +7,7 @@ import io.netty.channel.ChannelFutureListener;
@@ -152,6 +152,3 @@ index a7990660e..48acf6364 100644
      private void a(ChannelHandlerContext channelhandlercontext, ByteBuf bytebuf) {
          channelhandlercontext.pipeline().firstContext().writeAndFlush(bytebuf).addListener(ChannelFutureListener.CLOSE);
      }
--- 
-2.38.1.windows.1
-

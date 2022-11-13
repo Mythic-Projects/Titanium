@@ -1,11 +1,11 @@
-From ac4fff349cdd12a6801ec8e5a402f8988417d150 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 22 May 2022 23:34:18 +0200
 Subject: [PATCH] Implement [PandaSpigot-0006] Update to Netty 4.1.x
 
 
 diff --git a/pom.xml b/pom.xml
-index 496541bdd..4b26b7ec8 100644
+index 496541bdd61a30f13676bc8a7fbcec5911cb14b5..4b26b7ec84dc959b7f24efd5b52db05b86f8705c 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -35,6 +35,11 @@
@@ -21,7 +21,7 @@ index 496541bdd..4b26b7ec8 100644
              <groupId>net.sf.trove4j</groupId>
              <artifactId>trove4j</artifactId>
 diff --git a/src/main/java/net/minecraft/server/PacketDataSerializer.java b/src/main/java/net/minecraft/server/PacketDataSerializer.java
-index e2eb30546..b6b0e6dd3 100644
+index e2eb305468ff76026dc9b24d59394cfc94501273..b6b0e6dd3dbbd275b1915a14f476eaf4da9e6242 100644
 --- a/src/main/java/net/minecraft/server/PacketDataSerializer.java
 +++ b/src/main/java/net/minecraft/server/PacketDataSerializer.java
 @@ -8,6 +8,7 @@ import io.netty.buffer.ByteBufOutputStream;
@@ -321,6 +321,3 @@ index e2eb30546..b6b0e6dd3 100644
 +    }
 +    // PandaSpigot end
  }
--- 
-2.38.1.windows.1
-

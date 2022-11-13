@@ -1,4 +1,4 @@
-From 07f1d8725cdc308de1088ac8612000279aeaf511 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: RoccoDev <hey@rocco.dev>
 Date: Thu, 11 Feb 2021 17:07:11 +0100
 Subject: [PATCH] Implement [KigPaper-0138] Fix some more memory leaks by
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [KigPaper-0138] Fix some more memory leaks by
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityInsentient.java b/src/main/java/net/minecraft/server/EntityInsentient.java
-index 302af42f4..6e2e0c53a 100644
+index 302af42f49a7c437186ff396c47c499068c4c11f..6e2e0c53a480de0ac6fc7e2d97233d64d8fae0a4 100644
 --- a/src/main/java/net/minecraft/server/EntityInsentient.java
 +++ b/src/main/java/net/minecraft/server/EntityInsentient.java
 @@ -1,6 +1,7 @@
@@ -45,7 +45,7 @@ index 302af42f4..6e2e0c53a 100644
      }
  
 diff --git a/src/main/java/net/minecraft/server/PathfinderGoalSwell.java b/src/main/java/net/minecraft/server/PathfinderGoalSwell.java
-index c8eebf8cb..29e885e6e 100644
+index c8eebf8cb76e9683a8ce362af3e45691da0b0e8e..29e885e6e43419a09dd1d4473a2d323dc0a78fee 100644
 --- a/src/main/java/net/minecraft/server/PathfinderGoalSwell.java
 +++ b/src/main/java/net/minecraft/server/PathfinderGoalSwell.java
 @@ -3,7 +3,7 @@ package net.minecraft.server;
@@ -85,6 +85,3 @@ index c8eebf8cb..29e885e6e 100644
              this.a.a(-1);
          } else {
              this.a.a(1);
--- 
-2.38.1.windows.1
-

@@ -1,11 +1,11 @@
-From 0981788886c6b75550ec9f4802461a7b0ae4b9f3 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 17 Jun 2022 21:02:35 +0200
 Subject: [PATCH] Make messages configurable
 
 
 diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
-index 1ee72921..7f5d714d 100644
+index 1ee7292123246de64d052d50d8f94362f8866a37..7f5d714d48de47a281f2458f98a4934d6a0cb111 100644
 --- a/src/main/java/org/bukkit/Server.java
 +++ b/src/main/java/org/bukkit/Server.java
 @@ -1083,10 +1083,23 @@ public interface Server extends PluginMessageRecipient {
@@ -33,7 +33,7 @@ index 1ee72921..7f5d714d 100644
           * @return time when the server was started
           */
 diff --git a/src/main/java/org/bukkit/command/Command.java b/src/main/java/org/bukkit/command/Command.java
-index eebb817f..523b4679 100644
+index eebb817f8c0b8b76d12a1a597758c02f4eec26cd..523b4679d84167376d0993e45a49ebb787c455a9 100644
 --- a/src/main/java/org/bukkit/command/Command.java
 +++ b/src/main/java/org/bukkit/command/Command.java
 @@ -198,13 +198,19 @@ public abstract class Command {
@@ -61,6 +61,3 @@ index eebb817f..523b4679 100644
  
          return false;
      }
--- 
-2.38.1.windows.1
-

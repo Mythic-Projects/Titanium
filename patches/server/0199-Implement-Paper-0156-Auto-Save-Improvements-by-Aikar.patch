@@ -1,11 +1,11 @@
-From 32f468b6fc8037e1a74c9dc042b23dd2ef717ed6 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Mon, 19 Sep 2016 23:16:39 -0400
 Subject: [PATCH] Implement [Paper-0156] Auto Save Improvements by Aikar
 
 
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index eee8537e2..44c1a5b6f 100644
+index eee8537e2f7063b55107c0f083fc6217a44fec13..44c1a5b6f60d70000f812df0d614e1ab4568c715 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
 @@ -1059,11 +1059,10 @@ public class Chunk {
@@ -23,7 +23,7 @@ index eee8537e2..44c1a5b6f 100644
  
      public Random a(long i) {
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index 9c841a9b6..593017bb9 100644
+index 9c841a9b628a199652f32116a4478f9287d3b89d..593017bb9f29a5a57fdc7ecf8a2600ce984dcdaf 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
 @@ -390,7 +390,7 @@ public class ChunkProviderServer implements IChunkProvider {
@@ -36,7 +36,7 @@ index 9c841a9b6..593017bb9 100644
                  }
              }
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index d88128a68..2285cdcf2 100644
+index d88128a68f56f82e743068d008c0f080f41dac8d..2285cdcf2ff316c8dbd2b0b7e18a608216d8d479 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
 @@ -29,6 +29,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
@@ -48,7 +48,7 @@ index d88128a68..2285cdcf2 100644
      public final MinecraftServer server;
      public final PlayerInteractManager playerInteractManager;
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 0a3c4ef8a..e1fe12478 100644
+index 0a3c4ef8aaeff67ebf89508ca7cb20724cac4346..e1fe12478694aa830a2bbd9ba80f6bfdd424074f 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -126,6 +126,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
@@ -98,7 +98,7 @@ index 0a3c4ef8a..e1fe12478 100644
          // WindSpigot start - backport modern tick loop
          // Paper start
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index 710e7c1e2..a1abe9428 100644
+index 710e7c1e2c75144b36015911e72b6c999f363c21..a1abe94280c4996a0541938678b0e6eaca62994d 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -299,6 +299,7 @@ public abstract class PlayerList {
@@ -136,7 +136,7 @@ index 710e7c1e2..a1abe9428 100644
      public void addWhitelist(GameProfile gameprofile) {
          this.whitelist.add(new WhiteListEntry(gameprofile));
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 372b45f93..6c77596ea 100644
+index 372b45f936b5108110854c9f201a7c0079e80030..6c77596eab914e8fce8b0a1ed1e79dda13226685 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
 @@ -987,7 +987,8 @@ public class WorldServer extends World implements IAsyncTaskHandler {
@@ -158,7 +158,7 @@ index 372b45f93..6c77596ea 100644
              this.chunkProvider.saveChunks(flag, iprogressupdate);
              // CraftBukkit - ArrayList -> Collection
 diff --git a/src/main/java/net/titanium/config/PaperConfig.java b/src/main/java/net/titanium/config/PaperConfig.java
-index 739d38d38..75cfd1e72 100644
+index 739d38d38fad32d74bcd9500be26fbc99b083bae..75cfd1e7265fc935c7d4f89416e4d06fd7183db3 100644
 --- a/src/main/java/net/titanium/config/PaperConfig.java
 +++ b/src/main/java/net/titanium/config/PaperConfig.java
 @@ -53,7 +53,7 @@ public class PaperConfig extends TitaniumConfigSection {
@@ -171,7 +171,7 @@ index 739d38d38..75cfd1e72 100644
          public int maxPlayersAutoSavePerTick = 10;
  
 diff --git a/src/main/java/net/titanium/config/PaperWorldConfig.java b/src/main/java/net/titanium/config/PaperWorldConfig.java
-index 9897a8ece..ad52f0faf 100644
+index 9897a8ece0633cd743139d38df73239e5e92c6cb..ad52f0fafe0b752e56b2a993ed66053e1c1e798f 100644
 --- a/src/main/java/net/titanium/config/PaperWorldConfig.java
 +++ b/src/main/java/net/titanium/config/PaperWorldConfig.java
 @@ -243,6 +243,9 @@ public class PaperWorldConfig extends TitaniumConfigSection {
@@ -184,6 +184,3 @@ index 9897a8ece..ad52f0faf 100644
      @Comment("Whether to enable certain features during world generation.")
      public GeneratorSettings generatorSettings = new GeneratorSettings();
  
--- 
-2.38.1.windows.1
-

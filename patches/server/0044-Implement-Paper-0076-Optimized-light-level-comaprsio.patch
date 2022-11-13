@@ -1,4 +1,4 @@
-From cf143ac50f05231415626b91a53c819de47ae75b Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 22 May 2022 22:04:24 +0200
 Subject: [PATCH] Implement [Paper-0076] - Optimized light level comaprsions by
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0076] - Optimized light level comaprsions by
 
 
 diff --git a/src/main/java/net/minecraft/server/BlockCrops.java b/src/main/java/net/minecraft/server/BlockCrops.java
-index 75e05423c..313941406 100644
+index 75e05423cbdb4cc85abbbe573ca0eb29e4c44d1f..313941406b106c8cb48f825e0840d6f552b75c6f 100644
 --- a/src/main/java/net/minecraft/server/BlockCrops.java
 +++ b/src/main/java/net/minecraft/server/BlockCrops.java
 @@ -26,7 +26,7 @@ public class BlockCrops extends BlockPlant implements IBlockFragilePlantElement
@@ -19,7 +19,7 @@ index 75e05423c..313941406 100644
  
              if (i < 7) {
 diff --git a/src/main/java/net/minecraft/server/BlockGrass.java b/src/main/java/net/minecraft/server/BlockGrass.java
-index 844ad30fd..381d40209 100644
+index 844ad30fd55cd8fed6e9b6c1d9f964a72a501b16..381d40209d233f1ca5675e9737a6cd6a23b25a2b 100644
 --- a/src/main/java/net/minecraft/server/BlockGrass.java
 +++ b/src/main/java/net/minecraft/server/BlockGrass.java
 @@ -29,7 +29,8 @@ public class BlockGrass extends Block implements IBlockFragilePlantElement {
@@ -55,7 +55,7 @@ index 844ad30fd..381d40209 100644
                              // world.setTypeUpdate(blockposition1, Blocks.GRASS.getBlockData());
                              org.bukkit.World bworld = world.getWorld();
 diff --git a/src/main/java/net/minecraft/server/BlockMycel.java b/src/main/java/net/minecraft/server/BlockMycel.java
-index d2bd4dd9b..faa46821d 100644
+index d2bd4dd9b9decd5cce2aee240426eb948fb5fcae..faa46821d42246be89de5fc23c093643fa96937b 100644
 --- a/src/main/java/net/minecraft/server/BlockMycel.java
 +++ b/src/main/java/net/minecraft/server/BlockMycel.java
 @@ -43,13 +43,13 @@ public class BlockMycel extends Block {
@@ -75,7 +75,7 @@ index d2bd4dd9b..faa46821d 100644
                              // world.setTypeUpdate(blockposition1, this.getBlockData());
                              org.bukkit.World bworld = world.getWorld();
 diff --git a/src/main/java/net/minecraft/server/BlockSapling.java b/src/main/java/net/minecraft/server/BlockSapling.java
-index 7d871a1e1..12e78b6cc 100644
+index 7d871a1e125666bc10bde8f638c317f5e5b99e8c..12e78b6cc305ba8fdae2bb46428391fb683c6274 100644
 --- a/src/main/java/net/minecraft/server/BlockSapling.java
 +++ b/src/main/java/net/minecraft/server/BlockSapling.java
 @@ -32,7 +32,7 @@ public class BlockSapling extends BlockPlant implements IBlockFragilePlantElemen
@@ -88,7 +88,7 @@ index 7d871a1e1..12e78b6cc 100644
                  world.captureTreeGeneration = true;
                  // CraftBukkit end
 diff --git a/src/main/java/net/minecraft/server/BlockStem.java b/src/main/java/net/minecraft/server/BlockStem.java
-index bf7554b8e..3df19f778 100644
+index bf7554b8e2951704dbfc996270be6a3745c53d84..3df19f7780bf5fb810dd3017d1f6a72d4559ccf2 100644
 --- a/src/main/java/net/minecraft/server/BlockStem.java
 +++ b/src/main/java/net/minecraft/server/BlockStem.java
 @@ -52,7 +52,7 @@ public class BlockStem extends BlockPlant implements IBlockFragilePlantElement {
@@ -101,7 +101,7 @@ index bf7554b8e..3df19f778 100644
  
              if (random.nextInt((int) (world.growthOdds / (this == Blocks.PUMPKIN_STEM? world.spigotConfigTitanium.growth.pumpkinModifier : world.spigotConfigTitanium.growth.melonModifier) * (25.0F / f)) + 1) == 0) { // Spigot
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index 6cd00843c..0c4ffe8ba 100644
+index 6cd00843cd95e4561beb4e9f192b6dc247a89ec2..0c4ffe8ba0472852d6524d040e7c0e3b73a63aac 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
 @@ -694,6 +694,8 @@ public class Chunk {
@@ -114,7 +114,7 @@ index 6cd00843c..0c4ffe8ba 100644
          int j = blockposition.getX() & 15;
          int k = blockposition.getY();
 diff --git a/src/main/java/net/minecraft/server/EntityMonster.java b/src/main/java/net/minecraft/server/EntityMonster.java
-index 9fefb867b..bc56fb655 100644
+index 9fefb867bca8685b7c571dda0d05091c05d335d6..bc56fb655d46ee0ed80c7bb7efb79569f9b18c5c 100644
 --- a/src/main/java/net/minecraft/server/EntityMonster.java
 +++ b/src/main/java/net/minecraft/server/EntityMonster.java
 @@ -107,17 +107,19 @@ public abstract class EntityMonster extends EntityCreature implements IMonster {
@@ -142,7 +142,7 @@ index 9fefb867b..bc56fb655 100644
      }
  
 diff --git a/src/main/java/net/minecraft/server/EntityZombie.java b/src/main/java/net/minecraft/server/EntityZombie.java
-index c4e4ac522..3c1f72bcd 100644
+index c4e4ac522019eaeba6026308e4c3670f909895ea..3c1f72bcd0439322ebae5c41bd25a80672afb703 100644
 --- a/src/main/java/net/minecraft/server/EntityZombie.java
 +++ b/src/main/java/net/minecraft/server/EntityZombie.java
 @@ -184,7 +184,7 @@ public class EntityZombie extends EntityMonster {
@@ -155,7 +155,7 @@ index c4e4ac522..3c1f72bcd 100644
                          if (!this.world.isPlayerNearby((double) i1, (double) j1, (double) k1, 7.0D) && this.world.a(entityzombie.getBoundingBox(), (Entity) entityzombie) && this.world.getCubes(entityzombie, entityzombie.getBoundingBox()).isEmpty() && !this.world.containsLiquid(entityzombie.getBoundingBox())) {
                              this.world.addEntity(entityzombie, CreatureSpawnEvent.SpawnReason.REINFORCEMENTS); // CraftBukkit
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 16c818008..fd416f207 100644
+index 16c8180080fec79176fad8f59bb721732a833b40..fd416f20715d0a1600b8595940874364d51d9cd5 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -677,6 +677,37 @@ public abstract class World implements IBlockAccess {
@@ -196,6 +196,3 @@ index 16c818008..fd416f207 100644
      public int getLightLevel(BlockPosition blockposition) {
          return this.c(blockposition, true);
      }
--- 
-2.38.1.windows.1
-

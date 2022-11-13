@@ -1,11 +1,11 @@
-From e7975c2b239a2473a7dbb7787537687a9035e7c3 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 5 Jun 2022 02:40:10 +0200
 Subject: [PATCH] Add more informations to /tps command
 
 
 diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
-index 76999087..150560f6 100644
+index 7699908797b2183536f28e58f2f7a7ef49d9f1de..150560f611f8447294033f28709ad1e19524d678 100644
 --- a/src/main/java/org/bukkit/Server.java
 +++ b/src/main/java/org/bukkit/Server.java
 @@ -4,6 +4,8 @@ import eu.okaeri.configs.OkaeriConfig;
@@ -32,6 +32,3 @@ index 76999087..150560f6 100644
      }
  
      Titanium titanium();
--- 
-2.38.1.windows.1
-

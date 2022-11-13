@@ -1,11 +1,11 @@
-From cd16976d32261dba83ab7bbfdb58a245aa162bb0 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 22 Jul 2022 16:01:45 +0200
 Subject: [PATCH] Backport Paper Entity#teleportAsync
 
 
 diff --git a/src/main/java/org/bukkit/entity/Entity.java b/src/main/java/org/bukkit/entity/Entity.java
-index 7fb08af4..6c28f121 100644
+index 7fb08af407dcacfbe37222dfd66064ffc3dd6963..6c28f121f8f6553e7c466050eab609f77e7a228c 100644
 --- a/src/main/java/org/bukkit/entity/Entity.java
 +++ b/src/main/java/org/bukkit/entity/Entity.java
 @@ -12,6 +12,7 @@ import java.util.List;
@@ -61,6 +61,3 @@ index 7fb08af4..6c28f121 100644
          * @return True if the entity is invulnerable.
           */
          public boolean isInvulnerable()
--- 
-2.38.1.windows.1
-

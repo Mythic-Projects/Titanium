@@ -1,11 +1,11 @@
-From 76116eadf1b8384622f58d56661fc4ff03549939 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 23 Sep 2022 21:17:20 +0200
 Subject: [PATCH] Allow render distance from 1, not 3
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerChunkMap.java b/src/main/java/net/minecraft/server/PlayerChunkMap.java
-index a8c53d1ca..71be8d228 100644
+index a8c53d1ca34df030033f576ade18b85592356125..71be8d228b0e0d7f22fd0829960c854e47dc0e3a 100644
 --- a/src/main/java/net/minecraft/server/PlayerChunkMap.java
 +++ b/src/main/java/net/minecraft/server/PlayerChunkMap.java
 @@ -278,7 +278,7 @@ public class PlayerChunkMap {
@@ -26,6 +26,3 @@ index a8c53d1ca..71be8d228 100644
          if (viewDistance != player.viewDistance) {
              int cx = (int) player.locX >> 4;
              int cz = (int) player.locZ >> 4;
--- 
-2.38.1.windows.1
-

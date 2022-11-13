@@ -1,11 +1,11 @@
-From 394ba2e82c4aa9e298df21478015e9bab10e205d Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Tue, 14 Jun 2022 17:52:25 +0200
 Subject: [PATCH] Add /setslots command
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index 1aa993e96..08b9485d9 100644
+index 1aa993e96df79eade587036873a09f9682e864e3..08b9485d9379425c2e8287f8134d2cb3ef3ef34a 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -62,7 +62,7 @@ public abstract class PlayerList {
@@ -18,7 +18,7 @@ index 1aa993e96..08b9485d9 100644
      private WorldSettings.EnumGamemode s;
      private boolean t;
 diff --git a/src/main/java/net/titanium/Titanium.java b/src/main/java/net/titanium/Titanium.java
-index 4e85f8b45..e0d19630c 100644
+index 4e85f8b45d4c46f25477098be4a4955282e67b6b..e0d19630c48235a0d6760bdcd7e449eac9fa008a 100644
 --- a/src/main/java/net/titanium/Titanium.java
 +++ b/src/main/java/net/titanium/Titanium.java
 @@ -15,10 +15,10 @@ public class Titanium {
@@ -52,7 +52,7 @@ index 4e85f8b45..e0d19630c 100644
          return serverConfig;
      }
 diff --git a/src/main/java/net/titanium/command/PingCommand.java b/src/main/java/net/titanium/command/PingCommand.java
-index a0721f594..2e0bf26e3 100644
+index a0721f59434330496700810c9cbb8af1566332b3..2e0bf26e3cd8b66fd5c2fcce659433e366a210a3 100644
 --- a/src/main/java/net/titanium/command/PingCommand.java
 +++ b/src/main/java/net/titanium/command/PingCommand.java
 @@ -9,8 +9,11 @@ import org.bukkit.entity.Player;
@@ -104,7 +104,7 @@ index a0721f594..2e0bf26e3 100644
  
 diff --git a/src/main/java/net/titanium/command/SetSlotsCommand.java b/src/main/java/net/titanium/command/SetSlotsCommand.java
 new file mode 100644
-index 000000000..f99f92e70
+index 0000000000000000000000000000000000000000..f99f92e7047170cf48dac256ee583142414a0604
 --- /dev/null
 +++ b/src/main/java/net/titanium/command/SetSlotsCommand.java
 @@ -0,0 +1,58 @@
@@ -167,7 +167,7 @@ index 000000000..f99f92e70
 +
 +}
 diff --git a/src/main/java/net/titanium/config/SpigotConfig.java b/src/main/java/net/titanium/config/SpigotConfig.java
-index 19ae5ed01..d25c9541c 100644
+index 19ae5ed01304b33e7c106e4d5fbe4f38d5d10330..d25c9541cc50cc1ffa74067a208df15ddf342355 100644
 --- a/src/main/java/net/titanium/config/SpigotConfig.java
 +++ b/src/main/java/net/titanium/config/SpigotConfig.java
 @@ -169,6 +169,18 @@ public class SpigotConfig extends TitaniumConfigSection {
@@ -190,7 +190,7 @@ index 19ae5ed01..d25c9541c 100644
  
      public Commands commands = new Commands();
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 201d83c3b..d9b5850a0 100644
+index 201d83c3b8f535a6044246f8312885696d7220e2..d9b5850a0489fb420d3a335fa8f13b1457257d71 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -17,6 +17,7 @@ import java.util.Set;
@@ -211,6 +211,3 @@ index 201d83c3b..d9b5850a0 100644
  
          return this;
      }
--- 
-2.38.1.windows.1
-

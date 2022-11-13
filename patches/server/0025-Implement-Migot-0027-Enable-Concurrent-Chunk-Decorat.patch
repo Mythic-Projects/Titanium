@@ -1,11 +1,11 @@
-From 1153c0e1882e8a74b3582f713ca1ece58ddc3763 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 1 May 2022 13:22:42 +0200
 Subject: [PATCH] Implement [Migot-0027] Enable Concurrent Chunk Decoration
 
 
 diff --git a/src/main/java/net/minecraft/server/BiomeDecorator.java b/src/main/java/net/minecraft/server/BiomeDecorator.java
-index 97f2f5030..c531312ce 100644
+index 97f2f5030bc17840e8e0374b2648aaa8b4c266cb..c531312ce47358f657e584f0b6b2f006719857ca 100644
 --- a/src/main/java/net/minecraft/server/BiomeDecorator.java
 +++ b/src/main/java/net/minecraft/server/BiomeDecorator.java
 @@ -43,6 +43,37 @@ public class BiomeDecorator {
@@ -81,7 +81,7 @@ index 97f2f5030..c531312ce 100644
              this.a = world;
              String s = world.getWorldData().getGeneratorOptions();
 diff --git a/src/main/java/net/minecraft/server/BiomeTheEndDecorator.java b/src/main/java/net/minecraft/server/BiomeTheEndDecorator.java
-index 4128e9c67..bbd0dc69b 100644
+index 4128e9c67c84f0611a34b9388a0953e53abc29e6..bbd0dc69b69595e840990cf615de2ebf548d37db 100644
 --- a/src/main/java/net/minecraft/server/BiomeTheEndDecorator.java
 +++ b/src/main/java/net/minecraft/server/BiomeTheEndDecorator.java
 @@ -8,6 +8,18 @@ public class BiomeTheEndDecorator extends BiomeDecorator {
@@ -103,6 +103,3 @@ index 4128e9c67..bbd0dc69b 100644
      protected void a(BiomeBase biomebase) {
          this.a();
          if (this.b.nextInt(5) == 0) {
--- 
-2.38.1.windows.1
-

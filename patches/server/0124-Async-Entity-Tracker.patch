@@ -1,4 +1,4 @@
-From 6abd0b7ad1cdcdf691af1b68cc96542c4b092a19 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Rastrian <me@rastrian.dev>
 Date: Fri, 17 Jun 2022 01:57:00 +0200
 Subject: [PATCH] Async Entity Tracker
@@ -7,7 +7,7 @@ Co-authored-by: windcolor-dev <teaglehao@gmail.com>
 Co-authored-by: Peridot <peridot491@protonmail.com>
 
 diff --git a/build.gradle b/build.gradle
-index b8dd740db..ac36aadf9 100644
+index b8dd740dbea9ac880f7820bfc01eab54078b2bfb..ac36aadf9a3f7d6a14335c5236aa8f672abe9b94 100644
 --- a/build.gradle
 +++ b/build.gradle
 @@ -30,7 +30,8 @@ dependencies {
@@ -21,7 +21,7 @@ index b8dd740db..ac36aadf9 100644
  
      testImplementation 'junit:junit:4.13.2' // Titanium - Updated junit to 4.13.2
 diff --git a/src/main/java/ga/windpvp/windspigot/async/AsyncUtil.java b/src/main/java/ga/windpvp/windspigot/async/AsyncUtil.java
-index b1143e247..8bbd109e1 100644
+index b1143e247aac245d9c4ad69efd5cdb90d606241d..8bbd109e13469488fa21a92bfacbcbf1208c0013 100644
 --- a/src/main/java/ga/windpvp/windspigot/async/AsyncUtil.java
 +++ b/src/main/java/ga/windpvp/windspigot/async/AsyncUtil.java
 @@ -2,6 +2,7 @@ package ga.windpvp.windspigot.async;
@@ -71,7 +71,7 @@ index b1143e247..8bbd109e1 100644
  }
 diff --git a/src/main/java/ga/windpvp/windspigot/async/ResettableLatch.java b/src/main/java/ga/windpvp/windspigot/async/ResettableLatch.java
 new file mode 100644
-index 000000000..ab41c6a7e
+index 0000000000000000000000000000000000000000..ab41c6a7e906867a27eba3c4fcbde43007a8c964
 --- /dev/null
 +++ b/src/main/java/ga/windpvp/windspigot/async/ResettableLatch.java
 @@ -0,0 +1,48 @@
@@ -125,7 +125,7 @@ index 000000000..ab41c6a7e
 +}
 diff --git a/src/main/java/ga/windpvp/windspigot/async/entitytracker/AsyncEntityTracker.java b/src/main/java/ga/windpvp/windspigot/async/entitytracker/AsyncEntityTracker.java
 new file mode 100644
-index 000000000..e2e5f8d6e
+index 0000000000000000000000000000000000000000..e2e5f8d6e50add4b980ab2989692be43c3474aab
 --- /dev/null
 +++ b/src/main/java/ga/windpvp/windspigot/async/entitytracker/AsyncEntityTracker.java
 @@ -0,0 +1,53 @@
@@ -184,7 +184,7 @@ index 000000000..e2e5f8d6e
 +}
 diff --git a/src/main/java/ga/windpvp/windspigot/commons/ConcurrentIntHashMap.java b/src/main/java/ga/windpvp/windspigot/commons/ConcurrentIntHashMap.java
 new file mode 100644
-index 000000000..4b5ec7c85
+index 0000000000000000000000000000000000000000..4b5ec7c851f873a28ca465e346f274cec8e16b33
 --- /dev/null
 +++ b/src/main/java/ga/windpvp/windspigot/commons/ConcurrentIntHashMap.java
 @@ -0,0 +1,28 @@
@@ -218,7 +218,7 @@ index 000000000..4b5ec7c85
 +}
 diff --git a/src/main/java/me/rastrian/dev/PlayerMap.java b/src/main/java/me/rastrian/dev/PlayerMap.java
 new file mode 100644
-index 000000000..70d4abbd2
+index 0000000000000000000000000000000000000000..70d4abbd2b4e86a2fa60cb7e7a67e20b320b4d2e
 --- /dev/null
 +++ b/src/main/java/me/rastrian/dev/PlayerMap.java
 @@ -0,0 +1,209 @@
@@ -433,7 +433,7 @@ index 000000000..70d4abbd2
 +}
 \ No newline at end of file
 diff --git a/src/main/java/me/suicidalkids/ion/visuals/CannonTrackerEntry.java b/src/main/java/me/suicidalkids/ion/visuals/CannonTrackerEntry.java
-index d37dc2909..d5bf46e27 100644
+index d37dc29092e6ce833c512388ff0ea6b83b316b41..d5bf46e27d5ccb8eddd2a32278d7b183a4338210 100644
 --- a/src/main/java/me/suicidalkids/ion/visuals/CannonTrackerEntry.java
 +++ b/src/main/java/me/suicidalkids/ion/visuals/CannonTrackerEntry.java
 @@ -8,7 +8,7 @@ import java.util.List;
@@ -540,7 +540,7 @@ index d37dc2909..d5bf46e27 100644
          } else if (this.trackedPlayers.contains(entityplayer)) {
              this.trackedPlayers.remove(entityplayer);
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index 6c0ab90c7..d88128a68 100644
+index 6c0ab90c7bddac3022fe7e9a7ac52147f7b77aa4..d88128a68f56f82e743068d008c0f080f41dac8d 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
 @@ -35,7 +35,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
@@ -625,7 +625,7 @@ index 6c0ab90c7..d88128a68 100644
  
      protected void B() {
 diff --git a/src/main/java/net/minecraft/server/EntityTracker.java b/src/main/java/net/minecraft/server/EntityTracker.java
-index addf86937..9cb4cdaa4 100644
+index addf86937c1fbd0e8ead1e64637faa890ba7967f..9cb4cdaa4970a6dfb9e97ecb3e411133b0ecbfe8 100644
 --- a/src/main/java/net/minecraft/server/EntityTracker.java
 +++ b/src/main/java/net/minecraft/server/EntityTracker.java
 @@ -1,11 +1,9 @@
@@ -792,7 +792,7 @@ index addf86937..9cb4cdaa4 100644
 +    // Nacho end
  }
 diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-index 651e5bfa0..f3377f69f 100644
+index 651e5bfa07c9ccba74c223e402ee64a45cd4841b..f3377f69fd8ed0dbea37d9a3026d3ce0940a22b9 100644
 --- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 +++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 @@ -1,10 +1,14 @@
@@ -1222,7 +1222,7 @@ index 651e5bfa0..f3377f69f 100644
          org.spigotmc.AsyncCatcher.catchOp( "player tracker clear"); // Spigot
          if (this.trackedPlayers.contains(entityplayer)) {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 0aa2cbf42..9027f5bda 100644
+index 0aa2cbf42902da71a8fede8eb6d5de34feadbe9a..9027f5bda44136bf105352accaedce36f4e8a53a 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -613,7 +613,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
@@ -1267,7 +1267,7 @@ index 0aa2cbf42..9027f5bda 100644
                  worldserver.explosionDensityCache.clear(); // PaperSpigot - Optimize explosions
              // } // CraftBukkit
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index d80fef6e9..e80bac6bf 100644
+index d80fef6e94a95c5b93709a6a31e5268220f2cdbb..e80bac6bfe7a8f51a38062848033fb956d8df690 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -1,6 +1,7 @@
@@ -1316,7 +1316,7 @@ index d80fef6e9..e80bac6bf 100644
          // CraftBukkit start
          if (this.player.dead) return;
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index 08b9485d9..c48b878c0 100644
+index 08b9485d9379425c2e8287f8134d2cb3ef3ef34a..c48b878c01935df67bfd2ccca2b5303368ba158a 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -356,6 +356,7 @@ public abstract class PlayerList {
@@ -1328,7 +1328,7 @@ index 08b9485d9..c48b878c0 100644
  
      public String disconnect(EntityPlayer entityplayer) { // CraftBukkit - return string
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 7da9e9281..647e4ab36 100644
+index 7da9e928145d420fbaff552ac97c242e947b2595..647e4ab36dd9a12ce9db0a033b41df9199513617 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
@@ -1397,7 +1397,7 @@ index 7da9e9281..647e4ab36 100644
          EntityHuman entityhuman = null;
  
 diff --git a/src/main/java/net/minecraft/server/WorldManager.java b/src/main/java/net/minecraft/server/WorldManager.java
-index 7a9027fc6..8d3e3c971 100644
+index 7a9027fc6d22989e6ec84c77c51ce3ded3a7310c..8d3e3c971c7563ac771734dd9b5be98268267886 100644
 --- a/src/main/java/net/minecraft/server/WorldManager.java
 +++ b/src/main/java/net/minecraft/server/WorldManager.java
 @@ -25,12 +25,18 @@ public class WorldManager implements IWorldAccess {
@@ -1453,7 +1453,7 @@ index 7a9027fc6..8d3e3c971 100644
          }
  
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index ff8ac6c52..2283264bd 100644
+index ff8ac6c5270ce40a21c4d9519a09c5ede68b1072..2283264bdd8b890d6cea5c7a03ec5c1fae5e7e7e 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
 @@ -3,15 +3,14 @@ package net.minecraft.server;
@@ -1506,7 +1506,7 @@ index ff8ac6c52..2283264bd 100644
          this.worldProvider.a(this);
          this.chunkProvider = this.k();
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index d9b5850a0..4b7df8f07 100644
+index d9b5850a0489fb420d3a335fa8f13b1457257d71..4b7df8f07ed8e91a34f363afb73190a5b66e0d9a 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -144,6 +144,7 @@ TitaniumConfig extends TitaniumConfigSection {
@@ -1554,7 +1554,7 @@ index d9b5850a0..4b7df8f07 100644
      @Comment("Enable this option only if some of your plugins are not compatible with the new configs.")
 diff --git a/src/main/java/net/titanium/util/IndexedLinkedSet.java b/src/main/java/net/titanium/util/IndexedLinkedSet.java
 new file mode 100644
-index 000000000..7c36c1fd2
+index 0000000000000000000000000000000000000000..7c36c1fd2e3678c7bcdcf1a066ab1ced040b0346
 --- /dev/null
 +++ b/src/main/java/net/titanium/util/IndexedLinkedSet.java
 @@ -0,0 +1,96 @@
@@ -1656,7 +1656,7 @@ index 000000000..7c36c1fd2
 +}
 \ No newline at end of file
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index f5554ad74..c1ab4e8d2 100644
+index f5554ad74639578d021d34c8e2ee2331f986aa4f..c1ab4e8d26cf5bd85821ba9adba2c79fb74eafeb 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
@@ -1683,7 +1683,7 @@ index f5554ad74..c1ab4e8d2 100644
          internal.worldData.setDifficulty(EnumDifficulty.EASY);
          internal.setSpawnFlags(true, true);
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-index afed8b691..ed8338ce8 100644
+index afed8b6915f3e66dbd1d8bc394e91a46820e7f76..ed8338ce834559adc30e6b79641cd52471bafcf6 100644
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
 @@ -2,6 +2,7 @@ package org.bukkit.craftbukkit.entity;
@@ -1704,7 +1704,7 @@ index afed8b691..ed8338ce8 100644
      private double health = 20;
      private boolean scaledHealth = false;
 diff --git a/src/main/java/org/spigotmc/TrackingRange.java b/src/main/java/org/spigotmc/TrackingRange.java
-index f5e38264a..a4dbfdf0b 100644
+index f5e38264a91b265b347082b9c462309b3c69b644..a4dbfdf0be805d61d3cfde5b511811ace15aa388 100644
 --- a/src/main/java/org/spigotmc/TrackingRange.java
 +++ b/src/main/java/org/spigotmc/TrackingRange.java
 @@ -1,7 +1,10 @@
@@ -1728,6 +1728,3 @@ index f5e38264a..a4dbfdf0b 100644
              return trackingConfig.players;
          }  else if ( entity.activationType == 1 )
          {
--- 
-2.38.1.windows.1
-

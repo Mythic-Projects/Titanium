@@ -1,11 +1,11 @@
-From 99bdb02577859b49be7505ceccc7525d888d3c08 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 28 Sep 2022 17:22:47 +0200
 Subject: [PATCH] Backport EntityTransformEvent and EntityZapEvent
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityMushroomCow.java b/src/main/java/net/minecraft/server/EntityMushroomCow.java
-index fef767c24..0e19eca3b 100644
+index fef767c248ab7ce356ae403b25e466cb306bdd73..0e19eca3b42f5ddda2416cb2c804807f54480405 100644
 --- a/src/main/java/net/minecraft/server/EntityMushroomCow.java
 +++ b/src/main/java/net/minecraft/server/EntityMushroomCow.java
 @@ -1,5 +1,7 @@
@@ -30,7 +30,7 @@ index fef767c24..0e19eca3b 100644
  
                  for (int i = 0; i < 5; ++i) {
 diff --git a/src/main/java/net/minecraft/server/EntityPig.java b/src/main/java/net/minecraft/server/EntityPig.java
-index 3f2ce15ff..33d83cd41 100644
+index 3f2ce15ff362a6a992a4252718d8bf55f2aea08e..33d83cd4127968d8b5ab689f27e9fecc0f1d8b08 100644
 --- a/src/main/java/net/minecraft/server/EntityPig.java
 +++ b/src/main/java/net/minecraft/server/EntityPig.java
 @@ -114,6 +114,12 @@ public class EntityPig extends EntityAnimal {
@@ -47,7 +47,7 @@ index 3f2ce15ff..33d83cd41 100644
              if (CraftEventFactory.callPigZapEvent(this, entitylightning, entitypigzombie).isCancelled()) {
                  return;
 diff --git a/src/main/java/net/minecraft/server/EntitySlime.java b/src/main/java/net/minecraft/server/EntitySlime.java
-index d2126b162..cf20be756 100644
+index d2126b162ff2b73a5fdafc94a727014eb3cf1ed1..cf20be756b173f763b7802505f83c08c0461e58f 100644
 --- a/src/main/java/net/minecraft/server/EntitySlime.java
 +++ b/src/main/java/net/minecraft/server/EntitySlime.java
 @@ -1,6 +1,10 @@
@@ -90,7 +90,7 @@ index d2126b162..cf20be756 100644
  
          super.die();
 diff --git a/src/main/java/net/minecraft/server/EntityVillager.java b/src/main/java/net/minecraft/server/EntityVillager.java
-index f1c905aa0..f1f2c4dd0 100644
+index f1c905aa0fb964bd728c63b851fa4800a77179ef..f1f2c4dd09ef36535d16726ed9321df60198c4fc 100644
 --- a/src/main/java/net/minecraft/server/EntityVillager.java
 +++ b/src/main/java/net/minecraft/server/EntityVillager.java
 @@ -3,6 +3,8 @@ package net.minecraft.server;
@@ -128,7 +128,7 @@ index f1c905aa0..f1f2c4dd0 100644
              this.die();
          }
 diff --git a/src/main/java/net/minecraft/server/EntityZombie.java b/src/main/java/net/minecraft/server/EntityZombie.java
-index 3c1f72bcd..caa0df625 100644
+index 3c1f72bcd0439322ebae5c41bd25a80672afb703..caa0df625fa47485d8e053d3468413a3a573fcf2 100644
 --- a/src/main/java/net/minecraft/server/EntityZombie.java
 +++ b/src/main/java/net/minecraft/server/EntityZombie.java
 @@ -8,10 +8,12 @@ import java.util.UUID;
@@ -171,7 +171,7 @@ index 3c1f72bcd..caa0df625 100644
          entityvillager.addEffect(new MobEffect(MobEffectList.CONFUSION.id, 200, 0));
          this.world.a((EntityHuman) null, 1017, new BlockPosition((int) this.locX, (int) this.locY, (int) this.locZ), 0);
 diff --git a/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java b/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
-index 0e220ae4d..3aa549ce3 100644
+index 0e220ae4d3f9e7bbd3ce262e8509251c4dd436e8..3aa549ce396ac40b999ad1e6011b127d811e6a71 100644
 --- a/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
 +++ b/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
 @@ -2,6 +2,7 @@ package org.bukkit.craftbukkit.event;
@@ -213,6 +213,3 @@ index 0e220ae4d..3aa549ce3 100644
      // Titanium end
  
      /**
--- 
-2.38.1.windows.1
-

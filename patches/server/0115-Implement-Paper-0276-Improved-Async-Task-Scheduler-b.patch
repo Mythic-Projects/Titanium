@@ -1,4 +1,4 @@
-From 059f5570dce676243c3960d00c12f45b2f846d6b Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Fri, 16 Mar 2018 22:59:43 -0400
 Subject: [PATCH] Implement [Paper-0276] Improved Async Task Scheduler by Aikar
@@ -32,7 +32,7 @@ operations are decoupled from the sync tasks queue.
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftAsyncScheduler.java b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftAsyncScheduler.java
 new file mode 100644
-index 000000000..12b40e079
+index 0000000000000000000000000000000000000000..12b40e0799a95245db30c086248db2c57b1351c3
 --- /dev/null
 +++ b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftAsyncScheduler.java
 @@ -0,0 +1,127 @@
@@ -164,7 +164,7 @@ index 000000000..12b40e079
 +    }
 +}
 diff --git a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftScheduler.java b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftScheduler.java
-index 94397831f..74c6099cc 100644
+index 94397831f8c7f005b644dab13eb13eb5be4f54d0..74c6099cc9ec4785e4a0eabcf46dd197dfce20e2 100644
 --- a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftScheduler.java
 +++ b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftScheduler.java
 @@ -60,7 +60,7 @@ public class CraftScheduler implements BukkitScheduler {
@@ -364,7 +364,7 @@ index 94397831f..74c6099cc 100644
          CraftTask task = head.getNext();
          CraftTask lastTask = head;
 diff --git a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftTask.java b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftTask.java
-index 4b1e35236..44cbcdac8 100644
+index 4b1e352361e8f92f34901b23ff4326f0ec5cbd14..44cbcdac82d11f23986676b3ca29c05e98ec80c3 100644
 --- a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftTask.java
 +++ b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftTask.java
 @@ -10,6 +10,11 @@ import org.bukkit.scheduler.BukkitTask;
@@ -379,6 +379,3 @@ index 4b1e35236..44cbcdac8 100644
      /**
       * -1 means no repeating <br>
       * -2 means cancel <br>
--- 
-2.38.1.windows.1
-

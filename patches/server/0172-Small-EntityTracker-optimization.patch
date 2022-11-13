@@ -1,11 +1,11 @@
-From 4d6d42df9c9e7536fde7d4035f40736051a6fcc1 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 23 Sep 2022 21:33:18 +0200
 Subject: [PATCH] Small EntityTracker optimization
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-index 00db62d04..3e52ef525 100644
+index 00db62d0418a648ed2acd8a3c08d49d93e617cfa..3e52ef52562dac6521cb4f305e66f773c170d924 100644
 --- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 +++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 @@ -232,10 +232,13 @@ public class EntityTrackerEntry {
@@ -32,6 +32,3 @@ index 00db62d04..3e52ef525 100644
                      if (flag1) {
                          this.yRot = l;
                          this.xRot = i1;
--- 
-2.38.1.windows.1
-

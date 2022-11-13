@@ -1,4 +1,4 @@
-From beb05a2ee48bcbc4db2c0b38d05ec0ee52ba2011 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Tue, 19 Jan 2016 00:13:19 -0500
 Subject: [PATCH] Implement [Paper-0127] Do not load chunks for pathfinding by
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0127] Do not load chunks for pathfinding by
 
 
 diff --git a/src/main/java/net/minecraft/server/ChunkCache.java b/src/main/java/net/minecraft/server/ChunkCache.java
-index a64d03085..edcfa031b 100644
+index a64d03085c767e6538694853f64fc9edb430651a..edcfa031b0964ec36750c4f5e6486303ae657ee9 100644
 --- a/src/main/java/net/minecraft/server/ChunkCache.java
 +++ b/src/main/java/net/minecraft/server/ChunkCache.java
 @@ -33,7 +33,7 @@ public class ChunkCache implements IBlockAccess {
@@ -27,6 +27,3 @@ index a64d03085..edcfa031b 100644
              }
          }
  
--- 
-2.38.1.windows.1
-

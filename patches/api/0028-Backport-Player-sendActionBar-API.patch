@@ -1,11 +1,11 @@
-From 3b7297cc961c463fd43b9fb9056374cffd60dacb Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 22 Jun 2022 09:05:16 +0200
 Subject: [PATCH] Backport Player#sendActionBar API
 
 
 diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/bukkit/entity/Player.java
-index 61115f88..07cfd856 100644
+index 61115f886a525a2ab8be983a1fc129dc26b9b6d3..07cfd8566bbf2997aa66313acb5263940f07879a 100644
 --- a/src/main/java/org/bukkit/entity/Player.java
 +++ b/src/main/java/org/bukkit/entity/Player.java
 @@ -2,6 +2,8 @@ package org.bukkit.entity;
@@ -80,6 +80,3 @@ index 61115f88..07cfd856 100644
      /**
       * Forces an update of the player's entire inventory.
       *
--- 
-2.38.1.windows.1
-

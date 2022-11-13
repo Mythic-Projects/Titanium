@@ -1,4 +1,4 @@
-From 72105eacb4156922bc0b3b9576bb012f4a0ea13d Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: wea_ondara <wea_ondara@alpenblock.net>
 Date: Sat, 4 Jun 2022 13:02:23 +0200
 Subject: [PATCH] Implement [Paper-0378] Performance improvement for
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0378] Performance improvement for
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftChunk.java b/src/main/java/org/bukkit/craftbukkit/CraftChunk.java
-index 8a33e282c..4f472e4b2 100644
+index 8a33e282ce9f4ead6828cd0323de29e2c02fb605..4f472e4b2ca26ade469fc24a82bbea1216ea70c1 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftChunk.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftChunk.java
 @@ -86,14 +86,15 @@ public class CraftChunk implements Chunk {
@@ -29,6 +29,3 @@ index 8a33e282c..4f472e4b2 100644
          }
  
          return entities;
--- 
-2.38.1.windows.1
-

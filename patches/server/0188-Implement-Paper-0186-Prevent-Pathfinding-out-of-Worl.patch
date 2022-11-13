@@ -1,4 +1,4 @@
-From 7aefc3c212a91d85af830a9825522bb0cfb8677c Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Mon, 19 Dec 2016 23:07:42 -0500
 Subject: [PATCH] Implement [Paper-0186] Prevent Pathfinding out of World
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0186] Prevent Pathfinding out of World
 
 
 diff --git a/src/main/java/net/minecraft/server/NavigationAbstract.java b/src/main/java/net/minecraft/server/NavigationAbstract.java
-index 1ec5cedab..9c76587dc 100644
+index 1ec5cedab50628df8a98e1ed595848a3670c304a..9c76587dc9b7074f672d1236d2006e3daff7716a 100644
 --- a/src/main/java/net/minecraft/server/NavigationAbstract.java
 +++ b/src/main/java/net/minecraft/server/NavigationAbstract.java
 @@ -38,6 +38,7 @@ public abstract class NavigationAbstract {
@@ -26,7 +26,7 @@ index 1ec5cedab..9c76587dc 100644
              return null;
          } else {
 diff --git a/src/main/java/net/minecraft/server/WorldBorder.java b/src/main/java/net/minecraft/server/WorldBorder.java
-index 7ea40468e..aee2e095f 100644
+index 7ea40468e93e0026f5c39dc41f9c27d7c59d5fc1..aee2e095fa1b2ccb715a2338703d58359cbf920f 100644
 --- a/src/main/java/net/minecraft/server/WorldBorder.java
 +++ b/src/main/java/net/minecraft/server/WorldBorder.java
 @@ -29,10 +29,17 @@ public class WorldBorder {
@@ -48,6 +48,3 @@ index 7ea40468e..aee2e095f 100644
      // CraftBukkit start - split method
      public boolean isInBounds(ChunkCoordIntPair chunkcoordintpair) {
          return isInBounds(chunkcoordintpair.x, chunkcoordintpair.z);
--- 
-2.38.1.windows.1
-

@@ -1,11 +1,11 @@
-From 24e2d63d80ad1db07e1e5880735ae9370fbd8491 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 21 Sep 2022 01:18:03 +0200
 Subject: [PATCH] Backport EntityPickupItemEvent
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityInsentient.java b/src/main/java/net/minecraft/server/EntityInsentient.java
-index f9129b71f..6ef9663fc 100644
+index f9129b71f5ef7fe96e9ab042e995af599dc2a9c2..6ef9663fcc12ae5823cd9feaaeae6cf079a73c02 100644
 --- a/src/main/java/net/minecraft/server/EntityInsentient.java
 +++ b/src/main/java/net/minecraft/server/EntityInsentient.java
 @@ -400,7 +400,11 @@ public abstract class EntityInsentient extends EntityLiving {
@@ -22,7 +22,7 @@ index f9129b71f..6ef9663fc 100644
                      this.a(itemstack1, 0.0F);
                  }
 diff --git a/src/main/java/net/minecraft/server/EntityItem.java b/src/main/java/net/minecraft/server/EntityItem.java
-index 8e1692bf8..4366f79de 100644
+index 8e1692bf859845aa147c5362002dbafa7eb4dd49..4366f79de769ba666ece4c4e608d336d94627224 100644
 --- a/src/main/java/net/minecraft/server/EntityItem.java
 +++ b/src/main/java/net/minecraft/server/EntityItem.java
 @@ -3,6 +3,7 @@ package net.minecraft.server;
@@ -74,7 +74,7 @@ index 8e1692bf8..4366f79de 100644
                  this.pickupDelay = 0;
              }
 diff --git a/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java b/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
-index 72d21f366..0e220ae4d 100644
+index 72d21f366b69767402f9503b4c94db4cf056ea42..0e220ae4d3f9e7bbd3ce262e8509251c4dd436e8 100644
 --- a/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
 +++ b/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
 @@ -146,7 +146,8 @@ public class CraftEventFactory {
@@ -102,6 +102,3 @@ index 72d21f366..0e220ae4d 100644
      // Titanium end
  
      /**
--- 
-2.38.1.windows.1
-

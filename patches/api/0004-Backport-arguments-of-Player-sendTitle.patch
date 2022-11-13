@@ -1,11 +1,11 @@
-From 5ddd8bb74b547cc158c6212f91e945f855484de6 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Tue, 10 May 2022 20:22:45 +0200
 Subject: [PATCH] Backport arguments of Player#sendTitle
 
 
 diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/bukkit/entity/Player.java
-index d02fe560..cd41b87c 100644
+index d02fe560016ff38792bbf3f5cb3832d6c5636d8e..cd41b87c43a1e85cb987539c446982bada87ca65 100644
 --- a/src/main/java/org/bukkit/entity/Player.java
 +++ b/src/main/java/org/bukkit/entity/Player.java
 @@ -429,6 +429,22 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
@@ -63,6 +63,3 @@ index d02fe560..cd41b87c 100644
           *
           * @return a Set with all hidden players
           */
--- 
-2.36.0.windows.1
-

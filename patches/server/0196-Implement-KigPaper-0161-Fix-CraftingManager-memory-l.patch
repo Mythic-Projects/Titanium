@@ -1,4 +1,4 @@
-From 4bf0049e59f75ead51756b3872b6779428820226 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: RoccoDev <hey@rocco.dev>
 Date: Wed, 24 Mar 2021 22:35:51 +0100
 Subject: [PATCH] Implement [KigPaper-0161] Fix CraftingManager memory leak by
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [KigPaper-0161] Fix CraftingManager memory leak by
 
 
 diff --git a/src/main/java/net/minecraft/server/ContainerWorkbench.java b/src/main/java/net/minecraft/server/ContainerWorkbench.java
-index 48d524e54..862ca2a23 100644
+index 48d524e54a6b9b13dd6d4b3863d328b97bce6a7e..862ca2a23c832303361e6df725022b12bbdca1f9 100644
 --- a/src/main/java/net/minecraft/server/ContainerWorkbench.java
 +++ b/src/main/java/net/minecraft/server/ContainerWorkbench.java
 @@ -9,7 +9,7 @@ public class ContainerWorkbench extends Container {
@@ -19,7 +19,7 @@ index 48d524e54..862ca2a23 100644
      // CraftBukkit start
      private CraftInventoryView bukkitEntity = null;
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index 99e37b94a..710e7c1e2 100644
+index 99e37b94a412ded62e3693a348c7a6e6d2aa58c5..710e7c1e2c75144b36015911e72b6c999f363c21 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -31,6 +31,7 @@ import org.bukkit.craftbukkit.chunkio.ChunkIOExecutor;
@@ -58,7 +58,7 @@ index 99e37b94a..710e7c1e2 100644
      }
  
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index aec720df3..f2d5ade7d 100644
+index aec720df3ce5256d6e2b963a91ff7e69b0bd73c8..f2d5ade7d0ba4181614fa735a971a94d4d88fdb2 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -76,6 +76,7 @@ import org.bukkit.craftbukkit.generator.CraftChunkData;
@@ -84,6 +84,3 @@ index aec720df3..f2d5ade7d 100644
          File parentFolder = world.getWorldFolder().getAbsoluteFile();
  
          // Synchronized because access to RegionFileCache.a is guarded by this lock.
--- 
-2.38.1.windows.1
-

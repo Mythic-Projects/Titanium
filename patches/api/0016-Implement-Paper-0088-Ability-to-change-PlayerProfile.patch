@@ -1,4 +1,4 @@
-From bd038742041d773dd2976eea7d6309cc99ddc2e2 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Sun, 18 Mar 2018 11:43:30 -0400
 Subject: [PATCH] Implement [Paper-0088] Ability to change PlayerProfile in
@@ -7,7 +7,7 @@ Subject: [PATCH] Implement [Paper-0088] Ability to change PlayerProfile in
 This will allow you to change the players name or skin on login.
 
 diff --git a/src/main/java/org/bukkit/event/player/AsyncPlayerPreLoginEvent.java b/src/main/java/org/bukkit/event/player/AsyncPlayerPreLoginEvent.java
-index 1d571889..bbb6bd68 100644
+index 1d571889979f161b3c99792432e9739f462ebae6..bbb6bd684e813fe9bcce47f2c2393c6c2e938f3c 100644
 --- a/src/main/java/org/bukkit/event/player/AsyncPlayerPreLoginEvent.java
 +++ b/src/main/java/org/bukkit/event/player/AsyncPlayerPreLoginEvent.java
 @@ -15,22 +15,46 @@ public class AsyncPlayerPreLoginEvent extends Event {
@@ -79,6 +79,3 @@ index 1d571889..bbb6bd68 100644
      }
  
      @Override
--- 
-2.38.1.windows.1
-

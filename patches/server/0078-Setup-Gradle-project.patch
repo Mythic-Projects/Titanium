@@ -1,11 +1,11 @@
-From 88cb7d34977201255d76beafd7683b6f4afeb816 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 29 May 2022 10:00:04 +0200
 Subject: [PATCH] Setup Gradle project
 
 
 diff --git a/.gitignore b/.gitignore
-index 73c16b1d5..f92f6c5d7 100644
+index 73c16b1d532c2e8d82a47db3ef47a2e44aa4bd8d..f92f6c5d7d68a6d4d9abfa33207c17c9331a3175 100644
 --- a/.gitignore
 +++ b/.gitignore
 @@ -25,6 +25,9 @@ dependency-reduced-pom.xml
@@ -20,7 +20,7 @@ index 73c16b1d5..f92f6c5d7 100644
  
 diff --git a/build.gradle b/build.gradle
 new file mode 100644
-index 000000000..fea68dea8
+index 0000000000000000000000000000000000000000..fea68dea8801c49c69b76b83801614ad94e95a6f
 --- /dev/null
 +++ b/build.gradle
 @@ -0,0 +1,90 @@
@@ -117,7 +117,7 @@ index 000000000..fea68dea8
 \ No newline at end of file
 diff --git a/deprecation-mappings.at b/deprecation-mappings.at
 deleted file mode 100644
-index 5858b4887..000000000
+index 5858b488706682919648deb1aaf32c13d26b95af..0000000000000000000000000000000000000000
 --- a/deprecation-mappings.at
 +++ /dev/null
 @@ -1,62 +0,0 @@
@@ -185,7 +185,7 @@ index 5858b4887..000000000
 -public+synthetic org/bukkit/craftbukkit/v1_8_R3/entity/CraftProjectile/setShooter(Lorg/bukkit/entity/LivingEntity;)V
 diff --git a/deprecation-mappings.csrg b/deprecation-mappings.csrg
 deleted file mode 100644
-index 48bc50495..000000000
+index 48bc504954dfc5763cae9069aa8cc8f70453e5b0..0000000000000000000000000000000000000000
 --- a/deprecation-mappings.csrg
 +++ /dev/null
 @@ -1,27 +0,0 @@
@@ -218,7 +218,7 @@ index 48bc50495..000000000
 -org/bukkit/event/vehicle/VehicleDamageEvent _INVALID_setDamage (I)V setDamage
 diff --git a/pom.xml b/pom.xml
 deleted file mode 100644
-index dbd89ca89..000000000
+index dbd89ca89e912512d4744d3dc8860a41ed64e48d..0000000000000000000000000000000000000000
 --- a/pom.xml
 +++ /dev/null
 @@ -1,401 +0,0 @@
@@ -624,7 +624,7 @@ index dbd89ca89..000000000
 -    </build>
 -</project>
 diff --git a/src/main/java/io/papermc/paper/util/maplist/ObjectMapList.java b/src/main/java/io/papermc/paper/util/maplist/ObjectMapList.java
-index 8fc248c8b..927b83dbc 100644
+index 8fc248c8b0d6fce81d40396be221f71bb7314131..927b83dbc4a2c806af14345f57a904e22a10235f 100644
 --- a/src/main/java/io/papermc/paper/util/maplist/ObjectMapList.java
 +++ b/src/main/java/io/papermc/paper/util/maplist/ObjectMapList.java
 @@ -9,7 +9,7 @@ import java.util.NoSuchElementException;
@@ -637,7 +637,7 @@ index 8fc248c8b..927b83dbc 100644
   */
  public final class ObjectMapList<T> extends AbstractReferenceList<T> implements Set<T> {
 diff --git a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftScheduler.java b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftScheduler.java
-index f036709c4..94397831f 100644
+index f036709c4895639d6f3af764c209e1caa643d5dd..94397831f8c7f005b644dab13eb13eb5be4f54d0 100644
 --- a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftScheduler.java
 +++ b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftScheduler.java
 @@ -35,7 +35,7 @@ import org.github.paperspigot.exception.ServerSchedulerException;
@@ -659,7 +659,7 @@ index f036709c4..94397831f 100644
      private volatile CraftTask head = new CraftTask();
      /**
 diff --git a/src/main/java/org/bukkit/craftbukkit/util/AsynchronousExecutor.java b/src/main/java/org/bukkit/craftbukkit/util/AsynchronousExecutor.java
-index 193c3621c..6de0f4fa0 100644
+index 193c3621c6398aa7e67719a19c082668ed7bad9c..6de0f4fa03a5132d089394b6811caa14326df576 100644
 --- a/src/main/java/org/bukkit/craftbukkit/util/AsynchronousExecutor.java
 +++ b/src/main/java/org/bukkit/craftbukkit/util/AsynchronousExecutor.java
 @@ -16,9 +16,9 @@ import org.apache.commons.lang.Validate;
@@ -675,6 +675,3 @@ index 193c3621c..6de0f4fa0 100644
   *
   * @param <P> The type of parameter you provide to make the object that will be created. It should implement {@link Object#hashCode()} and {@link Object#equals(Object)} if you want to get the value early.
   * @param <T> The type of object you provide. This is created in stage 1, and passed to stage 2, 3, and returned if get() is called.
--- 
-2.38.1.windows.1
-

@@ -1,11 +1,11 @@
-From 0459a0d0a14c89df3e87dc6fe6be0612f8d0b505 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 22 May 2022 23:02:34 +0200
 Subject: [PATCH] Add Server.Spigot#getTacoSpigotConfig
 
 
 diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
-index 2653e84d..76999087 100644
+index 2653e84dbc799754b3d2297460b9dd070af21f69..7699908797b2183536f28e58f2f7a7ef49d9f1de 100644
 --- a/src/main/java/org/bukkit/Server.java
 +++ b/src/main/java/org/bukkit/Server.java
 @@ -990,6 +990,15 @@ public interface Server extends PluginMessageRecipient {
@@ -24,6 +24,3 @@ index 2653e84d..76999087 100644
          // IonSpigot start
          /**
           * @deprecated Use {@link Titanium#getServerConfig()}
--- 
-2.36.0.windows.1
-

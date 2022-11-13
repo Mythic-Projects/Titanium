@@ -1,4 +1,4 @@
-From 7949f8625ca62a03c06b70a8f0f578609458344e Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 23 May 2022 22:20:52 +0200
 Subject: [PATCH] Implement [Paper-0202] Shame on you Mojang moves chunk
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0202] Shame on you Mojang moves chunk
 
 
 diff --git a/src/main/java/net/minecraft/server/BlockBeacon.java b/src/main/java/net/minecraft/server/BlockBeacon.java
-index a73d7b13a..b4289c43d 100644
+index a73d7b13a8dce788127c73ec1ae7a077d04777e2..b4289c43d0efe0b3e571f989bc2a69cfededfd46 100644
 --- a/src/main/java/net/minecraft/server/BlockBeacon.java
 +++ b/src/main/java/net/minecraft/server/BlockBeacon.java
 @@ -62,8 +62,8 @@ public class BlockBeacon extends BlockContainer {
@@ -48,6 +48,3 @@ index a73d7b13a..b4289c43d 100644
 +        });*/ // Paper
      }
  }
--- 
-2.38.1.windows.1
-

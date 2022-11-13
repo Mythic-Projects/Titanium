@@ -1,4 +1,4 @@
-From 2809af8ccc74d58c4a691eb63755ad004aeb0931 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: hpfxd <me@hpfxd.com>
 Date: Wed, 27 Oct 2021 04:07:19 -0400
 Subject: [PATCH] Implement [PandaSpigot-0005] Backport PlayerHandshakeEvent
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [PandaSpigot-0005] Backport PlayerHandshakeEvent
 
 
 diff --git a/src/main/java/net/minecraft/server/HandshakeListener.java b/src/main/java/net/minecraft/server/HandshakeListener.java
-index 10ae9e1e4..ed2b7b827 100644
+index 10ae9e1e4a6f97919b4bcee70786398059e0dc47..ed2b7b827928381bbe046d5a6132c8040fd7ef4a 100644
 --- a/src/main/java/net/minecraft/server/HandshakeListener.java
 +++ b/src/main/java/net/minecraft/server/HandshakeListener.java
 @@ -75,8 +75,36 @@ public class HandshakeListener implements PacketHandshakingInListener {
@@ -47,6 +47,3 @@ index 10ae9e1e4..ed2b7b827 100644
                      String[] split = packethandshakinginsetprotocol.hostname.split("\00");
                      if ( split.length == 3 || split.length == 4 ) {
                          // PandaSpigot start - Unix domain socket support
--- 
-2.38.1.windows.1
-

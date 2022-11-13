@@ -1,4 +1,4 @@
-From 585c20d5eda74ca55bdf9cac18e4859466833c90 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Fri, 29 Apr 2016 20:02:00 -0400
 Subject: [PATCH] Implement [Paper-0090] Improve Maps (in item frames)
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0090] Improve Maps (in item frames)
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
-index f6db5de1c..70a63b662 100644
+index f6db5de1c1403f28a2e781fe7e53d16e9dc8cf61..70a63b6629fb69e6640ed33dd75afc7d76491c74 100644
 --- a/src/main/java/net/minecraft/server/EntityHuman.java
 +++ b/src/main/java/net/minecraft/server/EntityHuman.java
 @@ -625,6 +625,14 @@ public abstract class EntityHuman extends EntityLiving {
@@ -25,7 +25,7 @@ index f6db5de1c..70a63b662 100644
          }
      }
 diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-index f3377f69f..00db62d04 100644
+index f3377f69fd8ed0dbea37d9a3026d3ce0940a22b9..00db62d0418a648ed2acd8a3c08d49d93e617cfa 100644
 --- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 +++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 @@ -193,11 +193,11 @@ public class EntityTrackerEntry {
@@ -43,7 +43,7 @@ index f3377f69f..00db62d04 100644
                  Iterator iterator = this.trackedPlayers.iterator(); // CraftBukkit
  
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 059679d13..0895ac9af 100644
+index 059679d131eb2c49074c948f8cb7b572ce14e292..0895ac9af6ad470947394354e6f86db2cc91ee83 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -1203,6 +1203,7 @@ public abstract class World implements IBlockAccess {
@@ -55,7 +55,7 @@ index 059679d13..0895ac9af 100644
                          }
                      }
 diff --git a/src/main/java/net/minecraft/server/WorldMap.java b/src/main/java/net/minecraft/server/WorldMap.java
-index f5d2d6d41..089de0627 100644
+index f5d2d6d414fab54a37b7dc6af67329204b1ce5de..089de06278536b6dd8bcb11963c15a6a1d0d3c8e 100644
 --- a/src/main/java/net/minecraft/server/WorldMap.java
 +++ b/src/main/java/net/minecraft/server/WorldMap.java
 @@ -3,6 +3,7 @@ package net.minecraft.server;
@@ -153,7 +153,7 @@ index f5d2d6d41..089de0627 100644
              if (this.d) {
                  this.e = Math.min(this.e, i);
 diff --git a/src/main/java/org/bukkit/craftbukkit/map/RenderData.java b/src/main/java/org/bukkit/craftbukkit/map/RenderData.java
-index 256a13178..503a31b4e 100644
+index 256a131781721c86dd6cdbc329335964570cbe8c..503a31b4efc8920a11bc1db03f81aab6439ceb23 100644
 --- a/src/main/java/org/bukkit/craftbukkit/map/RenderData.java
 +++ b/src/main/java/org/bukkit/craftbukkit/map/RenderData.java
 @@ -5,7 +5,7 @@ import org.bukkit.map.MapCursor;
@@ -165,6 +165,3 @@ index 256a13178..503a31b4e 100644
      public final ArrayList<MapCursor> cursors;
  
      public RenderData() {
--- 
-2.38.1.windows.1
-

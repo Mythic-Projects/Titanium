@@ -1,11 +1,11 @@
-From 388be191828bf8aa909531a96a352bb467b1e8d2 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 31 Oct 2022 23:11:16 +0100
 Subject: [PATCH] Add 'chunk.async-spawn-chunks' option to config
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index e1fe12478..846b9cab1 100644
+index e1fe12478694aa830a2bbd9ba80f6bfdd424074f..846b9cab16651f6488e922f3b45e311049fd0948 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -498,7 +498,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
@@ -18,7 +18,7 @@ index e1fe12478..846b9cab1 100644
              }
          }
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index d2922e080..faa2aeeab 100644
+index d2922e080b2e3f715112d19c3d73957f5d86051f..faa2aeeab3347471935ad8e7ff9bb3c3f0a6978e 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -291,6 +291,10 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -33,7 +33,7 @@ index d2922e080..faa2aeeab 100644
  
      public Tnt tnt = new Tnt();
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index f2d5ade7d..971d0b254 100644
+index f2d5ade7d0ba4181614fa735a971a94d4d88fdb2..971d0b254dea0523b036c40a3a0fb630e270e513 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -1116,7 +1116,7 @@ public final class CraftServer implements Server {
@@ -45,6 +45,3 @@ index f2d5ade7d..971d0b254 100644
                  }
              }
          }
--- 
-2.38.1.windows.1
-

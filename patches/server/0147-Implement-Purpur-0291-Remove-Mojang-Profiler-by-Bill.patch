@@ -1,4 +1,4 @@
-From 9f92a57d87611ca7f8746f5af1cae6ab9281aa26 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: BillyGalbreath <blake.galbreath@gmail.com>
 Date: Sat, 16 Jul 2022 21:37:10 -0500
 Subject: [PATCH] Implement [Purpur-0291] Remove Mojang Profiler by
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Purpur-0291] Remove Mojang Profiler by
 
 
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index 58d8c9d78..155c61f44 100644
+index 58d8c9d78af5fdda9a41fe57ea27f87d3b3d146b..155c61f44bf28b560d69263bd2e05f2965ad9a43 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
 @@ -279,7 +279,7 @@ public class Chunk {
@@ -37,7 +37,7 @@ index 58d8c9d78..155c61f44 100644
  
      private void c(int i, int j, int k) {
 diff --git a/src/main/java/net/minecraft/server/CommandDebug.java b/src/main/java/net/minecraft/server/CommandDebug.java
-index 916298c36..ae716d306 100644
+index 916298c3648219a4c98ebc74727a4368b5694085..ae716d306d1460de526035c61413de09a17b20ec 100644
 --- a/src/main/java/net/minecraft/server/CommandDebug.java
 +++ b/src/main/java/net/minecraft/server/CommandDebug.java
 @@ -100,6 +100,7 @@ public class CommandDebug extends CommandAbstract {
@@ -49,7 +49,7 @@ index 916298c36..ae716d306 100644
  
          if (list != null && list.size() >= 3) {
 diff --git a/src/main/java/net/minecraft/server/CommandDispatcher.java b/src/main/java/net/minecraft/server/CommandDispatcher.java
-index c1b6e3cd0..6558679ef 100644
+index c1b6e3cd0a5069d7284e99a7fa8df78a72475e9b..6558679ef442718d1d6b3380b2c4c89d537daee6 100644
 --- a/src/main/java/net/minecraft/server/CommandDispatcher.java
 +++ b/src/main/java/net/minecraft/server/CommandDispatcher.java
 @@ -24,7 +24,7 @@ public class CommandDispatcher extends CommandHandler implements ICommandDispatc
@@ -62,7 +62,7 @@ index c1b6e3cd0..6558679ef 100644
          this.a((ICommand) (new CommandSay()));
          this.a((ICommand) (new CommandSpawnpoint()));
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 72f3bd890..c70eaac40 100644
+index 72f3bd890322d1c1b2351c3b8a6e9a07a279ac24..c70eaac4070662b7b73bd95575d8fd0e183ec900 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
 @@ -299,7 +299,7 @@ public abstract class Entity implements ICommandListener {
@@ -171,7 +171,7 @@ index 72f3bd890..c70eaac40 100644
      }
  
 diff --git a/src/main/java/net/minecraft/server/EntityInsentient.java b/src/main/java/net/minecraft/server/EntityInsentient.java
-index 027f700ec..920790d12 100644
+index 027f700ec5dcb4a5ab2cc0e4355b55deb308295c..920790d1238be71f7af06c8d74c28a1bd1d26ed3 100644
 --- a/src/main/java/net/minecraft/server/EntityInsentient.java
 +++ b/src/main/java/net/minecraft/server/EntityInsentient.java
 @@ -148,13 +148,13 @@ public abstract class EntityInsentient extends EntityLiving {
@@ -268,7 +268,7 @@ index 027f700ec..920790d12 100644
  
      protected void E() {}
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index dbd2186b3..bc77b4ce6 100644
+index dbd2186b30e770b59d9e7e112ca78c4011c2d3d3..bc77b4ce6108984cfe0cfcd29327ef306ad4bc4f 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
 @@ -173,7 +173,7 @@ public abstract class EntityLiving extends Entity {
@@ -364,7 +364,7 @@ index dbd2186b3..bc77b4ce6 100644
  
      protected void doTick() {}
 diff --git a/src/main/java/net/minecraft/server/EntityMinecartAbstract.java b/src/main/java/net/minecraft/server/EntityMinecartAbstract.java
-index 0446e2be5..a3392c83d 100644
+index 0446e2be5003e8aa785618de48767d160dd32b19..a3392c83d478b41371b63b9c1dba896b66ea5b3f 100644
 --- a/src/main/java/net/minecraft/server/EntityMinecartAbstract.java
 +++ b/src/main/java/net/minecraft/server/EntityMinecartAbstract.java
 @@ -207,7 +207,7 @@ public abstract class EntityMinecartAbstract extends Entity implements INamableT
@@ -386,7 +386,7 @@ index 0446e2be5..a3392c83d 100644
  
          if (this.world.isClientSide) {
 diff --git a/src/main/java/net/minecraft/server/EntitySenses.java b/src/main/java/net/minecraft/server/EntitySenses.java
-index 141a1ef8d..a2bfb5b50 100644
+index 141a1ef8d171366300d438bf43f4030daaea60f2..a2bfb5b5056a5ab1887cb8dbfec0f64851797675 100644
 --- a/src/main/java/net/minecraft/server/EntitySenses.java
 +++ b/src/main/java/net/minecraft/server/EntitySenses.java
 @@ -24,10 +24,10 @@ public class EntitySenses {
@@ -403,7 +403,7 @@ index 141a1ef8d..a2bfb5b50 100644
                  this.b.add(entity);
              } else {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 6e663d52c..9253329f1 100644
+index 6e663d52c006c62c972b73fa90c5744d014bc55c..9253329f1ae1299d91904eef5703ede519d36d88 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -659,13 +659,13 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
@@ -581,7 +581,7 @@ index 6e663d52c..9253329f1 100644
  
              public Object call() throws Exception {
 diff --git a/src/main/java/net/minecraft/server/NavigationAbstract.java b/src/main/java/net/minecraft/server/NavigationAbstract.java
-index 8ebe58495..ea6104338 100644
+index 8ebe58495efda8b15012946b6c13daa72a61e008..ea610433835e3b376b138680cddfa1a30355cc13 100644
 --- a/src/main/java/net/minecraft/server/NavigationAbstract.java
 +++ b/src/main/java/net/minecraft/server/NavigationAbstract.java
 @@ -43,13 +43,13 @@ public abstract class NavigationAbstract {
@@ -617,7 +617,7 @@ index 8ebe58495..ea6104338 100644
          }
      }
 diff --git a/src/main/java/net/minecraft/server/PathfinderGoalSelector.java b/src/main/java/net/minecraft/server/PathfinderGoalSelector.java
-index b03ba8575..d2066fe64 100644
+index b03ba8575e2cd010f7b4ad0aaa4c5746275ba5f0..d2066fe64675305a52a7ba84e4e84ede5d68b000 100644
 --- a/src/main/java/net/minecraft/server/PathfinderGoalSelector.java
 +++ b/src/main/java/net/minecraft/server/PathfinderGoalSelector.java
 @@ -45,7 +45,7 @@ public class PathfinderGoalSelector {
@@ -650,7 +650,7 @@ index b03ba8575..d2066fe64 100644
  
      private boolean a(PathfinderGoalSelector.PathfinderGoalSelectorItem pathfindergoalselector_pathfindergoalselectoritem) {
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index c74ca9b79..1128ccfda 100644
+index c74ca9b791637fc1111d486e5c2436ed85c1264a..1128ccfda1e4d1339852977e77c2a565647b6481 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -131,7 +131,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
@@ -672,7 +672,7 @@ index c74ca9b79..1128ccfda 100644
          for (int spam; (spam = this.chatThrottle) > 0 && !chatSpamField.compareAndSet(this, spam, spam - 1); ) ;
          /* Use thread-safe field access instead
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index 0010fbbbd..d7abef659 100644
+index 0010fbbbded81e05cf95ac2aab7c4e4c51d66b63..d7abef6593c3d785071a085a1547b698ebc6ae8a 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -790,7 +790,7 @@ public abstract class PlayerList {
@@ -706,7 +706,7 @@ index 0010fbbbd..d7abef659 100644
  
          entity.spawnIn(worldserver1);
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 87b92bd3c..059679d13 100644
+index 87b92bd3cc3ab603df80056480e3124d20961ae2..059679d131eb2c49074c948f8cb7b572ce14e292 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -453,9 +453,9 @@ public abstract class World implements IBlockAccess {
@@ -894,7 +894,7 @@ index 87b92bd3c..059679d13 100644
          }
      }
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 7a972a8ad..bf80c4644 100644
+index 7a972a8adbd0616484ba3680b44f5ed0fb02e253..bf80c4644bc9f6f22a35c7e9418251ac7f486808 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
 @@ -238,7 +238,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
@@ -1007,6 +1007,3 @@ index 7a972a8ad..bf80c4644 100644
                  this.V.clear();
                  return !this.M.isEmpty();
              }
--- 
-2.38.1.windows.1
-

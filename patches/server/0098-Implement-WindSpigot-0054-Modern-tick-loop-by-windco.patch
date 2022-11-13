@@ -1,11 +1,11 @@
-From f346b88473f51b50021401256e9d09cd308b8ed0 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: windcolor-dev <79166388+windcolor-dev@users.noreply.github.com>
 Date: Sun, 5 Jun 2022 19:17:13 +0200
 Subject: [PATCH] Implement [WindSpigot-0054] Modern tick loop by windcolor-dev
 
 
 diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
-index 251ca80c3..4f0492bf0 100644
+index 251ca80c310e8e7e5ab094def8a288ae8a9a4ebb..4f0492bf0a62fec3221766606737ff9af4404a7e 100644
 --- a/src/main/java/net/minecraft/server/DedicatedServer.java
 +++ b/src/main/java/net/minecraft/server/DedicatedServer.java
 @@ -41,8 +41,8 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
@@ -20,7 +20,7 @@ index 251ca80c3..4f0492bf0 100644
          Thread thread = new Thread("Server Infinisleeper") {
              {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 8e0cb4242..024d5fad4 100644
+index 8e0cb4242afdc23e191d5241eac101672d44a148..024d5fad42842ddcc61c56b4a24e235054292ecb 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -10,6 +10,8 @@ import com.mojang.authlib.GameProfile;
@@ -378,7 +378,7 @@ index 8e0cb4242..024d5fad4 100644
          return this.G;
 diff --git a/src/main/java/net/titanium/tickloop/IAsyncHandler.java b/src/main/java/net/titanium/tickloop/IAsyncHandler.java
 new file mode 100644
-index 000000000..00a0508ef
+index 0000000000000000000000000000000000000000..00a0508ef9689ae79940526a81cfa02a34ea219d
 --- /dev/null
 +++ b/src/main/java/net/titanium/tickloop/IAsyncHandler.java
 @@ -0,0 +1,140 @@
@@ -525,7 +525,7 @@ index 000000000..00a0508ef
 \ No newline at end of file
 diff --git a/src/main/java/net/titanium/tickloop/ReentrantIAsyncHandler.java b/src/main/java/net/titanium/tickloop/ReentrantIAsyncHandler.java
 new file mode 100644
-index 000000000..24111f3b9
+index 0000000000000000000000000000000000000000..24111f3b9f0edd826c0823d7a12a0ca835034dc6
 --- /dev/null
 +++ b/src/main/java/net/titanium/tickloop/ReentrantIAsyncHandler.java
 @@ -0,0 +1,29 @@
@@ -561,7 +561,7 @@ index 000000000..24111f3b9
 \ No newline at end of file
 diff --git a/src/main/java/net/titanium/tickloop/TasksPerTick.java b/src/main/java/net/titanium/tickloop/TasksPerTick.java
 new file mode 100644
-index 000000000..aca388a15
+index 0000000000000000000000000000000000000000..aca388a15abed49a8f690eeb38d1747e2d26a7b7
 --- /dev/null
 +++ b/src/main/java/net/titanium/tickloop/TasksPerTick.java
 @@ -0,0 +1,20 @@
@@ -587,7 +587,7 @@ index 000000000..aca388a15
 +}
 \ No newline at end of file
 diff --git a/src/main/java/org/bukkit/craftbukkit/Main.java b/src/main/java/org/bukkit/craftbukkit/Main.java
-index 109563b91..65ec9c8d3 100644
+index 109563b91c78cedd451d46abae794612c648d323..65ec9c8d376c35b31bdc0beea4d2fe2a997d5a1f 100644
 --- a/src/main/java/org/bukkit/craftbukkit/Main.java
 +++ b/src/main/java/org/bukkit/craftbukkit/Main.java
 @@ -9,6 +9,8 @@ import java.util.logging.Level;
@@ -632,6 +632,3 @@ index 109563b91..65ec9c8d3 100644
              } catch (Throwable t) {
                  t.printStackTrace();
              }
--- 
-2.38.1.windows.1
-

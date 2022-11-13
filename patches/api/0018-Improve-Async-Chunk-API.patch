@@ -1,11 +1,11 @@
-From 93980cb7a1f5a883f964f041a1f9e81036fdde9b Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 5 Jun 2022 20:25:48 +0200
 Subject: [PATCH] Improve Async Chunk API
 
 
 diff --git a/src/main/java/org/bukkit/World.java b/src/main/java/org/bukkit/World.java
-index 325d65a3..e8de1b37 100644
+index 325d65a37dc5e38bf64cb88b936d2a258be182ab..e8de1b3779fdb35150ae49f566ba2ee819272d7a 100644
 --- a/src/main/java/org/bukkit/World.java
 +++ b/src/main/java/org/bukkit/World.java
 @@ -1,17 +1,25 @@
@@ -141,6 +141,3 @@ index 325d65a3..e8de1b37 100644
      /**
       * Gets the world border for this world.
       *
--- 
-2.38.1.windows.1
-

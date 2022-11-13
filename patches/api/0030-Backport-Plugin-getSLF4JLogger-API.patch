@@ -1,11 +1,11 @@
-From 03c61abb1860253f2ce892336177c3dd0b7ab87e Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 6 Jul 2022 10:28:28 +0200
 Subject: [PATCH] Backport Plugin#getSLF4JLogger API
 
 
 diff --git a/build.gradle b/build.gradle
-index 33b6a6ee..66247c79 100644
+index 33b6a6ee5b54b43dffc218e799c4943dbff539dd..66247c7923c6eff9acc52234af74c118f617eeb3 100644
 --- a/build.gradle
 +++ b/build.gradle
 @@ -13,10 +13,13 @@ dependencies {
@@ -23,7 +23,7 @@ index 33b6a6ee..66247c79 100644
      api 'org.jetbrains:annotations:16.0.2' // Titanium - add jetbrains annotations - future is now 😎
  
 diff --git a/src/main/java/org/bukkit/plugin/Plugin.java b/src/main/java/org/bukkit/plugin/Plugin.java
-index 7bdc809c..3f85b51f 100644
+index 7bdc809c6d99eb837c276d43ebae36cd8ddb07d6..3f85b51fdecf05a192b3b09e48a22d70623e241f 100644
 --- a/src/main/java/org/bukkit/plugin/Plugin.java
 +++ b/src/main/java/org/bukkit/plugin/Plugin.java
 @@ -10,6 +10,7 @@ import org.bukkit.configuration.file.FileConfiguration;
@@ -48,6 +48,3 @@ index 7bdc809c..3f85b51f 100644
      /**
       * Returns the name of the plugin.
       * <p>
--- 
-2.38.1.windows.1
-

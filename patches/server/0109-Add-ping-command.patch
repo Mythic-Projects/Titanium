@@ -1,4 +1,4 @@
-From 2fea9a6913974669c6c7b9b0da76f21a3bd79010 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 10 Jun 2022 09:12:17 +0200
 Subject: [PATCH] Add /ping command
@@ -6,7 +6,7 @@ Subject: [PATCH] Add /ping command
 
 diff --git a/src/main/java/net/titanium/command/PingCommand.java b/src/main/java/net/titanium/command/PingCommand.java
 new file mode 100644
-index 000000000..a0721f594
+index 0000000000000000000000000000000000000000..a0721f59434330496700810c9cbb8af1566332b3
 --- /dev/null
 +++ b/src/main/java/net/titanium/command/PingCommand.java
 @@ -0,0 +1,60 @@
@@ -71,7 +71,7 @@ index 000000000..a0721f594
 +
 +}
 diff --git a/src/main/java/net/titanium/config/SpigotConfig.java b/src/main/java/net/titanium/config/SpigotConfig.java
-index 63f4492b2..fbac6bd5b 100644
+index 63f4492b28e206346c22a944559e0b33db3725e6..fbac6bd5bbeb2f9ac4284e4fe5b73f813279c369 100644
 --- a/src/main/java/net/titanium/config/SpigotConfig.java
 +++ b/src/main/java/net/titanium/config/SpigotConfig.java
 @@ -18,10 +18,13 @@ import java.util.concurrent.TimeUnit;
@@ -136,7 +136,7 @@ index 63f4492b2..fbac6bd5b 100644
 +
  }
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 6c9f254ca..25c914253 100644
+index 6c9f254ca0972863245f1f2dfd0c0d5e044921c9..25c914253953f38d8d335a57cddb7c70a3328459 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -16,6 +16,7 @@ import java.util.Map;
@@ -158,7 +158,7 @@ index 6c9f254ca..25c914253 100644
          return this;
      }
 diff --git a/src/main/java/net/titanium/config/TitaniumConfigSection.java b/src/main/java/net/titanium/config/TitaniumConfigSection.java
-index 4294759c5..3ea4cae2f 100644
+index 4294759c511a14ebea95d85dc92c0008492f5f8c..3ea4cae2f9ea1d7423865bcd3ddb4a4600205eac 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfigSection.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfigSection.java
 @@ -2,12 +2,11 @@ package net.titanium.config;
@@ -199,7 +199,7 @@ index 4294759c5..3ea4cae2f 100644
          } catch (Exception ex) {
 diff --git a/src/main/java/net/titanium/config/serdes/RangeFormattingTransformer.java b/src/main/java/net/titanium/config/serdes/RangeFormattingTransformer.java
 new file mode 100644
-index 000000000..f0c9004cf
+index 0000000000000000000000000000000000000000..f0c9004cfa70a6e3b72ebe910dcd49464248e3a3
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/serdes/RangeFormattingTransformer.java
 @@ -0,0 +1,25 @@
@@ -230,7 +230,7 @@ index 000000000..f0c9004cf
 +}
 diff --git a/src/main/java/net/titanium/util/range/NumberRange.java b/src/main/java/net/titanium/util/range/NumberRange.java
 new file mode 100644
-index 000000000..426276632
+index 0000000000000000000000000000000000000000..4262766321f324616b1a16b36cf76c4c6bc03cac
 --- /dev/null
 +++ b/src/main/java/net/titanium/util/range/NumberRange.java
 @@ -0,0 +1,154 @@
@@ -390,7 +390,7 @@ index 000000000..426276632
 +}
 diff --git a/src/main/java/net/titanium/util/range/RangeFormatting.java b/src/main/java/net/titanium/util/range/RangeFormatting.java
 new file mode 100644
-index 000000000..53d9319e4
+index 0000000000000000000000000000000000000000..53d9319e4dd004ad35022db471cccd5038188b72
 --- /dev/null
 +++ b/src/main/java/net/titanium/util/range/RangeFormatting.java
 @@ -0,0 +1,49 @@
@@ -444,7 +444,7 @@ index 000000000..53d9319e4
 +
 +}
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index a59c278ba..e29a2e99c 100644
+index a59c278ba92023728561476699ac4de0b622fb19..e29a2e99cec1d952e787724435e920011e97bd29 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -35,6 +35,7 @@ import net.titanium.config.BukkitConfig;
@@ -463,6 +463,3 @@ index a59c278ba..e29a2e99c 100644
              });
              it.withBindFile((File) console.options.valueOf("titanium-settings"));
              it.withRemoveOrphans(false);
--- 
-2.38.1.windows.1
-

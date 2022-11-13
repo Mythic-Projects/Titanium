@@ -1,4 +1,4 @@
-From 3912e498654c6d31555ad32f1e83d0befad548ea Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 22 May 2022 23:01:59 +0200
 Subject: [PATCH] Implement [Taco-0024] Optimize tnt entity and falling block
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Taco-0024] Optimize tnt entity and falling block
 
 
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 8305cf6d1..dbaeee4c1 100644
+index 8305cf6d1fd8243aea80bca8f6ec7f552a12df1d..dbaeee4c1979f39a0dd391b05ff781aaba573554 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
 @@ -562,7 +562,16 @@ public abstract class Entity implements ICommandListener {
@@ -46,7 +46,7 @@ index 8305cf6d1..dbaeee4c1 100644
                  axisalignedbb2 = (AxisAlignedBB) iterator1.next();
              }
 diff --git a/src/main/java/net/minecraft/server/Explosion.java b/src/main/java/net/minecraft/server/Explosion.java
-index cf48af7ea..741697e2f 100644
+index cf48af7ead55dee7f027a9e7c00471522614b100..741697e2f6410fb891c16e95ad8769f97a238914 100644
 --- a/src/main/java/net/minecraft/server/Explosion.java
 +++ b/src/main/java/net/minecraft/server/Explosion.java
 @@ -55,6 +55,9 @@ public class Explosion {
@@ -68,7 +68,7 @@ index cf48af7ea..741697e2f 100644
          this.blocks.addAll(hashset);
          float f3 = this.size * 2.0F;
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index b0c5da5cf..16441d096 100644
+index b0c5da5cff0166c1f3b9eec8aa175449d365457c..16441d096f33ee96484a0a38df7a476442b58b82 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -8,6 +8,7 @@ import me.suicidalkids.ion.blocks.movement.MovementCache;
@@ -107,7 +107,7 @@ index b0c5da5cf..16441d096 100644
  
 diff --git a/src/main/java/net/titanium/config/TacoSpigotConfig.java b/src/main/java/net/titanium/config/TacoSpigotConfig.java
 new file mode 100644
-index 000000000..da1cee705
+index 0000000000000000000000000000000000000000..da1cee705f44668506d3d72f1a1b3fc50dff0cb4
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/TacoSpigotConfig.java
 @@ -0,0 +1,12 @@
@@ -125,7 +125,7 @@ index 000000000..da1cee705
 +}
 diff --git a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
 new file mode 100644
-index 000000000..3a356dd35
+index 0000000000000000000000000000000000000000..3a356dd3567b3b9f151a6ed5a699a5c9ecaa31a8
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
 @@ -0,0 +1,22 @@
@@ -152,7 +152,7 @@ index 000000000..3a356dd35
 +
 +}
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 01ba17d0b..a88915383 100644
+index 01ba17d0b1a34886426830a0a57e81ae3602a099..a88915383ee0412a2f60468f41ac0ddd3a2d7d51 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -47,6 +47,9 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -192,7 +192,7 @@ index 01ba17d0b..a88915383 100644
      private LegacyConfigHelper ionConfigHelper;
  
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index a1eeae7c2..bea17770d 100644
+index a1eeae7c2d0a7627e1e6b63b6fbdea6b5f7e13d1..bea17770d0af27e64ed262cbad92a7ae226cf827 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -1869,6 +1869,12 @@ public final class CraftServer implements Server {
@@ -208,6 +208,3 @@ index a1eeae7c2..bea17770d 100644
          // IonSpigot start
          @Deprecated // Titanium
          @Override
--- 
-2.38.1.windows.1
-

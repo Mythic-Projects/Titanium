@@ -1,11 +1,11 @@
-From 8d65bce4c6b1c5d61cd7bd5aef90f083439a8a1f Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 23 Sep 2022 21:19:17 +0200
 Subject: [PATCH] Fix killing at the same time
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
-index 70a63b662..f91a50c54 100644
+index 70a63b6629fb69e6640ed33dd75afc7d76491c74..f91a50c54c32518edd1d003b7ea815968e18332c 100644
 --- a/src/main/java/net/minecraft/server/EntityHuman.java
 +++ b/src/main/java/net/minecraft/server/EntityHuman.java
 @@ -965,6 +965,11 @@ public abstract class EntityHuman extends EntityLiving {
@@ -20,6 +20,3 @@ index 70a63b662..f91a50c54 100644
          if (entity.aD()) {
              if (!entity.l(this)) {
                  float f = (float) this.getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).getValue();
--- 
-2.38.1.windows.1
-

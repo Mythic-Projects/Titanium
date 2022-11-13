@@ -1,11 +1,11 @@
-From da681815c788309b435b4c04193a4c0fc5dce033 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 15 Jun 2022 21:38:43 +0200
 Subject: [PATCH] Add Server#setMaxPlayers
 
 
 diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
-index 7696b6f7..a7b8c8f5 100644
+index 7696b6f70c90700def3ccb0af3a9b94fc152a460..a7b8c8f5e98eb362585a981f47326e3b2d5f8067 100644
 --- a/src/main/java/org/bukkit/Bukkit.java
 +++ b/src/main/java/org/bukkit/Bukkit.java
 @@ -161,6 +161,16 @@ public final class Bukkit {
@@ -26,7 +26,7 @@ index 7696b6f7..a7b8c8f5 100644
       * Get the game port that the server runs on.
       *
 diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
-index 0242faa4..1ee72921 100644
+index 0242faa47655bfee9985009284a30345bad0ec1f..1ee7292123246de64d052d50d8f94362f8866a37 100644
 --- a/src/main/java/org/bukkit/Server.java
 +++ b/src/main/java/org/bukkit/Server.java
 @@ -137,6 +137,14 @@ public interface Server extends PluginMessageRecipient {
@@ -44,6 +44,3 @@ index 0242faa4..1ee72921 100644
      /**
       * Get the game port that the server runs on.
       *
--- 
-2.38.1.windows.1
-

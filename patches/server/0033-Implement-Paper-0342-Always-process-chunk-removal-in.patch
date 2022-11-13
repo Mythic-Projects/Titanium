@@ -1,4 +1,4 @@
-From ffff1767c94a9996057da91d3c24992ddadf5ff9 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 12 May 2022 10:55:26 +0200
 Subject: [PATCH] Implement [Paper-0342] Always process chunk removal in
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0342] Always process chunk removal in
 
 
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index b1f4a3545..70f3661be 100644
+index b1f4a354550411a9a5e457fbf99cd7c4722a2133..70f3661beb49336ec06c3fc9bcc9c956f200db1e 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -1156,7 +1156,7 @@ public abstract class World implements IBlockAccess {
@@ -26,6 +26,3 @@ index b1f4a3545..70f3661be 100644
          // CraftBukkit start - Decrement loop variable field if we've already ticked this entity
          int index = this.entityList.indexOf(entity);
          if (index != -1) {
--- 
-2.38.1.windows.1
-

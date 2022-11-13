@@ -1,11 +1,11 @@
-From 5da212a074f2cb0b81c83c0e4ee16631ae99c052 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 28 Aug 2022 14:55:50 +0200
 Subject: [PATCH] Add EntityType#fromEnumName and #findType
 
 
 diff --git a/src/main/java/org/bukkit/entity/EntityType.java b/src/main/java/org/bukkit/entity/EntityType.java
-index ccc024bf..7c6ca475 100644
+index ccc024bf972bd00161830a06b002cbd2ab19d1a0..7c6ca4758e7de7db348e6572738b1f8aec4e65ac 100644
 --- a/src/main/java/org/bukkit/entity/EntityType.java
 +++ b/src/main/java/org/bukkit/entity/EntityType.java
 @@ -13,6 +13,7 @@ import org.bukkit.entity.minecart.StorageMinecart;
@@ -68,6 +68,3 @@ index ccc024bf..7c6ca475 100644
      @Deprecated
      public static EntityType fromId(int id) {
          if (id > Short.MAX_VALUE) {
--- 
-2.38.1.windows.1
-

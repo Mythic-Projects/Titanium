@@ -1,11 +1,11 @@
-From 91e0030a832d4e698b20009f2e0b0e790bc67a6e Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 23 Sep 2022 21:56:36 +0200
 Subject: [PATCH] Option to disable chunk ticking
 
 
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 93eb7e728..8424b5f17 100644
+index 93eb7e7287ea602dd8d5f34b946777972f34fe5c..8424b5f173a1db0e0e5714f4d87378c2d995cd1b 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
 @@ -404,6 +404,9 @@ public class WorldServer extends World implements IAsyncTaskHandler {
@@ -19,7 +19,7 @@ index 93eb7e728..8424b5f17 100644
          if (this.worldData.getType() == WorldType.DEBUG_ALL_BLOCK_STATES) {
              // Spigot start
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 49021bd85..633efdb9f 100644
+index 49021bd8519b66ff3d3bbf3c9f53cd514a91acd9..633efdb9f4d0f0ad384d90c09dc91a0d7f4f0f8d 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -107,6 +107,11 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -34,6 +34,3 @@ index 49021bd85..633efdb9f 100644
      }
  
      @Comment("Whether saving of fireworks and arrows should be disabled.")
--- 
-2.38.1.windows.1
-

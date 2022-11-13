@@ -1,11 +1,11 @@
-From 418ace3c7ad58f8a272c42fc33c266c07897e967 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 17 Jun 2022 21:02:02 +0200
 Subject: [PATCH] Make messages configurable
 
 
 diff --git a/src/main/java/net/minecraft/server/CommandAbstract.java b/src/main/java/net/minecraft/server/CommandAbstract.java
-index 112188084..759513a07 100644
+index 11218808402b3d88c99b4b44f654907c842d25d9..759513a07c9f5d205e9b3ff84e5ddabae3250142 100644
 --- a/src/main/java/net/minecraft/server/CommandAbstract.java
 +++ b/src/main/java/net/minecraft/server/CommandAbstract.java
 @@ -11,6 +11,7 @@ import java.util.Collections;
@@ -26,7 +26,7 @@ index 112188084..759513a07 100644
      }
  
 diff --git a/src/main/java/net/minecraft/server/HandshakeListener.java b/src/main/java/net/minecraft/server/HandshakeListener.java
-index ed2b7b827..7a9d4e946 100644
+index ed2b7b827928381bbe046d5a6132c8040fd7ef4a..7a9d4e946ba4bd461893259be72e1f1465b7ff31 100644
 --- a/src/main/java/net/minecraft/server/HandshakeListener.java
 +++ b/src/main/java/net/minecraft/server/HandshakeListener.java
 @@ -4,6 +4,7 @@ package net.minecraft.server;
@@ -52,7 +52,7 @@ index ed2b7b827..7a9d4e946 100644
                  this.b.close(chatcomponenttext);
              } else {
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index e80bac6bf..5e2eec676 100644
+index e80bac6bfe7a8f51a38062848033fb956d8df690..5e2eec676c95f4963e9cb2d3a98e49bdd56cbe08 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -1227,7 +1227,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
@@ -65,7 +65,7 @@ index e80bac6bf..5e2eec676 100644
              SpigotTimings.playerCommandTimer.stopTiming(); // Spigot
              return;
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index c48b878c0..0010fbbbd 100644
+index c48b878c01935df67bfd2ccca2b5303368ba158a..0010fbbbded81e05cf95ac2aab7c4e4c51d66b63 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -17,6 +17,7 @@ import java.util.Iterator;
@@ -95,7 +95,7 @@ index c48b878c0..0010fbbbd 100644
          }
  
 diff --git a/src/main/java/net/titanium/Titanium.java b/src/main/java/net/titanium/Titanium.java
-index e0d19630c..96e10acf3 100644
+index e0d19630c48235a0d6760bdcd7e449eac9fa008a..96e10acf31d95211a7815494891a19972c68cb78 100644
 --- a/src/main/java/net/titanium/Titanium.java
 +++ b/src/main/java/net/titanium/Titanium.java
 @@ -7,6 +7,8 @@ import java.io.File;
@@ -174,7 +174,7 @@ index e0d19630c..96e10acf3 100644
          return knockbackConfig;
      }
 diff --git a/src/main/java/net/titanium/command/PingCommand.java b/src/main/java/net/titanium/command/PingCommand.java
-index 2e0bf26e3..8246e4ae4 100644
+index 2e0bf26e3cd8b66fd5c2fcce659433e366a210a3..8246e4ae4677a2126456413bcc873135c60ea87f 100644
 --- a/src/main/java/net/titanium/command/PingCommand.java
 +++ b/src/main/java/net/titanium/command/PingCommand.java
 @@ -1,6 +1,7 @@
@@ -237,7 +237,7 @@ index 2e0bf26e3..8246e4ae4 100644
                  .replace("{PLAYER}", player.getName());
  
 diff --git a/src/main/java/net/titanium/command/SetSlotsCommand.java b/src/main/java/net/titanium/command/SetSlotsCommand.java
-index e3607b5c5..7db3b64f7 100644
+index e3607b5c5b8e146ddfaa7d28211a07f67f8010fc..7db3b64f77003076ce87bf99120587348fc24553 100644
 --- a/src/main/java/net/titanium/command/SetSlotsCommand.java
 +++ b/src/main/java/net/titanium/command/SetSlotsCommand.java
 @@ -4,6 +4,7 @@ import java.util.Arrays;
@@ -296,7 +296,7 @@ index e3607b5c5..7db3b64f7 100644
                  .replace("{OLD_SLOTS}", Integer.toString(oldSlots)));
  
 diff --git a/src/main/java/net/titanium/config/SpigotConfig.java b/src/main/java/net/titanium/config/SpigotConfig.java
-index d25c9541c..dd47b50c5 100644
+index d25c9541cc50cc1ffa74067a208df15ddf342355..dd47b50c567b8dd12938623b8fb9d7192ee26dc3 100644
 --- a/src/main/java/net/titanium/config/SpigotConfig.java
 +++ b/src/main/java/net/titanium/config/SpigotConfig.java
 @@ -130,59 +130,6 @@ public class SpigotConfig extends TitaniumConfigSection {
@@ -360,7 +360,7 @@ index d25c9541c..dd47b50c5 100644
  
      public static class Commands extends TitaniumConfigSection {
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 065b8aa4e..b67970d70 100644
+index 065b8aa4ec7f33a65aaae261dbabe81638d6890a..b67970d7037091a2e6a31f37debe8ab2d2f18d98 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -30,8 +30,7 @@ import org.bukkit.command.Command;
@@ -386,7 +386,7 @@ index 065b8aa4e..b67970d70 100644
      }
 diff --git a/src/main/java/net/titanium/config/message/MessageConfig.java b/src/main/java/net/titanium/config/message/MessageConfig.java
 new file mode 100644
-index 000000000..c0c84785b
+index 0000000000000000000000000000000000000000..c0c84785bfc5781a804d3c6b681c57615b45e094
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/message/MessageConfig.java
 @@ -0,0 +1,111 @@
@@ -503,7 +503,7 @@ index 000000000..c0c84785b
 +}
 diff --git a/src/main/java/net/titanium/config/migration/S0001_Migrate_messages_into_separate_file.java b/src/main/java/net/titanium/config/migration/S0001_Migrate_messages_into_separate_file.java
 new file mode 100644
-index 000000000..b9e2212f0
+index 0000000000000000000000000000000000000000..b9e2212f038f54b59eb7ae533d493ed8888c297c
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/migration/S0001_Migrate_messages_into_separate_file.java
 @@ -0,0 +1,63 @@
@@ -571,7 +571,7 @@ index 000000000..b9e2212f0
 +
 +}
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index c1ab4e8d2..d13fd3606 100644
+index c1ab4e8d26cf5bd85821ba9adba2c79fb74eafeb..d13fd3606b124af3db8f3e14efceb1152ba2a992 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -41,6 +41,7 @@ import net.titanium.config.BukkitConfig;
@@ -637,7 +637,7 @@ index c1ab4e8d2..d13fd3606 100644
          public Instant getStartTime() {
              return startTime;
 diff --git a/src/main/java/org/bukkit/craftbukkit/Main.java b/src/main/java/org/bukkit/craftbukkit/Main.java
-index 31525c89c..ed4453c99 100644
+index 31525c89c3b6de0cebbfd0e85e9db779a0fb920f..ed4453c9923413ea6c27840ad846066a1baf0328 100644
 --- a/src/main/java/org/bukkit/craftbukkit/Main.java
 +++ b/src/main/java/org/bukkit/craftbukkit/Main.java
 @@ -148,6 +148,12 @@ public class Main {
@@ -654,7 +654,7 @@ index 31525c89c..ed4453c99 100644
                          .withRequiredArg()
                          .ofType(File.class)
 diff --git a/src/main/java/org/spigotmc/RestartCommand.java b/src/main/java/org/spigotmc/RestartCommand.java
-index e2828dfa2..c34de5946 100644
+index e2828dfa2542245f8adb776a6e8faa6bebb6d1e4..c34de59462c9cc89bce38cd1e7a5512ae32bbdb5 100644
 --- a/src/main/java/org/spigotmc/RestartCommand.java
 +++ b/src/main/java/org/spigotmc/RestartCommand.java
 @@ -5,6 +5,7 @@ import java.util.List;
@@ -675,7 +675,7 @@ index e2828dfa2..c34de5946 100644
                  // Give the socket a chance to send the packets
                  try
 diff --git a/src/main/java/org/spigotmc/TicksPerSecondCommand.java b/src/main/java/org/spigotmc/TicksPerSecondCommand.java
-index 5da2b2148..f775f05f4 100644
+index 5da2b2148ae143c27dd44670f3b8a474db258d03..f775f05f48878045a26113c4723e77cc023f6abb 100644
 --- a/src/main/java/org/spigotmc/TicksPerSecondCommand.java
 +++ b/src/main/java/org/spigotmc/TicksPerSecondCommand.java
 @@ -1,6 +1,9 @@
@@ -753,6 +753,3 @@ index 5da2b2148..f775f05f4 100644
      }
  
      private static String formatUptime(long uptime) {
--- 
-2.38.1.windows.1
-

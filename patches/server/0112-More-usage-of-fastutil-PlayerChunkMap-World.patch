@@ -1,11 +1,11 @@
-From f5530a74a725d24edb289fe425e8e843ff43a571 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sat, 11 Jun 2022 00:25:00 +0200
 Subject: [PATCH] More usage of fastutil - PlayerChunkMap & World
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerChunkMap.java b/src/main/java/net/minecraft/server/PlayerChunkMap.java
-index 38586aad7..7aa2b129d 100644
+index 38586aad7548b69275f0e5b3f5e8b2c2734076fe..7aa2b129d86159522c2ace7fbc952e5619f7898c 100644
 --- a/src/main/java/net/minecraft/server/PlayerChunkMap.java
 +++ b/src/main/java/net/minecraft/server/PlayerChunkMap.java
 @@ -1,9 +1,12 @@
@@ -56,7 +56,7 @@ index 38586aad7..7aa2b129d 100644
  
          public PlayerChunk(int i, int j) {
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index e74197ee9..1aa993e96 100644
+index e74197ee9058f0ae392fa2facef61ad6ff7d2a48..1aa993e96df79eade587036873a09f9682e864e3 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -54,7 +54,7 @@ public abstract class PlayerList {
@@ -69,7 +69,7 @@ index e74197ee9..1aa993e96 100644
      private final IpBanList l;
      private final OpList operators;
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 2af353222..2baed2815 100644
+index 2af35322287456b9604848deb41a768f6fcdb910..2baed2815a98c99220e40b2d2daea0732f8dbbe3 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -4,6 +4,7 @@ import com.google.common.base.Predicate;
@@ -100,6 +100,3 @@ index 2af353222..2baed2815 100644
      protected final IntHashMap<Entity> entitiesById = new IntHashMap();
      private long d = 16777215L;
      private int I; private int getSkylightSubtracted() { return this.I; } // Paper - OBFHELPER
--- 
-2.38.1.windows.1
-

@@ -1,11 +1,11 @@
-From 87fff27f8fa81c79095b0bf37e7b08a49e30e6d0 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 19 May 2022 19:14:10 +0200
 Subject: [PATCH] Implement [IonSpigot-0008] Reduce Chunk Hashing
 
 
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index c4dab42bd..19d407b40 100644
+index c4dab42bdf868f73f0c3875e8adfb852b2b02e18..19d407b4080cd4313aaabe3193870e50dd335046 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
 @@ -56,8 +56,9 @@ public class ChunkProviderServer implements IChunkProvider {
@@ -81,6 +81,3 @@ index c4dab42bd..19d407b40 100644
              
              chunk.addEntities();
              
--- 
-2.38.1.windows.1
-

@@ -1,11 +1,11 @@
-From 23172e2d03e925aae4244019a495d3e343f9f86f Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 19 May 2022 23:07:12 +0200
 Subject: [PATCH] Implement [FlamePaper-0003] Fix chunk memory leak
 
 
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index c08454465..7795d0b71 100644
+index c08454465cd1755ac117bee2670dfa62fed33821..7795d0b712872d69c237ad481a7a2afcc1e1656e 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
 @@ -40,7 +40,7 @@ public class ChunkProviderServer implements IChunkProvider {
@@ -58,7 +58,7 @@ index c08454465..7795d0b71 100644
          return !this.world.savingDisabled;
      }
 diff --git a/src/main/java/net/minecraft/server/ChunkRegionLoader.java b/src/main/java/net/minecraft/server/ChunkRegionLoader.java
-index 6b244904d..7889b91e7 100644
+index 6b244904d60ebbd2bf4a93a320c9b161e879451e..7889b91e705fcd1b221d0156e08b1dafe28e5eab 100644
 --- a/src/main/java/net/minecraft/server/ChunkRegionLoader.java
 +++ b/src/main/java/net/minecraft/server/ChunkRegionLoader.java
 @@ -17,8 +17,9 @@ import org.apache.logging.log4j.Logger;
@@ -74,7 +74,7 @@ index 6b244904d..7889b91e7 100644
      private boolean e = false;
  
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index fcb31e75b..cf1592484 100644
+index fcb31e75b78502d5f63651e49209f29fac3f8a8e..cf15924847fdc2fd6e0973fcc4bf9bf61d08cb41 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
 @@ -231,7 +231,12 @@ public class WorldServer extends World implements IAsyncTaskHandler {
@@ -92,7 +92,7 @@ index fcb31e75b..cf1592484 100644
  
          if (j != this.ab()) {
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 9e3709d50..8f2e22d43 100644
+index 9e3709d502420c9ae6558160149dfbb09f9e06c9..8f2e22d43cb3efe1de0654aa3242eaa5bc5045d6 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -998,6 +998,26 @@ public final class CraftServer implements Server {
@@ -122,6 +122,3 @@ index 9e3709d50..8f2e22d43 100644
          }
  
          worlds.remove(world.getName().toLowerCase());
--- 
-2.38.1.windows.1
-

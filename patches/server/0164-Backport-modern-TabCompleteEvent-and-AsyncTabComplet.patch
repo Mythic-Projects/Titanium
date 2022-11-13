@@ -1,11 +1,11 @@
-From 3a96875bfc5fec5b089ffec2885b4653bf4db084 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sat, 17 Sep 2022 12:10:54 +0200
 Subject: [PATCH] Backport modern TabCompleteEvent and AsyncTabCompleteEvent
 
 
 diff --git a/src/main/java/net/minecraft/server/PacketPlayInTabComplete.java b/src/main/java/net/minecraft/server/PacketPlayInTabComplete.java
-index 0d811e789..3440a3377 100644
+index 0d811e789c3ef7dd6ce5837a75dcbcf6ebcbd127..3440a33775b8ccc09f67d3c294c0ea0dd81aa2ae 100644
 --- a/src/main/java/net/minecraft/server/PacketPlayInTabComplete.java
 +++ b/src/main/java/net/minecraft/server/PacketPlayInTabComplete.java
 @@ -1,6 +1,9 @@
@@ -32,7 +32,7 @@ index 0d811e789..3440a3377 100644
  
      public String a() {
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index c10ff1faa..fe3a1520a 100644
+index c10ff1faa809dd8786f1bc62fd1811d26493652c..fe3a1520a7d6be235f81b1bb3f54e3ec5ae1c413 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -1,10 +1,11 @@
@@ -104,7 +104,7 @@ index c10ff1faa..fe3a1520a 100644
  
      public void a(PacketPlayInSettings packetplayinsettings) {
 diff --git a/src/main/java/net/titanium/console/TitaniumConsoleCompleter.java b/src/main/java/net/titanium/console/TitaniumConsoleCompleter.java
-index b87509781..18066a65e 100644
+index b87509781d24d2f64c3f329c92c591f3575a154b..18066a65ef68bb97bf809044df8d2af2e20d08db 100644
 --- a/src/main/java/net/titanium/console/TitaniumConsoleCompleter.java
 +++ b/src/main/java/net/titanium/console/TitaniumConsoleCompleter.java
 @@ -1,10 +1,15 @@
@@ -213,7 +213,7 @@ index b87509781..18066a65e 100644
 -    }
  }
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index a50fb6477..9f617675c 100644
+index a50fb6477ba6b5e576e0bfb73a267224372925e4..9f617675c128cc750ec61c918afa912ed99da8f4 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -94,6 +94,7 @@ import org.bukkit.craftbukkit.util.permissions.CraftDefaultPermissions;
@@ -249,6 +249,3 @@ index a50fb6477..9f617675c 100644
      }
      // PaperSpigot end
  
--- 
-2.38.1.windows.1
-

@@ -1,11 +1,11 @@
-From c0b55ff11cd673f59b764ac3e9896ad5ea40a65f Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sat, 27 Aug 2022 19:51:26 +0200
 Subject: [PATCH] Configurable player data saving
 
 
 diff --git a/src/main/java/net/minecraft/server/WorldNBTStorage.java b/src/main/java/net/minecraft/server/WorldNBTStorage.java
-index d508977f5..434168072 100644
+index d508977f55d3010a7602a8a5380e29d941da7aa0..434168072eb81ea7e86bf56cac0ff3b5229f4e76 100644
 --- a/src/main/java/net/minecraft/server/WorldNBTStorage.java
 +++ b/src/main/java/net/minecraft/server/WorldNBTStorage.java
 @@ -8,6 +8,7 @@ import java.io.FileOutputStream;
@@ -40,6 +40,3 @@ index d508977f5..434168072 100644
          NBTTagCompound nbttagcompound = null;
  
          try {
--- 
-2.38.1.windows.1
-

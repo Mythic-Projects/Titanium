@@ -1,11 +1,11 @@
-From b44922d9bea2e4b3f44bcbed40f4f761f627cfda Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 5 Jun 2022 16:17:15 +0200
 Subject: [PATCH] Implement [PandaSpigot-0060] Optimise removeQueue by hpfxd
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index b89849a10..f8cd8bc2c 100644
+index b89849a101a5f58d2b17135b8bf208d0f2ad66b8..f8cd8bc2c161563fd8f49a0a31bb96814ab964a9 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
 @@ -35,7 +35,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
@@ -55,6 +55,3 @@ index b89849a10..f8cd8bc2c 100644
      }
  
      protected void a(MobEffect mobeffect) {
--- 
-2.38.1.windows.1
-

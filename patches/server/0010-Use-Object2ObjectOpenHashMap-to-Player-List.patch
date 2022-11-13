@@ -1,11 +1,11 @@
-From cd1c2e66a2ec7fe114ca54fce8ea44c5e386c48e Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 27 Apr 2022 22:20:00 +0200
 Subject: [PATCH] Use Object2ObjectOpenHashMap to Player List
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index 3c2d3197f..3403bd7fb 100644
+index 3c2d3197faa7e5212f7c6f9970e56426ae02ade7..3403bd7fbda574b7bd34fa54e750ad7a1fa73a1e 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
@@ -26,7 +26,7 @@ index 3c2d3197f..3403bd7fb 100644
      private final IpBanList l;
      private final OpList operators;
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 69485fa69..32ad864ab 100644
+index 69485fa696f27c965dd576d9cda7b4b56ef57032..32ad864ab02b63f13efd3545d4e65ecfd8bd088e 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -1,5 +1,6 @@
@@ -50,6 +50,3 @@ index 69485fa69..32ad864ab 100644
          this.serverVersion = CraftServer.class.getPackage().getImplementationVersion();
          online.value = console.getPropertyManager().getBoolean("online-mode", true);
  
--- 
-2.38.1.windows.1
-

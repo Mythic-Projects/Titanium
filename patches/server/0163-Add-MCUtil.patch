@@ -1,4 +1,4 @@
-From 210af42b4703888d9dff57e6e4815e13d158d339 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 16 Sep 2022 23:49:08 +0200
 Subject: [PATCH] Add MCUtil
@@ -6,7 +6,7 @@ Subject: [PATCH] Add MCUtil
 
 diff --git a/src/main/java/net/minecraft/server/MCUtil.java b/src/main/java/net/minecraft/server/MCUtil.java
 new file mode 100644
-index 000000000..a32f75812
+index 0000000000000000000000000000000000000000..a32f7581228067f2cdacb587ac86a82e87293b49
 --- /dev/null
 +++ b/src/main/java/net/minecraft/server/MCUtil.java
 @@ -0,0 +1,82 @@
@@ -93,7 +93,7 @@ index 000000000..a32f75812
 +
 +}
 diff --git a/src/main/java/net/titanium/util/async/AsyncUtil.java b/src/main/java/net/titanium/util/async/AsyncUtil.java
-index b4dce733c..6ae626464 100644
+index b4dce733ca8674f458f078c1283f12bdf102ec0b..6ae62646460e13bd094e5e9074b12222440874ea 100644
 --- a/src/main/java/net/titanium/util/async/AsyncUtil.java
 +++ b/src/main/java/net/titanium/util/async/AsyncUtil.java
 @@ -1,9 +1,12 @@
@@ -152,6 +152,3 @@ index b4dce733c..6ae626464 100644
  	/**
  	 * Runs a given task if it is synchronized on an object
  	 * @param monitor The object to check for locking
--- 
-2.38.1.windows.1
-

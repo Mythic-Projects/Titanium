@@ -1,4 +1,4 @@
-From c418ada2e5044baa45e6a5a37cf0bc480127e613 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 5 Jun 2022 02:53:00 +0200
 Subject: [PATCH] Implement [PandaSpigot-0034] Prevent fishing hooks from using
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [PandaSpigot-0034] Prevent fishing hooks from using
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityFishingHook.java b/src/main/java/net/minecraft/server/EntityFishingHook.java
-index 3717ca30c..b320b1301 100644
+index 3717ca30c98f7a96c967ea8382387d8567ea00cd..b320b1301e7142328ffd497e7b6ed46300a63aee 100644
 --- a/src/main/java/net/minecraft/server/EntityFishingHook.java
 +++ b/src/main/java/net/minecraft/server/EntityFishingHook.java
 @@ -360,6 +360,7 @@ public class EntityFishingHook extends Entity {
@@ -17,6 +17,3 @@ index 3717ca30c..b320b1301 100644
              }
          }
      }
--- 
-2.38.1.windows.1
-

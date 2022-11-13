@@ -1,4 +1,4 @@
-From 31a2587bec51d05d36b784b1100c6195e537485f Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: vemacs <d@nkmem.es>
 Date: Wed, 23 Nov 2016 08:31:45 -0500
 Subject: [PATCH] Implement [Paper-0168] Cache user authenticator threads by
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0168] Cache user authenticator threads by
 
 
 diff --git a/src/main/java/net/minecraft/server/LoginListener.java b/src/main/java/net/minecraft/server/LoginListener.java
-index ecff46f0a..812d9a947 100644
+index ecff46f0aca0b510aea49677512a3a255bcb8846..812d9a94712f359f30a6d74efb49e13503265d65 100644
 --- a/src/main/java/net/minecraft/server/LoginListener.java
 +++ b/src/main/java/net/minecraft/server/LoginListener.java
 @@ -40,6 +40,12 @@ public class LoginListener implements PacketLoginInListener, IUpdatePlayerListBo
@@ -63,6 +63,3 @@ index ecff46f0a..812d9a947 100644
          }
      }
  
--- 
-2.38.1.windows.1
-

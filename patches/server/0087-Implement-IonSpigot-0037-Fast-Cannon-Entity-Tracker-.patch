@@ -1,4 +1,4 @@
-From 7fd466c9415f87c07ab5ccd1c3275b89029306db Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: SuicidalKids <kfian294ma4@gmail.com>
 Date: Thu, 22 Apr 2021 20:36:16 +0100
 Subject: [PATCH] Implement [IonSpigot-0037] Fast Cannon Entity Tracker by
@@ -7,7 +7,7 @@ Subject: [PATCH] Implement [IonSpigot-0037] Fast Cannon Entity Tracker by
 
 diff --git a/src/main/java/me/suicidalkids/ion/visuals/CannonTrackerEntry.java b/src/main/java/me/suicidalkids/ion/visuals/CannonTrackerEntry.java
 new file mode 100644
-index 000000000..d37dc2909
+index 0000000000000000000000000000000000000000..d37dc29092e6ce833c512388ff0ea6b83b316b41
 --- /dev/null
 +++ b/src/main/java/me/suicidalkids/ion/visuals/CannonTrackerEntry.java
 @@ -0,0 +1,110 @@
@@ -122,7 +122,7 @@ index 000000000..d37dc2909
 +
 +}
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 2e20f7b4b..cfd1df78e 100644
+index 2e20f7b4b435a966f2619631b358c40b6eed6492..cfd1df78ed93ddc5fa39de6bd4ced1d0ec760b8b 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
 @@ -137,6 +137,7 @@ public abstract class Entity implements ICommandListener {
@@ -142,7 +142,7 @@ index 2e20f7b4b..cfd1df78e 100644
          this.datawatcher = new DataWatcher(this);
          this.datawatcher.a(0, Byte.valueOf((byte) 0));
 diff --git a/src/main/java/net/minecraft/server/EntityTracker.java b/src/main/java/net/minecraft/server/EntityTracker.java
-index 4668a1fca..addf86937 100644
+index 4668a1fca0a7c7016264c56f54ac8464768751c4..addf86937c1fbd0e8ead1e64637faa890ba7967f 100644
 --- a/src/main/java/net/minecraft/server/EntityTracker.java
 +++ b/src/main/java/net/minecraft/server/EntityTracker.java
 @@ -105,7 +105,7 @@ public class EntityTracker {
@@ -171,7 +171,7 @@ index 4668a1fca..addf86937 100644
      public void untrackEntity(Entity entity) {
          org.spigotmc.AsyncCatcher.catchOp( "entity untrack"); // Spigot
 diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-index 8e9597417..651e5bfa0 100644
+index 8e9597417845af723d1626313fd9a70ecd3e304f..651e5bfa07c9ccba74c223e402ee64a45cd4841b 100644
 --- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 +++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 @@ -451,7 +451,7 @@ public class EntityTrackerEntry {
@@ -197,7 +197,7 @@ index 8e9597417..651e5bfa0 100644
              // CraftBukkit start - Remove useless error spam, just return
              // EntityTrackerEntry.p.warn("Fetching addPacket for removed entity");
 diff --git a/src/main/java/net/titanium/config/IonWorldConfig.java b/src/main/java/net/titanium/config/IonWorldConfig.java
-index b36867028..3e7abe020 100644
+index b368670289f330fad45a6b144308f47279cbc5ec..3e7abe0200a387d5df865206933f9e9ddf49db19 100644
 --- a/src/main/java/net/titanium/config/IonWorldConfig.java
 +++ b/src/main/java/net/titanium/config/IonWorldConfig.java
 @@ -19,4 +19,14 @@ public class IonWorldConfig extends TitaniumConfigSection {
@@ -215,6 +215,3 @@ index b36867028..3e7abe020 100644
 +    }
 +
  }
--- 
-2.38.1.windows.1
-

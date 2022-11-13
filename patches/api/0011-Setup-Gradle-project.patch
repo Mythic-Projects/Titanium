@@ -1,11 +1,11 @@
-From 540b0bc344202f5a6bd4b706da71e195003d5c0a Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 29 May 2022 10:00:11 +0200
 Subject: [PATCH] Setup Gradle project
 
 
 diff --git a/.gitignore b/.gitignore
-index edf9e5c3..dfa15b1d 100644
+index edf9e5c3afdfcb9e357974d6536d25bd828d67b0..dfa15b1d499bd8bf1cb6b81441d0d4094a8afad7 100644
 --- a/.gitignore
 +++ b/.gitignore
 @@ -21,6 +21,9 @@
@@ -20,7 +20,7 @@ index edf9e5c3..dfa15b1d 100644
  
 diff --git a/build.gradle b/build.gradle
 new file mode 100644
-index 00000000..45aafcce
+index 0000000000000000000000000000000000000000..45aafcce4ef6ae0e0fa01eba5f174a501f1a3ca0
 --- /dev/null
 +++ b/build.gradle
 @@ -0,0 +1,45 @@
@@ -72,7 +72,7 @@ index 00000000..45aafcce
 \ No newline at end of file
 diff --git a/pom.xml b/pom.xml
 deleted file mode 100644
-index 2ff99a88..00000000
+index 2ff99a888a04e285fb9bf10cb5cf5560a60227ba..0000000000000000000000000000000000000000
 --- a/pom.xml
 +++ /dev/null
 @@ -1,187 +0,0 @@
@@ -264,7 +264,7 @@ index 2ff99a88..00000000
 -    </build>
 -</project>
 diff --git a/src/main/java/org/spigotmc/CustomTimingsHandler.java b/src/main/java/org/spigotmc/CustomTimingsHandler.java
-index 7e89b97b..56e932b8 100644
+index 7e89b97b60d547c75bde6d54f1512b0277099034..56e932b84ee8cde6a86d7a4f4cc562dd6ee2677d 100644
 --- a/src/main/java/org/spigotmc/CustomTimingsHandler.java
 +++ b/src/main/java/org/spigotmc/CustomTimingsHandler.java
 @@ -30,7 +30,6 @@ import co.aikar.timings.NullTimingHandler;
@@ -285,7 +285,7 @@ index 7e89b97b..56e932b8 100644
  
          new AuthorNagException("Deprecated use of CustomTimingsHandler. Please Switch to Timings.of ASAP").printStackTrace();
 diff --git a/src/test/java/org/bukkit/DifficultyTest.java b/src/test/java/org/bukkit/DifficultyTest.java
-index 293e283a..9ef39817 100644
+index 293e283a22fdc2abb387c29239cc3391f7cb6a4f..9ef39817d0df126e74c121073b71b3a881e949f8 100644
 --- a/src/test/java/org/bukkit/DifficultyTest.java
 +++ b/src/test/java/org/bukkit/DifficultyTest.java
 @@ -2,6 +2,7 @@ package org.bukkit;
@@ -296,6 +296,3 @@ index 293e283a..9ef39817 100644
  
  import org.junit.Test;
  
--- 
-2.38.1.windows.1
-

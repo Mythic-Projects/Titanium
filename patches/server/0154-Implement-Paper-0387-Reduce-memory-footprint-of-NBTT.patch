@@ -1,4 +1,4 @@
-From f370fe58fce177a5e50ec4a1af6da91a5cc89b3c Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Spottedleaf <spottedleaf@spottedleaf.dev>
 Date: Mon, 6 Apr 2020 17:39:25 -0700
 Subject: [PATCH] Implement [Paper-0387] Reduce memory footprint of
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0387] Reduce memory footprint of
 
 
 diff --git a/src/main/java/net/minecraft/server/NBTTagCompound.java b/src/main/java/net/minecraft/server/NBTTagCompound.java
-index 22d7c2ab3..b28d7d608 100644
+index 22d7c2ab36f11f93c0b9d08b786c784562ef7077..b28d7d60884e0fca3d2e5826a5847352d1d58dc0 100644
 --- a/src/main/java/net/minecraft/server/NBTTagCompound.java
 +++ b/src/main/java/net/minecraft/server/NBTTagCompound.java
 @@ -1,6 +1,5 @@
@@ -25,6 +25,3 @@ index 22d7c2ab3..b28d7d608 100644
  
      public NBTTagCompound() {}
  
--- 
-2.38.1.windows.1
-

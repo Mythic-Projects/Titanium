@@ -1,4 +1,4 @@
-From ae410b73fb39a19bc585c4f0f96c9f5aeb10b824 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: ysl3000 <yannicklamprecht@live.de>
 Date: Wed, 3 Nov 2021 14:29:02 -0400
 Subject: [PATCH] Implement [Paper-0614] Player Chunk Load/Unload Events by
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0614] Player Chunk Load/Unload Events by
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index f8cd8bc2c..6c0ab90c7 100644
+index f8cd8bc2c161563fd8f49a0a31bb96814ab964a9..6c0ab90c7bddac3022fe7e9a7ac52147f7b77aa4 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
 @@ -253,6 +253,11 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
@@ -22,7 +22,7 @@ index f8cd8bc2c..6c0ab90c7 100644
                      }
                  } else {
 diff --git a/src/main/java/net/minecraft/server/PlayerChunkMap.java b/src/main/java/net/minecraft/server/PlayerChunkMap.java
-index 7aa2b129d..a8c53d1ca 100644
+index 7aa2b129d86159522c2ace7fbc952e5619f7898c..a8c53d1ca34df030033f576ade18b85592356125 100644
 --- a/src/main/java/net/minecraft/server/PlayerChunkMap.java
 +++ b/src/main/java/net/minecraft/server/PlayerChunkMap.java
 @@ -427,6 +427,11 @@ public class PlayerChunkMap {
@@ -37,6 +37,3 @@ index 7aa2b129d..a8c53d1ca 100644
                  if (this.b.isEmpty()) {
                      long i = (long) this.location.x + 2147483647L | (long) this.location.z + 2147483647L << 32;
  
--- 
-2.38.1.windows.1
-

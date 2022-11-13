@@ -1,11 +1,11 @@
-From b8637a22edff74fe834f9e5118364718d3e20172 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Poweruser <poweruser.rs@hotmail.com>
 Date: Sat, 15 Aug 2015 01:44:13 +0200
 Subject: [PATCH] Implement [Migot-0007] Optimize Idle Furnaces
 
 
 diff --git a/src/main/java/net/minecraft/server/TileEntityFurnace.java b/src/main/java/net/minecraft/server/TileEntityFurnace.java
-index a284b3cd2..3096dea34 100644
+index a284b3cd2e185447c23734111266ddb1696d5a9c..3096dea34eb8308eab8e5237a42b3762b92d22e5 100644
 --- a/src/main/java/net/minecraft/server/TileEntityFurnace.java
 +++ b/src/main/java/net/minecraft/server/TileEntityFurnace.java
 @@ -206,7 +206,7 @@ public class TileEntityFurnace extends TileEntityContainer implements IUpdatePla
@@ -17,6 +17,3 @@ index a284b3cd2..3096dea34 100644
                  // CraftBukkit start - Handle multiple elapsed ticks
                  if (this.burnTime <= 0 && this.canBurn()) { // CraftBukkit - == to <=
                      CraftItemStack fuel = CraftItemStack.asCraftMirror(this.items[1]);
--- 
-2.38.1.windows.1
-

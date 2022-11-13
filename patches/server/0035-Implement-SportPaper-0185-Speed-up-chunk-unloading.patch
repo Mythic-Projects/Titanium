@@ -1,11 +1,11 @@
-From 614d743da27017d53be25f1472bf4a687aa63454 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 19 May 2022 22:53:34 +0200
 Subject: [PATCH] Implement [SportPaper-0185] Speed up chunk unloading
 
 
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index 662f53300..4f21d2543 100644
+index 662f533006776a2fe88a7dee01a8127a170c6d64..4f21d2543b1aa4ad623c50565e25521d11b4d8a3 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
 @@ -36,7 +36,7 @@ import it.unimi.dsi.fastutil.longs.LongSet;
@@ -50,7 +50,7 @@ index 662f53300..4f21d2543 100644
      }
  
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
-index a7dd39dd0..2aadafeae 100644
+index a7dd39dd09c057b9f5500d0232ed21858b97914e..2aadafeae6c35347b1e092bab720a8264f535809 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 @@ -281,7 +281,6 @@ public class CraftWorld implements World {
@@ -69,6 +69,3 @@ index a7dd39dd0..2aadafeae 100644
          return chunk != null;
      }
  
--- 
-2.38.1.windows.1
-

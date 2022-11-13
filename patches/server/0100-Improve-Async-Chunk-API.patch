@@ -1,11 +1,11 @@
-From 82a042c54ced45b7d282d5110d87e1d39fadbbe2 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 5 Jun 2022 20:25:39 +0200
 Subject: [PATCH] Improve Async Chunk API
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
-index 46fcbc019..19cdb459e 100644
+index 46fcbc0196900ec42aa9b7d837d1ef8ece11d8e6..19cdb459e3f3474294bdc006b0370d58fa5df9a3 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 @@ -12,6 +12,7 @@ import java.util.Random;
@@ -47,6 +47,3 @@ index 46fcbc019..19cdb459e 100644
 +    }
 +    // Titanium end
  }
--- 
-2.38.1.windows.1
-

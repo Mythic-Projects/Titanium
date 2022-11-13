@@ -1,11 +1,11 @@
-From 978a4766f66133eda14c13e107f6699399ecb8a4 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Tue, 30 Aug 2022 00:45:27 +0200
 Subject: [PATCH] Update libraries
 
 
 diff --git a/build.gradle b/build.gradle
-index a7676ef2..c7145ad5 100644
+index a7676ef236aa1681d3466476838d63acab3b21f0..c7145ad57512488dc50ec8a79c9a3e06cd14296f 100644
 --- a/build.gradle
 +++ b/build.gradle
 @@ -1,14 +1,14 @@
@@ -47,6 +47,3 @@ index a7676ef2..c7145ad5 100644
  
      testImplementation 'junit:junit:4.13.2' // Titanium - Updated junit to 4.13.2
      testImplementation 'org.hamcrest:hamcrest-library:1.3'
--- 
-2.38.1.windows.1
-

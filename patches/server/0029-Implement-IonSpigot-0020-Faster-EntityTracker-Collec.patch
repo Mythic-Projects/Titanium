@@ -1,11 +1,11 @@
-From 84a3583a319cc32eff58877d18a4be463879cafb Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 11 May 2022 08:15:32 +0200
 Subject: [PATCH] Implement [IonSpigot-0020] Faster EntityTracker Collections
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityTracker.java b/src/main/java/net/minecraft/server/EntityTracker.java
-index cb72b3672..e24644c42 100644
+index cb72b36725927272fddfdad929b268a7b06140ac..e24644c425edf6a9aed5081a8de66d73b6563717 100644
 --- a/src/main/java/net/minecraft/server/EntityTracker.java
 +++ b/src/main/java/net/minecraft/server/EntityTracker.java
 @@ -13,7 +13,7 @@ public class EntityTracker {
@@ -18,7 +18,7 @@ index cb72b3672..e24644c42 100644
      private int e;
  
 diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-index 1fc2388ea..beff63760 100644
+index 1fc2388eaa178366b92e9f4e2d6b32ed8a83c0dc..beff637602a8a8dfafe7e6c30783ec98f4e857ea 100644
 --- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 +++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 @@ -42,7 +42,7 @@ public class EntityTrackerEntry {
@@ -30,6 +30,3 @@ index 1fc2388ea..beff63760 100644
      public Set<EntityPlayer> trackedPlayers = trackedPlayerMap.keySet();
      // PaperSpigot end
  
--- 
-2.38.1.windows.1
-

@@ -1,4 +1,4 @@
-From 7f12f5013930e49fb01388811a5eef2cd26205d4 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Thu, 14 Apr 2016 21:01:39 -0400
 Subject: [PATCH] Implement [Paper-0116] Fix Bugs with Spigot Mob Spawn Logic
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0116] Fix Bugs with Spigot Mob Spawn Logic
 
 
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index 44c1a5b6f..c9bddeb7c 100644
+index 44c1a5b6f60d70000f812df0d614e1ab4568c715..c9bddeb7c8738cd66701034fb5b557ba58bc1659 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
 @@ -787,7 +787,7 @@ public class Chunk {
@@ -19,7 +19,7 @@ index 44c1a5b6f..c9bddeb7c 100644
          if (entity instanceof EntityItem) {
              itemCounts[i]--;
 diff --git a/src/main/java/net/minecraft/server/SpawnerCreature.java b/src/main/java/net/minecraft/server/SpawnerCreature.java
-index 1092defac..89a8f916d 100644
+index 1092deface98bdad41e41f2f808e9246bb07d76c..89a8f916dba3a116fab4c52d03c43a5d3ad494cc 100644
 --- a/src/main/java/net/minecraft/server/SpawnerCreature.java
 +++ b/src/main/java/net/minecraft/server/SpawnerCreature.java
 @@ -23,6 +23,15 @@ public final class SpawnerCreature {
@@ -47,6 +47,3 @@ index 1092defac..89a8f916d 100644
                          Iterator iterator1 = this.b.iterator();
  
                          int moblimit = (limit * i / 256) - mobcnt + 1; // Spigot - up to 1 more than limit
--- 
-2.38.1.windows.1
-

@@ -1,4 +1,4 @@
-From fbea3234b7ccb78e968c753ab008e86f7b4d6745 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 15 May 2022 18:17:49 +0200
 Subject: [PATCH] Implement [Nacho-0009] Remove an extra file io call within
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Nacho-0009] Remove an extra file io call within
 
 
 diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
-index ba422aecb..b7bb92f0f 100644
+index ba422aecbf3db350247e84749bddc481f8901f16..b7bb92f0fe3b5123271975d52618f52a923e4ab1 100644
 --- a/src/main/java/net/minecraft/server/NetworkManager.java
 +++ b/src/main/java/net/minecraft/server/NetworkManager.java
 @@ -169,7 +169,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
@@ -49,7 +49,7 @@ index ba422aecb..b7bb92f0f 100644
          }
  
 diff --git a/src/main/java/net/minecraft/server/WorldNBTStorage.java b/src/main/java/net/minecraft/server/WorldNBTStorage.java
-index eab418042..d508977f5 100644
+index eab4180420f2f34ad75fa52405a3af8709034056..d508977f55d3010a7602a8a5380e29d941da7aa0 100644
 --- a/src/main/java/net/minecraft/server/WorldNBTStorage.java
 +++ b/src/main/java/net/minecraft/server/WorldNBTStorage.java
 @@ -207,7 +207,7 @@ public class WorldNBTStorage implements IDataManager, IPlayerFileData {
@@ -61,6 +61,3 @@ index eab418042..d508977f5 100644
              if ( org.bukkit.Bukkit.getOnlineMode() && !normalFile ) // Paper - Check online mode first // Akarin - ensures normal file
              {
                  file = new File( this.playerDir, UUID.nameUUIDFromBytes( ( "OfflinePlayer:" + entityhuman.getName() ).getBytes( "UTF-8" ) ).toString() + ".dat");
--- 
-2.38.1.windows.1
-

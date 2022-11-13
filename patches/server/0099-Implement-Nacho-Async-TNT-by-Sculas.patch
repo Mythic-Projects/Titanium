@@ -1,4 +1,4 @@
-From 9ff77bc90fae845cb8c084a3b0c36d7a8a96508b Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 5 Jun 2022 19:52:25 +0200
 Subject: [PATCH] Implement [Nacho-????] Async TNT by Sculas
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Nacho-????] Async TNT by Sculas
 
 diff --git a/src/main/java/ga/windpvp/windspigot/async/AsyncUtil.java b/src/main/java/ga/windpvp/windspigot/async/AsyncUtil.java
 new file mode 100644
-index 000000000..b1143e247
+index 0000000000000000000000000000000000000000..b1143e247aac245d9c4ad69efd5cdb90d606241d
 --- /dev/null
 +++ b/src/main/java/ga/windpvp/windspigot/async/AsyncUtil.java
 @@ -0,0 +1,43 @@
@@ -54,7 +54,7 @@ index 000000000..b1143e247
 +
 +}
 diff --git a/src/main/java/net/minecraft/server/Explosion.java b/src/main/java/net/minecraft/server/Explosion.java
-index 741697e2f..9b267e871 100644
+index 741697e2f6410fb891c16e95ad8769f97a238914..9b267e871736c48e06b632b6e70fbe62db8adabc 100644
 --- a/src/main/java/net/minecraft/server/Explosion.java
 +++ b/src/main/java/net/minecraft/server/Explosion.java
 @@ -3,22 +3,27 @@ package net.minecraft.server;
@@ -194,7 +194,7 @@ index 741697e2f..9b267e871 100644
          private final World world;
          private final double posX, posY, posZ;
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 024d5fad4..0aa2cbf42 100644
+index 024d5fad42842ddcc61c56b4a24e235054292ecb..0aa2cbf42902da71a8fede8eb6d5de34feadbe9a 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -122,6 +122,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
@@ -219,7 +219,7 @@ index 024d5fad4..0aa2cbf42 100644
          SpigotTimings.connectionTimer.startTiming(); // Spigot
          this.aq().c();
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 96a537233..88d3aa855 100644
+index 96a5372338d0bd372e4a94d6b9f159a1768f5b53..88d3aa8558b31d86924a733492f4ca1c4d728f0e 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -131,6 +131,21 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -244,6 +244,3 @@ index 96a537233..88d3aa855 100644
      @Comment("When this option is enabled, the server will create a directory `legacy_configs` with files like bukkit.yml, spigot.yml etc.")
      @Comment("Changing option there will not affect the server, it's only mirror of this file.")
      @Comment("Enable this option only if some of your plugins are not compatible with the new configs.")
--- 
-2.38.1.windows.1
-

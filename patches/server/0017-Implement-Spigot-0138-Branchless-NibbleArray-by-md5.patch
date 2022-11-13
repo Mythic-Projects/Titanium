@@ -1,11 +1,11 @@
-From 1314325b3f0a13b4fe065dcbdcc77272d563fae7 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 15 May 2022 17:44:45 +0200
 Subject: [PATCH] Implement [Spigot-0138] Branchless NibbleArray by md5
 
 
 diff --git a/src/main/java/net/minecraft/server/NibbleArray.java b/src/main/java/net/minecraft/server/NibbleArray.java
-index 9306f97af..69e2f0a9d 100644
+index 9306f97af94b6559dd28a3f942696ac4d3f6b746..69e2f0a9d445b71b79135bd9749e51b19517e98a 100644
 --- a/src/main/java/net/minecraft/server/NibbleArray.java
 +++ b/src/main/java/net/minecraft/server/NibbleArray.java
 @@ -30,17 +30,22 @@ public class NibbleArray {
@@ -37,6 +37,3 @@ index 9306f97af..69e2f0a9d 100644
  
      }
  
--- 
-2.38.1.windows.1
-

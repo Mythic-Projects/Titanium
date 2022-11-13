@@ -1,11 +1,11 @@
-From 50f894513057a7a3ea8c2a547de5566dcde630b8 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 5 Jun 2022 18:40:26 +0200
 Subject: [PATCH] Backport PaperServerListPingEvent
 
 
 diff --git a/build.gradle b/build.gradle
-index 54b518f2..6a9770f1 100644
+index 54b518f239e325590574269dc8a5597110bcbb25..6a9770f1fb787c99362d22aef0bca9e3a8695563 100644
 --- a/build.gradle
 +++ b/build.gradle
 @@ -18,6 +18,8 @@ dependencies {
@@ -19,7 +19,7 @@ index 54b518f2..6a9770f1 100644
      testImplementation 'net.sf.trove4j:trove4j:3.0.3' // required by tests
 diff --git a/src/main/java/com/destroystokyo/paper/event/server/PaperServerListPingEvent.java b/src/main/java/com/destroystokyo/paper/event/server/PaperServerListPingEvent.java
 new file mode 100644
-index 00000000..546d3b3f
+index 0000000000000000000000000000000000000000..546d3b3f83f92be9240e930fdabdf6dcc37fe41b
 --- /dev/null
 +++ b/src/main/java/com/destroystokyo/paper/event/server/PaperServerListPingEvent.java
 @@ -0,0 +1,338 @@
@@ -363,7 +363,7 @@ index 00000000..546d3b3f
 +}
 diff --git a/src/main/java/com/destroystokyo/paper/network/NetworkClient.java b/src/main/java/com/destroystokyo/paper/network/NetworkClient.java
 new file mode 100644
-index 00000000..739caf70
+index 0000000000000000000000000000000000000000..739caf7061781e9e3c2c541a1f9e3a4a29b8462b
 --- /dev/null
 +++ b/src/main/java/com/destroystokyo/paper/network/NetworkClient.java
 @@ -0,0 +1,40 @@
@@ -409,7 +409,7 @@ index 00000000..739caf70
 +}
 diff --git a/src/main/java/com/destroystokyo/paper/network/StatusClient.java b/src/main/java/com/destroystokyo/paper/network/StatusClient.java
 new file mode 100644
-index 00000000..ffda9f6a
+index 0000000000000000000000000000000000000000..ffda9f6a8b094942009aa78b331d22d9dcca2802
 --- /dev/null
 +++ b/src/main/java/com/destroystokyo/paper/network/StatusClient.java
 @@ -0,0 +1,25 @@
@@ -439,7 +439,7 @@ index 00000000..ffda9f6a
 +
 +}
 diff --git a/src/main/java/org/bukkit/util/CachedServerIcon.java b/src/main/java/org/bukkit/util/CachedServerIcon.java
-index 04804706..44563482 100644
+index 0480470678af31f9543b778e460a63fc0a30b2d8..44563482f100882a1dd10f1b0fdd537ca485a9f3 100644
 --- a/src/main/java/org/bukkit/util/CachedServerIcon.java
 +++ b/src/main/java/org/bukkit/util/CachedServerIcon.java
 @@ -14,4 +14,10 @@ import org.bukkit.event.server.ServerListPingEvent;
@@ -453,6 +453,3 @@ index 04804706..44563482 100644
 +    }
 +    // Paper end
  }
--- 
-2.38.1.windows.1
-

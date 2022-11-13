@@ -1,11 +1,11 @@
-From cc996aeed78e2f16347a07fc6a4272d67f8e8d98 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 29 Apr 2022 20:44:16 +0200
 Subject: [PATCH] Add ChatColor#decolor
 
 
 diff --git a/src/main/java/org/bukkit/ChatColor.java b/src/main/java/org/bukkit/ChatColor.java
-index adbae51a..b92e337b 100644
+index adbae51a70f883269be2fba50ab3f28be7928958..b92e337b50a1301f62b178a1f5aa617a0cf98fc7 100644
 --- a/src/main/java/org/bukkit/ChatColor.java
 +++ b/src/main/java/org/bukkit/ChatColor.java
 @@ -1,6 +1,7 @@
@@ -47,6 +47,3 @@ index adbae51a..b92e337b 100644
      /**
       * Translates a string using an alternate color code character into a
       * string that uses the internal ChatColor.COLOR_CODE color code
--- 
-2.36.0.windows.1
-

@@ -1,4 +1,4 @@
-From 855cc4bf25138e7fb31d2a7e65ada5a6fbb938d0 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 22 May 2022 23:47:26 +0200
 Subject: [PATCH] Implement [PandaSpigot-0005] Add internal setMaxStackSize
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [PandaSpigot-0005] Add internal setMaxStackSize
 
 
 diff --git a/src/main/java/org/bukkit/Material.java b/src/main/java/org/bukkit/Material.java
-index 0fb26055..c5d1b441 100644
+index 0fb260555ce50f5348293a17f85512a4fb08918d..c5d1b4410cca931bb245023125c74bbe225f4155 100644
 --- a/src/main/java/org/bukkit/Material.java
 +++ b/src/main/java/org/bukkit/Material.java
 @@ -461,7 +461,7 @@ public enum Material {
@@ -39,6 +39,3 @@ index 0fb26055..c5d1b441 100644
      /**
       * Gets the maximum durability of this material
       *
--- 
-2.36.0.windows.1
-

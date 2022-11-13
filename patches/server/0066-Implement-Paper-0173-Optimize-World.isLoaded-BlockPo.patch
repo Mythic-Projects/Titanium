@@ -1,11 +1,11 @@
-From 81cc525b27a37c71b3d757c5eb50c511210d09b7 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 23 May 2022 22:08:01 +0200
 Subject: [PATCH] Implement [Paper-0173] Optimize World.isLoaded(BlockPosition)
 
 
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 46ffc14d0..6645e4cb4 100644
+index 46ffc14d0bc6ec6ab0a8c53562697e9eeaf13d01..6645e4cb4598f14400342508ab96f9641e7b51a8 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -330,7 +330,7 @@ public abstract class World implements IBlockAccess {
@@ -17,6 +17,3 @@ index 46ffc14d0..6645e4cb4 100644
      }
  
      public boolean isLoaded(int blockposition_x, int blockposition_y, int blockposition_z) {
--- 
-2.38.1.windows.1
-

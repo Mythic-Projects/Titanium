@@ -1,4 +1,4 @@
-From 13a0740b140ecdb4f8c8547428d9fcd8e8521bdb Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 19 May 2022 23:17:47 +0200
 Subject: [PATCH] Implement [Nacho-0023] Optimize EntityTracker for the chunk
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Nacho-0023] Optimize EntityTracker for the chunk
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index 9f46e1c21..6db21f1a4 100644
+index 9f46e1c21abb2d916328664743aede81c8f62da0..6db21f1a4e2e9ad7579303f8548b8eca8045eca8 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
 @@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
@@ -73,7 +73,7 @@ index 9f46e1c21..6db21f1a4 100644
          }
  
 diff --git a/src/main/java/net/minecraft/server/EntityTracker.java b/src/main/java/net/minecraft/server/EntityTracker.java
-index e24644c42..4668a1fca 100644
+index e24644c425edf6a9aed5081a8de66d73b6563717..4668a1fca0a7c7016264c56f54ac8464768751c4 100644
 --- a/src/main/java/net/minecraft/server/EntityTracker.java
 +++ b/src/main/java/net/minecraft/server/EntityTracker.java
 @@ -239,6 +239,10 @@ public class EntityTracker {
@@ -87,6 +87,3 @@ index e24644c42..4668a1fca 100644
      public void a(EntityPlayer entityplayer, Chunk chunk) {
          Iterator iterator = this.c.iterator();
  
--- 
-2.38.1.windows.1
-

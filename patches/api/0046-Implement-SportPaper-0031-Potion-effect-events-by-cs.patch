@@ -1,4 +1,4 @@
-From c95054d46eaa54e634ecdfb3b8313967cff7d5f5 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: cswhite2000 <18whitechristop@gmail.com>
 Date: Wed, 8 Aug 2018 15:25:29 -0700
 Subject: [PATCH] Implement [SportPaper-0031] Potion effect events by
@@ -7,7 +7,7 @@ Subject: [PATCH] Implement [SportPaper-0031] Potion effect events by
 
 diff --git a/src/main/java/org/bukkit/event/entity/PotionEffectAddEvent.java b/src/main/java/org/bukkit/event/entity/PotionEffectAddEvent.java
 new file mode 100644
-index 00000000..a0e06344
+index 0000000000000000000000000000000000000000..a0e06344ef20793ed877db35af0b3ba3e3ddc98e
 --- /dev/null
 +++ b/src/main/java/org/bukkit/event/entity/PotionEffectAddEvent.java
 @@ -0,0 +1,32 @@
@@ -45,7 +45,7 @@ index 00000000..a0e06344
 +}
 diff --git a/src/main/java/org/bukkit/event/entity/PotionEffectEvent.java b/src/main/java/org/bukkit/event/entity/PotionEffectEvent.java
 new file mode 100644
-index 00000000..b0571a62
+index 0000000000000000000000000000000000000000..b0571a62798b58865c948ac6a644beb549fd075d
 --- /dev/null
 +++ b/src/main/java/org/bukkit/event/entity/PotionEffectEvent.java
 @@ -0,0 +1,23 @@
@@ -74,7 +74,7 @@ index 00000000..b0571a62
 +}
 diff --git a/src/main/java/org/bukkit/event/entity/PotionEffectExpireEvent.java b/src/main/java/org/bukkit/event/entity/PotionEffectExpireEvent.java
 new file mode 100644
-index 00000000..0fc28405
+index 0000000000000000000000000000000000000000..0fc2840585327f954e7132ea3525817c1bb8cefe
 --- /dev/null
 +++ b/src/main/java/org/bukkit/event/entity/PotionEffectExpireEvent.java
 @@ -0,0 +1,45 @@
@@ -125,7 +125,7 @@ index 00000000..0fc28405
 +}
 diff --git a/src/main/java/org/bukkit/event/entity/PotionEffectExtendEvent.java b/src/main/java/org/bukkit/event/entity/PotionEffectExtendEvent.java
 new file mode 100644
-index 00000000..02164cf3
+index 0000000000000000000000000000000000000000..02164cf3c386a282460f9c8fdf1430359e5a832a
 --- /dev/null
 +++ b/src/main/java/org/bukkit/event/entity/PotionEffectExtendEvent.java
 @@ -0,0 +1,26 @@
@@ -157,7 +157,7 @@ index 00000000..02164cf3
 +}
 diff --git a/src/main/java/org/bukkit/event/entity/PotionEffectRemoveEvent.java b/src/main/java/org/bukkit/event/entity/PotionEffectRemoveEvent.java
 new file mode 100644
-index 00000000..c95af16b
+index 0000000000000000000000000000000000000000..c95af16b8dd57455aaedb6954ecdb44726dbb833
 --- /dev/null
 +++ b/src/main/java/org/bukkit/event/entity/PotionEffectRemoveEvent.java
 @@ -0,0 +1,33 @@
@@ -194,6 +194,3 @@ index 00000000..c95af16b
 +    public static HandlerList getHandlerList() { return handlers; }
 +
 +}
--- 
-2.38.1.windows.1
-

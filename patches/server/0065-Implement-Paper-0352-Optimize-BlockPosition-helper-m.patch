@@ -1,4 +1,4 @@
-From a2ccbd5ccb818758e7f75ba8f1c421207ebd2656 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 23 May 2022 21:49:48 +0200
 Subject: [PATCH] Implement [Paper-0352] Optimize BlockPosition helper methods
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0352] Optimize BlockPosition helper methods
 
 
 diff --git a/src/main/java/net/minecraft/server/BlockPosition.java b/src/main/java/net/minecraft/server/BlockPosition.java
-index 0d0e0abb6..e8f475836 100644
+index 0d0e0abb644754e49543fa7b630174f614fdaf45..e8f4758367eae77389fc1be6830ef37a7f58274b 100644
 --- a/src/main/java/net/minecraft/server/BlockPosition.java
 +++ b/src/main/java/net/minecraft/server/BlockPosition.java
 @@ -52,59 +52,97 @@ public class BlockPosition extends BaseBlockPosition {
@@ -121,6 +121,3 @@ index 0d0e0abb6..e8f475836 100644
      }
  
      public BlockPosition c(BaseBlockPosition baseblockposition) {
--- 
-2.38.1.windows.1
-

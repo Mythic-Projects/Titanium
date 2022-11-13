@@ -1,11 +1,11 @@
-From 1668c0b3c4163d4b4c865300a5c8565a7877c42f Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 10 Jun 2022 09:12:56 +0200
 Subject: [PATCH] Add Command#testPermission for custom permission
 
 
 diff --git a/src/main/java/org/bukkit/command/Command.java b/src/main/java/org/bukkit/command/Command.java
-index c126a1e7..eebb817f 100644
+index c126a1e7e68fd8b81e51d8bdb10dd24eccd9db63..eebb817f8c0b8b76d12a1a597758c02f4eec26cd 100644
 --- a/src/main/java/org/bukkit/command/Command.java
 +++ b/src/main/java/org/bukkit/command/Command.java
 @@ -182,6 +182,7 @@ public abstract class Command {
@@ -81,6 +81,3 @@ index c126a1e7..eebb817f 100644
  
      /**
       * Returns the label for this command
--- 
-2.38.1.windows.1
-

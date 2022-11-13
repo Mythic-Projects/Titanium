@@ -1,11 +1,11 @@
-From 53d3f50dc26b85d62107218ccbe115b639a4d22b Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sat, 28 May 2022 10:27:44 +0200
 Subject: [PATCH] Update dependencies and plugins
 
 
 diff --git a/pom.xml b/pom.xml
-index 70a18daf..2ff99a88 100644
+index 70a18daf44968e7d5a3df2355b9aed200084c7a9..2ff99a888a04e285fb9bf10cb5cf5560a60227ba 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -111,7 +111,7 @@
@@ -35,6 +35,3 @@ index 70a18daf..2ff99a88 100644
                  <executions>
                      <execution>
                          <phase>package</phase>
--- 
-2.36.0.windows.1
-

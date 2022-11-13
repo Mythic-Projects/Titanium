@@ -1,11 +1,11 @@
-From dcbdb1c0fe4fdba5d09763a5cb3949ae18b2ebb0 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 16 Sep 2022 22:44:31 +0200
 Subject: [PATCH] Option to change brand name
 
 
 diff --git a/src/main/java/com/destroystokyo/paper/network/PaperServerListPingEventImpl.java b/src/main/java/com/destroystokyo/paper/network/PaperServerListPingEventImpl.java
-index d41b9d0d8..c9c6b66ca 100644
+index d41b9d0d8136720a8556def95b651f14d4c4b8b9..c9c6b66caa02a31609f2f88b557cab0c0a276a0c 100644
 --- a/src/main/java/com/destroystokyo/paper/network/PaperServerListPingEventImpl.java
 +++ b/src/main/java/com/destroystokyo/paper/network/PaperServerListPingEventImpl.java
 @@ -14,7 +14,7 @@ class PaperServerListPingEventImpl extends PaperServerListPingEvent {
@@ -18,7 +18,7 @@ index d41b9d0d8..c9c6b66ca 100644
      }
  
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 9253329f1..0a307856c 100644
+index 9253329f1ae1299d91904eef5703ede519d36d88..0a307856cdefa86537b931435767205644a5b835 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -1293,6 +1293,18 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
@@ -41,7 +41,7 @@ index 9253329f1..0a307856c 100644
          crashreport.g().a("Profiler Position", new Callable() {
              public String a() throws Exception {
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index d7abef659..99e37b94a 100644
+index d7abef6593c3d785071a085a1547b698ebc6ae8a..99e37b94a412ded62e3693a348c7a6e6d2aa58c5 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -152,7 +152,7 @@ public abstract class PlayerList {
@@ -54,7 +54,7 @@ index d7abef659..99e37b94a 100644
          playerconnection.sendPacket(new PacketPlayOutSpawnPosition(blockposition));
          playerconnection.sendPacket(new PacketPlayOutAbilities(entityplayer.abilities));
 diff --git a/src/main/java/net/titanium/config/message/MessageConfig.java b/src/main/java/net/titanium/config/message/MessageConfig.java
-index ddc83deed..b77b36be2 100644
+index ddc83deed6fe55aa736b2d0467fdb5c089a31326..b77b36be2696fddceccc4c61f35349a8bf173253 100644
 --- a/src/main/java/net/titanium/config/message/MessageConfig.java
 +++ b/src/main/java/net/titanium/config/message/MessageConfig.java
 @@ -24,6 +24,20 @@ public class MessageConfig extends TitaniumConfigSection implements Server.Titan
@@ -78,6 +78,3 @@ index ddc83deed..b77b36be2 100644
      public String restart = "&cServer is restarting!";
      public String whitelist = "&cYou are not on the whitelist!";
      public String serverFull = "&cThe server is full!";
--- 
-2.38.1.windows.1
-

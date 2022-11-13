@@ -1,4 +1,4 @@
-From 34245d6ac6359017fff26865ab29505c7ebcae3b Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Mystiflow <mystiflow@gmail.com>
 Date: Fri, 6 Jul 2018 13:21:30 +0100
 Subject: [PATCH] Implement [Paper-0353] Send nearby packets from world player
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0353] Send nearby packets from world player
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index f128d49d8..e74197ee9 100644
+index f128d49d8899d8e373b5106dbf2cf63188c121dc..e74197ee9058f0ae392fa2facef61ad6ff7d2a48 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -40,6 +40,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
@@ -58,7 +58,7 @@ index f128d49d8..e74197ee9 100644
                  double d5 = d1 - entityplayer.locY;
                  double d6 = d2 - entityplayer.locZ;
 diff --git a/src/main/java/net/minecraft/server/WorldManager.java b/src/main/java/net/minecraft/server/WorldManager.java
-index 98164f253..7a9027fc6 100644
+index 98164f25323ae72ad813ffff8e659a0d284decd4..7a9027fc6d22989e6ec84c77c51ce3ded3a7310c 100644
 --- a/src/main/java/net/minecraft/server/WorldManager.java
 +++ b/src/main/java/net/minecraft/server/WorldManager.java
 @@ -29,8 +29,8 @@ public class WorldManager implements IWorldAccess {
@@ -112,7 +112,7 @@ index 98164f253..7a9027fc6 100644
                  double d1 = (double) blockposition.getY() - entityplayer.locY;
                  double d2 = (double) blockposition.getZ() - entityplayer.locZ;
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 3ff74dd9b..ff8ac6c52 100644
+index 3ff74dd9b95f1474739eaaf133e441a96c294f72..ff8ac6c5270ce40a21c4d9519a09c5ede68b1072 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
 @@ -1044,7 +1044,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
@@ -133,6 +133,3 @@ index 3ff74dd9b..ff8ac6c52 100644
                  }
              }
  
--- 
-2.38.1.windows.1
-

@@ -1,4 +1,4 @@
-From 069fcf8047b74becd4b9b361c5143be8e97e8289 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: RoccoDev <roccodev.business@gmail.com>
 Date: Tue, 15 Sep 2020 12:24:14 +0200
 Subject: [PATCH] Implement [KigPaper-0112] Only trigger
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [KigPaper-0112] Only trigger
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 1128ccfda..c10ff1faa 100644
+index 1128ccfda1e4d1339852977e77c2a565647b6481..c10ff1faa809dd8786f1bc62fd1811d26493652c 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -93,6 +93,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
@@ -37,6 +37,3 @@ index 1128ccfda..c10ff1faa 100644
          // Send the possibly modified leave message
          s = event.getReason();
          // CraftBukkit end
--- 
-2.38.1.windows.1
-

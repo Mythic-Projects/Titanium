@@ -1,11 +1,11 @@
-From aec04d73d0fb22763197c661e2349b479bba35dd Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 25 May 2022 21:08:49 +0200
 Subject: [PATCH] Implement [SportPaper-0198] Optimize head rotation patch
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-index 3fe42a9a7..8e9597417 100644
+index 3fe42a9a7d9ac6ce594df37e298a8d5b8d8a49f3..8e9597417845af723d1626313fd9a70ecd3e304f 100644
 --- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 +++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 @@ -413,7 +413,13 @@ public class EntityTrackerEntry {
@@ -23,6 +23,3 @@ index 3fe42a9a7..8e9597417 100644
                      }
                      // CraftBukkit end
  
--- 
-2.38.1.windows.1
-

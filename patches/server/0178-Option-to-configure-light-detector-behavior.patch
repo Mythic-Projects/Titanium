@@ -1,11 +1,11 @@
-From 44b914c9fe25923acad1de7f1ce1cfbbf7863965 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 23 Sep 2022 22:57:54 +0200
 Subject: [PATCH] Option to configure light detector behavior
 
 
 diff --git a/src/main/java/net/minecraft/server/TileEntityLightDetector.java b/src/main/java/net/minecraft/server/TileEntityLightDetector.java
-index f75e2de63..b692340c2 100644
+index f75e2de63e96019b3210db14f036fd74353ddcce..b692340c2062f6f5c3ee2a6ace3af34d1000992b 100644
 --- a/src/main/java/net/minecraft/server/TileEntityLightDetector.java
 +++ b/src/main/java/net/minecraft/server/TileEntityLightDetector.java
 @@ -1,11 +1,17 @@
@@ -28,7 +28,7 @@ index f75e2de63..b692340c2 100644
              if (this.e instanceof BlockDaylightDetector) {
                  ((BlockDaylightDetector) this.e).f(this.world, this.position);
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 67b096a91..9bc1db054 100644
+index 67b096a9102ba5ccc2024b84a3dc90f8147b03c4..9bc1db05491ddaf4e17b9b1c89715c8cff342467 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -120,6 +120,19 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -51,6 +51,3 @@ index 67b096a91..9bc1db054 100644
      }
  
      @Comment("Whether saving of fireworks and arrows should be disabled.")
--- 
-2.38.1.windows.1
-

@@ -1,4 +1,4 @@
-From 8565a2faf1afa325db7da0a5e848d9f2131ec846 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Thu, 19 Jul 2018 01:13:28 -0400
 Subject: [PATCH] Implement [Paper-0332] Add More information to
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0332] Add More information to
 
 
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 01f755f0e..52b01f54e 100644
+index 01f755f0e6f912b48e6202f9ab277f7f56aca55b..52b01f54e1da3d87e11a6805db58db7dffe23fa1 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
 @@ -2028,7 +2028,7 @@ public abstract class Entity implements ICommandListener {
@@ -18,6 +18,3 @@ index 01f755f0e..52b01f54e 100644
      }
  
      public boolean isInvulnerable(DamageSource damagesource) {
--- 
-2.38.1.windows.1
-

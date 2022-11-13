@@ -1,4 +1,4 @@
-From fed9ab56b4ef6ad686e2adbf9bc9aa82da35a0e6 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Rastrian <me@rastrian.dev>
 Date: Fri, 24 Jun 2022 21:02:34 +0200
 Subject: [PATCH] Async Combat packet handling
@@ -8,7 +8,7 @@ Co-authored-by: Peridot <peridot491@protonmail.com>
 
 diff --git a/src/main/java/ga/windpvp/windspigot/async/netty/Spigot404Write.java b/src/main/java/ga/windpvp/windspigot/async/netty/Spigot404Write.java
 new file mode 100644
-index 000000000..c7d31d48a
+index 0000000000000000000000000000000000000000..c7d31d48ad94744b10725af7e78db40ed082a946
 --- /dev/null
 +++ b/src/main/java/ga/windpvp/windspigot/async/netty/Spigot404Write.java
 @@ -0,0 +1,70 @@
@@ -85,7 +85,7 @@ index 000000000..c7d31d48a
 \ No newline at end of file
 diff --git a/src/main/java/ga/windpvp/windspigot/async/netty/Tasks.java b/src/main/java/ga/windpvp/windspigot/async/netty/Tasks.java
 new file mode 100644
-index 000000000..35a11277e
+index 0000000000000000000000000000000000000000..35a11277ec475dbcf6bc9a197c80e0a9cdc460b5
 --- /dev/null
 +++ b/src/main/java/ga/windpvp/windspigot/async/netty/Tasks.java
 @@ -0,0 +1,34 @@
@@ -126,7 +126,7 @@ index 000000000..35a11277e
 \ No newline at end of file
 diff --git a/src/main/java/ga/windpvp/windspigot/async/thread/CombatThread.java b/src/main/java/ga/windpvp/windspigot/async/thread/CombatThread.java
 new file mode 100644
-index 000000000..a9f4ab47a
+index 0000000000000000000000000000000000000000..a9f4ab47ae26cc4e3cd484ce337919948b72f25f
 --- /dev/null
 +++ b/src/main/java/ga/windpvp/windspigot/async/thread/CombatThread.java
 @@ -0,0 +1,20 @@
@@ -151,7 +151,7 @@ index 000000000..a9f4ab47a
 +}
 +
 diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
-index 87408d92a..268dec691 100644
+index 87408d92af51df906f16054c16828b276856377c..268dec691a8bcc80a35b957920a525d2f7b454d9 100644
 --- a/src/main/java/net/minecraft/server/NetworkManager.java
 +++ b/src/main/java/net/minecraft/server/NetworkManager.java
 @@ -4,6 +4,7 @@ import com.google.common.collect.Queues;
@@ -193,7 +193,7 @@ index 87408d92a..268dec691 100644
          GenericFutureListener<? extends Future<? super Void>>[] listeners = null;
          if (genericfuturelistener != null || agenericfuturelistener != null) { // cannot call ArrayUtils.add with both null arguments
 diff --git a/src/main/java/net/titanium/Titanium.java b/src/main/java/net/titanium/Titanium.java
-index 96e10acf3..166873aee 100644
+index 96e10acf31d95211a7815494891a19972c68cb78..166873aee398b7c478d3025031679a744f44d76a 100644
 --- a/src/main/java/net/titanium/Titanium.java
 +++ b/src/main/java/net/titanium/Titanium.java
 @@ -3,6 +3,7 @@ package net.titanium;
@@ -242,7 +242,7 @@ index 96e10acf3..166873aee 100644
 +
  }
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 2c268d232..dccba94d7 100644
+index 2c268d2327ded4063c0065521612822af4e64566..dccba94d727bcb1e28af055959021f1aaa7da573 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -196,6 +196,28 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -275,7 +275,7 @@ index 2c268d232..dccba94d7 100644
      @Comment("This option force this migration even, if titanium.yml exists.")
      @Comment("This option will be automatically disabled after running it.")
 diff --git a/src/main/java/net/titanium/config/message/MessageConfig.java b/src/main/java/net/titanium/config/message/MessageConfig.java
-index c0c84785b..ddc83deed 100644
+index c0c84785bfc5781a804d3c6b681c57615b45e094..ddc83deed6fe55aa736b2d0467fdb5c089a31326 100644
 --- a/src/main/java/net/titanium/config/message/MessageConfig.java
 +++ b/src/main/java/net/titanium/config/message/MessageConfig.java
 @@ -10,6 +10,8 @@ import eu.okaeri.configs.annotation.Names;
@@ -303,7 +303,7 @@ index c0c84785b..ddc83deed 100644
              "&6Uptime: &a{UPTIME}"
 diff --git a/src/main/java/net/titanium/util/async/AsyncPacketThread.java b/src/main/java/net/titanium/util/async/AsyncPacketThread.java
 new file mode 100644
-index 000000000..b42591f5a
+index 0000000000000000000000000000000000000000..b42591f5a3aabd0d8e94fc25731dc8f82161cfc9
 --- /dev/null
 +++ b/src/main/java/net/titanium/util/async/AsyncPacketThread.java
 @@ -0,0 +1,168 @@
@@ -477,7 +477,7 @@ index 000000000..b42591f5a
 +}
 \ No newline at end of file
 diff --git a/src/main/java/org/spigotmc/TicksPerSecondCommand.java b/src/main/java/org/spigotmc/TicksPerSecondCommand.java
-index f775f05f4..83e1022db 100644
+index f775f05f48878045a26113c4723e77cc023f6abb..83e1022db8ef7966be7d046cf4ae6b40005c075b 100644
 --- a/src/main/java/org/spigotmc/TicksPerSecondCommand.java
 +++ b/src/main/java/org/spigotmc/TicksPerSecondCommand.java
 @@ -1,8 +1,10 @@
@@ -575,6 +575,3 @@ index f775f05f4..83e1022db 100644
  
      // Titanium start
      private static String formatMemoryUsage(long usage, long max) {
--- 
-2.38.1.windows.1
-

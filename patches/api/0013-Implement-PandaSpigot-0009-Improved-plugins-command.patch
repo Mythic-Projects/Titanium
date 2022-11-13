@@ -1,11 +1,11 @@
-From a70dc580c19e5716cdcbb22320a2fc14bde41578 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sat, 4 Jun 2022 12:52:13 +0200
 Subject: [PATCH] Implement [PandaSpigot-0009] Improved plugins command
 
 
 diff --git a/src/main/java/org/bukkit/command/defaults/PluginsCommand.java b/src/main/java/org/bukkit/command/defaults/PluginsCommand.java
-index e21d1679..763abb2b 100644
+index e21d16793b703189a5f4cf9091ac12f494d0107e..763abb2b61e7cff8c71a19a55a34063d03ed24f1 100644
 --- a/src/main/java/org/bukkit/command/defaults/PluginsCommand.java
 +++ b/src/main/java/org/bukkit/command/defaults/PluginsCommand.java
 @@ -2,10 +2,17 @@ package org.bukkit.command.defaults;
@@ -135,6 +135,3 @@ index e21d1679..763abb2b 100644
      private String getPluginList() {
          StringBuilder pluginList = new StringBuilder();
          Plugin[] plugins = Bukkit.getPluginManager().getPlugins();
--- 
-2.38.1.windows.1
-

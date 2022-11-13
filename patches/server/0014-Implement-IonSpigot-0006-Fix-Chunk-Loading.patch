@@ -1,11 +1,11 @@
-From 06c7c25e79bc692b26250ae5e0dc362df267d8b8 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 11 May 2022 16:04:30 +0200
 Subject: [PATCH] Implement [IonSpigot-0006] Fix Chunk Loading
 
 
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 2da303fee..9b87db50f 100644
+index 2da303feee4191d6a47108ef904d32958ce6a23d..9b87db50fc215afd9572df33c8d1cd7800bef5fd 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
 @@ -422,11 +422,31 @@ public abstract class Entity implements ICommandListener {
@@ -45,6 +45,3 @@ index 2da303fee..9b87db50f 100644
      }
  
  
--- 
-2.38.1.windows.1
-

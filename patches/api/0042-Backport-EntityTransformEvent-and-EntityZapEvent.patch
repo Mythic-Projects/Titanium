@@ -1,4 +1,4 @@
-From d06dab04ff835984d61689986ac394ce16ffa784 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 28 Sep 2022 17:22:52 +0200
 Subject: [PATCH] Backport EntityTransformEvent and EntityZapEvent
@@ -6,7 +6,7 @@ Subject: [PATCH] Backport EntityTransformEvent and EntityZapEvent
 
 diff --git a/src/main/java/com/destroystokyo/paper/event/entity/EntityZapEvent.java b/src/main/java/com/destroystokyo/paper/event/entity/EntityZapEvent.java
 new file mode 100644
-index 00000000..a8e81879
+index 0000000000000000000000000000000000000000..a8e818796878fc0bed9610616deb2e01db85d307
 --- /dev/null
 +++ b/src/main/java/com/destroystokyo/paper/event/entity/EntityZapEvent.java
 @@ -0,0 +1,67 @@
@@ -79,7 +79,7 @@ index 00000000..a8e81879
 +}
 diff --git a/src/main/java/org/bukkit/event/entity/EntityTransformEvent.java b/src/main/java/org/bukkit/event/entity/EntityTransformEvent.java
 new file mode 100644
-index 00000000..a751d39f
+index 0000000000000000000000000000000000000000..a751d39f420a9af4ac99f537b41dc484b85e6d00
 --- /dev/null
 +++ b/src/main/java/org/bukkit/event/entity/EntityTransformEvent.java
 @@ -0,0 +1,109 @@
@@ -194,7 +194,7 @@ index 00000000..a751d39f
 +}
 \ No newline at end of file
 diff --git a/src/main/java/org/bukkit/event/entity/PigZapEvent.java b/src/main/java/org/bukkit/event/entity/PigZapEvent.java
-index aa80ebf1..cf196075 100644
+index aa80ebf1df632d19f6ab73e5eafee9d29c4b79ca..cf1960754d310ca03e25706cd6c0e4b0e9df76c8 100644
 --- a/src/main/java/org/bukkit/event/entity/PigZapEvent.java
 +++ b/src/main/java/org/bukkit/event/entity/PigZapEvent.java
 @@ -1,5 +1,6 @@
@@ -238,6 +238,3 @@ index aa80ebf1..cf196075 100644
 +     */
 +    // Paper end
  }
--- 
-2.38.1.windows.1
-

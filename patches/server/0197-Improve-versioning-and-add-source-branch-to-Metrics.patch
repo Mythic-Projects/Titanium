@@ -1,11 +1,11 @@
-From 38cf554bdb7506f34da1c1fa691492c4d321c731 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 24 Oct 2022 11:24:32 +0200
 Subject: [PATCH] Improve versioning and add source & branch to Metrics
 
 
 diff --git a/build.gradle b/build.gradle
-index fcd0b9eb4..6f4b4a67b 100644
+index fcd0b9eb48ae24f258600a8fce850b887bc09c14..6f4b4a67bc7d0117daa9541ad4b116763a787031 100644
 --- a/build.gradle
 +++ b/build.gradle
 @@ -1,7 +1,5 @@
@@ -37,7 +37,7 @@ index fcd0b9eb4..6f4b4a67b 100644
                  "Main-Class": "org.bukkit.craftbukkit.Main",
                  "Implementation-Title": "CraftBukkit",
 diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
-index 17adad63f..e60f87391 100644
+index 17adad63f5032edb20a6073ba51ac5169e1fb019..e60f87391288a8172057d2f85eeb833056e4f242 100644
 --- a/src/main/java/net/minecraft/server/DedicatedServer.java
 +++ b/src/main/java/net/minecraft/server/DedicatedServer.java
 @@ -21,6 +21,7 @@ import org.apache.logging.log4j.Logger;
@@ -93,7 +93,7 @@ index 17adad63f..e60f87391 100644
      public PropertyManager getPropertyManager() {
          return this.propertyManager;
 diff --git a/src/main/java/net/titanium/Metrics.java b/src/main/java/net/titanium/Metrics.java
-index 07080ee82..dcb40013f 100644
+index 07080ee8240b135090101e9234c0456ef9b06c88..dcb40013f2633c6da8be658a1434a10a9e5ea4c0 100644
 --- a/src/main/java/net/titanium/Metrics.java
 +++ b/src/main/java/net/titanium/Metrics.java
 @@ -558,6 +558,13 @@ public class Metrics {
@@ -110,6 +110,3 @@ index 07080ee82..dcb40013f 100644
          @Override
          protected JsonObjectBuilder.JsonObject getChartData() throws Exception {
              String value = callable.call();
--- 
-2.38.1.windows.1
-

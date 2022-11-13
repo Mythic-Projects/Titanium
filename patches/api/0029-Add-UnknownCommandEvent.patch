@@ -1,4 +1,4 @@
-From 109c7806c4cf329f513d903a774bab35fe3c6d0f Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 24 Jun 2022 22:55:52 +0200
 Subject: [PATCH] Add UnknownCommandEvent
@@ -6,7 +6,7 @@ Subject: [PATCH] Add UnknownCommandEvent
 
 diff --git a/src/main/java/net/titanium/event/UnknownCommandEvent.java b/src/main/java/net/titanium/event/UnknownCommandEvent.java
 new file mode 100644
-index 00000000..d3c83123
+index 0000000000000000000000000000000000000000..d3c83123eaa49c13d689281ebfd101c0a7343eb2
 --- /dev/null
 +++ b/src/main/java/net/titanium/event/UnknownCommandEvent.java
 @@ -0,0 +1,85 @@
@@ -96,7 +96,7 @@ index 00000000..d3c83123
 +
 +}
 diff --git a/src/main/java/org/bukkit/event/player/PlayerEvent.java b/src/main/java/org/bukkit/event/player/PlayerEvent.java
-index 0d4833f6..266aac01 100644
+index 0d4833f60846f7911cefcbdb1933b9aaf5071455..266aac015f017230cef3ef19161dc5dc5845c682 100644
 --- a/src/main/java/org/bukkit/event/player/PlayerEvent.java
 +++ b/src/main/java/org/bukkit/event/player/PlayerEvent.java
 @@ -13,10 +13,9 @@ public abstract class PlayerEvent extends Event {
@@ -111,6 +111,3 @@ index 0d4833f6..266aac01 100644
      }
  
      /**
--- 
-2.38.1.windows.1
-

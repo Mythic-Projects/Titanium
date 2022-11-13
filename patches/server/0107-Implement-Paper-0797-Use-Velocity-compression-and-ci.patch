@@ -1,4 +1,4 @@
-From 0e4efa9bae46c008ff06a1290fee8a0e5ca8c29f Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Elier <elierrrlg@outlook.com>
 Date: Tue, 7 Jun 2022 14:58:12 +0200
 Subject: [PATCH] Implement [Paper-0797] Use Velocity compression and cipher
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0797] Use Velocity compression and cipher
 
 
 diff --git a/build.gradle b/build.gradle
-index 02bdc89c8..2cd9f0ed7 100644
+index 02bdc89c8bb33778eb11fb996b4cfee96c0529b5..2cd9f0ed7aae8a7083ee68ee3e334820086e9769 100644
 --- a/build.gradle
 +++ b/build.gradle
 @@ -24,12 +24,14 @@ dependencies {
@@ -28,7 +28,7 @@ index 02bdc89c8..2cd9f0ed7 100644
      testImplementation 'org.hamcrest:hamcrest-library:1.3'
 diff --git a/src/main/java/dev/cobblesword/nachospigot/commons/minecraft/CryptException.java b/src/main/java/dev/cobblesword/nachospigot/commons/minecraft/CryptException.java
 new file mode 100644
-index 000000000..142ac5ab9
+index 0000000000000000000000000000000000000000..142ac5ab97db469442b74925a5f1c8bc84a8d090
 --- /dev/null
 +++ b/src/main/java/dev/cobblesword/nachospigot/commons/minecraft/CryptException.java
 @@ -0,0 +1,7 @@
@@ -41,7 +41,7 @@ index 000000000..142ac5ab9
 +}
 \ No newline at end of file
 diff --git a/src/main/java/net/minecraft/server/LoginListener.java b/src/main/java/net/minecraft/server/LoginListener.java
-index ef6cc267e..72b82e7f8 100644
+index ef6cc267e4815761b51ceb6309a8326036228542..72b82e7f84c555b777682aeee20116607e13595e 100644
 --- a/src/main/java/net/minecraft/server/LoginListener.java
 +++ b/src/main/java/net/minecraft/server/LoginListener.java
 @@ -196,9 +196,15 @@ public class LoginListener implements PacketLoginInListener, IUpdatePlayerListBo
@@ -64,7 +64,7 @@ index ef6cc267e..72b82e7f8 100644
              authenticatorPool.execute(new Runnable() {
                  public void run() {
 diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
-index 5b92d7897..87408d92a 100644
+index 5b92d78975dbb1755bc2177836f350d4de205eeb..87408d92af51df906f16054c16828b276856377c 100644
 --- a/src/main/java/net/minecraft/server/NetworkManager.java
 +++ b/src/main/java/net/minecraft/server/NetworkManager.java
 @@ -2,6 +2,8 @@ package net.minecraft.server;
@@ -157,7 +157,7 @@ index 5b92d7897..87408d92a 100644
  
      public void l() {
 diff --git a/src/main/java/net/minecraft/server/PacketCompressor.java b/src/main/java/net/minecraft/server/PacketCompressor.java
-index 8107890ff..144751f36 100644
+index 8107890ffbc205f5ce7e22c04d62fb8b16d087c2..144751f366848e983f428056f82baa9aab6efa07 100644
 --- a/src/main/java/net/minecraft/server/PacketCompressor.java
 +++ b/src/main/java/net/minecraft/server/PacketCompressor.java
 @@ -1,52 +1,104 @@
@@ -295,7 +295,7 @@ index 8107890ff..144751f36 100644
 +}
 \ No newline at end of file
 diff --git a/src/main/java/net/minecraft/server/PacketDecompressor.java b/src/main/java/net/minecraft/server/PacketDecompressor.java
-index 300d46475..659d08127 100644
+index 300d46475a682fbeb4db3e21e64f3c18e21a14c7..659d08127fe92c51d5d8b1e74dfdd1554237aa5b 100644
 --- a/src/main/java/net/minecraft/server/PacketDecompressor.java
 +++ b/src/main/java/net/minecraft/server/PacketDecompressor.java
 @@ -1,5 +1,7 @@
@@ -411,7 +411,7 @@ index 300d46475..659d08127 100644
 +}
 \ No newline at end of file
 diff --git a/src/main/java/net/minecraft/server/PacketDecrypter.java b/src/main/java/net/minecraft/server/PacketDecrypter.java
-index 4d02db906..2852385be 100644
+index 4d02db906ec31f627454fde8c5ca9f268b68e933..2852385be773ba6ea0f9c0325846a7b830c75ad6 100644
 --- a/src/main/java/net/minecraft/server/PacketDecrypter.java
 +++ b/src/main/java/net/minecraft/server/PacketDecrypter.java
 @@ -1,24 +1,36 @@
@@ -463,7 +463,7 @@ index 4d02db906..2852385be 100644
 +}
 \ No newline at end of file
 diff --git a/src/main/java/net/minecraft/server/PacketEncrypter.java b/src/main/java/net/minecraft/server/PacketEncrypter.java
-index b32a7e676..23efafd71 100644
+index b32a7e67666d372cc9f080b60897f28fb59736fd..23efafd714e5465a4e40bfacba383a4d4188443b 100644
 --- a/src/main/java/net/minecraft/server/PacketEncrypter.java
 +++ b/src/main/java/net/minecraft/server/PacketEncrypter.java
 @@ -1,23 +1,37 @@
@@ -517,7 +517,7 @@ index b32a7e676..23efafd71 100644
 +}
 \ No newline at end of file
 diff --git a/src/main/java/net/minecraft/server/RegionFile.java b/src/main/java/net/minecraft/server/RegionFile.java
-index 81ada5e38..fc948bc63 100644
+index 81ada5e38e9ad94f995219205fefbc59a74d03f0..fc948bc6369beb3abcbba6f90a511f15197722d8 100644
 --- a/src/main/java/net/minecraft/server/RegionFile.java
 +++ b/src/main/java/net/minecraft/server/RegionFile.java
 @@ -2,6 +2,7 @@ package net.minecraft.server;
@@ -538,7 +538,7 @@ index 81ada5e38..fc948bc63 100644
              // Paper end
  
 diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
-index 55631adb9..4a2a1b565 100644
+index 44e127fe665f4f016d30541f303158bfe26159e5..86e3d7825857c4f6c4d291101b48c9ffc1463b3a 100644
 --- a/src/main/java/net/minecraft/server/ServerConnection.java
 +++ b/src/main/java/net/minecraft/server/ServerConnection.java
 @@ -2,6 +2,7 @@ package net.minecraft.server;
@@ -561,6 +561,3 @@ index 55631adb9..4a2a1b565 100644
              this.g.add(((ServerBootstrap) ((ServerBootstrap) (new ServerBootstrap()).channel(oclass)).childHandler(new ChannelInitializer() {
                  protected void initChannel(Channel channel) throws Exception {
                      try {
--- 
-2.38.1.windows.1
-

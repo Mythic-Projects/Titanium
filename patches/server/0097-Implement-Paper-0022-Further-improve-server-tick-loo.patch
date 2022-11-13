@@ -1,4 +1,4 @@
-From 7743de8a65818cb1b48e3024fa3c0528ae16d5d2 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Tue, 1 Mar 2016 23:09:29 -0600
 Subject: [PATCH] Implement [Paper-0022] Further improve server tick loop by
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0022] Further improve server tick loop by
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 1c3aa0d40..8e0cb4242 100644
+index 1c3aa0d400eb6445177768cf235c82510f4239e3..8e0cb4242afdc23e191d5241eac101672d44a148 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -18,6 +18,7 @@ import java.awt.GraphicsEnvironment;
@@ -80,7 +80,7 @@ index 1c3aa0d40..8e0cb4242 100644
                          tps5.add(currentTps, diff);
                          tps15.add(currentTps, diff);
 diff --git a/src/main/java/org/spigotmc/TicksPerSecondCommand.java b/src/main/java/org/spigotmc/TicksPerSecondCommand.java
-index aad78940a..5da2b2148 100644
+index aad78940abc159941093a04cfc1657f30c8a7370..5da2b2148ae143c27dd44670f3b8a474db258d03 100644
 --- a/src/main/java/org/spigotmc/TicksPerSecondCommand.java
 +++ b/src/main/java/org/spigotmc/TicksPerSecondCommand.java
 @@ -47,7 +47,7 @@ public class TicksPerSecondCommand extends Command
@@ -92,6 +92,3 @@ index aad78940a..5da2b2148 100644
      }
  
      // Titanium start
--- 
-2.38.1.windows.1
-

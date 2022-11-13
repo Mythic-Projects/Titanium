@@ -1,11 +1,11 @@
-From 2c500cef0448c929d7f09a7c943be7404cd5f6df Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 19 May 2022 07:21:14 +0200
 Subject: [PATCH] This is Titanium
 
 
 diff --git a/pom.xml b/pom.xml
-index fe9d6d26..70a18daf 100644
+index fe9d6d265b686ae1c373e4fdcd202b16673366f1..70a18daf44968e7d5a3df2355b9aed200084c7a9 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -4,39 +4,32 @@
@@ -133,6 +133,3 @@ index fe9d6d26..70a18daf 100644
          </plugins>
      </build>
  </project>
--- 
-2.36.0.windows.1
-

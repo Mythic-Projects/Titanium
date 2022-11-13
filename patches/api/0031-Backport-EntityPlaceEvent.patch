@@ -1,4 +1,4 @@
-From 4a1056d8c0f62ccf53b0a5d4d552269508d0a092 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 6 Jul 2022 11:00:24 +0200
 Subject: [PATCH] Backport EntityPlaceEvent
@@ -6,7 +6,7 @@ Subject: [PATCH] Backport EntityPlaceEvent
 
 diff --git a/src/main/java/org/bukkit/event/entity/EntityPlaceEvent.java b/src/main/java/org/bukkit/event/entity/EntityPlaceEvent.java
 new file mode 100644
-index 00000000..e121b8ad
+index 0000000000000000000000000000000000000000..e121b8ad6a25d7af2be87bed1c0de003b068b0b5
 --- /dev/null
 +++ b/src/main/java/org/bukkit/event/entity/EntityPlaceEvent.java
 @@ -0,0 +1,84 @@
@@ -94,6 +94,3 @@ index 00000000..e121b8ad
 +        return handlers;
 +    }
 +}
--- 
-2.38.1.windows.1
-

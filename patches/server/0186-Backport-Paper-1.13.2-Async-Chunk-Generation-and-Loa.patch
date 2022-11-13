@@ -1,4 +1,4 @@
-From 6f6ec044024abede2646195b11dd23fa085cc062 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Fri, 14 Oct 2022 11:59:49 +0200
 Subject: [PATCH] Backport Paper 1.13.2 Async Chunk Generation (and Loading)
@@ -7,7 +7,7 @@ Co-authored-by: Peridot <peridot491@protonmail.com>
 
 diff --git a/src/main/java/com/destroystokyo/paper/util/PriorityQueuedExecutor.java b/src/main/java/com/destroystokyo/paper/util/PriorityQueuedExecutor.java
 new file mode 100644
-index 000000000..ee0b44984
+index 0000000000000000000000000000000000000000..ee0b44984346ea77d0d46ea3d7d33c4266ba6666
 --- /dev/null
 +++ b/src/main/java/com/destroystokyo/paper/util/PriorityQueuedExecutor.java
 @@ -0,0 +1,362 @@
@@ -374,7 +374,7 @@ index 000000000..ee0b44984
 +
 +}
 diff --git a/src/main/java/net/minecraft/server/Block.java b/src/main/java/net/minecraft/server/Block.java
-index 86f111df7..210ca9561 100644
+index 86f111df74e8f09265a56f2fe017d725a8c09db1..210ca95614b9fc9bd6383c9063161fc53857d637 100644
 --- a/src/main/java/net/minecraft/server/Block.java
 +++ b/src/main/java/net/minecraft/server/Block.java
 @@ -160,11 +160,7 @@ public class Block {
@@ -391,7 +391,7 @@ index 86f111df7..210ca9561 100644
  
      public IBlockData updateState(IBlockData iblockdata, IBlockAccess iblockaccess, BlockPosition blockposition) {
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index 155c61f44..eee8537e2 100644
+index 155c61f44bf28b560d69263bd2e05f2965ad9a43..eee8537e2f7063b55107c0f083fc6217a44fec13 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
 @@ -19,7 +19,7 @@ import org.apache.logging.log4j.Logger;
@@ -510,7 +510,7 @@ index 155c61f44..eee8537e2 100644
          int i = blockposition.getX() & 15;
          int j = blockposition.getZ() & 15;
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderGenerate.java b/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
-index 1a386ad77..d9e157343 100644
+index 1a386ad77c0d8cc2fa631799018930720dd464da..d9e1573439c366435eae3dfa7a894b03a156a69a 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
 @@ -164,25 +164,7 @@ public class ChunkProviderGenerate implements IChunkProvider {
@@ -581,7 +581,7 @@ index 1a386ad77..d9e157343 100644
      public Chunk getChunkAt(BlockPosition blockposition) {
          return this.getOrCreateChunk(blockposition.getX() >> 4, blockposition.getZ() >> 4);
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index a34910099..9c841a9b6 100644
+index a349100994125bb1e3e1f5ca64c329f62588f56f..9c841a9b628a199652f32116a4478f9287d3b89d 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
 @@ -1,35 +1,29 @@
@@ -936,7 +936,7 @@ index a34910099..9c841a9b6 100644
              }
              // CraftBukkit end
 diff --git a/src/main/java/net/minecraft/server/IChunkLoader.java b/src/main/java/net/minecraft/server/IChunkLoader.java
-index df4c1e0e8..47ff14b53 100644
+index df4c1e0e89f5a692453d280a522a5014f6c001f0..47ff14b5330d76f831e5a317d5ac144a3e76f12e 100644
 --- a/src/main/java/net/minecraft/server/IChunkLoader.java
 +++ b/src/main/java/net/minecraft/server/IChunkLoader.java
 @@ -4,6 +4,17 @@ import java.io.IOException;
@@ -958,7 +958,7 @@ index df4c1e0e8..47ff14b53 100644
  
      void a(World world, Chunk chunk) throws IOException, ExceptionWorldConflict;
 diff --git a/src/main/java/net/minecraft/server/IChunkProvider.java b/src/main/java/net/minecraft/server/IChunkProvider.java
-index c68ffe0e0..270532cc7 100644
+index c68ffe0e040f239f093a4543bc07463b27f96228..270532cc7f6bab26792234e3477062dc00a42496 100644
 --- a/src/main/java/net/minecraft/server/IChunkProvider.java
 +++ b/src/main/java/net/minecraft/server/IChunkProvider.java
 @@ -1,6 +1,7 @@
@@ -987,7 +987,7 @@ index c68ffe0e0..270532cc7 100644
  
      boolean a(IChunkProvider ichunkprovider, Chunk chunk, int i, int j);
 diff --git a/src/main/java/net/minecraft/server/LongHashMap.java b/src/main/java/net/minecraft/server/LongHashMap.java
-index 11f23a56d..ad5f4aace 100644
+index 11f23a56d4d24774549d7276f68eab0ea290e3ef..ad5f4aacec7ab3de5a9373f61c6de80fc378ee1e 100644
 --- a/src/main/java/net/minecraft/server/LongHashMap.java
 +++ b/src/main/java/net/minecraft/server/LongHashMap.java
 @@ -1,5 +1,9 @@
@@ -1020,7 +1020,7 @@ index 11f23a56d..ad5f4aace 100644
          return this.c(i) != null;
      }
 diff --git a/src/main/java/net/minecraft/server/MathHelper.java b/src/main/java/net/minecraft/server/MathHelper.java
-index 49e064626..005b4f1d4 100644
+index 49e064626367174b6a00b5d02e77ce5a8aadb062..005b4f1d42aac5809092672cc9e3c4db53a13e0a 100644
 --- a/src/main/java/net/minecraft/server/MathHelper.java
 +++ b/src/main/java/net/minecraft/server/MathHelper.java
 @@ -120,6 +120,7 @@ public class MathHelper {
@@ -1032,7 +1032,7 @@ index 49e064626..005b4f1d4 100644
          f %= 360.0F;
          if (f >= 180.0F) {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index ce9a24f9a..0a3c4ef8a 100644
+index ce9a24f9ad76dcece90343b400aae34675a57d13..0a3c4ef8aaeff67ebf89508ca7cb20724cac4346 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -41,6 +41,8 @@ import java.util.concurrent.locks.LockSupport;
@@ -1080,7 +1080,7 @@ index ce9a24f9a..0a3c4ef8a 100644
                  //this.methodProfiler.a(worldserver.getWorldData().getName()); // Purpur
 diff --git a/src/main/java/net/minecraft/server/PaperAsyncChunkProvider.java b/src/main/java/net/minecraft/server/PaperAsyncChunkProvider.java
 new file mode 100644
-index 000000000..6dcfdb990
+index 0000000000000000000000000000000000000000..6dcfdb9905a93cfc9b01b20b4770b1411053744c
 --- /dev/null
 +++ b/src/main/java/net/minecraft/server/PaperAsyncChunkProvider.java
 @@ -0,0 +1,643 @@
@@ -1728,7 +1728,7 @@ index 000000000..6dcfdb990
 +
 +}
 diff --git a/src/main/java/net/minecraft/server/PlayerChunkMap.java b/src/main/java/net/minecraft/server/PlayerChunkMap.java
-index 71be8d228..4832019dc 100644
+index 71be8d228b0e0d7f22fd0829960c854e47dc0e3a..4832019dcbb8d09028743aa658684b2a0d88b97b 100644
 --- a/src/main/java/net/minecraft/server/PlayerChunkMap.java
 +++ b/src/main/java/net/minecraft/server/PlayerChunkMap.java
 @@ -7,6 +7,9 @@ import java.util.ArrayList;
@@ -1952,7 +1952,7 @@ index 71be8d228..4832019dc 100644
  
          private void a(Chunk chunk) {
 diff --git a/src/main/java/net/minecraft/server/StructureGenerator.java b/src/main/java/net/minecraft/server/StructureGenerator.java
-index d48a43569..9d3f85c33 100644
+index d48a43569e26aebff59268600f285f0e38fb18cf..9d3f85c33c50ffe30b379c0482c1202d81c26f80 100644
 --- a/src/main/java/net/minecraft/server/StructureGenerator.java
 +++ b/src/main/java/net/minecraft/server/StructureGenerator.java
 @@ -1,16 +1,16 @@
@@ -1975,7 +1975,7 @@ index d48a43569..9d3f85c33 100644
      public StructureGenerator() {}
  
 diff --git a/src/main/java/net/minecraft/server/StructurePiece.java b/src/main/java/net/minecraft/server/StructurePiece.java
-index 0f4a4999b..e0b8561a5 100644
+index 0f4a4999ba409ceb3fd1d6384f500cd31182c931..e0b8561a56d9bc8baa5fe136978f8f41fb983ba2 100644
 --- a/src/main/java/net/minecraft/server/StructurePiece.java
 +++ b/src/main/java/net/minecraft/server/StructurePiece.java
 @@ -56,9 +56,11 @@ public abstract class StructurePiece {
@@ -2001,7 +2001,7 @@ index 0f4a4999b..e0b8561a5 100644
      }
  
 diff --git a/src/main/java/net/minecraft/server/StructureStart.java b/src/main/java/net/minecraft/server/StructureStart.java
-index 22ba3221a..1f44c5b9e 100644
+index 22ba3221aca59dc4dacf2a23e788b2b7c6c95bcf..1f44c5b9e86db82b399f5417d784bed7ba9614c1 100644
 --- a/src/main/java/net/minecraft/server/StructureStart.java
 +++ b/src/main/java/net/minecraft/server/StructureStart.java
 @@ -1,12 +1,13 @@
@@ -2110,7 +2110,7 @@ index 22ba3221a..1f44c5b9e 100644
  
      public boolean d() {
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index e73d52e3a..792678bbf 100644
+index e73d52e3a59c01e583a9c9f29307dab6a35319de..792678bbf49bc3e8cc07622a9cbac6db02e9f839 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -331,7 +331,7 @@ public abstract class World implements IBlockAccess {
@@ -2289,7 +2289,7 @@ index e73d52e3a..792678bbf 100644
 +    // Titanium end
  }
 diff --git a/src/main/java/net/minecraft/server/WorldGenLargeFeature.java b/src/main/java/net/minecraft/server/WorldGenLargeFeature.java
-index 0b8340e35..ba86514f5 100644
+index 0b8340e35497e478aab95833e96055ac0ef6f742..ba86514f56d8c3044c0a88c854a6a5560d49b7bb 100644
 --- a/src/main/java/net/minecraft/server/WorldGenLargeFeature.java
 +++ b/src/main/java/net/minecraft/server/WorldGenLargeFeature.java
 @@ -89,7 +89,7 @@ public class WorldGenLargeFeature extends StructureGenerator {
@@ -2302,7 +2302,7 @@ index 0b8340e35..ba86514f5 100644
              return structurepiece instanceof WorldGenRegistration.WorldGenWitchHut;
          } else {
 diff --git a/src/main/java/net/minecraft/server/WorldGenMinable.java b/src/main/java/net/minecraft/server/WorldGenMinable.java
-index 2307c87b6..ae22fb53f 100644
+index 2307c87b6c08e785be438515727821cffdd63ad8..ae22fb53fde4c42d109510b30df3b92f9767474a 100644
 --- a/src/main/java/net/minecraft/server/WorldGenMinable.java
 +++ b/src/main/java/net/minecraft/server/WorldGenMinable.java
 @@ -7,6 +7,7 @@ public class WorldGenMinable extends WorldGenerator {
@@ -2377,7 +2377,7 @@ index 2307c87b6..ae22fb53f 100644
                                  }
                              }
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 598b7cf3d..2e3ad3d2c 100644
+index 598b7cf3d9f2f86522b14d39649bbcdafaf74256..2e3ad3d2c9fb86279a24d697c99c8e4888f93397 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
 @@ -821,7 +821,11 @@ public class WorldServer extends World implements IAsyncTaskHandler {
@@ -2395,7 +2395,7 @@ index 598b7cf3d..2e3ad3d2c 100644
      }
 diff --git a/src/main/java/net/titanium/chunk/ChunkMap.java b/src/main/java/net/titanium/chunk/ChunkMap.java
 new file mode 100644
-index 000000000..2f4460edf
+index 0000000000000000000000000000000000000000..2f4460edf619bc8e38d57193d62e8f1a87b9c938
 --- /dev/null
 +++ b/src/main/java/net/titanium/chunk/ChunkMap.java
 @@ -0,0 +1,119 @@
@@ -2519,7 +2519,7 @@ index 000000000..2f4460edf
 +
 +}
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 8d62b0304..902d79cf7 100644
+index 8d62b0304ee9a9cd7d66b9500b218bf5c47e3a56..902d79cf730498b73bc440c80cf33aac049d0993 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -258,6 +258,32 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -2556,7 +2556,7 @@ index 8d62b0304..902d79cf7 100644
  
      public Tnt tnt = new Tnt();
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index a5c0bc0bc..aec720df3 100644
+index a5c0bc0bcb3e023d99546a5f389fd9359c5fb140..aec720df3ce5256d6e2b963a91ff7e69b0bd73c8 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -38,6 +38,8 @@ import javax.imageio.ImageIO;
@@ -2592,7 +2592,7 @@ index a5c0bc0bc..aec720df3 100644
              }
          }
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
-index e050c4a75..be4a5fc3c 100644
+index e050c4a7504bf61ec9e180bfcc82632f3202f6c1..be4a5fc3ccdd80d339ca5129e8bb713d71d6ad8f 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 @@ -15,6 +15,7 @@ import java.util.UUID;
@@ -2696,7 +2696,7 @@ index e050c4a75..be4a5fc3c 100644
  
      public Titanium titanium() {
 diff --git a/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOExecutor.java b/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOExecutor.java
-index f02cb1783..99f935465 100644
+index f02cb17838ad6f9d6d36ba9d828ce8fb7a8c3b7f..99f9354659b27ea81808929a5fe8604543f69b8e 100644
 --- a/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOExecutor.java
 +++ b/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOExecutor.java
 @@ -3,6 +3,7 @@ package org.bukkit.craftbukkit.chunkio;
@@ -2732,7 +2732,7 @@ index f02cb1783..99f935465 100644
          int size = Math.max(BASE_THREADS, (int) Math.ceil(players / PLAYERS_PER_THREAD));
          instance.setActiveThreads(size);
 diff --git a/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOProvider.java b/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOProvider.java
-index c7e2b561f..6b34e1afb 100644
+index c7e2b561f29fc38d10e5a3bd4447fb5d882bd685..6b34e1afb74aec9410ae4d736431bf816fd0de67 100644
 --- a/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOProvider.java
 +++ b/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOProvider.java
 @@ -46,35 +46,8 @@ class ChunkIOProvider implements AsynchronousExecutor.CallBackProvider<QueuedChu
@@ -2773,7 +2773,7 @@ index c7e2b561f..6b34e1afb 100644
  
      public void callStage3(QueuedChunk queuedChunk, Chunk chunk, Runnable runnable) throws RuntimeException {
 diff --git a/src/main/java/org/bukkit/craftbukkit/generator/CustomChunkGenerator.java b/src/main/java/org/bukkit/craftbukkit/generator/CustomChunkGenerator.java
-index 04dd15db1..4b0f9e607 100644
+index 04dd15db12ef23223d43f2a1f724b0d28a901926..4b0f9e6073d9bf9b0dc6011e664577e6c367fb79 100644
 --- a/src/main/java/org/bukkit/craftbukkit/generator/CustomChunkGenerator.java
 +++ b/src/main/java/org/bukkit/craftbukkit/generator/CustomChunkGenerator.java
 @@ -14,6 +14,7 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
@@ -2800,6 +2800,3 @@ index 04dd15db1..4b0f9e607 100644
  
          this.random = new Random(seed);
      }
--- 
-2.38.1.windows.1
-

@@ -1,4 +1,4 @@
-From 25ce6464fa7af47089a8baefac944f086fee5798 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sat, 4 Jun 2022 13:11:54 +0200
 Subject: [PATCH] Implement [PandaSpigot-0039] Optimize VarInt reading and
@@ -7,7 +7,7 @@ Subject: [PATCH] Implement [PandaSpigot-0039] Optimize VarInt reading and
 
 diff --git a/src/main/java/com/hpfxd/pandaspigot/network/VarIntByteDecoder.java b/src/main/java/com/hpfxd/pandaspigot/network/VarIntByteDecoder.java
 new file mode 100644
-index 000000000..df2d56f9a
+index 0000000000000000000000000000000000000000..34ad9d82e0cb6b10d572163e74a7d444d0d0a9ee
 --- /dev/null
 +++ b/src/main/java/com/hpfxd/pandaspigot/network/VarIntByteDecoder.java
 @@ -0,0 +1,50 @@
@@ -19,7 +19,7 @@ index 000000000..df2d56f9a
 +    private int readVarint;
 +    private int bytesRead;
 +    private DecodeResult result = DecodeResult.TOO_SHORT;
-+    
++
 +    @Override
 +    public boolean process(byte k) {
 +        if (k == 0 && bytesRead == 0) {
@@ -41,19 +41,19 @@ index 000000000..df2d56f9a
 +        }
 +        return true;
 +    }
-+    
++
 +    public int getReadVarint() {
 +        return readVarint;
 +    }
-+    
++
 +    public int getBytesRead() {
 +        return bytesRead;
 +    }
-+    
++
 +    public DecodeResult getResult() {
 +        return result;
 +    }
-+    
++
 +    public enum DecodeResult {
 +        SUCCESS,
 +        TOO_SHORT,
@@ -63,7 +63,7 @@ index 000000000..df2d56f9a
 +}
 diff --git a/src/main/java/com/hpfxd/pandaspigot/network/VarIntUtil.java b/src/main/java/com/hpfxd/pandaspigot/network/VarIntUtil.java
 new file mode 100644
-index 000000000..c0040dd80
+index 0000000000000000000000000000000000000000..7e321847a7cbf7b569458973e5b6ed03274ad2f2
 --- /dev/null
 +++ b/src/main/java/com/hpfxd/pandaspigot/network/VarIntUtil.java
 @@ -0,0 +1,114 @@
@@ -74,14 +74,14 @@ index 000000000..c0040dd80
 +
 +public class VarIntUtil {
 +    private static final int[] VARINT_EXACT_BYTE_LENGTHS = new int[33];
-+    
++
 +    static {
 +        for (int i = 0; i <= 32; ++i) {
 +            VARINT_EXACT_BYTE_LENGTHS[i] = (int) Math.ceil((31d - (i - 1)) / 7d);
 +        }
 +        VARINT_EXACT_BYTE_LENGTHS[32] = 1; // Special case for the number 0.
 +    }
-+    
++
 +    /**
 +     * Reads a Minecraft-style VarInt from the specified {@code buf}.
 +     *
@@ -95,7 +95,7 @@ index 000000000..c0040dd80
 +        }
 +        return read;
 +    }
-+    
++
 +    /**
 +     * Reads a Minecraft-style VarInt from the specified {@code buf}. The difference between this
 +     * method and {@link #readVarInt(ByteBuf)} is that this function returns a sentinel value if the
@@ -116,7 +116,7 @@ index 000000000..c0040dd80
 +        }
 +        return Integer.MIN_VALUE;
 +    }
-+    
++
 +    /**
 +     * Returns the exact byte size of {@code value} if it were encoded as a VarInt.
 +     *
@@ -126,7 +126,7 @@ index 000000000..c0040dd80
 +    public static int varIntBytes(int value) {
 +        return VARINT_EXACT_BYTE_LENGTHS[Integer.numberOfLeadingZeros(value)];
 +    }
-+    
++
 +    /**
 +     * Writes a Minecraft-style VarInt to the specified {@code buf}.
 +     *
@@ -145,7 +145,7 @@ index 000000000..c0040dd80
 +            writeVarIntFull(buf, value);
 +        }
 +    }
-+    
++
 +    private static void writeVarIntFull(ByteBuf buf, int value) {
 +        // See https://steinborn.me/posts/performance/how-fast-can-you-write-a-varint/
 +        if ((value & (0xFFFFFFFF << 7)) == 0) {
@@ -167,7 +167,7 @@ index 000000000..c0040dd80
 +            buf.writeByte(value >>> 28);
 +        }
 +    }
-+    
++
 +    /**
 +     * Writes the specified {@code value} as a 21-bit Minecraft VarInt to the specified {@code buf}.
 +     * The upper 11 bits will be discarded.
@@ -182,7 +182,7 @@ index 000000000..c0040dd80
 +    }
 +}
 diff --git a/src/main/java/net/minecraft/server/PacketPrepender.java b/src/main/java/net/minecraft/server/PacketPrepender.java
-index 29d28a452..e51cb41fc 100644
+index 29d28a45224afbf7f5641a98fee1ae7a416ed6e1..4e87b40e840e24b74b321794068b2a84b7173b0d 100644
 --- a/src/main/java/net/minecraft/server/PacketPrepender.java
 +++ b/src/main/java/net/minecraft/server/PacketPrepender.java
 @@ -4,26 +4,29 @@ import io.netty.buffer.ByteBuf;
@@ -218,30 +218,28 @@ index 29d28a452..e51cb41fc 100644
      protected void encode(ChannelHandlerContext channelhandlercontext, ByteBuf object, ByteBuf bytebuf) throws Exception {
          this.a(channelhandlercontext, (ByteBuf) object, bytebuf);
      }
--}
 +    // PandaSpigot start
 +    @Override
 +    protected ByteBuf allocateBuffer(ChannelHandlerContext ctx, ByteBuf msg, boolean preferDirect) throws Exception {
 +        int anticipatedRequiredCapacity = com.hpfxd.pandaspigot.network.VarIntUtil.varIntBytes(msg.readableBytes())
-+                + msg.readableBytes();
++            + msg.readableBytes();
 +
 +        return ctx.alloc().directBuffer(anticipatedRequiredCapacity);
 +    }
 +    // PandaSpigot end
-+}
-\ No newline at end of file
+ }
 diff --git a/src/main/java/net/minecraft/server/PacketSplitter.java b/src/main/java/net/minecraft/server/PacketSplitter.java
-index c51a1f7d1..99ebfd72f 100644
+index c51a1f7d1a57acde1e5c7378fe35c30547107052..204011926353a93a48e1909ca276222b5f31d44e 100644
 --- a/src/main/java/net/minecraft/server/PacketSplitter.java
 +++ b/src/main/java/net/minecraft/server/PacketSplitter.java
 @@ -1,5 +1,6 @@
  package net.minecraft.server;
  
-+import com.hpfxd.pandaspigot.network.VarIntByteDecoder;
++import com.hpfxd.pandaspigot.network.VarIntByteDecoder; // PandaSpigot
  import io.netty.buffer.ByteBuf;
  import io.netty.buffer.Unpooled;
  import io.netty.channel.ChannelHandlerContext;
-@@ -12,36 +13,49 @@ public class PacketSplitter extends ByteToMessageDecoder {
+@@ -12,36 +13,48 @@ public class PacketSplitter extends ByteToMessageDecoder {
      public PacketSplitter() {}
  
      protected void decode(ChannelHandlerContext channelhandlercontext, ByteBuf bytebuf, List<Object> list) throws Exception {
@@ -315,26 +313,23 @@ index c51a1f7d1..99ebfd72f 100644
 +        // PandaSpigot end
      }
  }
-+
 diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
-index 50afd4a6b..55631adb9 100644
+index 50afd4a6b0994798d0eb9b65ffe193d80a5f3d25..44e127fe665f4f016d30541f303158bfe26159e5 100644
 --- a/src/main/java/net/minecraft/server/ServerConnection.java
 +++ b/src/main/java/net/minecraft/server/ServerConnection.java
-@@ -116,7 +116,13 @@ public class ServerConnection {
+@@ -116,7 +116,14 @@ public class ServerConnection {
                      }
  
                      if (!disableFlushConsolidation) channel.pipeline().addFirst(new io.netty.handler.flush.FlushConsolidationHandler()); // PandaSpigot
 -                    channel.pipeline().addLast("timeout", new ReadTimeoutHandler(30)).addLast("legacy_query", new LegacyPingHandler(ServerConnection.this)).addLast("splitter", new PacketSplitter()).addLast("decoder", new PacketDecoder(EnumProtocolDirection.SERVERBOUND)).addLast("prepender", new PacketPrepender()).addLast("encoder", new PacketEncoder(EnumProtocolDirection.CLIENTBOUND));
 +                    // PandaSpigot start - newlines
 +                    channel.pipeline().addLast("timeout", new ReadTimeoutHandler(30))
-+                            .addLast("legacy_query", new LegacyPingHandler(ServerConnection.this))
-+                            .addLast("splitter", new PacketSplitter())
-+                            .addLast("decoder", new PacketDecoder(EnumProtocolDirection.SERVERBOUND))
-+                            .addLast("prepender", PacketPrepender.INSTANCE) // PandaSpigot - Share PacketPrepender instance
-+                            .addLast("encoder", new PacketEncoder(EnumProtocolDirection.CLIENTBOUND));
++                        .addLast("legacy_query", new LegacyPingHandler(ServerConnection.this))
++                        .addLast("splitter", new PacketSplitter())
++                        .addLast("decoder", new PacketDecoder(EnumProtocolDirection.SERVERBOUND))
++                        .addLast("prepender", PacketPrepender.INSTANCE) // PandaSpigot - Share PacketPrepender instance
++                        .addLast("encoder", new PacketEncoder(EnumProtocolDirection.CLIENTBOUND));
++                    // PandaSpigot end
                      NetworkManager networkmanager = new NetworkManager(EnumProtocolDirection.SERVERBOUND);
  
                      // PandaSpigot start - prevent blocking on adding a new network manager while the server is ticking
--- 
-2.38.1.windows.1
-

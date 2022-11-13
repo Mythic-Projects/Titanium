@@ -1,4 +1,4 @@
-From b2aef86aa6687382650a409fca7923255d6ee727 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: cswhite2000 <18whitechristop@gmail.com>
 Date: Wed, 8 Aug 2018 17:08:31 -0700
 Subject: [PATCH] Implement [SportPaper-0058] Potion effect events by
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [SportPaper-0058] Potion effect events by
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index bc77b4ce6..2c6ba6d09 100644
+index bc77b4ce6108984cfe0cfcd29327ef306ad4bc4f..2c6ba6d09346860fa69c512bab1c5f1b4233bcc1 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
 @@ -18,11 +18,16 @@ import com.google.common.collect.Lists;
@@ -172,7 +172,7 @@ index bc77b4ce6..2c6ba6d09 100644
  
 diff --git a/src/main/java/org/bukkit/craftbukkit/potion/CraftPotionUtils.java b/src/main/java/org/bukkit/craftbukkit/potion/CraftPotionUtils.java
 new file mode 100644
-index 000000000..0303c265a
+index 0000000000000000000000000000000000000000..0303c265a83fda300c62205474ebe8c8b70bb29b
 --- /dev/null
 +++ b/src/main/java/org/bukkit/craftbukkit/potion/CraftPotionUtils.java
 @@ -0,0 +1,34 @@
@@ -210,6 +210,3 @@ index 000000000..0303c265a
 +        effect.a(cloneWithDuration(effect, duration));
 +    }
 +}
--- 
-2.38.1.windows.1
-

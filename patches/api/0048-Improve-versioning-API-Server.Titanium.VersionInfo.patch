@@ -1,11 +1,11 @@
-From e1fe661c84eeb77e3f2483369c25542ae4dcb5a8 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sat, 5 Nov 2022 21:30:38 +0100
 Subject: [PATCH] Improve versioning API - Server.Titanium.VersionInfo
 
 
 diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
-index aaaa3366..f745a42a 100644
+index aaaa3366a994561ce65784243b62dcff7b031fc6..f745a42a7541b24c7921483e790b7af8aa8b42a1 100644
 --- a/src/main/java/org/bukkit/Server.java
 +++ b/src/main/java/org/bukkit/Server.java
 @@ -1098,6 +1098,30 @@ public interface Server extends PluginMessageRecipient {
@@ -40,7 +40,7 @@ index aaaa3366..f745a42a 100644
          public OkaeriConfig getServerConfig() {
              throw new UnsupportedOperationException("Not supported yet.");
 diff --git a/src/main/java/org/bukkit/command/defaults/VersionCommand.java b/src/main/java/org/bukkit/command/defaults/VersionCommand.java
-index d4b5c757..275e1ba4 100644
+index d4b5c757b7dd5ccddc868f6b5561ee2ac75277e4..275e1ba401e1d9d6050cff14f431d1c963986095 100644
 --- a/src/main/java/org/bukkit/command/defaults/VersionCommand.java
 +++ b/src/main/java/org/bukkit/command/defaults/VersionCommand.java
 @@ -9,6 +9,7 @@ import java.util.List;
@@ -63,6 +63,3 @@ index d4b5c757..275e1ba4 100644
          versionMessage = message + "\n" + msg;
          // Paper end
          versionLock.lock();
--- 
-2.38.1.windows.1
-

@@ -1,11 +1,11 @@
-From 28ce039022c5f49b22ebb96cf757b992ac080a33 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sat, 18 Jun 2022 20:22:11 +0200
 Subject: [PATCH] Fix compilation warnings
 
 
 diff --git a/src/main/java/me/suicidalkids/ion/blocks/redstone/PandaRedstoneWire.java b/src/main/java/me/suicidalkids/ion/blocks/redstone/PandaRedstoneWire.java
-index aa118132b..9361ea8c5 100644
+index aa118132b6e486d4b7f1d28103511038cdbb8eef..9361ea8c521558f34c4fa039b3dbf4a2a62b8ae3 100644
 --- a/src/main/java/me/suicidalkids/ion/blocks/redstone/PandaRedstoneWire.java
 +++ b/src/main/java/me/suicidalkids/ion/blocks/redstone/PandaRedstoneWire.java
 @@ -187,7 +187,7 @@ public class PandaRedstoneWire extends BlockRedstoneWire {
@@ -27,7 +27,7 @@ index aa118132b..9361ea8c5 100644
       * @param worldIn		World
       * @param pos			Position of the wire
 diff --git a/src/main/java/net/minecraft/server/EntityBat.java b/src/main/java/net/minecraft/server/EntityBat.java
-index 52416203a..3183a41f8 100644
+index 52416203a74782a9dc56754f71f6f064c2fe9d3d..3183a41f846e0d4ccc44a3cba1bef8ddc890ea7c 100644
 --- a/src/main/java/net/minecraft/server/EntityBat.java
 +++ b/src/main/java/net/minecraft/server/EntityBat.java
 @@ -14,7 +14,7 @@ public class EntityBat extends EntityAmbient {
@@ -40,7 +40,7 @@ index 52416203a..3183a41f8 100644
  
      protected float bB() {
 diff --git a/src/main/java/net/minecraft/server/EntityBlaze.java b/src/main/java/net/minecraft/server/EntityBlaze.java
-index c6b711385..05d336142 100644
+index c6b711385d3ee6627966a401c8d4f34044a30b8b..05d3361428362f065c807a10c9d5f6e5be13ec22 100644
 --- a/src/main/java/net/minecraft/server/EntityBlaze.java
 +++ b/src/main/java/net/minecraft/server/EntityBlaze.java
 @@ -27,7 +27,7 @@ public class EntityBlaze extends EntityMonster {
@@ -53,7 +53,7 @@ index c6b711385..05d336142 100644
  
      protected String z() {
 diff --git a/src/main/java/net/minecraft/server/EntityBoat.java b/src/main/java/net/minecraft/server/EntityBoat.java
-index 590d84c92..7e7f4c30a 100644
+index 590d84c926c33a33de0deb69cd19020422fba8fe..7e7f4c30a9e654c20f2f95781f586a5d882b23c5 100644
 --- a/src/main/java/net/minecraft/server/EntityBoat.java
 +++ b/src/main/java/net/minecraft/server/EntityBoat.java
 @@ -57,9 +57,9 @@ public class EntityBoat extends Entity {
@@ -70,7 +70,7 @@ index 590d84c92..7e7f4c30a 100644
  
      public AxisAlignedBB j(Entity entity) {
 diff --git a/src/main/java/net/minecraft/server/EntityEnderman.java b/src/main/java/net/minecraft/server/EntityEnderman.java
-index 72645353b..41a7a0c16 100644
+index 72645353b79165114fe7f3886ed28dafabdcc081..41a7a0c16110394b11b080dcdcdcdb797f98922f 100644
 --- a/src/main/java/net/minecraft/server/EntityEnderman.java
 +++ b/src/main/java/net/minecraft/server/EntityEnderman.java
 @@ -56,9 +56,9 @@ public class EntityEnderman extends EntityMonster {
@@ -87,7 +87,7 @@ index 72645353b..41a7a0c16 100644
  
      public void b(NBTTagCompound nbttagcompound) {
 diff --git a/src/main/java/net/minecraft/server/EntityMinecartFurnace.java b/src/main/java/net/minecraft/server/EntityMinecartFurnace.java
-index 908620d41..40ca81e80 100644
+index 908620d41116f7d0474b11ec823acf8222bebe80..40ca81e8000b497e65d3ec6d62be96e66b578220 100644
 --- a/src/main/java/net/minecraft/server/EntityMinecartFurnace.java
 +++ b/src/main/java/net/minecraft/server/EntityMinecartFurnace.java
 @@ -20,7 +20,7 @@ public class EntityMinecartFurnace extends EntityMinecartAbstract {
@@ -100,7 +100,7 @@ index 908620d41..40ca81e80 100644
  
      public void t_() {
 diff --git a/src/main/java/net/minecraft/server/EntitySheep.java b/src/main/java/net/minecraft/server/EntitySheep.java
-index 29611a194..e1baf50eb 100644
+index 29611a194b8a582d57159231091c66adb7c6944f..e1baf50ebc6ba7e2df799e09a78fbee6e4ec8177 100644
 --- a/src/main/java/net/minecraft/server/EntitySheep.java
 +++ b/src/main/java/net/minecraft/server/EntitySheep.java
 @@ -71,7 +71,7 @@ public class EntitySheep extends EntityAnimal {
@@ -113,7 +113,7 @@ index 29611a194..e1baf50eb 100644
  
      protected void dropDeathLoot(boolean flag, int i) {
 diff --git a/src/main/java/net/minecraft/server/EntitySkeleton.java b/src/main/java/net/minecraft/server/EntitySkeleton.java
-index 46bff95d8..cbd5fd361 100644
+index 46bff95d8bf73e34eb8e0a9b94fb9fa9e9cc5cfb..cbd5fd36151af716f0ade99f8a43b4f4b4c22b5f 100644
 --- a/src/main/java/net/minecraft/server/EntitySkeleton.java
 +++ b/src/main/java/net/minecraft/server/EntitySkeleton.java
 @@ -34,7 +34,7 @@ public class EntitySkeleton extends EntityMonster implements IRangedEntity {
@@ -126,7 +126,7 @@ index 46bff95d8..cbd5fd361 100644
  
      protected String z() {
 diff --git a/src/main/java/net/minecraft/server/EntitySpider.java b/src/main/java/net/minecraft/server/EntitySpider.java
-index 68a253c96..4b17765b0 100644
+index 68a253c9698d2b239e400d7a9406c4430072cc33..4b17765b001774dfc06023002a4c7bbc8f1a1b43 100644
 --- a/src/main/java/net/minecraft/server/EntitySpider.java
 +++ b/src/main/java/net/minecraft/server/EntitySpider.java
 @@ -29,7 +29,7 @@ public class EntitySpider extends EntityMonster {
@@ -139,7 +139,7 @@ index 68a253c96..4b17765b0 100644
  
      public void t_() {
 diff --git a/src/main/java/net/minecraft/server/EntityTNTPrimed.java b/src/main/java/net/minecraft/server/EntityTNTPrimed.java
-index 6ca8b5f07..e3f989481 100644
+index 6ca8b5f07f71e35822c1248f1aeb88234ba3fb59..e3f9894810d28137156a269a9814d78cf8268d7b 100644
 --- a/src/main/java/net/minecraft/server/EntityTNTPrimed.java
 +++ b/src/main/java/net/minecraft/server/EntityTNTPrimed.java
 @@ -174,7 +174,7 @@ public class EntityTNTPrimed extends Entity {
@@ -152,7 +152,7 @@ index 6ca8b5f07..e3f989481 100644
      @Override
      public boolean W() {
 diff --git a/src/main/java/net/minecraft/server/EntityWither.java b/src/main/java/net/minecraft/server/EntityWither.java
-index 04885ac46..255c941e5 100644
+index 04885ac46404f97bda59d0e5554d702ce69cd84c..255c941e54d3fe0af05bbaa76163ab03300c2f6c 100644
 --- a/src/main/java/net/minecraft/server/EntityWither.java
 +++ b/src/main/java/net/minecraft/server/EntityWither.java
 @@ -49,10 +49,10 @@ public class EntityWither extends EntityMonster implements IRangedEntity {
@@ -171,7 +171,7 @@ index 04885ac46..255c941e5 100644
  
      public void b(NBTTagCompound nbttagcompound) {
 diff --git a/src/main/java/net/minecraft/server/EntityWolf.java b/src/main/java/net/minecraft/server/EntityWolf.java
-index 469c87a17..01daab0b2 100644
+index 469c87a179b452b5df06e79a6bc1d8e7fce07965..01daab0b2788a6e206530a5c1932ff87af298b56 100644
 --- a/src/main/java/net/minecraft/server/EntityWolf.java
 +++ b/src/main/java/net/minecraft/server/EntityWolf.java
 @@ -87,9 +87,9 @@ public class EntityWolf extends EntityTameableAnimal {
@@ -187,6 +187,3 @@ index 469c87a17..01daab0b2 100644
      }
  
      protected void a(BlockPosition blockposition, Block block) {
--- 
-2.38.1.windows.1
-

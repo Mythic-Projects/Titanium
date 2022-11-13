@@ -1,4 +1,4 @@
-From b79a9765dc34488322e24c1af7557a31a8c06af7 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 15 May 2022 18:56:03 +0200
 Subject: [PATCH] Improve calculating TileEntityFurnace#fuelTime and some
@@ -6,7 +6,7 @@ Subject: [PATCH] Improve calculating TileEntityFurnace#fuelTime and some
 
 
 diff --git a/src/main/java/net/minecraft/server/ItemHoe.java b/src/main/java/net/minecraft/server/ItemHoe.java
-index 7c041a01c..07c9a9d98 100644
+index 7c041a01cf34969743dc26f7dda56b2803db1781..07c9a9d988ad51c111533ee0cc9f56f8f801c4dd 100644
 --- a/src/main/java/net/minecraft/server/ItemHoe.java
 +++ b/src/main/java/net/minecraft/server/ItemHoe.java
 @@ -1,6 +1,9 @@
@@ -47,7 +47,7 @@ index 7c041a01c..07c9a9d98 100644
      static class SyntheticClass_1 {
  
 diff --git a/src/main/java/net/minecraft/server/ItemSword.java b/src/main/java/net/minecraft/server/ItemSword.java
-index f2efd9f7f..edd343015 100644
+index f2efd9f7f9ca60b7fd3f231e1a9522cbb05874da..edd343015951218c003a3edf2b89f2f1832b940d 100644
 --- a/src/main/java/net/minecraft/server/ItemSword.java
 +++ b/src/main/java/net/minecraft/server/ItemSword.java
 @@ -1,8 +1,10 @@
@@ -96,7 +96,7 @@ index f2efd9f7f..edd343015 100644
 +
  }
 diff --git a/src/main/java/net/minecraft/server/ItemTool.java b/src/main/java/net/minecraft/server/ItemTool.java
-index 4e94ea1a7..3d8fd484b 100644
+index 4e94ea1a71c1d5c14fde5dd651b379dc3e8c9397..3d8fd484b50f8263f78b7ea480809a8417e0243e 100644
 --- a/src/main/java/net/minecraft/server/ItemTool.java
 +++ b/src/main/java/net/minecraft/server/ItemTool.java
 @@ -2,8 +2,10 @@ package net.minecraft.server;
@@ -152,7 +152,7 @@ index 4e94ea1a7..3d8fd484b 100644
 +
  }
 diff --git a/src/main/java/net/minecraft/server/TileEntityFurnace.java b/src/main/java/net/minecraft/server/TileEntityFurnace.java
-index 3096dea34..1217072b2 100644
+index 3096dea34eb8308eab8e5237a42b3762b92d22e5..1217072b2dfac00712a20052f8ec12945301fbf1 100644
 --- a/src/main/java/net/minecraft/server/TileEntityFurnace.java
 +++ b/src/main/java/net/minecraft/server/TileEntityFurnace.java
 @@ -3,6 +3,7 @@ package net.minecraft.server;
@@ -191,7 +191,7 @@ index 3096dea34..1217072b2 100644
  
 diff --git a/src/main/java/net/titanium/item/Burnable.java b/src/main/java/net/titanium/item/Burnable.java
 new file mode 100644
-index 000000000..7f09ab3fe
+index 0000000000000000000000000000000000000000..7f09ab3feb8dd325e44940411eda955a4c9673c6
 --- /dev/null
 +++ b/src/main/java/net/titanium/item/Burnable.java
 @@ -0,0 +1,7 @@
@@ -204,7 +204,7 @@ index 000000000..7f09ab3fe
 +}
 diff --git a/src/main/java/net/titanium/item/HasToolMaterial.java b/src/main/java/net/titanium/item/HasToolMaterial.java
 new file mode 100644
-index 000000000..5ea6604b8
+index 0000000000000000000000000000000000000000..5ea6604b811e087639cc05d7ef6b098169ebf35a
 --- /dev/null
 +++ b/src/main/java/net/titanium/item/HasToolMaterial.java
 @@ -0,0 +1,13 @@
@@ -221,6 +221,3 @@ index 000000000..5ea6604b8
 +    }
 +
 +}
--- 
-2.38.1.windows.1
-

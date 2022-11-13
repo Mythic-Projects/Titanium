@@ -1,4 +1,4 @@
-From d1206e2ae47eb501cbc6ac651f22fe54860ebc98 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Mon, 10 Sep 2018 23:36:16 -0400
 Subject: [PATCH] Implement [Paper-0348] Prevent chunk loading from Fluid
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0348] Prevent chunk loading from Fluid
 
 
 diff --git a/src/main/java/net/minecraft/server/BlockFluids.java b/src/main/java/net/minecraft/server/BlockFluids.java
-index db73f5d9c..000849f2b 100644
+index db73f5d9cc85579037c3d95509a1227946cb08d6..000849f2b9c00280f86c077048beab5dbef49e55 100644
 --- a/src/main/java/net/minecraft/server/BlockFluids.java
 +++ b/src/main/java/net/minecraft/server/BlockFluids.java
 @@ -85,7 +85,13 @@ public abstract class BlockFluids extends Block {
@@ -59,7 +59,7 @@ index db73f5d9c..000849f2b 100644
                      return true;
                  }
 diff --git a/src/main/java/net/minecraft/server/IBlockAccess.java b/src/main/java/net/minecraft/server/IBlockAccess.java
-index 304e82754..6e71b75ec 100644
+index 304e82754e7f0d3cec6bbd97d1e563f7421090cc..6e71b75ec9f0d6963887a636a58dcd5e0f40b76d 100644
 --- a/src/main/java/net/minecraft/server/IBlockAccess.java
 +++ b/src/main/java/net/minecraft/server/IBlockAccess.java
 @@ -6,6 +6,12 @@ public interface IBlockAccess {
@@ -76,7 +76,7 @@ index 304e82754..6e71b75ec 100644
  
      int getBlockPower(BlockPosition blockposition, EnumDirection enumdirection);
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 3d8f7044c..0d0bc88a5 100644
+index 3d8f7044c2c4123a4244b26d470562a90ada9fc5..0d0bc88a5d77444bb61b4c9909eeb2c0aeee1eda 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -598,6 +598,12 @@ public abstract class World implements IBlockAccess {
@@ -100,6 +100,3 @@ index 3d8f7044c..0d0bc88a5 100644
      public IBlockData getTypeIfLoaded(BlockPosition blockposition) {
          // CraftBukkit start - tree generation
          if (captureTreeGeneration) {
--- 
-2.38.1.windows.1
-

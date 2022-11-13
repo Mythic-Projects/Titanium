@@ -1,11 +1,11 @@
-From fd2ac4e004e639bd81e056889b689e9135ffdcfe Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 16 Oct 2022 22:52:54 +0200
 Subject: [PATCH] Use EntityType for spawner illegal entities patch
 
 
 diff --git a/src/main/java/net/minecraft/server/MobSpawnerAbstract.java b/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
-index a0f5c65b3..770222cea 100644
+index a0f5c65b3b42e79c07017135ff9f7067dcf14cc0..770222cea0996de1694b98c070d22d4f465a9514 100644
 --- a/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
 +++ b/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
 @@ -3,9 +3,10 @@ package net.minecraft.server;
@@ -58,7 +58,7 @@ index a0f5c65b3..770222cea 100644
          this.mobName = s;
      }
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 222ef239e..8d62b0304 100644
+index 222ef239eec29804aadda4cae381b825a57615fe..8d62b0304ee9a9cd7d66b9500b218bf5c47e3a56 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -2,7 +2,6 @@ package net.titanium.config;
@@ -107,6 +107,3 @@ index 222ef239e..8d62b0304 100644
              );
  
          }
--- 
-2.38.1.windows.1
-

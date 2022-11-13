@@ -1,11 +1,11 @@
-From 70fbd11028d6bbbdb6a76b7ab69dcd71f0ecdaaf Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 19 May 2022 18:53:38 +0200
 Subject: [PATCH] Implement [Migot-0032] Thread Local IntCache
 
 
 diff --git a/src/main/java/net/minecraft/server/IntCache.java b/src/main/java/net/minecraft/server/IntCache.java
-index 95060a4e6..29f4421d8 100644
+index 95060a4e61970f4e812d9388d5d34be6c0d62777..29f4421d878653c2bfc902f97c90a9d49127d712 100644
 --- a/src/main/java/net/minecraft/server/IntCache.java
 +++ b/src/main/java/net/minecraft/server/IntCache.java
 @@ -1,63 +1,115 @@
@@ -157,6 +157,3 @@ index 95060a4e6..29f4421d8 100644
 +    // Migot end
 +
  }
--- 
-2.38.1.windows.1
-

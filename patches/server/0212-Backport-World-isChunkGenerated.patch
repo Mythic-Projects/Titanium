@@ -1,11 +1,11 @@
-From 109081dd92c4a56c459865588e49ddd5f6c2f66d Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sat, 5 Nov 2022 21:53:17 +0100
 Subject: [PATCH] Backport World#isChunkGenerated
 
 
 diff --git a/src/main/java/net/minecraft/server/ChunkRegionLoader.java b/src/main/java/net/minecraft/server/ChunkRegionLoader.java
-index 32b584440..3f648ff36 100644
+index 32b584440e348e9474d63aa5ad1b4aab41fbb131..3f648ff365036cf522cf313d2a633423c27d4b9a 100644
 --- a/src/main/java/net/minecraft/server/ChunkRegionLoader.java
 +++ b/src/main/java/net/minecraft/server/ChunkRegionLoader.java
 @@ -41,6 +41,11 @@ public class ChunkRegionLoader implements IChunkLoader, IAsyncChunkSaver {
@@ -21,7 +21,7 @@ index 32b584440..3f648ff36 100644
      // CraftBukkit start - Add async variant, provide compatibility
      public Chunk a(World world, int i, int j) throws IOException {
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
-index be4a5fc3c..fac98d03f 100644
+index be4a5fc3ccdd80d339ca5129e8bb713d71d6ad8f..fac98d03fc6942e407acfbcd4d69e1ff61436e4f 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 @@ -149,6 +149,22 @@ public class CraftWorld implements World {
@@ -47,6 +47,3 @@ index be4a5fc3c..fac98d03f 100644
      public Chunk[] getLoadedChunks() {
          Object[] chunks = world.chunkProviderServer.chunks.values().toArray();
          org.bukkit.Chunk[] craftChunks = new CraftChunk[chunks.length];
--- 
-2.38.1.windows.1
-

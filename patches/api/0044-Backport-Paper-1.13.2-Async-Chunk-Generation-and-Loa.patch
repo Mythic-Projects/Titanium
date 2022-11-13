@@ -1,4 +1,4 @@
-From 66dfe8dd5f5b52dda837be4707973b0afa3bcfe7 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Fri, 14 Oct 2022 11:59:49 +0200
 Subject: [PATCH] Backport Paper 1.13.2 Async Chunk Generation (and Loading)
@@ -7,7 +7,7 @@ Co-authored-by: Peridot <peridot491@protonmail.com>
 
 diff --git a/src/main/java/net/titanium/AsyncPriority.java b/src/main/java/net/titanium/AsyncPriority.java
 new file mode 100644
-index 00000000..72753a86
+index 0000000000000000000000000000000000000000..72753a86a089560423af5810f83895f329f0ba5c
 --- /dev/null
 +++ b/src/main/java/net/titanium/AsyncPriority.java
 @@ -0,0 +1,24 @@
@@ -36,7 +36,7 @@ index 00000000..72753a86
 +
 +}
 diff --git a/src/main/java/org/bukkit/World.java b/src/main/java/org/bukkit/World.java
-index 9cd5770f..f36906eb 100644
+index 9cd5770fcd57d20c9ba9c9f7f2e4552af43ab926..f36906eba48e859cd97f184a1bb4791daae2bd9a 100644
 --- a/src/main/java/org/bukkit/World.java
 +++ b/src/main/java/org/bukkit/World.java
 @@ -9,6 +9,7 @@ import java.util.Map;
@@ -574,7 +574,7 @@ index 9cd5770f..f36906eb 100644
  
      Titanium titanium();
 diff --git a/src/main/java/org/bukkit/entity/Entity.java b/src/main/java/org/bukkit/entity/Entity.java
-index 6c28f121..ecd9e79c 100644
+index 6c28f121f8f6553e7c466050eab609f77e7a228c..ecd9e79cc063f0be73c7fac7eda2c8360b5a6078 100644
 --- a/src/main/java/org/bukkit/entity/Entity.java
 +++ b/src/main/java/org/bukkit/entity/Entity.java
 @@ -107,7 +107,8 @@ public interface Entity extends Metadatable, CommandSender {
@@ -606,6 +606,3 @@ index 6c28f121..ecd9e79c 100644
                  .thenAccept(chunk -> future.complete(teleport(loc, cause)))
                  .exceptionally(ex -> {
                      future.completeExceptionally(ex);
--- 
-2.38.1.windows.1
-

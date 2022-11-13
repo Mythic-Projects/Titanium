@@ -1,11 +1,11 @@
-From 7852629c9755e56fa74d3859823c552936438d0c Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 28 Apr 2022 21:29:45 +0200
 Subject: [PATCH] Implement [FlamePaper-0023] Update Version Command
 
 
 diff --git a/src/main/java/org/bukkit/command/defaults/VersionCommand.java b/src/main/java/org/bukkit/command/defaults/VersionCommand.java
-index e91e1d8c..d49d0ded 100644
+index e91e1d8c1215d19a78611d3c8302ed9634bfbda5..d49d0dedccc414c4367f2e4596a3979b2b2f1a18 100644
 --- a/src/main/java/org/bukkit/command/defaults/VersionCommand.java
 +++ b/src/main/java/org/bukkit/command/defaults/VersionCommand.java
 @@ -43,7 +43,7 @@ public class VersionCommand extends BukkitCommand {
@@ -27,6 +27,3 @@ index e91e1d8c..d49d0ded 100644
              }
          }
          return true;
--- 
-2.36.0.windows.1
-

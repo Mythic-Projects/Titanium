@@ -1,4 +1,4 @@
-From 32d437ce9f6f2661b2748622bfe3bc10f46b0550 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 22 May 2022 23:50:59 +0200
 Subject: [PATCH] Implement [PandaSpigot-0008] Remove hacky stackable buckets
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [PandaSpigot-0008] Remove hacky stackable buckets
 
 
 diff --git a/src/main/java/net/titanium/config/PaperConfig.java b/src/main/java/net/titanium/config/PaperConfig.java
-index 93f8f2bc5..f9ad4c6f3 100644
+index 93f8f2bc555f8e81c23bf9de0e710699daf8a90d..f9ad4c6f34ba76333c28dcbb9605b9dd6fa16738 100644
 --- a/src/main/java/net/titanium/config/PaperConfig.java
 +++ b/src/main/java/net/titanium/config/PaperConfig.java
 @@ -119,29 +119,24 @@ public class PaperConfig extends TitaniumConfigSection {
@@ -55,6 +55,3 @@ index 93f8f2bc5..f9ad4c6f3 100644
      }
  
      @Comment("Send a warning to console when players are moving at excessive speeds.")
--- 
-2.38.1.windows.1
-

@@ -1,11 +1,11 @@
-From 60ded45a38aabf9e6b706d5ceca39845e9e47282 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 20 Jun 2022 07:56:03 +0200
 Subject: [PATCH] Add Titanium to crashlog
 
 
 diff --git a/src/main/java/org/spigotmc/WatchdogThread.java b/src/main/java/org/spigotmc/WatchdogThread.java
-index c8f619a7e..811be767d 100644
+index c8f619a7eddd0fbfe10e13164c946b50734e3100..811be767d337c6e63f50c43843dc73fd8e2fd891 100644
 --- a/src/main/java/org/spigotmc/WatchdogThread.java
 +++ b/src/main/java/org/spigotmc/WatchdogThread.java
 @@ -56,9 +56,9 @@ public class WatchdogThread extends Thread
@@ -29,6 +29,3 @@ index c8f619a7e..811be767d 100644
                  dumpThread( ManagementFactory.getThreadMXBean().getThreadInfo( MinecraftServer.getServer().primaryThread.getId(), Integer.MAX_VALUE ), log );
                  log.log( Level.SEVERE, "------------------------------" );
                  //
--- 
-2.38.1.windows.1
-

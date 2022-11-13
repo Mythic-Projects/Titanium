@@ -1,4 +1,4 @@
-From 7bdb6f5756c3befac5409ef420ebf797630416bd Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 4 Aug 2022 00:34:23 +0200
 Subject: [PATCH] Implement [PaperBin-????] Optimise
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [PaperBin-????] Optimise
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
-index 2b7aa9e69..f6db5de1c 100644
+index 2b7aa9e699e6cbd225b6b38b6d9a04db08190402..f6db5de1c1403f28a2e781fe7e53d16e9dc8cf61 100644
 --- a/src/main/java/net/minecraft/server/EntityHuman.java
 +++ b/src/main/java/net/minecraft/server/EntityHuman.java
 @@ -1785,6 +1785,16 @@ public abstract class EntityHuman extends EntityLiving {
@@ -27,7 +27,7 @@ index 2b7aa9e69..f6db5de1c 100644
  
          static final int[] a = new int[EnumDirection.values().length];
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index bf80c4644..93eb7e728 100644
+index bf80c4644bc9f6f22a35c7e9418251ac7f486808..93eb7e7287ea602dd8d5f34b946777972f34fe5c 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
 @@ -356,7 +356,25 @@ public class WorldServer extends World implements IAsyncTaskHandler {
@@ -67,6 +67,3 @@ index bf80c4644..93eb7e728 100644
      }
  
      protected void h() {
--- 
-2.38.1.windows.1
-

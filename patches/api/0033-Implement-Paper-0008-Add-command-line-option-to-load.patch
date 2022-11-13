@@ -1,4 +1,4 @@
-From ed718caa02300a1f75dcf7e131884b709f6a6034 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Jason Penilla <11360596+jpenilla@users.noreply.github.com>
 Date: Tue, 18 May 2021 14:39:44 -0700
 Subject: [PATCH] Implement [Paper-0008] Add command line option to load extra
@@ -7,7 +7,7 @@ Subject: [PATCH] Implement [Paper-0008] Add command line option to load extra
 ex: java -jar paperclip.jar nogui -add-plugin=/path/to/plugin.jar -add-plugin=/path/to/another/plugin_jar.jar
 
 diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
-index a7b8c8f5..5daf5196 100644
+index a7b8c8f5e98eb362585a981f47326e3b2d5f8067..5daf51962486195d8f30c5a5a9ba5b2fcb2429eb 100644
 --- a/src/main/java/org/bukkit/Bukkit.java
 +++ b/src/main/java/org/bukkit/Bukkit.java
 @@ -42,6 +42,7 @@ import org.bukkit.generator.ChunkGenerator;
@@ -42,7 +42,7 @@ index a7b8c8f5..5daf5196 100644
       * Gets the name of this server implementation.
       *
 diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
-index 7f5d714d..aaaa3366 100644
+index 7f5d714d48de47a281f2458f98a4934d6a0cb111..aaaa3366a994561ce65784243b62dcff7b031fc6 100644
 --- a/src/main/java/org/bukkit/Server.java
 +++ b/src/main/java/org/bukkit/Server.java
 @@ -44,6 +44,7 @@ import org.bukkit.plugin.messaging.PluginMessageRecipient;
@@ -75,7 +75,7 @@ index 7f5d714d..aaaa3366 100644
       * Gets the name of this server implementation.
       *
 diff --git a/src/main/java/org/bukkit/plugin/SimplePluginManager.java b/src/main/java/org/bukkit/plugin/SimplePluginManager.java
-index ce9839ec..17d5aa2d 100644
+index ce9839ec73e7ca668f1c920ddcd23fdeacd67a6a..17d5aa2de8ee814382f126eb908502f72f282340 100644
 --- a/src/main/java/org/bukkit/plugin/SimplePluginManager.java
 +++ b/src/main/java/org/bukkit/plugin/SimplePluginManager.java
 @@ -36,6 +36,7 @@ import com.google.common.collect.ImmutableSet;
@@ -181,7 +181,7 @@ index ce9839ec..17d5aa2d 100644
                  }
              }
 diff --git a/src/main/java/org/bukkit/plugin/java/JavaPluginLoader.java b/src/main/java/org/bukkit/plugin/java/JavaPluginLoader.java
-index b057b053..725fed92 100644
+index b057b053bb638c2746db0f14293453e990259618..725fed92f6497fc6d7b805b0a55aeb2416c0ba5f 100644
 --- a/src/main/java/org/bukkit/plugin/java/JavaPluginLoader.java
 +++ b/src/main/java/org/bukkit/plugin/java/JavaPluginLoader.java
 @@ -75,7 +75,7 @@ public final class JavaPluginLoader implements PluginLoader {
@@ -193,6 +193,3 @@ index b057b053..725fed92 100644
          final File dataFolder = new File(parentFile, description.getName());
          @SuppressWarnings("deprecation")
          final File oldDataFolder = new File(parentFile, description.getRawName());
--- 
-2.38.1.windows.1
-

@@ -1,11 +1,11 @@
-From 6fa9c355faa04278f7361ca3189e5f2357be5dd8 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Thinkofdeath <thinkofdeath@spigotmc.org>
 Date: Mon, 28 Mar 2016 15:41:31 -0700
 Subject: [PATCH] Allow large packets for 1.7 clients by Thinkofdeath
 
 
 diff --git a/src/main/java/net/minecraft/server/PacketDataSerializer.java b/src/main/java/net/minecraft/server/PacketDataSerializer.java
-index 60e6b06c7..7770c9ee1 100644
+index 60e6b06c724a48f5b634f88577a1002fa3c03502..7770c9ee11a439a4fd7f951a66ab12d2ce96e9ff 100644
 --- a/src/main/java/net/minecraft/server/PacketDataSerializer.java
 +++ b/src/main/java/net/minecraft/server/PacketDataSerializer.java
 @@ -23,6 +23,7 @@ import java.nio.channels.ScatteringByteChannel;
@@ -49,7 +49,7 @@ index 60e6b06c7..7770c9ee1 100644
      public byte[]readByteArray(int limit) {
 diff --git a/src/main/java/net/techcable/tacospigot/CompatHacks.java b/src/main/java/net/techcable/tacospigot/CompatHacks.java
 new file mode 100644
-index 000000000..6ebc9c89c
+index 0000000000000000000000000000000000000000..6ebc9c89cf27ec2bcfaacc4b28068e21dda273d4
 --- /dev/null
 +++ b/src/main/java/net/techcable/tacospigot/CompatHacks.java
 @@ -0,0 +1,10 @@
@@ -64,6 +64,3 @@ index 000000000..6ebc9c89c
 +    }
 +}
 \ No newline at end of file
--- 
-2.38.1.windows.1
-

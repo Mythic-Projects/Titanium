@@ -1,11 +1,11 @@
-From 8eaff7af50f599d516ba0336e23ce519f4fd4734 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: BillyGalbreath <blake.galbreath@gmail.com>
 Date: Sun, 26 Jun 2022 01:10:05 -0500
 Subject: [PATCH] Implement [Purpur-0290] Remove Timings by BillyGalbreath
 
 
 diff --git a/src/main/java/co/aikar/timings/SpigotTimings.java b/src/main/java/co/aikar/timings/SpigotTimings.java
-index b3cafafcb..c2f9c4240 100644
+index b3cafafcbe92d1896dfd6925ee611d2ca6120f0a..c2f9c4240c9bbdf00ee8794472b10f76fe9be8d3 100644
 --- a/src/main/java/co/aikar/timings/SpigotTimings.java
 +++ b/src/main/java/co/aikar/timings/SpigotTimings.java
 @@ -6,6 +6,7 @@ import org.bukkit.scheduler.BukkitTask;
@@ -17,7 +17,7 @@ index b3cafafcb..c2f9c4240 100644
  
      public static final Timing playerListTimer = Timings.ofSafe("Player List");
 diff --git a/src/main/java/co/aikar/timings/WorldTimingsHandler.java b/src/main/java/co/aikar/timings/WorldTimingsHandler.java
-index 9ebc710fe..68da46384 100644
+index 9ebc710fe7cebf71c130c84da2805c4314719b92..68da4638423baa981af677090fb5efd18816a63f 100644
 --- a/src/main/java/co/aikar/timings/WorldTimingsHandler.java
 +++ b/src/main/java/co/aikar/timings/WorldTimingsHandler.java
 @@ -5,6 +5,7 @@ import net.minecraft.server.World;
@@ -29,7 +29,7 @@ index 9ebc710fe..68da46384 100644
      public final Timing mobSpawn;
      public final Timing doChunkUnload;
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index 1de17cafd..58d8c9d78 100644
+index 1de17cafd0b7696d0024d40962a0e8c0f0aacf1d..58d8c9d78af5fdda9a41fe57ea27f87d3b3d146b 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
 @@ -1073,7 +1073,7 @@ public class Chunk {
@@ -51,7 +51,7 @@ index 1de17cafd..58d8c9d78 100644
  
      public BlockPosition h(BlockPosition blockposition) {
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index f56bed369..a34910099 100644
+index f56bed369ba2eb0bb8aa4d10ccd28250bdcce33a..a349100994125bb1e3e1f5ca64c329f62588f56f 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
 @@ -162,7 +162,7 @@ public class ChunkProviderServer implements IChunkProvider {
@@ -85,7 +85,7 @@ index f56bed369..a34910099 100644
                  }
  
 diff --git a/src/main/java/net/minecraft/server/ChunkRegionLoader.java b/src/main/java/net/minecraft/server/ChunkRegionLoader.java
-index 7889b91e7..32b584440 100644
+index 7889b91e705fcd1b221d0156e08b1dafe28e5eab..32b584440e348e9474d63aa5ad1b4aab41fbb131 100644
 --- a/src/main/java/net/minecraft/server/ChunkRegionLoader.java
 +++ b/src/main/java/net/minecraft/server/ChunkRegionLoader.java
 @@ -44,9 +44,9 @@ public class ChunkRegionLoader implements IChunkLoader, IAsyncChunkSaver {
@@ -141,7 +141,7 @@ index 7889b91e7..32b584440 100644
          // return chunk; // CraftBukkit
      }
 diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
-index 4f0492bf0..17adad63f 100644
+index 4f0492bf0a62fec3221766606737ff9af4404a7e..17adad63f5032edb20a6073ba51ac5169e1fb019 100644
 --- a/src/main/java/net/minecraft/server/DedicatedServer.java
 +++ b/src/main/java/net/minecraft/server/DedicatedServer.java
 @@ -438,7 +438,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
@@ -163,7 +163,7 @@ index 4f0492bf0..17adad63f 100644
  
      public boolean ae() {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 9027f5bda..6e663d52c 100644
+index 9027f5bda44136bf105352accaedce36f4e8a53a..6e663d52c006c62c972b73fa90c5744d014bc55c 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -827,7 +827,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
@@ -322,7 +322,7 @@ index 9027f5bda..6e663d52c 100644
          this.methodProfiler.b();
      }
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 30358c611..c74ca9b79 100644
+index 30358c6116efab77fb112bc9aa9e920099732750..c74ca9b791637fc1111d486e5c2436ed85c1264a 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -1219,7 +1219,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
@@ -362,7 +362,7 @@ index 30358c611..c74ca9b79 100644
          // CraftBukkit end
      }
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index d05cedaec..87b92bd3c 100644
+index d05cedaecbbb0fae77c1bfc2ccf9929c06c3c9d1..87b92bd3cc3ab603df80056480e3124d20961ae2 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -184,6 +184,7 @@ public abstract class World implements IBlockAccess {
@@ -488,7 +488,7 @@ index d05cedaec..87b92bd3c 100644
                      entity.ak();
                  } else {
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 2283264bd..7a972a8ad 100644
+index 2283264bdd8b890d6cea5c7a03ec5c1fae5e7e7e..7a972a8adbd0616484ba3680b44f5ed0fb02e253 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
 @@ -231,13 +231,13 @@ public class WorldServer extends World implements IAsyncTaskHandler {
@@ -627,7 +627,7 @@ index 2283264bd..7a972a8ad 100644
                  this.methodProfiler.b();
                  this.V.clear();
 diff --git a/src/main/java/net/titanium/config/SpigotConfig.java b/src/main/java/net/titanium/config/SpigotConfig.java
-index dd47b50c5..a9dddef60 100644
+index dd47b50c567b8dd12938623b8fb9d7192ee26dc3..a9dddef6070939893b6a4dad5e3e2abdc4f65e41 100644
 --- a/src/main/java/net/titanium/config/SpigotConfig.java
 +++ b/src/main/java/net/titanium/config/SpigotConfig.java
 @@ -161,49 +161,6 @@ public class SpigotConfig extends TitaniumConfigSection {
@@ -681,7 +681,7 @@ index dd47b50c5..a9dddef60 100644
  
      public static class Stats extends TitaniumConfigSection {
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
-index 19cdb459e..e050c4a75 100644
+index 19cdb459e3f3474294bdc006b0370d58fa5df9a3..e050c4a7504bf61ec9e180bfcc82632f3202f6c1 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 @@ -286,11 +286,11 @@ public class CraftWorld implements World {
@@ -699,7 +699,7 @@ index 19cdb459e..e050c4a75 100644
          world.chunkProviderServer.unloadQueue.remove(key);
          return chunk != null;
 diff --git a/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOProvider.java b/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOProvider.java
-index 1178ad7f7..c7e2b561f 100644
+index 1178ad7f7b7eda10917a3f92b400c788543d0312..c7e2b561f29fc38d10e5a3bd4447fb5d882bd685 100644
 --- a/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOProvider.java
 +++ b/src/main/java/org/bukkit/craftbukkit/chunkio/ChunkIOProvider.java
 @@ -49,9 +49,9 @@ class ChunkIOProvider implements AsynchronousExecutor.CallBackProvider<QueuedChu
@@ -715,7 +715,7 @@ index 1178ad7f7..c7e2b561f 100644
  
          Server server = queuedChunk.provider.world.getServer();
 diff --git a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftTask.java b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftTask.java
-index 44cbcdac8..8aec605a0 100644
+index 44cbcdac82d11f23986676b3ca29c05e98ec80c3..8aec605a0979ffc26143874bcc2922e9ab552a17 100644
 --- a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftTask.java
 +++ b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftTask.java
 @@ -60,9 +60,9 @@ public class CraftTask implements BukkitTask, Runnable { // Spigot
@@ -731,7 +731,7 @@ index 44cbcdac8..8aec605a0 100644
  
      long getPeriod() {
 diff --git a/src/main/java/org/spigotmc/ActivationRange.java b/src/main/java/org/spigotmc/ActivationRange.java
-index 3f10502c5..8b5b679d6 100644
+index 3f10502c5c77de15777bafd5107b28c37a0da2a2..8b5b679d61b7105edb8e2cb4035fbc5b1fab2073 100644
 --- a/src/main/java/org/spigotmc/ActivationRange.java
 +++ b/src/main/java/org/spigotmc/ActivationRange.java
 @@ -101,7 +101,7 @@ public class ActivationRange
@@ -775,7 +775,7 @@ index 3f10502c5..8b5b679d6 100644
      }
  }
 diff --git a/src/main/java/org/spigotmc/AntiXray.java b/src/main/java/org/spigotmc/AntiXray.java
-index da1563309..3d9021bc8 100644
+index da156330971fa2d86fcb3d4490b5300ba149dc7c..3d9021bc8083af5092a78000ad7dabc9e869abb0 100644
 --- a/src/main/java/org/spigotmc/AntiXray.java
 +++ b/src/main/java/org/spigotmc/AntiXray.java
 @@ -107,9 +107,9 @@ public class AntiXray
@@ -802,6 +802,3 @@ index da1563309..3d9021bc8 100644
          }
      }
  
--- 
-2.38.1.windows.1
-

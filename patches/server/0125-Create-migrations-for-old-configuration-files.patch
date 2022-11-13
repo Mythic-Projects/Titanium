@@ -1,11 +1,11 @@
-From df20391502d0b86fb9e4de345b230e6e5e25082a Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 16 Jun 2022 23:40:42 +0200
 Subject: [PATCH] Create migrations for old configuration files
 
 
 diff --git a/src/main/java/net/titanium/config/LegacyConfigHelper.java b/src/main/java/net/titanium/config/LegacyConfigHelper.java
-index b4a4615d8..8241ba8b6 100644
+index b4a4615d863899c930f1d08dccbaae991d8bab6a..8241ba8b61af334f4b81c228c47cdb0681cc5324 100644
 --- a/src/main/java/net/titanium/config/LegacyConfigHelper.java
 +++ b/src/main/java/net/titanium/config/LegacyConfigHelper.java
 @@ -1,13 +1,7 @@
@@ -75,7 +75,7 @@ index b4a4615d8..8241ba8b6 100644
  }
 diff --git a/src/main/java/net/titanium/config/MigrationHelper.java b/src/main/java/net/titanium/config/MigrationHelper.java
 new file mode 100644
-index 000000000..047d6fbf4
+index 0000000000000000000000000000000000000000..047d6fbf48e59587596fb6bd1b3de38ab1b5f6e3
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/MigrationHelper.java
 @@ -0,0 +1,122 @@
@@ -202,7 +202,7 @@ index 000000000..047d6fbf4
 +
 +}
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 4b7df8f07..065b8aa4e 100644
+index 4b7df8f07ed8e91a34f363afb73190a5b66e0d9a..065b8aa4ec7f33a65aaae261dbabe81638d6890a 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -9,7 +9,10 @@ import eu.okaeri.configs.annotation.Header;
@@ -299,7 +299,7 @@ index 4b7df8f07..065b8aa4e 100644
 +
  }
 diff --git a/src/main/java/net/titanium/config/TitaniumConfigSection.java b/src/main/java/net/titanium/config/TitaniumConfigSection.java
-index 3ea4cae2f..1d9af7463 100644
+index 3ea4cae2f9ea1d7423865bcd3ddb4a4600205eac..1d9af7463408488d1650c38cab62b243a949782c 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfigSection.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfigSection.java
 @@ -3,8 +3,13 @@ package net.titanium.config;
@@ -371,6 +371,3 @@ index 3ea4cae2f..1d9af7463 100644
 +    }
 +
  }
--- 
-2.38.1.windows.1
-

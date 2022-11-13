@@ -1,4 +1,4 @@
-From b831906d7950c1df6dc9977b1e65fd94432108c1 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Himing <mhiming@gmail.com>
 Date: Sat, 18 Jun 2022 12:00:37 +0200
 Subject: [PATCH] Implement [Paper-0196] Fix block break desync by Michael
@@ -7,7 +7,7 @@ Subject: [PATCH] Implement [Paper-0196] Fix block break desync by Michael
 Co-authored-by: Peridot <peridot491@protonmail.com>
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 5e2eec676..30358c611 100644
+index 5e2eec676c95f4963e9cb2d3a98e49bdd56cbe08..30358c6116efab77fb112bc9aa9e920099732750 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -18,6 +18,7 @@ import java.util.Queue;
@@ -38,7 +38,7 @@ index 5e2eec676..30358c611 100644
              } else {
                  if (packetplayinblockdig.c() == PacketPlayInBlockDig.EnumPlayerDigType.START_DESTROY_BLOCK) {
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index b67970d70..2c268d232 100644
+index b67970d7037091a2e6a31f37debe8ab2d2f18d98..2c268d2327ded4063c0065521612822af4e64566 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -87,11 +87,14 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -57,6 +57,3 @@ index b67970d70..2c268d232 100644
          public boolean tickFluids = true;
  
      }
--- 
-2.38.1.windows.1
-

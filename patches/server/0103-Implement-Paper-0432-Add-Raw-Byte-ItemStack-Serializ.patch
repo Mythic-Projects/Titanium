@@ -1,4 +1,4 @@
-From c05e621487a5acda978a23ed968f67af63add2f0 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Mariell Hoversholm <proximyst@proximyst.com>
 Date: Thu, 30 Apr 2020 16:56:54 +0200
 Subject: [PATCH] Implement [Paper-0432] Add Raw Byte ItemStack Serialization
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0432] Add Raw Byte ItemStack Serialization
 
 
 diff --git a/src/main/java/net/minecraft/server/NBTCompressedStreamTools.java b/src/main/java/net/minecraft/server/NBTCompressedStreamTools.java
-index b2d52540d..0726d17ea 100644
+index b2d52540dbaf61b1f3bccd1b3e71435cb6d9a4ee..0726d17ea4c4c76313b131261f52bf0f665f0b1a 100644
 --- a/src/main/java/net/minecraft/server/NBTCompressedStreamTools.java
 +++ b/src/main/java/net/minecraft/server/NBTCompressedStreamTools.java
 @@ -14,6 +14,7 @@ import java.util.zip.GZIPOutputStream;
@@ -26,7 +26,7 @@ index b2d52540d..0726d17ea 100644
          DataOutputStream dataoutputstream = new DataOutputStream(new BufferedOutputStream(new GZIPOutputStream(outputstream)));
  
 diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java
-index 23f05f4db..6229ec532 100644
+index 23f05f4db84237a3f6477fd26e7fd731b742aeca..6229ec5329e0806eb16ddb2f0fe54c8e7b939ac9 100644
 --- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java
 +++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java
 @@ -90,7 +90,7 @@ public final class CraftItemStack extends ItemStack {
@@ -39,7 +39,7 @@ index 23f05f4db..6229ec532 100644
      /**
       * Mirror
 diff --git a/src/main/java/org/bukkit/craftbukkit/util/CraftMagicNumbers.java b/src/main/java/org/bukkit/craftbukkit/util/CraftMagicNumbers.java
-index 589dba72d..573e375dc 100644
+index 589dba72db8a20235472a59f02412cb1e73ccb93..573e375dcf702711eed2391940d1d0cc8919510b 100644
 --- a/src/main/java/org/bukkit/craftbukkit/util/CraftMagicNumbers.java
 +++ b/src/main/java/org/bukkit/craftbukkit/util/CraftMagicNumbers.java
 @@ -143,4 +143,34 @@ public final class CraftMagicNumbers implements UnsafeValues {
@@ -77,6 +77,3 @@ index 589dba72d..573e375dc 100644
 +    }
 +    // Paper end
  }
--- 
-2.38.1.windows.1
-

@@ -1,4 +1,4 @@
-From 94385fcf7f942e874d08d58d0634733fe5ffd5af Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Tue, 8 Mar 2016 23:25:45 -0500
 Subject: [PATCH] Implement [Taco-0013] Option to disable Scoreboard for non
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Taco-0013] Option to disable Scoreboard for non
 
 
 diff --git a/src/main/java/net/minecraft/server/CommandScoreboard.java b/src/main/java/net/minecraft/server/CommandScoreboard.java
-index 27d08a7de..fdbf259a7 100644
+index 27d08a7de54de062041a107490a9d4684872ec8b..fdbf259a79954dab90938c16404df493b1618fb3 100644
 --- a/src/main/java/net/minecraft/server/CommandScoreboard.java
 +++ b/src/main/java/net/minecraft/server/CommandScoreboard.java
 @@ -471,6 +471,7 @@ public class CommandScoreboard extends CommandAbstract {
@@ -18,7 +18,7 @@ index 27d08a7de..fdbf259a7 100644
  
                          if (scoreboard.addPlayerToTeam(s2, s)) {
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index 9077f53ac..dbd2186b3 100644
+index 9077f53ac4bcd291970255f23ca4f49fffdbb502..dbd2186b30e770b59d9e7e112ca78c4011c2d3d3 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
 @@ -1898,6 +1898,7 @@ public abstract class EntityLiving extends Entity {
@@ -30,7 +30,7 @@ index 9077f53ac..dbd2186b3 100644
      }
  
 diff --git a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
-index 48343b8ba..18aa8c7c7 100644
+index 48343b8ba5d4af4b9b7c94fb259da859f2392d1c..18aa8c7c7affe85a6d5ababa75e6f9929ea2e9b0 100644
 --- a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
 +++ b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
 @@ -41,4 +41,7 @@ public class TacoSpigotWorldConfig extends TitaniumConfigSection {
@@ -41,6 +41,3 @@ index 48343b8ba..18aa8c7c7 100644
 +    public boolean allowNonPlayerEntitiesOnScoreboard = true;
 +
  }
--- 
-2.38.1.windows.1
-

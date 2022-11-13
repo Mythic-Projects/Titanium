@@ -1,4 +1,4 @@
-From 60aeb9a2e1b5a8be812031df3f895d78a15c0c07 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 23 May 2022 21:15:55 +0200
 Subject: [PATCH] Implement [PandaSpigot-0011] Allow controlled flushing for
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [PandaSpigot-0011] Allow controlled flushing for
 
 
 diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
-index 361315f5f..effff01a1 100644
+index 361315f5ff2c0050c8df8885b0d4633444c6eeb7..effff01a1ef8f5f32844430264ff1a27d374c0b6 100644
 --- a/src/main/java/net/minecraft/server/NetworkManager.java
 +++ b/src/main/java/net/minecraft/server/NetworkManager.java
 @@ -79,6 +79,38 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
@@ -113,6 +113,3 @@ index 361315f5f..effff01a1 100644
              }
          }
          return true;
--- 
-2.38.1.windows.1
-

@@ -1,11 +1,11 @@
-From 81311b1b0a479004e7084ce454bf5b99a58bf425 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Tue, 14 Jun 2022 20:55:47 +0200
 Subject: [PATCH] Update libraries
 
 
 diff --git a/build.gradle b/build.gradle
-index 2cd9f0ed7..b8dd740db 100644
+index 2cd9f0ed7aae8a7083ee68ee3e334820086e9769..b8dd740dbea9ac880f7820bfc01eab54078b2bfb 100644
 --- a/build.gradle
 +++ b/build.gradle
 @@ -8,20 +8,20 @@ dependencies {
@@ -45,7 +45,7 @@ index 2cd9f0ed7..b8dd740db 100644
      // Titanium libraries end
  
 diff --git a/src/main/java/net/minecraft/server/LoginListener.java b/src/main/java/net/minecraft/server/LoginListener.java
-index 72b82e7f8..0e5f1ea39 100644
+index 72b82e7f84c555b777682aeee20116607e13595e..0e5f1ea39c26a0735a4fafaab240cc69882e8134 100644
 --- a/src/main/java/net/minecraft/server/LoginListener.java
 +++ b/src/main/java/net/minecraft/server/LoginListener.java
 @@ -213,7 +213,7 @@ public class LoginListener implements PacketLoginInListener, IUpdatePlayerListBo
@@ -57,6 +57,3 @@ index 72b82e7f8..0e5f1ea39 100644
                          if (LoginListener.this.i != null) {
                              // CraftBukkit start - fire PlayerPreLoginEvent
                              if (!networkManager.g()) {
--- 
-2.38.1.windows.1
-

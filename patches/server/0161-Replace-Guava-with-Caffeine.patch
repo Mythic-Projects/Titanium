@@ -1,11 +1,11 @@
-From c523a757a87164ed01a7630855ab903170d1ee85 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 14 Sep 2022 21:23:44 +0200
 Subject: [PATCH] Replace Guava with Caffeine
 
 
 diff --git a/build.gradle b/build.gradle
-index 129b6c415..919f494a3 100644
+index 129b6c415800222c96b55dfb063c503f0261ce36..919f494a34bae40ab81274a3ab3265204f90b0f9 100644
 --- a/build.gradle
 +++ b/build.gradle
 @@ -29,6 +29,7 @@ dependencies {
@@ -17,7 +17,7 @@ index 129b6c415..919f494a3 100644
  
      testImplementation 'junit:junit:4.13.2' // Titanium - Updated junit to 4.13.2
 diff --git a/src/main/java/net/minecraft/server/TileEntitySkull.java b/src/main/java/net/minecraft/server/TileEntitySkull.java
-index 58014c5f1..9e0e4fdfa 100644
+index 58014c5f142abf72fcf6a7164872bbe7d7bb9d18..9e0e4fdfaed384cafa9faba5b93c218870a36229 100644
 --- a/src/main/java/net/minecraft/server/TileEntitySkull.java
 +++ b/src/main/java/net/minecraft/server/TileEntitySkull.java
 @@ -1,5 +1,8 @@
@@ -58,7 +58,7 @@ index 58014c5f1..9e0e4fdfa 100644
                                  @Override
                                  public void run() {
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 59dc7d986..a50fb6477 100644
+index 59dc7d98642c159e007d1fd2ee80d0afec3937f3..a50fb6477ba6b5e576e0bfb73a267224372925e4 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -166,7 +166,7 @@ public final class CraftServer implements Server {
@@ -95,6 +95,3 @@ index 59dc7d986..a50fb6477 100644
          }
  
          return result;
--- 
-2.38.1.windows.1
-

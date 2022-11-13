@@ -1,11 +1,11 @@
-From dc5f7deac01677f0e57f42b60bebb07999dd0ff5 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Tue, 7 Jun 2022 14:57:10 +0200
 Subject: [PATCH] Update gson and guava
 
 
 diff --git a/src/main/java/net/minecraft/server/BaseBlockPosition.java b/src/main/java/net/minecraft/server/BaseBlockPosition.java
-index a685e0812..e7cf210b5 100644
+index a685e081258deb8c2b19cf5236fbbb43e0bad64d..e7cf210b5882796b3332515190bf3ef0dc2628a2 100644
 --- a/src/main/java/net/minecraft/server/BaseBlockPosition.java
 +++ b/src/main/java/net/minecraft/server/BaseBlockPosition.java
 @@ -1,5 +1,6 @@
@@ -25,7 +25,7 @@ index a685e0812..e7cf210b5 100644
  
      // Paperspigot - Signature change, Object -> BaseBlockPosition
 diff --git a/src/main/java/net/minecraft/server/BlockState.java b/src/main/java/net/minecraft/server/BlockState.java
-index 3cada5afc..5aaf81052 100644
+index 3cada5afc0542db3758e24dbadd9b24c11aa76f1..5aaf81052585c7a3f09d04d824aa2301a1a7c2a5 100644
 --- a/src/main/java/net/minecraft/server/BlockState.java
 +++ b/src/main/java/net/minecraft/server/BlockState.java
 @@ -1,5 +1,6 @@
@@ -45,7 +45,7 @@ index 3cada5afc..5aaf81052 100644
  
      public boolean equals(Object object) {
 diff --git a/src/main/java/net/minecraft/server/BlockStateList.java b/src/main/java/net/minecraft/server/BlockStateList.java
-index 6559cc502..4b8d232a7 100644
+index 6559cc50224064b6f69f389ef62978627292f369..4b8d232a73acfc1160c3fbe487a63cb0ebf16e0f 100644
 --- a/src/main/java/net/minecraft/server/BlockStateList.java
 +++ b/src/main/java/net/minecraft/server/BlockStateList.java
 @@ -2,6 +2,7 @@ package net.minecraft.server;
@@ -66,7 +66,7 @@ index 6559cc502..4b8d232a7 100644
  
      static class BlockData extends BlockDataAbstract {
 diff --git a/src/main/java/net/minecraft/server/BlockTripwireHook.java b/src/main/java/net/minecraft/server/BlockTripwireHook.java
-index 0ad4a20f3..625d1d53b 100644
+index 0ad4a20f3cb0de792c7e80fba6d16a0df7e97b01..625d1d53bebe546ac959472591f7512c10fc588c 100644
 --- a/src/main/java/net/minecraft/server/BlockTripwireHook.java
 +++ b/src/main/java/net/minecraft/server/BlockTripwireHook.java
 @@ -1,5 +1,6 @@
@@ -86,7 +86,7 @@ index 0ad4a20f3..625d1d53b 100644
  
                  boolean flag7 = !((Boolean) iblockdata2.get(BlockTripwire.DISARMED)).booleanValue();
 diff --git a/src/main/java/net/minecraft/server/EntitySlice.java b/src/main/java/net/minecraft/server/EntitySlice.java
-index ae6c52f2c..2aee73def 100644
+index ae6c52f2cc72aa63458ce352389616baa097d8ff..2aee73def8e134112a7703148b267faa816376ab 100644
 --- a/src/main/java/net/minecraft/server/EntitySlice.java
 +++ b/src/main/java/net/minecraft/server/EntitySlice.java
 @@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
@@ -116,7 +116,7 @@ index ae6c52f2c..2aee73def 100644
  
      public int size() {
 diff --git a/src/main/java/net/minecraft/server/PacketPlayOutPlayerInfo.java b/src/main/java/net/minecraft/server/PacketPlayOutPlayerInfo.java
-index fc5ad2911..5d28cb4e1 100644
+index fc5ad2911fda8a8270a3d3ceddd70c5f2fbbd79b..5d28cb4e1d816a4fc09aa7322096c28fa49d6276 100644
 --- a/src/main/java/net/minecraft/server/PacketPlayOutPlayerInfo.java
 +++ b/src/main/java/net/minecraft/server/PacketPlayOutPlayerInfo.java
 @@ -1,5 +1,6 @@
@@ -145,7 +145,7 @@ index fc5ad2911..5d28cb4e1 100644
      }
  
 diff --git a/src/main/java/net/minecraft/server/ShapeDetector.java b/src/main/java/net/minecraft/server/ShapeDetector.java
-index 765f8eb9d..11109bfa9 100644
+index 765f8eb9d5dc9c0d5f229dd326c1ed2d3f4d77af..11109bfa99760e56949e57abd4c1fcfc67afca23 100644
 --- a/src/main/java/net/minecraft/server/ShapeDetector.java
 +++ b/src/main/java/net/minecraft/server/ShapeDetector.java
 @@ -1,5 +1,6 @@
@@ -165,7 +165,7 @@ index 765f8eb9d..11109bfa9 100644
      }
  
 diff --git a/src/main/java/net/minecraft/server/StructureBoundingBox.java b/src/main/java/net/minecraft/server/StructureBoundingBox.java
-index d6c2aac9f..0a065f93e 100644
+index d6c2aac9f299df7d616c883e6c55c403ee19da7c..0a065f93ea21a166b4310ff1a0199dcdb36440b3 100644
 --- a/src/main/java/net/minecraft/server/StructureBoundingBox.java
 +++ b/src/main/java/net/minecraft/server/StructureBoundingBox.java
 @@ -1,5 +1,6 @@
@@ -185,7 +185,7 @@ index d6c2aac9f..0a065f93e 100644
  
      public NBTTagIntArray g() {
 diff --git a/src/main/java/net/minecraft/server/WorldGenCaves.java b/src/main/java/net/minecraft/server/WorldGenCaves.java
-index 2cdd02378..219be66a8 100644
+index 2cdd023782bd1783916cb5bd7a1a3dd80ae5ac4f..219be66a8742f0628307eb57ce7321bafa7aa7e2 100644
 --- a/src/main/java/net/minecraft/server/WorldGenCaves.java
 +++ b/src/main/java/net/minecraft/server/WorldGenCaves.java
 @@ -1,5 +1,6 @@
@@ -205,7 +205,7 @@ index 2cdd02378..219be66a8 100644
                                              if (iblockdata1.getBlock() == Blocks.GRASS || iblockdata1.getBlock() == Blocks.MYCELIUM) {
                                                  flag3 = true;
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index bb326eddf..a59c278ba 100644
+index bb326eddfca1874bae385ea43ae4855175b02e8e..a59c278ba92023728561476699ac4de0b622fb19 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -154,7 +154,7 @@ public final class CraftServer implements Server {
@@ -217,6 +217,3 @@ index bb326eddf..a59c278ba 100644
      private final EntityMetadataStore entityMetadata = new EntityMetadataStore();
      private final PlayerMetadataStore playerMetadata = new PlayerMetadataStore();
      private final WorldMetadataStore worldMetadata = new WorldMetadataStore();
--- 
-2.38.1.windows.1
-

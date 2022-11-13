@@ -1,4 +1,4 @@
-From 16bb338d54e9aaed2559630070a5b1ec9703b17b Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 23 May 2022 20:35:24 +0200
 Subject: [PATCH] Implement [PandaSpigot-0010] Optimize Network Manager and add
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [PandaSpigot-0010] Optimize Network Manager and add
 
 
 diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
-index 415b603f4..ecfbf25fd 100644
+index 415b603f41dbb438ef4d9b8812ce3ab4ba36c39d..ecfbf25fd78abd2f67fa2114a8bc4d37f3efa099 100644
 --- a/src/main/java/net/minecraft/server/NetworkManager.java
 +++ b/src/main/java/net/minecraft/server/NetworkManager.java
 @@ -18,7 +18,6 @@ import io.netty.util.concurrent.Future;
@@ -364,7 +364,7 @@ index 415b603f4..ecfbf25fd 100644
  
      // Spigot Start
 diff --git a/src/main/java/net/minecraft/server/Packet.java b/src/main/java/net/minecraft/server/Packet.java
-index fdc142b75..9ccda9433 100644
+index fdc142b75b78289f01a9e9fed6f36432624735db..9ccda94331a183d722edf1c4c093e20aa0aa0d4a 100644
 --- a/src/main/java/net/minecraft/server/Packet.java
 +++ b/src/main/java/net/minecraft/server/Packet.java
 @@ -9,4 +9,39 @@ public interface Packet<T extends PacketListener> {
@@ -408,7 +408,7 @@ index fdc142b75..9ccda9433 100644
 +
  }
 diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
-index d8b825275..0ed82a880 100644
+index d8b8252751dea04ef5277a1f12c79f082af9f698..0ed82a88094b1f07e92735435635f6e06a34fcdf 100644
 --- a/src/main/java/net/minecraft/server/ServerConnection.java
 +++ b/src/main/java/net/minecraft/server/ServerConnection.java
 @@ -62,6 +62,7 @@ public class ServerConnection {
@@ -433,6 +433,3 @@ index d8b825275..0ed82a880 100644
                      networkmanager.a((PacketListener) (new HandshakeListener(ServerConnection.this.f, networkmanager)));
                  }
              }).group((EventLoopGroup) lazyinitvar.c()).localAddress(inetaddress, i)).bind().syncUninterruptibly());
--- 
-2.38.1.windows.1
-

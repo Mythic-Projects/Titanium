@@ -1,11 +1,11 @@
-From 79120247c432eb62aaa0cfa13af56e5841e5143a Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sat, 4 Jun 2022 12:39:17 +0200
 Subject: [PATCH] Improve publishing project to maven repository
 
 
 diff --git a/build.gradle b/build.gradle
-index 45aafcce..54b518f2 100644
+index 45aafcce4ef6ae0e0fa01eba5f174a501f1a3ca0..54b518f239e325590574269dc8a5597110bcbb25 100644
 --- a/build.gradle
 +++ b/build.gradle
 @@ -31,6 +31,19 @@ task generateApiVersioningFile(type: Copy) {
@@ -28,6 +28,3 @@ index 45aafcce..54b518f2 100644
  jar {
      dependsOn generateApiVersioningFile
      from(layout.buildDirectory.file("pom.properties")) {
--- 
-2.38.1.windows.1
-

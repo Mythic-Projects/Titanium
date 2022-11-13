@@ -1,4 +1,4 @@
-From 16b650d9539e998063b46095573bb0ebde4cc1ee Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Thu, 31 Mar 2016 19:17:58 -0400
 Subject: [PATCH] Implement [Paper-0101] Do not load chunks for light check by
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0101] Do not load chunks for light check by
 
 
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 2baed2815..7da9e9281 100644
+index 2baed2815a98c99220e40b2d2daea0732f8dbbe3..7da9e928145d420fbaff552ac97c242e947b2595 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -685,6 +685,7 @@ public abstract class World implements IBlockAccess {
@@ -17,6 +17,3 @@ index 2baed2815..7da9e9281 100644
  
              return this.getChunkAtWorldCoords(blockposition).a(blockposition, 0);
          }
--- 
-2.38.1.windows.1
-

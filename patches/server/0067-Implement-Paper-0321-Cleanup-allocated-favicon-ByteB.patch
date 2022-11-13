@@ -1,11 +1,11 @@
-From 9880be9bd7fa5612005a01d0781c567393594491 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 23 May 2022 22:12:19 +0200
 Subject: [PATCH] Implement [Paper-0321] Cleanup allocated favicon ByteBuf
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index f1107aff8..fddd28c52 100644
+index f1107aff81f72d978f66a7d5f6d553c4a4e44f8a..fddd28c52ba003157e441b5eefb4eeb2a9cc026b 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -678,6 +678,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
@@ -32,6 +32,3 @@ index f1107aff8..fddd28c52 100644
              }
          }
  
--- 
-2.38.1.windows.1
-

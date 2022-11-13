@@ -1,4 +1,4 @@
-From 03324cbdd7838fda0d638297ebcf9d45ab8f2553 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 23 May 2022 22:24:49 +0200
 Subject: [PATCH] Implement [PandaSpigot-0028] Avoid blocking on Network
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [PandaSpigot-0028] Avoid blocking on Network
 
 
 diff --git a/src/main/java/net/minecraft/server/ServerConnection.java b/src/main/java/net/minecraft/server/ServerConnection.java
-index 91c44724f..50afd4a6b 100644
+index 91c44724f8cbe65bf46dd5ddf67f5528956ca54b..50afd4a6b0994798d0eb9b65ffe193d80a5f3d25 100644
 --- a/src/main/java/net/minecraft/server/ServerConnection.java
 +++ b/src/main/java/net/minecraft/server/ServerConnection.java
 @@ -63,6 +63,16 @@ public class ServerConnection {
@@ -48,6 +48,3 @@ index 91c44724f..50afd4a6b 100644
              // Spigot Start
              // This prevents players from 'gaming' the server, and strategically relogging to increase their position in the tick order
              if ( TitaniumConfig.get().spigot.settings.playerShuffle > 0 && MinecraftServer.currentTick % TitaniumConfig.get().spigot.settings.playerShuffle == 0 )
--- 
-2.38.1.windows.1
-

@@ -1,11 +1,11 @@
-From ff797e7101646eb231925e0261c1b20eb41fe615 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 23 Sep 2022 21:49:49 +0200
 Subject: [PATCH] Option to disable statistics and achievements
 
 
 diff --git a/src/main/java/net/minecraft/server/StatisticManager.java b/src/main/java/net/minecraft/server/StatisticManager.java
-index 5d6c3deac..e80e5d932 100644
+index 5d6c3deac0d16d522ac3ef793a3fea3d74f05e68..e80e5d932fb74e7ccb9310bf04e18cdc53c31c8b 100644
 --- a/src/main/java/net/minecraft/server/StatisticManager.java
 +++ b/src/main/java/net/minecraft/server/StatisticManager.java
 @@ -2,6 +2,7 @@ package net.minecraft.server;
@@ -53,7 +53,7 @@ index 5d6c3deac..e80e5d932 100644
  
          return statisticwrapper == null ? 0 : statisticwrapper.a();
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 422b1d5e1..49021bd85 100644
+index 422b1d5e14b8161ef1849d4fcc196697b33433e4..49021bd8519b66ff3d3bbf3c9f53cd514a91acd9 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -102,6 +102,11 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -68,6 +68,3 @@ index 422b1d5e1..49021bd85 100644
      }
  
      @Comment("Whether saving of fireworks and arrows should be disabled.")
--- 
-2.38.1.windows.1
-

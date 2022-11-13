@@ -1,4 +1,4 @@
-From ff69573f45a6d55381999d7d72f58f8fd717d745 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Thu, 12 May 2022 11:02:40 +0200
 Subject: [PATCH] Backport [Paper-0180] Server Tick Events
@@ -6,7 +6,7 @@ Subject: [PATCH] Backport [Paper-0180] Server Tick Events
 
 diff --git a/src/main/java/com/destroystokyo/paper/event/server/ServerTickEndEvent.java b/src/main/java/com/destroystokyo/paper/event/server/ServerTickEndEvent.java
 new file mode 100644
-index 00000000..a61737ee
+index 0000000000000000000000000000000000000000..a61737ee114b7c0c67163e1298da4fd7f45555d6
 --- /dev/null
 +++ b/src/main/java/com/destroystokyo/paper/event/server/ServerTickEndEvent.java
 @@ -0,0 +1,56 @@
@@ -69,7 +69,7 @@ index 00000000..a61737ee
 \ No newline at end of file
 diff --git a/src/main/java/com/destroystokyo/paper/event/server/ServerTickStartEvent.java b/src/main/java/com/destroystokyo/paper/event/server/ServerTickStartEvent.java
 new file mode 100644
-index 00000000..6aa0d1fe
+index 0000000000000000000000000000000000000000..6aa0d1febde1498b75dcd858035ed2dba9b1a3e5
 --- /dev/null
 +++ b/src/main/java/com/destroystokyo/paper/event/server/ServerTickStartEvent.java
 @@ -0,0 +1,29 @@
@@ -102,6 +102,3 @@ index 00000000..6aa0d1fe
 +        return handlers;
 +    }
 +}
--- 
-2.36.0.windows.1
-

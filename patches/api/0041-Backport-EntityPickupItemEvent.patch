@@ -1,4 +1,4 @@
-From ab2b87b3096a6fdc230cba31e1558038a8aa4bce Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 21 Sep 2022 01:18:09 +0200
 Subject: [PATCH] Backport EntityPickupItemEvent
@@ -6,7 +6,7 @@ Subject: [PATCH] Backport EntityPickupItemEvent
 
 diff --git a/src/main/java/org/bukkit/event/entity/EntityPickupItemEvent.java b/src/main/java/org/bukkit/event/entity/EntityPickupItemEvent.java
 new file mode 100644
-index 00000000..88d9deb7
+index 0000000000000000000000000000000000000000..88d9deb75108bb4a1191cdbf13517c1896f2bb61
 --- /dev/null
 +++ b/src/main/java/org/bukkit/event/entity/EntityPickupItemEvent.java
 @@ -0,0 +1,71 @@
@@ -82,7 +82,7 @@ index 00000000..88d9deb7
 +
 +}
 diff --git a/src/main/java/org/bukkit/event/player/PlayerPickupItemEvent.java b/src/main/java/org/bukkit/event/player/PlayerPickupItemEvent.java
-index dfba8163..15dc46fe 100644
+index dfba816313750dc62fd7d70f929f7d79a3bf61fc..15dc46feb8df5ead5e037fa6492a7b09b5375320 100644
 --- a/src/main/java/org/bukkit/event/player/PlayerPickupItemEvent.java
 +++ b/src/main/java/org/bukkit/event/player/PlayerPickupItemEvent.java
 @@ -1,13 +1,18 @@
@@ -104,6 +104,3 @@ index dfba8163..15dc46fe 100644
  public class PlayerPickupItemEvent extends PlayerEvent implements Cancellable {
      private static final HandlerList handlers = new HandlerList();
      private final Item item;
--- 
-2.38.1.windows.1
-

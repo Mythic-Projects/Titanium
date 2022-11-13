@@ -1,4 +1,4 @@
-From 0c8424c4296fea82e8550b4846e10b5aa8c8eeed Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 11 May 2022 16:19:25 +0200
 Subject: [PATCH] Implement [Paper-0072] Fix Furnace cook time bug when lagging
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0072] Fix Furnace cook time bug when lagging
 
 
 diff --git a/src/main/java/net/minecraft/server/TileEntityFurnace.java b/src/main/java/net/minecraft/server/TileEntityFurnace.java
-index 0e3f35a6e..a284b3cd2 100644
+index 0e3f35a6eee539511f996687d36e5bfe160c1751..a284b3cd2e185447c23734111266ddb1696d5a9c 100644
 --- a/src/main/java/net/minecraft/server/TileEntityFurnace.java
 +++ b/src/main/java/net/minecraft/server/TileEntityFurnace.java
 @@ -100,7 +100,7 @@ public class TileEntityFurnace extends TileEntityContainer implements IUpdatePla
@@ -18,6 +18,3 @@ index 0e3f35a6e..a284b3cd2 100644
              this.update();
          }
  
--- 
-2.38.1.windows.1
-

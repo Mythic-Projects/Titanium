@@ -1,4 +1,4 @@
-From 483d0e1d5e5578338de5501c9baf9b9f9da3dbe6 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: frash23 <jacob@bytesizedpacket.com>
 Date: Thu, 24 Mar 2016 04:07:04 +0100
 Subject: [PATCH] Implement [Taco-0017] Add option to stop redstone firing
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Taco-0017] Add option to stop redstone firing
 
 
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 647e4ab36..d05cedaec 100644
+index 647e4ab36dd9a12ce9db0a033b41df9199513617..d05cedaecbbb0fae77c1bfc2ccf9929c06c3c9d1 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -614,7 +614,7 @@ public abstract class World implements IBlockAccess {
@@ -19,7 +19,7 @@ index 647e4ab36..d05cedaec 100644
                      this.getServer().getPluginManager().callEvent(event);
  
 diff --git a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
-index 18aa8c7c7..8773f724e 100644
+index 18aa8c7c7affe85a6d5ababa75e6f9929ea2e9b0..8773f724ef495d09360a62126b29c388a641f15e 100644
 --- a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
 +++ b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
 @@ -26,6 +26,11 @@ public class TacoSpigotWorldConfig extends TitaniumConfigSection {
@@ -43,6 +43,3 @@ index 18aa8c7c7..8773f724e 100644
          @CustomKey("fire-InventoryMoveItemEvent")
          public boolean fireInventoryMoveItemEvent = true;
  
--- 
-2.38.1.windows.1
-

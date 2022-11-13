@@ -1,11 +1,11 @@
-From f3d2ff5adeb9283dfa47ac3a7aa5b6480474a99d Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 13 Nov 2022 06:40:00 +0100
 Subject: [PATCH] Option to disable fire ticking
 
 
 diff --git a/src/main/java/net/minecraft/server/BlockFire.java b/src/main/java/net/minecraft/server/BlockFire.java
-index d32552ff8..189ce852e 100644
+index d32552ff8904500cd27d8ca2d82e4460b631d98e..189ce852e70fa72d2c6048a8ba295e74066e0f5f 100644
 --- a/src/main/java/net/minecraft/server/BlockFire.java
 +++ b/src/main/java/net/minecraft/server/BlockFire.java
 @@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
@@ -25,7 +25,7 @@ index d32552ff8..189ce852e 100644
              if (!this.canPlace(world, blockposition)) {
                  fireExtinguished(world, blockposition); // CraftBukkit - invalid place location
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index faa2aeeab..81cc31535 100644
+index faa2aeeab3347471935ad8e7ff9bb3c3f0a6978e..2d3e9b51830a69154bec3616640a3e2cbfd55c16 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -129,6 +129,10 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -39,6 +39,3 @@ index faa2aeeab..81cc31535 100644
          public LightDetector lightDetector = new LightDetector();
  
          public static class LightDetector extends TitaniumConfigSection {
--- 
-2.38.1.windows.1
-

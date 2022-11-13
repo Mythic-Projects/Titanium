@@ -1,11 +1,11 @@
-From 6750a95d1060b22477315d7ae5b14f9383af1597 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Mon, 23 May 2022 19:47:37 +0200
 Subject: [PATCH] Fix LegacyConfigHelper
 
 
 diff --git a/src/main/java/net/titanium/config/LegacyConfigHelper.java b/src/main/java/net/titanium/config/LegacyConfigHelper.java
-index 4d197bb7b..b4a4615d8 100644
+index 4d197bb7bb63740343dc4da9ba331bfc7a459365..b4a4615d863899c930f1d08dccbaae991d8bab6a 100644
 --- a/src/main/java/net/titanium/config/LegacyConfigHelper.java
 +++ b/src/main/java/net/titanium/config/LegacyConfigHelper.java
 @@ -5,16 +5,10 @@ import java.io.File;
@@ -126,7 +126,7 @@ index 4d197bb7b..b4a4615d8 100644
  
          return dataMap;
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 05ab2e8eb..b7843b6b6 100644
+index 05ab2e8eba81b889c88168f48425f2a76a75d124..b7843b6b62a8f6c0d03efe267a826ec098920981 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -153,27 +153,27 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -163,7 +163,7 @@ index 05ab2e8eb..b7843b6b6 100644
              this.ionConfigHelper.saveSectionToFile();
          }
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index bea17770d..9bf8677db 100644
+index bea17770d0af27e64ed262cbad92a7ae226cf827..9bf8677dbcd2828b542f61fa7fffd62fb8eb2a82 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -33,6 +33,7 @@ import javax.imageio.ImageIO;
@@ -234,6 +234,3 @@ index bea17770d..9bf8677db 100644
          }
          // IonSpigot end
  
--- 
-2.38.1.windows.1
-

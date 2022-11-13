@@ -1,4 +1,4 @@
-From d266039f2dc8ba3b666abd2241c8e0ac6258535c Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 9 Apr 2021 13:54:47 +0200
 Subject: [PATCH] Implement [Migot-0009] Prevent creature spawning in unloaded
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Migot-0009] Prevent creature spawning in unloaded
 
 
 diff --git a/src/main/java/net/minecraft/server/SpawnerCreature.java b/src/main/java/net/minecraft/server/SpawnerCreature.java
-index 284f4bf2f..31a99c396 100644
+index 284f4bf2f6b7790a85d22fa1d4e5fa37f1f4aca2..31a99c39638367bcec138ab993d4d87b19cc8944 100644
 --- a/src/main/java/net/minecraft/server/SpawnerCreature.java
 +++ b/src/main/java/net/minecraft/server/SpawnerCreature.java
 @@ -73,7 +73,7 @@ public final class SpawnerCreature {
@@ -18,6 +18,3 @@ index 284f4bf2f..31a99c396 100644
                                      this.b.add(chunkCoords);
                                  }
                              }
--- 
-2.36.0.windows.1
-

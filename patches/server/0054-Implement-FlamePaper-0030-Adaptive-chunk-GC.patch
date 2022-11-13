@@ -1,11 +1,11 @@
-From 1c2eac5e2734cde751975baedde19b16608e9f41 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 22 May 2022 23:13:48 +0200
 Subject: [PATCH] Implement [FlamePaper-0030] Adaptive chunk GC
 
 
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index c17d5b554..19853ce95 100644
+index c17d5b55403eb91371cc62bd3979f8dfba75ef2b..19853ce9594e78da440168e7372793949993c737 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -78,6 +78,9 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -19,7 +19,7 @@ index c17d5b554..19853ce95 100644
          public boolean disableUnloadedChunksMovement = false;
  
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
-index 2aadafeae..46fcbc019 100644
+index 2aadafeae6c35347b1e092bab720a8264f535809..46fcbc0196900ec42aa9b7d837d1ef8ece11d8e6 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 @@ -14,6 +14,7 @@ import java.util.UUID;
@@ -48,6 +48,3 @@ index 2aadafeae..46fcbc019 100644
              chunkLoadCount = 0;
          } else if (chunkGCTickCount >= server.chunkGCPeriod && server.chunkGCPeriod > 0) {
              chunkGCTickCount = 0;
--- 
-2.38.1.windows.1
-

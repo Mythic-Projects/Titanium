@@ -1,11 +1,11 @@
-From ce61c17a1b0d28ef9eb3f1966274cb92c735a9a9 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 22 May 2022 22:11:28 +0200
 Subject: [PATCH] Use okaeri-configs for configuration
 
 
 diff --git a/src/main/java/co/aikar/timings/TimingsCommand.java b/src/main/java/co/aikar/timings/TimingsCommand.java
-index 3dba3aa1..cfb99253 100644
+index 3dba3aa17314d2d1977278c55974093c9c46148f..cfb99253f55fa5809dd0690708c9816b96192fc1 100644
 --- a/src/main/java/co/aikar/timings/TimingsCommand.java
 +++ b/src/main/java/co/aikar/timings/TimingsCommand.java
 @@ -54,11 +54,11 @@ public class TimingsCommand extends BukkitCommand {
@@ -23,7 +23,7 @@ index 3dba3aa1..cfb99253 100644
              sender.sendMessage("Disabled Timings");
              return true;
 diff --git a/src/main/java/co/aikar/timings/TimingsExport.java b/src/main/java/co/aikar/timings/TimingsExport.java
-index fe19ea00..c563513c 100644
+index fe19ea003eedfe21c6400d83430d87ddba8f5f6e..c563513c4cef1f0d626cf38efe0ad9081a35c4d3 100644
 --- a/src/main/java/co/aikar/timings/TimingsExport.java
 +++ b/src/main/java/co/aikar/timings/TimingsExport.java
 @@ -25,6 +25,7 @@ package co.aikar.timings;
@@ -99,7 +99,7 @@ index fe19ea00..c563513c 100644
      }
  
 diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
-index 8fbc8283..9adccafb 100644
+index 8fbc82833d16138914e379fef9a38c206d9cc07b..9adccafb516515db169e354f3c8908111dbb8d5f 100644
 --- a/src/main/java/org/bukkit/Bukkit.java
 +++ b/src/main/java/org/bukkit/Bukkit.java
 @@ -1166,4 +1166,8 @@ public final class Bukkit {
@@ -112,7 +112,7 @@ index 8fbc8283..9adccafb 100644
 +    }
  }
 diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
-index 1b62463a..9997c307 100644
+index 1b62463a1e18d7e35524e06e791d321d6b3823c0..9997c3079a44b05b7eefcb8a4977d4d1874074c2 100644
 --- a/src/main/java/org/bukkit/Server.java
 +++ b/src/main/java/org/bukkit/Server.java
 @@ -1,5 +1,6 @@
@@ -177,6 +177,3 @@ index 1b62463a..9997c307 100644
 +    Titanium titanium();
 +
  }
--- 
-2.36.0.windows.1
-

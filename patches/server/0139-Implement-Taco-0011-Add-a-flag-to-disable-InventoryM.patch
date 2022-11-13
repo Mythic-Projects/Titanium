@@ -1,4 +1,4 @@
-From f4e961ff3a7b68440e24f7ac4ba41c221a335f37 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Techcable <techcable@outlook.com>
 Date: Wed, 3 Feb 2016 11:27:34 -0700
 Subject: [PATCH] Implement [Taco-0011] Add a flag to disable
@@ -10,7 +10,7 @@ Some plugins offer no way to disable their IMIE listeners. (See WorldGuard-3520)
 This patch adds flag to disable InventoryMoveItemEvent for hoppers.
 
 diff --git a/src/main/java/net/minecraft/server/TileEntityHopper.java b/src/main/java/net/minecraft/server/TileEntityHopper.java
-index 2f03ff0c5..22ee98aaf 100644
+index 2f03ff0c5284a018f7d8985cc631a26afb899de7..22ee98aafe8efb92ddef662ec470166a8d98d5d4 100644
 --- a/src/main/java/net/minecraft/server/TileEntityHopper.java
 +++ b/src/main/java/net/minecraft/server/TileEntityHopper.java
 @@ -267,6 +267,10 @@ public class TileEntityHopper extends TileEntityContainer implements IHopper, IU
@@ -80,7 +80,7 @@ index 2f03ff0c5..22ee98aaf 100644
                  } else {
                      iinventory.setItem(i, itemstack1);
 diff --git a/src/main/java/net/techcable/tacospigot/HopperHelper.java b/src/main/java/net/techcable/tacospigot/HopperHelper.java
-index 58b3b7283..a8348435f 100644
+index 58b3b7283b1249d3c565bf898a3ea0a9f2b99898..a8348435f2bbc23e48344513480c6d0dec7d40f1 100644
 --- a/src/main/java/net/techcable/tacospigot/HopperHelper.java
 +++ b/src/main/java/net/techcable/tacospigot/HopperHelper.java
 @@ -4,10 +4,12 @@ import net.minecraft.server.Block;
@@ -106,7 +106,7 @@ index 58b3b7283..a8348435f 100644
 +
  }
 diff --git a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
-index e04621edc..48343b8ba 100644
+index e04621edc0cb0b256ca2f55ab18027b9f3898c26..48343b8ba5d4af4b9b7c94fb259da859f2392d1c 100644
 --- a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
 +++ b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
 @@ -1,6 +1,7 @@
@@ -129,6 +129,3 @@ index e04621edc..48343b8ba 100644
      }
  
  }
--- 
-2.38.1.windows.1
-

@@ -1,11 +1,11 @@
-From dfc1074a0231a936810c2cbf3c516c88233eee2a Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Tue, 30 Aug 2022 00:45:06 +0200
 Subject: [PATCH] Update libraries
 
 
 diff --git a/build.gradle b/build.gradle
-index 25c44bd24..129b6c415 100644
+index 25c44bd24ccb783d564dd578549e2d2b5689918a..129b6c415800222c96b55dfb063c503f0261ce36 100644
 --- a/build.gradle
 +++ b/build.gradle
 @@ -8,31 +8,27 @@ dependencies {
@@ -49,6 +49,3 @@ index 25c44bd24..129b6c415 100644
      // Titanium libraries end
  
      testImplementation 'junit:junit:4.13.2' // Titanium - Updated junit to 4.13.2
--- 
-2.38.1.windows.1
-

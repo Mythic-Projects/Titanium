@@ -1,11 +1,11 @@
-From 8a440514961c9f29054a7bf75d9e55bad1b67424 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 23 Sep 2022 23:17:20 +0200
 Subject: [PATCH] Option to disable head rotation handling
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-index 3e52ef525..d0dd62781 100644
+index 3e52ef52562dac6521cb4f305e66f773c170d924..d0dd62781b90f2e53083df8c70a015e814384c0b 100644
 --- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 +++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 @@ -221,6 +221,8 @@ public class EntityTrackerEntry {
@@ -65,7 +65,7 @@ index 3e52ef525..d0dd62781 100644
 +    // Titanium end
  }
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 9bc1db054..118b52b18 100644
+index 9bc1db05491ddaf4e17b9b1c89715c8cff342467..118b52b18e4b70a941e0039b36192dda55246ea6 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -119,6 +119,10 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -79,6 +79,3 @@ index 9bc1db054..118b52b18 100644
  
          public LightDetector lightDetector = new LightDetector();
  
--- 
-2.38.1.windows.1
-

@@ -1,4 +1,4 @@
-From bf2cff820185db8365ea3279a64e0796997b8ca3 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 5 Jun 2022 18:40:17 +0200
 Subject: [PATCH] Backport PaperServerListPingEvent
@@ -6,7 +6,7 @@ Subject: [PATCH] Backport PaperServerListPingEvent
 
 diff --git a/src/main/java/com/destroystokyo/paper/network/PaperLegacyStatusClient.java b/src/main/java/com/destroystokyo/paper/network/PaperLegacyStatusClient.java
 new file mode 100644
-index 000000000..532c75160
+index 0000000000000000000000000000000000000000..532c7516092bd3ba06779d9ea22b6dc3aa0ea0ee
 --- /dev/null
 +++ b/src/main/java/com/destroystokyo/paper/network/PaperLegacyStatusClient.java
 @@ -0,0 +1,71 @@
@@ -83,7 +83,7 @@ index 000000000..532c75160
 +}
 diff --git a/src/main/java/com/destroystokyo/paper/network/PaperNetworkClient.java b/src/main/java/com/destroystokyo/paper/network/PaperNetworkClient.java
 new file mode 100644
-index 000000000..c9dc51213
+index 0000000000000000000000000000000000000000..c9dc5121354ae654c59399c70aa7c3ad45dc52f1
 --- /dev/null
 +++ b/src/main/java/com/destroystokyo/paper/network/PaperNetworkClient.java
 @@ -0,0 +1,48 @@
@@ -137,7 +137,7 @@ index 000000000..c9dc51213
 +}
 diff --git a/src/main/java/com/destroystokyo/paper/network/PaperServerListPingEventImpl.java b/src/main/java/com/destroystokyo/paper/network/PaperServerListPingEventImpl.java
 new file mode 100644
-index 000000000..d41b9d0d8
+index 0000000000000000000000000000000000000000..d41b9d0d8136720a8556def95b651f14d4c4b8b9
 --- /dev/null
 +++ b/src/main/java/com/destroystokyo/paper/network/PaperServerListPingEventImpl.java
 @@ -0,0 +1,31 @@
@@ -174,7 +174,7 @@ index 000000000..d41b9d0d8
 +}
 diff --git a/src/main/java/com/destroystokyo/paper/network/PaperStatusClient.java b/src/main/java/com/destroystokyo/paper/network/PaperStatusClient.java
 new file mode 100644
-index 000000000..a2a409e63
+index 0000000000000000000000000000000000000000..a2a409e635dde08f7c53e67164b967a000511e94
 --- /dev/null
 +++ b/src/main/java/com/destroystokyo/paper/network/PaperStatusClient.java
 @@ -0,0 +1,11 @@
@@ -191,7 +191,7 @@ index 000000000..a2a409e63
 +}
 diff --git a/src/main/java/com/destroystokyo/paper/network/StandardPaperServerListPingEventImpl.java b/src/main/java/com/destroystokyo/paper/network/StandardPaperServerListPingEventImpl.java
 new file mode 100644
-index 000000000..c7007dced
+index 0000000000000000000000000000000000000000..c7007dced6b2a2f7e23e90a3f4dbb2e39c9f5f8f
 --- /dev/null
 +++ b/src/main/java/com/destroystokyo/paper/network/StandardPaperServerListPingEventImpl.java
 @@ -0,0 +1,123 @@
@@ -319,7 +319,7 @@ index 000000000..c7007dced
 +
 +}
 diff --git a/src/main/java/net/minecraft/server/HandshakeListener.java b/src/main/java/net/minecraft/server/HandshakeListener.java
-index 051f4e620..10ae9e1e4 100644
+index 051f4e62036e1682fb40265cb77d97bd2a768f0b..10ae9e1e4a6f97919b4bcee70786398059e0dc47 100644
 --- a/src/main/java/net/minecraft/server/HandshakeListener.java
 +++ b/src/main/java/net/minecraft/server/HandshakeListener.java
 @@ -111,6 +111,10 @@ public class HandshakeListener implements PacketHandshakingInListener {
@@ -334,7 +334,7 @@ index 051f4e620..10ae9e1e4 100644
  
      public void a(IChatBaseComponent ichatbasecomponent) {}
 diff --git a/src/main/java/net/minecraft/server/LegacyPingHandler.java b/src/main/java/net/minecraft/server/LegacyPingHandler.java
-index 48acf6364..69398687c 100644
+index 48acf63644761ed2a5ae5a1cbdc7705bc6afe75f..69398687cbcc73f307f41bd8d3ae2d71646f4095 100644
 --- a/src/main/java/net/minecraft/server/LegacyPingHandler.java
 +++ b/src/main/java/net/minecraft/server/LegacyPingHandler.java
 @@ -8,6 +8,7 @@ import io.netty.channel.ChannelHandlerContext;
@@ -405,7 +405,7 @@ index 48acf6364..69398687c 100644
      }
  
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 68cff09ef..1c3aa0d40 100644
+index 68cff09ef0bb91f8c5569222f7dc83247df05932..1c3aa0d400eb6445177768cf235c82510f4239e3 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -61,7 +61,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
@@ -418,7 +418,7 @@ index 68cff09ef..1c3aa0d40 100644
      private String serverIp;
      private int u = -1;
 diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
-index effff01a1..5b92d7897 100644
+index effff01a1ef8f5f32844430264ff1a27d374c0b6..5b92d78975dbb1755bc2177836f350d4de205eeb 100644
 --- a/src/main/java/net/minecraft/server/NetworkManager.java
 +++ b/src/main/java/net/minecraft/server/NetworkManager.java
 @@ -73,6 +73,10 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
@@ -433,7 +433,7 @@ index effff01a1..5b92d7897 100644
      // PandaSpigot start - Optimize network
      public boolean isPending = true;
 diff --git a/src/main/java/net/minecraft/server/PacketStatusListener.java b/src/main/java/net/minecraft/server/PacketStatusListener.java
-index 98083820a..8107eeeee 100644
+index 98083820a6cf081f6271c60149678ebee1283909..8107eeeee6b9a8a67fc9c730032a5d233ed5e9a6 100644
 --- a/src/main/java/net/minecraft/server/PacketStatusListener.java
 +++ b/src/main/java/net/minecraft/server/PacketStatusListener.java
 @@ -1,6 +1,7 @@
@@ -467,7 +467,7 @@ index 98083820a..8107eeeee 100644
  
      public void a(PacketStatusInPing packetstatusinping) {
 diff --git a/src/main/java/net/minecraft/server/ServerPing.java b/src/main/java/net/minecraft/server/ServerPing.java
-index eeb810044..8f20df13a 100644
+index eeb81004490293619fdbd966c423bb9b8c74a061..8f20df13a7eeef89f7329ba962f6277bd70fd9c0 100644
 --- a/src/main/java/net/minecraft/server/ServerPing.java
 +++ b/src/main/java/net/minecraft/server/ServerPing.java
 @@ -29,6 +29,7 @@ public class ServerPing {
@@ -502,6 +502,3 @@ index eeb810044..8f20df13a 100644
          public void a(GameProfile[] agameprofile) {
              this.c = agameprofile;
          }
--- 
-2.38.1.windows.1
-

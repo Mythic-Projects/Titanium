@@ -1,11 +1,11 @@
-From 3981ed22097977f6b2eae51a3c4b45b5ff3fcdc5 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 10 Jun 2022 23:08:26 +0200
 Subject: [PATCH] Add missing comments in config
 
 
 diff --git a/src/main/java/net/titanium/config/PaperConfig.java b/src/main/java/net/titanium/config/PaperConfig.java
-index a0560a509..9d55dcbeb 100644
+index a0560a509c1fcb206225853e073b29cc20f92582..9d55dcbebfa4c7869acd52d701bf0fc09a90953f 100644
 --- a/src/main/java/net/titanium/config/PaperConfig.java
 +++ b/src/main/java/net/titanium/config/PaperConfig.java
 @@ -39,7 +39,7 @@ public class PaperConfig extends TitaniumConfigSection {
@@ -18,7 +18,7 @@ index a0560a509..9d55dcbeb 100644
          @Exclude
          public int maxPlayersAutoSavePerTick = 10;
 diff --git a/src/main/java/net/titanium/config/SpigotConfig.java b/src/main/java/net/titanium/config/SpigotConfig.java
-index fbac6bd5b..19ae5ed01 100644
+index fbac6bd5bbeb2f9ac4284e4fe5b73f813279c369..19ae5ed01304b33e7c106e4d5fbe4f38d5d10330 100644
 --- a/src/main/java/net/titanium/config/SpigotConfig.java
 +++ b/src/main/java/net/titanium/config/SpigotConfig.java
 @@ -189,7 +189,7 @@ public class SpigotConfig extends TitaniumConfigSection {
@@ -31,7 +31,7 @@ index fbac6bd5b..19ae5ed01 100644
                  .add("/skill")
                  .build();
 diff --git a/src/main/java/net/titanium/config/SpigotWorldConfig.java b/src/main/java/net/titanium/config/SpigotWorldConfig.java
-index ef4fd3047..47478b7ca 100644
+index ef4fd3047c99b4e8ee7497b876213b5b3ca99fc2..47478b7caa7149773d8b7a9377a8999e4eca9a53 100644
 --- a/src/main/java/net/titanium/config/SpigotWorldConfig.java
 +++ b/src/main/java/net/titanium/config/SpigotWorldConfig.java
 @@ -20,7 +20,6 @@ public class SpigotWorldConfig extends TitaniumConfigSection {
@@ -43,7 +43,7 @@ index ef4fd3047..47478b7ca 100644
  
          @Comment("Whether to enable the anti-xray module.")
 diff --git a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
-index c8eb27730..1ab14d47a 100644
+index c8eb27730b207aca7b3ae6356df97badf82f87a3..1ab14d47a202afa2b530350745815edc38d3a8d6 100644
 --- a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
 +++ b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
 @@ -1,5 +1,6 @@
@@ -77,7 +77,7 @@ index c8eb27730..1ab14d47a 100644
  
      }
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 25c914253..e607618c8 100644
+index 25c914253953f38d8d335a57cddb7c70a3328459..e607618c856ea15dd1279b2e000cdd68e0e3acf2 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -32,12 +32,12 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -128,7 +128,7 @@ index 25c914253..e607618c8 100644
  
          }
 diff --git a/src/main/java/net/titanium/config/TitaniumWorldConfig.java b/src/main/java/net/titanium/config/TitaniumWorldConfig.java
-index 1b1bc1384..026aeb400 100644
+index 1b1bc1384c428efe05b4de2d4ecefc355398fe51..026aeb4004e8a4113988c6294557238ecde97eec 100644
 --- a/src/main/java/net/titanium/config/TitaniumWorldConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumWorldConfig.java
 @@ -1,5 +1,6 @@
@@ -151,6 +151,3 @@ index 1b1bc1384..026aeb400 100644
          public boolean randomTickSpeed = false;
  
      }
--- 
-2.38.1.windows.1
-

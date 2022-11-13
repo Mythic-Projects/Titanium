@@ -1,11 +1,11 @@
-From cd5fdb0b04b5bde24db622d4bf6077d0bb91fb61 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Fri, 23 Sep 2022 22:12:12 +0200
 Subject: [PATCH] Option to disable explosion particles
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityTNTPrimed.java b/src/main/java/net/minecraft/server/EntityTNTPrimed.java
-index e3f989481..f99cd3a61 100644
+index e3f9894810d28137156a269a9814d78cf8268d7b..f99cd3a616da133b5da4c568ced5d9df379c5cf6 100644
 --- a/src/main/java/net/minecraft/server/EntityTNTPrimed.java
 +++ b/src/main/java/net/minecraft/server/EntityTNTPrimed.java
 @@ -1,5 +1,6 @@
@@ -24,7 +24,7 @@ index e3f989481..f99cd3a61 100644
          }
  
 diff --git a/src/main/java/net/minecraft/server/Explosion.java b/src/main/java/net/minecraft/server/Explosion.java
-index ee4cd2c6e..e6a8cbfb9 100644
+index ee4cd2c6e46af52ba6021ead5d876670a0c18dad..e6a8cbfb9ff3999daf437fb9ca9701a1611f263f 100644
 --- a/src/main/java/net/minecraft/server/Explosion.java
 +++ b/src/main/java/net/minecraft/server/Explosion.java
 @@ -239,11 +239,13 @@ public class Explosion {
@@ -42,7 +42,7 @@ index ee4cd2c6e..e6a8cbfb9 100644
          Iterator iterator;
          BlockPosition blockposition;
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 8424b5f17..598b7cf3d 100644
+index 8424b5f173a1db0e0e5714f4d87378c2d995cd1b..598b7cf3d9f2f86522b14d39649bbcdafaf74256 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
 @@ -1102,6 +1102,11 @@ public class WorldServer extends World implements IAsyncTaskHandler {
@@ -58,7 +58,7 @@ index 8424b5f17..598b7cf3d 100644
  
          while (iterator.hasNext()) {
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 633efdb9f..b4dd72325 100644
+index 633efdb9f4d0f0ad384d90c09dc91a0d7f4f0f8d..b4dd723254f6196e1094cd7a7fa89425092031be 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -112,6 +112,10 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -72,6 +72,3 @@ index 633efdb9f..b4dd72325 100644
      }
  
      @Comment("Whether saving of fireworks and arrows should be disabled.")
--- 
-2.38.1.windows.1
-

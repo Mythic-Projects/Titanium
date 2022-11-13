@@ -1,11 +1,11 @@
-From 24e0681cb19474b303ba6558532a91a2baf81c6d Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Wed, 15 Jun 2022 21:38:24 +0200
 Subject: [PATCH] Add Server#setMaxPlayers
 
 
 diff --git a/src/main/java/net/titanium/command/SetSlotsCommand.java b/src/main/java/net/titanium/command/SetSlotsCommand.java
-index f99f92e70..e3607b5c5 100644
+index f99f92e7047170cf48dac256ee583142414a0604..e3607b5c5b8e146ddfaa7d28211a07f67f8010fc 100644
 --- a/src/main/java/net/titanium/command/SetSlotsCommand.java
 +++ b/src/main/java/net/titanium/command/SetSlotsCommand.java
 @@ -4,6 +4,7 @@ import java.util.Arrays;
@@ -41,7 +41,7 @@ index f99f92e70..e3607b5c5 100644
          sender.sendMessage(config.spigot.messages.setSlots.set
                  .replace("{NEW_SLOTS}", Integer.toString(slots))
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 3a9e51740..f5554ad74 100644
+index 3a9e51740c2fdba037dae07d84f7abe30c9116fa..f5554ad74639578d021d34c8e2ee2331f986aa4f 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -522,6 +522,11 @@ public final class CraftServer implements Server {
@@ -56,6 +56,3 @@ index 3a9e51740..f5554ad74 100644
      // NOTE: These are dependent on the corrisponding call in MinecraftServer
      // so if that changes this will need to as well
      @Override
--- 
-2.38.1.windows.1
-

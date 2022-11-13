@@ -1,11 +1,11 @@
-From 10b5b3ff9e87debcf314d2dc050fc7634bca7a8e Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 13 Nov 2022 20:06:12 +0100
 Subject: [PATCH] Kill ender pearl outside world border
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityEnderPearl.java b/src/main/java/net/minecraft/server/EntityEnderPearl.java
-index 2ed7f2790..964848a3c 100644
+index 2ed7f2790217b5596005b80a8ed5e6ff133bc413..964848a3c6d80e6c5610e91228d099599fd8271a 100644
 --- a/src/main/java/net/minecraft/server/EntityEnderPearl.java
 +++ b/src/main/java/net/minecraft/server/EntityEnderPearl.java
 @@ -42,7 +42,13 @@ public class EntityEnderPearl extends EntityProjectile {
@@ -23,6 +23,3 @@ index 2ed7f2790..964848a3c 100644
              IBlockData blockData = world.getType(blockPosition);
              Block block = blockData.getBlock();
              TitaniumConfig.PearlPassthrough pearlPassthrough = TitaniumConfig.get().pearlPassthrough;
--- 
-2.38.1.windows.1
-

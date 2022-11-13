@@ -1,4 +1,4 @@
-From 82789c0ef8470ac06faf293962c35bfce7118691 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sun, 22 May 2022 22:45:52 +0200
 Subject: [PATCH] Implement [IonSpigot-0012] Movement Cache
@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [IonSpigot-0012] Movement Cache
 
 diff --git a/src/main/java/me/suicidalkids/ion/blocks/movement/MovementCache.java b/src/main/java/me/suicidalkids/ion/blocks/movement/MovementCache.java
 new file mode 100644
-index 000000000..4577d1824
+index 0000000000000000000000000000000000000000..4577d18245438b8f3a787cc748cb2d448e9395b3
 --- /dev/null
 +++ b/src/main/java/me/suicidalkids/ion/blocks/movement/MovementCache.java
 @@ -0,0 +1,65 @@
@@ -76,7 +76,7 @@ index 000000000..4577d1824
 +
 +}
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 7732fbd11..8305cf6d1 100644
+index 7732fbd111ee82f5b331bd8d1b8659e93782a4b4..8305cf6d1fd8243aea80bca8f6ec7f552a12df1d 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
 @@ -66,11 +66,16 @@ public abstract class Entity implements ICommandListener {
@@ -122,7 +122,7 @@ index 7732fbd11..8305cf6d1 100644
              // CraftBukkit start
              if (positionChanged && getBukkitEntity() instanceof Vehicle) {
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index e4da0544b..4e4610b24 100644
+index e4da0544b203b49dc055339f2bac246a4d62debf..4e4610b248f2b55dd586bcb03ab9e650a888dc27 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -409,6 +409,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
@@ -134,7 +134,7 @@ index e4da0544b..4e4610b24 100644
                      this.player.onGround = packetplayinflying.f();
                      double d16 = d12;
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index fd416f207..b0c5da5cf 100644
+index fd416f20715d0a1600b8595940874364d51d9cd5..b0c5da5cff0166c1f3b9eec8aa175449d365457c 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -4,6 +4,8 @@ import com.google.common.base.Predicate;
@@ -172,7 +172,7 @@ index fd416f207..b0c5da5cf 100644
          this.generator = gen;
          this.world = new CraftWorld((WorldServer) this, gen, env);
 diff --git a/src/main/java/net/titanium/config/IonConfig.java b/src/main/java/net/titanium/config/IonConfig.java
-index 282ab263d..eb839d9d7 100644
+index 282ab263da89ab21364c48044b079b2b17473f67..eb839d9d7f1ddfbb888aba715b68d98a6092aab1 100644
 --- a/src/main/java/net/titanium/config/IonConfig.java
 +++ b/src/main/java/net/titanium/config/IonConfig.java
 @@ -26,4 +26,6 @@ public class IonConfig extends TitaniumConfigSection{
@@ -184,7 +184,7 @@ index 282ab263d..eb839d9d7 100644
  }
 diff --git a/src/main/java/net/titanium/config/IonWorldConfig.java b/src/main/java/net/titanium/config/IonWorldConfig.java
 new file mode 100644
-index 000000000..b36867028
+index 0000000000000000000000000000000000000000..b368670289f330fad45a6b144308f47279cbc5ec
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/IonWorldConfig.java
 @@ -0,0 +1,22 @@
@@ -210,6 +210,3 @@ index 000000000..b36867028
 +    }
 +
 +}
--- 
-2.38.1.windows.1
-

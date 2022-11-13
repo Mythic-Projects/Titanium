@@ -1,4 +1,4 @@
-From 6858d0ddca828c5b2adab9620868b893ae771201 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Peridot <peridot491@protonmail.com>
 Date: Sat, 17 Sep 2022 12:11:09 +0200
 Subject: [PATCH] Backport modern TabCompleteEvent and AsyncTabCompleteEvent
@@ -6,7 +6,7 @@ Subject: [PATCH] Backport modern TabCompleteEvent and AsyncTabCompleteEvent
 
 diff --git a/src/main/java/com/destroystokyo/paper/event/server/AsyncTabCompleteEvent.java b/src/main/java/com/destroystokyo/paper/event/server/AsyncTabCompleteEvent.java
 new file mode 100644
-index 00000000..91fd5fb5
+index 0000000000000000000000000000000000000000..91fd5fb5784d587616762f7525191309be93983d
 --- /dev/null
 +++ b/src/main/java/com/destroystokyo/paper/event/server/AsyncTabCompleteEvent.java
 @@ -0,0 +1,176 @@
@@ -187,7 +187,7 @@ index 00000000..91fd5fb5
 +
 +}
 diff --git a/src/main/java/org/bukkit/event/Event.java b/src/main/java/org/bukkit/event/Event.java
-index 6677e1bd..47dbc721 100644
+index 6677e1bd6f5ae4385d3da9fe39caaa75468ee1fa..47dbc7218c8511bef2c83eee9b6a7156ebfa6e0e 100644
 --- a/src/main/java/org/bukkit/event/Event.java
 +++ b/src/main/java/org/bukkit/event/Event.java
 @@ -33,6 +33,22 @@ public abstract class Event {
@@ -215,7 +215,7 @@ index 6677e1bd..47dbc721 100644
       * default, it is the event's class's {@linkplain Class#getSimpleName()
 diff --git a/src/main/java/org/bukkit/event/server/TabCompleteEvent.java b/src/main/java/org/bukkit/event/server/TabCompleteEvent.java
 new file mode 100644
-index 00000000..aed9e4b3
+index 0000000000000000000000000000000000000000..aed9e4b3d128ef64977690b3db5c2942f807da45
 --- /dev/null
 +++ b/src/main/java/org/bukkit/event/server/TabCompleteEvent.java
 @@ -0,0 +1,128 @@
@@ -347,6 +347,3 @@ index 00000000..aed9e4b3
 +    }
 +
 +}
--- 
-2.38.1.windows.1
-
