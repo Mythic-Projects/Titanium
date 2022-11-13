@@ -8,7 +8,7 @@ diff --git a/src/main/java/net/minecraft/server/EntityEnderPearl.java b/src/main
 index 2ed7f2790217b5596005b80a8ed5e6ff133bc413..964848a3c6d80e6c5610e91228d099599fd8271a 100644
 --- a/src/main/java/net/minecraft/server/EntityEnderPearl.java
 +++ b/src/main/java/net/minecraft/server/EntityEnderPearl.java
-@@ -42,7 +42,13 @@ public class EntityEnderPearl extends EntityProjectile {
+@@ -42,7 +42,14 @@ public class EntityEnderPearl extends EntityProjectile {
          // FlamePaper start
          BlockPosition blockPosition = movingobjectposition.a();
  
@@ -16,6 +16,7 @@ index 2ed7f2790217b5596005b80a8ed5e6ff133bc413..964848a3c6d80e6c5610e91228d09959
 +        // Titanium start
 +        if (!world.getWorldBorder().isInBounds(blockPosition)) {
 +            this.die();
++            return;
 +        }
 +        // Titanium end
 +
