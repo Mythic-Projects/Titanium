@@ -5,7 +5,7 @@ Subject: [PATCH] Update libraries
 
 
 diff --git a/build.gradle b/build.gradle
-index a7676ef236aa1681d3466476838d63acab3b21f0..c7145ad57512488dc50ec8a79c9a3e06cd14296f 100644
+index a7676ef236aa1681d3466476838d63acab3b21f0..9c0ca813c8c433c1db09df4929dd8703f699a773 100644
 --- a/build.gradle
 +++ b/build.gradle
 @@ -1,14 +1,14 @@
@@ -37,7 +37,7 @@ index a7676ef236aa1681d3466476838d63acab3b21f0..c7145ad57512488dc50ec8a79c9a3e06
      // Titanium end
 -    api 'org.slf4j:slf4j-simple:1.7.36' // Titanium - backport Plugin#getSLF4JLogger from Paper
 -    // Titanium libraries end
-+    api 'org.apache.logging.log4j:log4j-api:2.18.0' // Titanium - updated log4j to 2.18.0 // Titanium - Add log4j-api to API
++    api 'org.apache.logging.log4j:log4j-api:2.19.0' // Titanium - updated log4j to 2.19.0 // Titanium - Add log4j-api to API
 +    api 'org.slf4j:slf4j-api:1.8.0-beta4' // Titanium - Backport Plugin#getSLF4JLogger from Paper
 +    api 'org.apache.commons:commons-lang3:3.12.0' // Titanium - updated commons-lang3 to 3.12.0 // Titanium - Add commons-lang3 to API
  

@@ -5,7 +5,7 @@ Subject: [PATCH] Update libraries
 
 
 diff --git a/build.gradle b/build.gradle
-index 25c44bd24ccb783d564dd578549e2d2b5689918a..129b6c415800222c96b55dfb063c503f0261ce36 100644
+index 25c44bd24ccb783d564dd578549e2d2b5689918a..59db5e1e04413c1430eac40ed3e61a3a4088cdc0 100644
 --- a/build.gradle
 +++ b/build.gradle
 @@ -8,31 +8,27 @@ dependencies {
@@ -22,7 +22,7 @@ index 25c44bd24ccb783d564dd578549e2d2b5689918a..129b6c415800222c96b55dfb063c503f
 -    implementation 'org.apache.logging.log4j:log4j-core:2.17.1'
 -    // Titanium end
 -    implementation 'org.apache.commons:commons-lang3:3.12.0' // Titanium - updated commons-lang3 to 3.12.0
-+    implementation 'org.apache.logging.log4j:log4j-core:2.18.0' // Titanium - updated log4j to 2.18.0
++    implementation 'org.apache.logging.log4j:log4j-core:2.19.0' // Titanium - updated log4j to 2.19.0
 +    implementation 'org.apache.logging.log4j:log4j-slf4j18-impl:2.18.0' // Paper
      implementation 'commons-io:commons-io:2.11.0' // Titanium - updated commons-io to 2.11.0
      implementation 'commons-codec:commons-codec:1.15' // Titanium - updated commons-codec to 1.15
