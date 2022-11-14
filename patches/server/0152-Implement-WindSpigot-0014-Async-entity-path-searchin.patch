@@ -391,7 +391,7 @@ index 45d385d31296eda75aa30500118c21406df5fe43..b9ab623fa63d3c5ad132504673b28fbe
          int i = (blockposition.getX() >> 4) - this.a;
          int j = (blockposition.getZ() >> 4) - this.b;
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index c70eaac4070662b7b73bd95575d8fd0e183ec900..01f755f0e6f912b48e6202f9ab277f7f56aca55b 100644
+index f9274a7b0da001f7f92f10d91120b8537213fcc5..72f2fac2927c35c2c58750cbc0f3f2944e64787e 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
 @@ -9,6 +9,7 @@ import java.util.concurrent.Callable;
@@ -402,7 +402,7 @@ index c70eaac4070662b7b73bd95575d8fd0e183ec900..01f755f0e6f912b48e6202f9ab277f7f
  import org.apache.logging.log4j.LogManager;
  import org.bukkit.Bukkit;
  import org.bukkit.Location;
-@@ -1170,9 +1171,20 @@ public abstract class Entity implements ICommandListener {
+@@ -1180,9 +1181,20 @@ public abstract class Entity implements ICommandListener {
      }
  
      public double c(BlockPosition blockposition) {
@@ -424,7 +424,7 @@ index c70eaac4070662b7b73bd95575d8fd0e183ec900..01f755f0e6f912b48e6202f9ab277f7f
      public double f(double d0, double d1, double d2) {
          double d3 = this.locX - d0;
          double d4 = this.locY - d1;
-@@ -1181,6 +1193,7 @@ public abstract class Entity implements ICommandListener {
+@@ -1191,6 +1203,7 @@ public abstract class Entity implements ICommandListener {
          return (double) MathHelper.sqrt(d3 * d3 + d4 * d4 + d5 * d5);
      }
  

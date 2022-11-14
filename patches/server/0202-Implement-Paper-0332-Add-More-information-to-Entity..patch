@@ -6,10 +6,10 @@ Subject: [PATCH] Implement [Paper-0332] Add More information to
 
 
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 01f755f0e6f912b48e6202f9ab277f7f56aca55b..52b01f54e1da3d87e11a6805db58db7dffe23fa1 100644
+index 72f2fac2927c35c2c58750cbc0f3f2944e64787e..c5c2f8f7867c7e675cb14bbcf708ea9a4cb62cdc 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
-@@ -2028,7 +2028,7 @@ public abstract class Entity implements ICommandListener {
+@@ -2038,7 +2038,7 @@ public abstract class Entity implements ICommandListener {
      }
  
      public String toString() {

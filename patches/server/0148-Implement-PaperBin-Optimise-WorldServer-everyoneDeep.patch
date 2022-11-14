@@ -5,27 +5,27 @@ Subject: [PATCH] Implement [PaperBin-????] Optimise
  WorldServer#everyoneDeeplySleeping
 
 
-diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
-index 2b7aa9e699e6cbd225b6b38b6d9a04db08190402..f6db5de1c1403f28a2e781fe7e53d16e9dc8cf61 100644
---- a/src/main/java/net/minecraft/server/EntityHuman.java
-+++ b/src/main/java/net/minecraft/server/EntityHuman.java
-@@ -1785,6 +1785,16 @@ public abstract class EntityHuman extends EntityLiving {
-         }
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index c70eaac4070662b7b73bd95575d8fd0e183ec900..f9274a7b0da001f7f92f10d91120b8537213fcc5 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -291,6 +291,16 @@ public abstract class Entity implements ICommandListener {
+         this.K();
      }
  
 +    // Titanium start
 +    public boolean isNether() {
-+        return this.world.getBiome(new BlockPosition(this.locX, this.locY, this.locZ)) == BiomeBase.HELL;
++        return this.world.getWorld().getEnvironment() == org.bukkit.World.Environment.NETHER;
 +    }
 +
 +    public boolean isEnd() {
-+        return this.world.getBiome(new BlockPosition(this.locX, this.locY, this.locZ)) == BiomeBase.SKY;
++        return this.world.getWorld().getEnvironment() == org.bukkit.World.Environment.THE_END;
 +    }
 +    // Titanium end
 +
-     static class SyntheticClass_1 {
- 
-         static final int[] a = new int[EnumDirection.values().length];
+     /**
+      * PaperSpigot - Checks if the feature is enabled and the entity is above the nether world bedrock height
+      */
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
 index bf80c4644bc9f6f22a35c7e9418251ac7f486808..93eb7e7287ea602dd8d5f34b946777972f34fe5c 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
