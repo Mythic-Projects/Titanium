@@ -1,0 +1,45 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 22 May 2022 22:35:00 +0200
+Subject: [PATCH] Implement [FlamePaper-0024] Disable Unloaded Chunk Movement
+
+
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index 2c05b139e1695e2f3ed3dd92767efeb16ef9f5d8..7732fbd111ee82f5b331bd8d1b8659e93782a4b4 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -8,6 +8,7 @@ import java.util.UUID;
+ import java.util.concurrent.Callable;
+ 
+ // CraftBukkit start
++import net.titanium.config.TitaniumConfig;
+ import org.bukkit.Bukkit;
+ import org.bukkit.Location;
+ import org.bukkit.Server;
+@@ -458,6 +459,12 @@ public abstract class Entity implements ICommandListener {
+ 
+     public void move(double d0, double d1, double d2) {
+         if (this.loadChunks) loadChunks(); // PaperSpigot - Load chunks
++        // FlamePaper start - Disable Unloaded Chunk Movement
++        if (!((ChunkProviderServer) world.chunkProvider).isChunkLoaded((int) locX >> 4, (int) locZ >> 4) && TitaniumConfig.get().chunk.disableUnloadedChunksMovement) {
++            this.a(this.getBoundingBox().c(d0, d1, d2));
++            this.recalcPosition();
++        } else
++        // FlamePaper end - Disable Unloaded Chunk Movement
+         if (this.noclip) {
+             this.a(this.getBoundingBox().c(d0, d1, d2));
+             this.recalcPosition();
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index e15abb056b56a6e3f196d7f7825522b035dba54a..c31324c95005dc7e6844879780bd73bceb63df52 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -54,6 +54,9 @@ public class TitaniumConfig extends TitaniumConfigSection {
+ 
+     public static class Chunk extends TitaniumConfigSection {
+ 
++        @Comment("Enabling this option prevents entities from moving in unloaded chunk (and for eg. falling down in \"slow-motion\")")
++        public boolean disableUnloadedChunksMovement = false;
++
+         @Comment("Configuration of chunk I/O (loading) since chunk loading is asynchronous.")
+         @Comment("If you have CPU with more threads changing these values can have good impact on performance.")
+         public IO io = new IO();

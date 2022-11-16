@@ -1,0 +1,20 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Tue, 7 Jun 2022 14:54:06 +0200
+Subject: [PATCH] Update gson and guava
+
+
+diff --git a/build.gradle b/build.gradle
+index eca389a19fab34be30b8cd216fe958b24fc23a99..4a804b969c93b87a9a84b132518a3a837b672d85 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -1,7 +1,7 @@
+ dependencies {
+     // Minecraft libraries start
+-    api 'com.google.guava:guava:17.0'
+-    api 'com.google.code.gson:gson:2.2.4'
++    api 'com.google.guava:guava:21.0' // Titanium - update guava to 21.0
++    api 'com.google.code.gson:gson:2.8.9' // Titanium - update gson to 2.8.9
+     api 'net.md-5:bungeecord-chat:1.8-SNAPSHOT'
+     api 'org.yaml:snakeyaml:1.15'
+     api ('com.googlecode.json-simple:json-simple:1.1.1') {

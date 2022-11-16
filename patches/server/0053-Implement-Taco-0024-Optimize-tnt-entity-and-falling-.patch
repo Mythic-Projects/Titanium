@@ -1,0 +1,216 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 22 May 2022 23:01:59 +0200
+Subject: [PATCH] Implement [Taco-0024] Optimize tnt entity and falling block
+ movement
+
+
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index 8305cf6d1fd8243aea80bca8f6ec7f552a12df1d..dbaeee4c1979f39a0dd391b05ff781aaba573554 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -562,7 +562,16 @@ public abstract class Entity implements ICommandListener {
+                 }
+             }
+ 
+-            List list = this.world.getCubes(this, this.getBoundingBox().a(d0, d1, d2));
++            // TacoSpigot start - do axis by axis scan if the entity is travelling a large area
++            AxisAlignedBB totalArea = this.getBoundingBox().a(d0, d1, d2);
++            double xLength = totalArea.d - totalArea.a;
++            double yLength = totalArea.e - totalArea.b;
++            double zLength = totalArea.f - totalArea.c;
++            boolean axisScan = this.world.tacoConfigTitanium.tnt.optimizeMovement && xLength * yLength * zLength > 10;
++
++            List list = this.world.getCubes(this, axisScan ? this.getBoundingBox().a(0, d1, 0) : totalArea);
++            // TacoSpigot end
++
+             AxisAlignedBB axisalignedbb = this.getBoundingBox();
+ 
+             AxisAlignedBB axisalignedbb1;
+@@ -574,6 +583,8 @@ public abstract class Entity implements ICommandListener {
+             this.a(this.getBoundingBox().c(0.0D, d1, 0.0D));
+             boolean flag1 = this.onGround || d7 != d1 && d7 < 0.0D;
+ 
++            if(axisScan) list = this.world.getCubes(this, this.getBoundingBox().a(d0, 0, 0)); // TacoSpigot - get x axis blocks
++
+             AxisAlignedBB axisalignedbb2;
+             Iterator iterator1;
+ 
+@@ -583,6 +594,8 @@ public abstract class Entity implements ICommandListener {
+ 
+             this.a(this.getBoundingBox().c(d0, 0.0D, 0.0D));
+ 
++            if(axisScan) list = this.world.getCubes(this, this.getBoundingBox().a(0, 0, d2)); // TacoSpigot - get z axis blocks
++
+             for (iterator1 = list.iterator(); iterator1.hasNext(); d2 = axisalignedbb2.c(this.getBoundingBox(), d2)) {
+                 axisalignedbb2 = (AxisAlignedBB) iterator1.next();
+             }
+diff --git a/src/main/java/net/minecraft/server/Explosion.java b/src/main/java/net/minecraft/server/Explosion.java
+index cf48af7ead55dee7f027a9e7c00471522614b100..741697e2f6410fb891c16e95ad8769f97a238914 100644
+--- a/src/main/java/net/minecraft/server/Explosion.java
++++ b/src/main/java/net/minecraft/server/Explosion.java
+@@ -55,6 +55,9 @@ public class Explosion {
+         int i;
+         int j;
+ 
++        Block b = world.getChunkAt((int)posX >> 4, (int)posZ >> 4).getBlockData(new BlockPosition(posX, posY, posZ)).getBlock(); // TacoSpigot - get block of the explosion
++
++        if (!this.world.tacoConfigTitanium.tnt.optimizeLiquidExplosions || !b.getMaterial().isLiquid()) { //TacoSpigot - skip calculating what blocks to blow up in water/lava
+         for (int k = 0; k < 16; ++k) {
+             for (i = 0; i < 16; ++i) {
+                 for (j = 0; j < 16; ++j) {
+@@ -94,6 +97,7 @@ public class Explosion {
+                 }
+             }
+         }
++        }
+ 
+         this.blocks.addAll(hashset);
+         float f3 = this.size * 2.0F;
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index b0c5da5cff0166c1f3b9eec8aa175449d365457c..16441d096f33ee96484a0a38df7a476442b58b82 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -8,6 +8,7 @@ import me.suicidalkids.ion.blocks.movement.MovementCache;
+ import net.titanium.config.IonWorldConfig;
+ import net.titanium.config.PaperWorldConfig;
+ import net.titanium.config.SpigotWorldConfig;
++import net.titanium.config.TacoSpigotWorldConfig;
+ import net.titanium.config.TitaniumConfig;
+ import org.bukkit.Bukkit;
+ import org.bukkit.block.BlockState;
+@@ -174,6 +175,7 @@ public abstract class World implements IBlockAccess {
+ 
+     public final SpigotWorldConfig spigotConfigTitanium;
+     public final PaperWorldConfig paperConfigTitanium;
++    public final TacoSpigotWorldConfig tacoConfigTitanium;
+     public final IonWorldConfig ionConfigTitanium;
+     // Titanium end
+ 
+@@ -205,6 +207,7 @@ public abstract class World implements IBlockAccess {
+         TitaniumConfig serverConfig = TitaniumConfig.get();
+         this.spigotConfigTitanium = serverConfig.spigot.worldSettings;
+         this.paperConfigTitanium = serverConfig.paper.worldSettings;
++        this.tacoConfigTitanium = serverConfig.taco.worldSettings;
+         this.ionConfigTitanium = serverConfig.ion.worldSettings;
+         // Titanium end
+         this.generator = gen;
+@@ -1319,6 +1322,9 @@ public abstract class World implements IBlockAccess {
+ 
+         if (entity instanceof EntityItem) return arraylist; // PaperSpigot - Optimize item movement
+ 
++        if (entity instanceof EntityTNTPrimed) return arraylist; // TacoSpigot - Optimize tnt entity movement
++        if (entity instanceof EntityFallingBlock) return arraylist; // TacoSpigot - Optimize falling block movement
++
+         double d0 = 0.25D;
+         List list = this.getEntities(entity, axisalignedbb.grow(d0, d0, d0));
+ 
+diff --git a/src/main/java/net/titanium/config/TacoSpigotConfig.java b/src/main/java/net/titanium/config/TacoSpigotConfig.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..da1cee705f44668506d3d72f1a1b3fc50dff0cb4
+--- /dev/null
++++ b/src/main/java/net/titanium/config/TacoSpigotConfig.java
+@@ -0,0 +1,12 @@
++package net.titanium.config;
++
++import eu.okaeri.configs.annotation.NameModifier;
++import eu.okaeri.configs.annotation.NameStrategy;
++import eu.okaeri.configs.annotation.Names;
++
++@Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
++public class TacoSpigotConfig extends TitaniumConfigSection {
++
++    public TacoSpigotWorldConfig worldSettings = new TacoSpigotWorldConfig();
++
++}
+diff --git a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..3a356dd3567b3b9f151a6ed5a699a5c9ecaa31a8
+--- /dev/null
++++ b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
+@@ -0,0 +1,22 @@
++package net.titanium.config;
++
++import eu.okaeri.configs.annotation.NameModifier;
++import eu.okaeri.configs.annotation.NameStrategy;
++import eu.okaeri.configs.annotation.Names;
++
++@Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
++public class TacoSpigotWorldConfig extends TitaniumConfigSection {
++
++    public Tnt tnt = new Tnt();
++
++    public static class Tnt extends TitaniumConfigSection {
++
++        //TODO comment this (See TacoSpigot-0024)
++        public boolean optimizeMovement = false;
++
++        //TODO comment this (See TacoSpigot-0024)
++        public boolean optimizeLiquidExplosions = true;
++
++    }
++
++}
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index 95c9ee2e9e836fa68399a270c1526bcbf9fb56e5..860fd4a57935da6d8c6fd81da330868247955f88 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -47,6 +47,9 @@ public class TitaniumConfig extends TitaniumConfigSection {
+     @Comment("Configuration from paper.yml")
+     public PaperConfig paper = new PaperConfig();
+ 
++    @Comment("Configuration from taco.yml")
++    public TacoSpigotConfig taco = new TacoSpigotConfig();
++
+     @Comment("Configuration from ion.yml")
+     public IonConfig ion = new IonConfig();
+ 
+@@ -133,6 +136,11 @@ public class TitaniumConfig extends TitaniumConfigSection {
+             }
+             this.paperConfigHelper.saveSectionToFile();
+ 
++            if (this.tacoSpigotConfigHelper == null) {
++                this.tacoSpigotConfigHelper = new LegacyConfigHelper(this.taco, "taco", 1);
++            }
++            this.tacoSpigotConfigHelper.saveSectionToFile();
++
+             if (this.ionConfigHelper == null) {
+                 this.ionConfigHelper = new LegacyConfigHelper(this.ion, "ion", 1);
+             }
+@@ -206,6 +214,13 @@ public class TitaniumConfig extends TitaniumConfigSection {
+         return this.paperConfigHelper;
+     }
+ 
++    @Exclude
++    private LegacyConfigHelper tacoSpigotConfigHelper;
++
++    public LegacyConfigHelper getTacoSpigotConfigHelper() {
++        return this.tacoSpigotConfigHelper;
++    }
++
+     @Exclude
+     private LegacyConfigHelper ionConfigHelper;
+ 
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index d9bde8659a3ee59b243fc3885f66d2069b68fb37..b727bee7974a6c8b184d27aa994a95e9a0c2ebd4 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -1889,6 +1889,18 @@ public final class CraftServer implements Server {
+             return configHelper.getConfiguration();
+         }
+ 
++        // Taco start
++        @Deprecated // Titanium
++        @Override
++        public YamlConfiguration getTacoSpigotConfig() {
++            LegacyConfigHelper configHelper = serverConfig.getTacoSpigotConfigHelper();
++            if (configHelper == null) {
++                throw new IllegalStateException("Legacy config files are disable. Set `enable-legacy-config-files` in titanium.yml to true to use them.");
++            }
++            return configHelper.getConfiguration();
++        }
++        // Taco end
++
+         // IonSpigot start
+         @Deprecated // Titanium
+         @Override

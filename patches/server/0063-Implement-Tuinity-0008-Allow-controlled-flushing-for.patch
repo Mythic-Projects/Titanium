@@ -1,0 +1,115 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Spottedleaf <spottedleaf@spottedleaf.dev>
+Date: Sat, 4 Apr 2020 15:27:44 -0700
+Subject: [PATCH] Implement [Tuinity-0008] Allow controlled flushing for
+ network manager by Spottedleaf
+
+
+diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
+index 2df10cb22767a4c9673cb051f887a3a639649201..8715a3bb7ed46026eb11af4475cfff6915a36fae 100644
+--- a/src/main/java/net/minecraft/server/NetworkManager.java
++++ b/src/main/java/net/minecraft/server/NetworkManager.java
+@@ -80,6 +80,39 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+     public boolean queueImmunity = false;
+     public EnumProtocol protocol;
+     // Paper end
++    
++    // Tuinity start - allow controlled flushing
++    volatile boolean canFlush = true;
++    private final java.util.concurrent.atomic.AtomicInteger packetWrites = new java.util.concurrent.atomic.AtomicInteger();
++    private int flushPacketsStart;
++    private final Object flushLock = new Object();
++
++    public void disableAutomaticFlush() {
++        synchronized (this.flushLock) {
++            this.flushPacketsStart = this.packetWrites.get(); // must be volatile and before canFlush = false
++            this.canFlush = false;
++        }
++    }
++
++    public void enableAutomaticFlush() {
++        synchronized (this.flushLock) {
++            this.canFlush = true;
++            if (this.packetWrites.get() != this.flushPacketsStart) { // must be after canFlush = true
++                this.flush(); // only make the flush call if we need to
++            }
++        }
++    }
++
++    private void flush() {
++        if (this.channel.eventLoop().inEventLoop()) {
++            this.channel.flush();
++        } else {
++            this.channel.eventLoop().execute(() -> {
++                this.channel.flush();
++            });
++        }
++    }
++    // Tuinity end
+ 
+     public NetworkManager(EnumProtocolDirection enumprotocoldirection) {
+         this.h = enumprotocoldirection;
+@@ -230,6 +263,14 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+ 
+     private void dispatchPacket(Packet<?> packet, final GenericFutureListener<? extends Future<? super Void>>[] agenericfuturelistener) { this.a(packet, agenericfuturelistener); } // Paper - OBFHELPER
+     private void a(final Packet packet, final GenericFutureListener<? extends Future<? super Void>>[] agenericfuturelistener) {
++        // Tuinity start - add flush parameter
++        this.writePacket(packet, agenericfuturelistener, Boolean.TRUE);
++    }
++    private void writePacket(Packet packet, final GenericFutureListener<? extends Future<? super Void>>[] agenericfuturelistener, Boolean flushConditional) {
++        this.packetWrites.getAndIncrement(); // must be before using canFlush
++        boolean effectiveFlush = flushConditional == null ? this.canFlush : flushConditional;
++        final boolean flush = effectiveFlush || packet instanceof PacketPlayOutKeepAlive || packet instanceof PacketPlayOutKickDisconnect; // no delay for certain packets
++        // Tuinity end - add flush parameter
+         final EnumProtocol enumprotocol = EnumProtocol.a(packet);
+         final EnumProtocol enumprotocol1 = this.channel.attr(NetworkManager.c).get();
+ 
+@@ -251,7 +292,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+             try {
+                 // Paper end
+ 
+-            ChannelFuture channelfuture = this.channel.writeAndFlush(packet);
++                ChannelFuture channelfuture = (flush) ? this.channel.writeAndFlush(packet) : this.channel.write(packet); // Tuinity - add flush parameter
+ 
+             if (agenericfuturelistener != null) {
+                 channelfuture.addListeners(agenericfuturelistener);
+@@ -283,7 +324,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+                 }
+                 try {
+                     // Paper end
+-                ChannelFuture channelfuture = NetworkManager.this.channel.writeAndFlush(packet);
++                    ChannelFuture channelfuture = (flush) ? NetworkManager.this.channel.writeAndFlush(packet) : NetworkManager.this.channel.write(packet); // Tuinity - add flush parameter
+ 
+                 if (agenericfuturelistener != null) {
+                     channelfuture.addListeners(agenericfuturelistener);
+@@ -325,6 +366,10 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+     }
+     private boolean processQueue() {
+         if (this.i.isEmpty()) return true;
++        // Tuinity start - make only one flush call per sendPacketQueue() call
++        final boolean needsFlush = this.canFlush; // make only one flush call per sendPacketQueue() call
++        boolean hasWrotePacket = false;
++        // Tuinity end
+         // If we are on main, we are safe here in that nothing else should be processing queue off main anymore
+         // But if we are not on main due to login/status, the parent is synchronized on packetQueue
+         java.util.Iterator<QueuedPacket> iterator = this.i.iterator();
+@@ -338,10 +383,18 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+ 
+             Packet<?> packet = queued.getPacket();
+             if (!packet.isReady()) {
++                // Tuinity start - make only one flush call per sendPacketQueue() call
++                if (hasWrotePacket && (needsFlush || this.canFlush)) {
++                    this.flush();
++                }
++                // Tuinity  end
+                 return false;
+             } else {
+                 iterator.remove();
+-                this.dispatchPacket(packet, queued.getGenericFutureListeners());
++                // Tuinity  start - make only one flush call per sendPacketQueue() call
++                this.writePacket(packet, queued.getGenericFutureListeners(), (!iterator.hasNext() && (needsFlush || this.canFlush)) ? Boolean.TRUE : Boolean.FALSE);
++                hasWrotePacket = true;
++                // Tuinity end
+             }
+         }
+         return true;

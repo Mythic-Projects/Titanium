@@ -1,0 +1,45 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 5 Jun 2022 17:10:31 +0200
+Subject: [PATCH] Add option to change internal error message
+
+
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index 4e4610b248f2b55dd586bcb03ab9e650a888dc27..d30402e4b70b886c871cacb8a3e26b7c3eb02e8e 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -1193,7 +1193,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+                 return;
+             }
+         } catch (org.bukkit.command.CommandException ex) {
+-            player.sendMessage(org.bukkit.ChatColor.RED + "An internal error occurred while attempting to perform this command");
++            player.sendMessage(server.serverConfig.spigot.messages.internalErrorCommand);
+             java.util.logging.Logger.getLogger(PlayerConnection.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+             SpigotTimings.playerCommandTimer.stopTiming(); // Spigot
+             return;
+diff --git a/src/main/java/net/titanium/config/SpigotConfig.java b/src/main/java/net/titanium/config/SpigotConfig.java
+index 17ea0ffbad5e4d610370942e1ff51a71154b12a1..63f4492b28e206346c22a944559e0b33db3725e6 100644
+--- a/src/main/java/net/titanium/config/SpigotConfig.java
++++ b/src/main/java/net/titanium/config/SpigotConfig.java
+@@ -142,6 +142,8 @@ public class SpigotConfig extends TitaniumConfigSection {
+ 
+         @Comment("You can use {0} to insert the command that was tried to use (without slash).")
+         public String unknownCommand = "&7Unknown command. Type &c/help &7for help.";
++        public String internalErrorCommand = "&cAn internal error occurred while attempting to perform this command";
++        public String internalErrorTabComplete = "&cAn internal error occurred while attempting to tab-complete this command";
+ 
+     }
+ 
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index c424e62fc705ba8c940536ab904d4eb004440879..441a89b5bc0996ca422c5d84f9ea2bfe1d5f2828 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -1737,7 +1737,7 @@ public final class CraftServer implements Server {
+                 completions = getCommandMap().tabComplete(player, message.substring(1), new Location(player.getWorld(), blockPosition.getX(), blockPosition.getY(), blockPosition.getZ()));
+             }
+         } catch (CommandException ex) {
+-            player.sendMessage(ChatColor.RED + "An internal error occurred while attempting to tab-complete this command");
++            player.sendMessage(serverConfig.spigot.messages.internalErrorTabComplete);
+             getLogger().log(Level.SEVERE, "Exception when " + player.getName() + " attempted to tab complete " + message, ex);
+         }
+ 

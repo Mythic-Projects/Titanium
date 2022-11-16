@@ -1,0 +1,259 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 29 May 2022 10:00:11 +0200
+Subject: [PATCH] Setup Gradle project
+
+
+diff --git a/.gitignore b/.gitignore
+index edf9e5c3afdfcb9e357974d6536d25bd828d67b0..dfa15b1d499bd8bf1cb6b81441d0d4094a8afad7 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -21,6 +21,9 @@
+ /dist
+ /manifest.mf
+ 
++# Titanium - it's annoy me so yes
++/logs
++
+ # Mac filesystem dust
+ .DS_Store
+ 
+diff --git a/build.gradle b/build.gradle
+new file mode 100644
+index 0000000000000000000000000000000000000000..ce7732115bf7fc3822540780614a6cfeaff69e3a
+--- /dev/null
++++ b/build.gradle
+@@ -0,0 +1,44 @@
++dependencies {
++    // Minecraft libraries start
++    api 'com.google.guava:guava:17.0'
++    api 'com.google.code.gson:gson:2.2.4'
++    api 'net.md-5:bungeecord-chat:1.8-SNAPSHOT'
++    api 'org.yaml:snakeyaml:1.15'
++    api ('com.googlecode.json-simple:json-simple:1.1.1') {
++        transitive = false
++    }
++    api 'org.avaje:ebean:2.8.1'
++    api 'commons-lang:commons-lang:2.6'
++
++    compileOnlyApi 'net.sf.trove4j:trove4j:3.0.3' // provided by CraftBukkit
++    // Minecraft libraries end
++
++    // Titanium libraries start
++    api 'org.apache.commons:commons-lang3:3.12.0' // Titanium - updated commons-lang3 to 3.12.0 // Titanium - Add commons-lang3 to API
++    // Titanium libraries end
++
++    testImplementation 'junit:junit:4.13.2' // Titanium - Updated junit to 4.13.2
++    testImplementation 'org.hamcrest:hamcrest-library:1.3'
++    testImplementation 'net.sf.trove4j:trove4j:3.0.3' // required by tests
++}
++
++task generateApiVersioningFile(type: Copy) {
++    Provider<RegularFile> pomProps = layout.buildDirectory.file "pom.properties"
++    File file = pomProps.get().asFile
++    file.getParentFile().mkdirs()
++    file.createNewFile()
++    file.write "version=${project.version}"
++}
++
++jar {
++    dependsOn generateApiVersioningFile
++    from(layout.buildDirectory.file("pom.properties")) {
++        into("META-INF/maven/${project.group}/${project.name.toLowerCase()}")
++    }
++
++    manifest {
++        attributes(
++                "Automatic-Module-Name": "org.bukkit"
++        )
++    }
++}
+\ No newline at end of file
+diff --git a/pom.xml b/pom.xml
+deleted file mode 100644
+index fe9d6d265b686ae1c373e4fdcd202b16673366f1..0000000000000000000000000000000000000000
+--- a/pom.xml
++++ /dev/null
+@@ -1,161 +0,0 @@
+-
+-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+-    <modelVersion>4.0.0</modelVersion>
+-
+-    <parent>
+-        <groupId>org.github.paperspigot</groupId>
+-        <artifactId>paperspigot-parent</artifactId>
+-        <version>dev-SNAPSHOT</version>
+-    </parent>
+-
+-    <groupId>org.github.paperspigot</groupId>
+-    <artifactId>paperspigot-api</artifactId>
+-    <version>1.8.8-R0.1-SNAPSHOT</version>
+-    <packaging>jar</packaging>
+-
+-    <name>PaperSpigot-API</name>
+-    <url>https://hub.spigotmc.org/stash/projects/PAPER/</url>
+-    <description>An enhanced plugin API for Minecraft servers.</description>
+-
+-    <properties>
+-        <!--PaperSpigot - Bump to 1.8 - This will haunt me -->
+-        <additionalparam>-Xdoclint:none</additionalparam>
+-        <maven.compiler.source>1.8</maven.compiler.source>
+-        <maven.compiler.target>1.8</maven.compiler.target>
+-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+-    </properties>
+-
+-    <!-- just until we get deployment to central approved -->
+-    <distributionManagement>
+-        <repository>
+-            <id>destroystokyo-releases</id>
+-            <url>https://repo.destroystokyo.com/content/repositories/releases/</url>
+-        </repository>
+-        <snapshotRepository>
+-            <id>destroystokyo-snapshots</id>
+-            <url>https://repo.destroystokyo.com/content/repositories/snapshots/</url>
+-        </snapshotRepository>
+-    </distributionManagement>
+-
+-    <!-- required until fixed plexus-compiler-eclipse is deployed -->
+-    <pluginRepositories>
+-        <pluginRepository>
+-            <id>spigotmc-public</id>
+-            <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+-        </pluginRepository>
+-    </pluginRepositories>
+-
+-    <dependencies>
+-        <dependency>
+-            <groupId>net.sf.trove4j</groupId>
+-            <artifactId>trove4j</artifactId>
+-            <version>3.0.3</version>
+-            <!-- Trove Provided by CraftBukkit -->
+-            <scope>provided</scope>
+-        </dependency>
+-        <dependency>
+-            <groupId>commons-lang</groupId>
+-            <artifactId>commons-lang</artifactId>
+-            <version>2.6</version>
+-            <scope>compile</scope>
+-        </dependency>
+-        <dependency>
+-            <groupId>com.googlecode.json-simple</groupId>
+-            <artifactId>json-simple</artifactId>
+-            <version>1.1.1</version>
+-            <type>jar</type>
+-            <scope>compile</scope>
+-        </dependency>
+-        <!-- bundled with Minecraft, should be kept in sync -->
+-        <dependency>
+-            <groupId>com.google.guava</groupId>
+-            <artifactId>guava</artifactId>
+-            <version>17.0</version>
+-            <scope>compile</scope>
+-        </dependency>
+-        <!-- bundled with Minecraft, should be kept in sync -->
+-        <dependency>
+-            <groupId>com.google.code.gson</groupId>
+-            <artifactId>gson</artifactId>
+-          <version>2.2.4</version>
+-        </dependency>
+-        <dependency>
+-            <groupId>org.avaje</groupId>
+-            <artifactId>ebean</artifactId>
+-            <version>2.8.1</version>
+-            <scope>compile</scope>
+-        </dependency>
+-        <dependency>
+-            <groupId>org.yaml</groupId>
+-            <artifactId>snakeyaml</artifactId>
+-            <version>1.15</version>
+-            <scope>compile</scope>
+-        </dependency>
+-        <dependency>
+-            <groupId>net.md-5</groupId>
+-            <artifactId>bungeecord-chat</artifactId>
+-            <version>1.8-SNAPSHOT</version>
+-            <type>jar</type>
+-            <scope>compile</scope>
+-        </dependency>
+-
+-        <!-- testing -->
+-        <dependency>
+-            <groupId>junit</groupId>
+-            <artifactId>junit</artifactId>
+-            <version>4.12</version>
+-            <scope>test</scope>
+-        </dependency>
+-        <dependency>
+-            <groupId>org.hamcrest</groupId>
+-            <artifactId>hamcrest-library</artifactId>
+-            <version>1.3</version>
+-            <scope>test</scope>
+-        </dependency>
+-    </dependencies>
+-
+-    <build>
+-        <plugins>
+-            <plugin>
+-                <groupId>org.apache.maven.plugins</groupId>
+-                <artifactId>maven-compiler-plugin</artifactId>
+-                <!-- versions after this appear to be broken -->
+-                <version>3.1</version>
+-                <configuration>
+-                    <!-- we use the Eclipse compiler as it doesn't need a JDK -->
+-                    <compilerId>eclipse</compilerId>
+-                    <!-- source and target are ignored if this isn't true -->
+-                    <optimize>true</optimize>
+-                </configuration>
+-                <dependencies>
+-                    <!-- we need our custom version as it fixes some bugs on case sensitive file systems -->
+-                    <dependency>
+-                        <groupId>org.codehaus.plexus</groupId>
+-                        <artifactId>plexus-compiler-eclipse</artifactId>
+-                        <version>2.5.0-spigotmc</version>
+-                    </dependency>
+-                </dependencies>
+-            </plugin>
+-            <plugin>
+-                <groupId>org.apache.maven.plugins</groupId>
+-                <artifactId>maven-shade-plugin</artifactId>
+-                <version>2.3</version>
+-                <executions>
+-                    <execution>
+-                        <phase>package</phase>
+-                        <goals>
+-                            <goal>shade</goal>
+-                        </goals>
+-                    </execution>
+-                </executions>
+-                <configuration>
+-                    <!-- utterly useless artifact from shade 2.x -->
+-                    <createDependencyReducedPom>false</createDependencyReducedPom>
+-                    <!-- when downloading via Maven we can pull depends individually -->
+-                    <shadedArtifactAttached>true</shadedArtifactAttached>
+-                </configuration>
+-            </plugin>
+-        </plugins>
+-    </build>
+-</project>
+diff --git a/src/main/java/org/spigotmc/CustomTimingsHandler.java b/src/main/java/org/spigotmc/CustomTimingsHandler.java
+index 7e89b97b60d547c75bde6d54f1512b0277099034..56e932b84ee8cde6a86d7a4f4cc562dd6ee2677d 100644
+--- a/src/main/java/org/spigotmc/CustomTimingsHandler.java
++++ b/src/main/java/org/spigotmc/CustomTimingsHandler.java
+@@ -30,7 +30,6 @@ import co.aikar.timings.NullTimingHandler;
+ import co.aikar.timings.Timing;
+ import co.aikar.timings.Timings;
+ import co.aikar.timings.TimingsManager;
+-import sun.reflect.Reflection;
+ 
+ import java.lang.reflect.Method;
+ import java.util.logging.Level;
+@@ -52,7 +51,7 @@ public final class CustomTimingsHandler {
+ 
+         Plugin plugin = null;
+         try {
+-             plugin = TimingsManager.getPluginByClassloader(Reflection.getCallerClass(2));
++             //plugin = TimingsManager.getPluginByClassloader(Reflection.getCallerClass(2)); [PandaSpigot-0006] Fix compatibility with new Java versions
+         } catch (Exception ignored) {}
+ 
+         new AuthorNagException("Deprecated use of CustomTimingsHandler. Please Switch to Timings.of ASAP").printStackTrace();

@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Mon, 23 May 2022 22:51:54 +0200
+Subject: [PATCH] Implement [Paper-0350] Use a Queue for Queueing Commands
+
+
+diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
+index d057a8bf01135a06ef629a0c640da947816bd722..c6b8a9d8ce755aa94c0ab6283936938eb7381924 100644
+--- a/src/main/java/net/minecraft/server/DedicatedServer.java
++++ b/src/main/java/net/minecraft/server/DedicatedServer.java
+@@ -30,7 +30,7 @@ import org.bukkit.event.server.RemoteServerCommandEvent;
+ public class DedicatedServer extends MinecraftServer implements IMinecraftServer {
+ 
+     private static final Logger LOGGER = LogManager.getLogger();
+-    private final List<ServerCommand> l = Collections.synchronizedList(Lists.<ServerCommand>newArrayList()); // CraftBukkit - fix decompile error
++    private final java.util.Queue<ServerCommand> l = new java.util.concurrent.ConcurrentLinkedQueue<>(); // Paper - use a proper queue
+     private RemoteStatusListener m;
+     private RemoteControlListener n;
+     public PropertyManager propertyManager;
+@@ -428,8 +428,10 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+ 
+     public void aO() {
+         SpigotTimings.serverCommandTimer.startTiming(); // Spigot
+-        while (!this.l.isEmpty()) {
+-            ServerCommand servercommand = (ServerCommand) this.l.remove(0);
++        // [Paper-0350] start - use a Queue for Queueing Commands
++        ServerCommand servercommand;
++        while ((servercommand = this.l.poll()) != null) {
++            // [Paper-0350] end - use a Queue for Queueing Commands
+ 
+             // CraftBukkit start - ServerCommand for preprocessing
+             ServerCommandEvent event = new ServerCommandEvent(console, servercommand.command);
