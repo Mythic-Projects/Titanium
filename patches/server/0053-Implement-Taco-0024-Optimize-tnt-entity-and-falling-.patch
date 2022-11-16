@@ -125,12 +125,13 @@ index 0000000000000000000000000000000000000000..da1cee705f44668506d3d72f1a1b3fc5
 +}
 diff --git a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..3a356dd3567b3b9f151a6ed5a699a5c9ecaa31a8
+index 0000000000000000000000000000000000000000..7c32cdd78d8ba3a6ba05f85286df3171a5bd21fd
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
-@@ -0,0 +1,22 @@
+@@ -0,0 +1,24 @@
 +package net.titanium.config;
 +
++import eu.okaeri.configs.annotation.Comment;
 +import eu.okaeri.configs.annotation.NameModifier;
 +import eu.okaeri.configs.annotation.NameStrategy;
 +import eu.okaeri.configs.annotation.Names;
@@ -142,17 +143,18 @@ index 0000000000000000000000000000000000000000..3a356dd3567b3b9f151a6ed5a699a5c9
 +
 +    public static class Tnt extends TitaniumConfigSection {
 +
-+        //TODO comment this (See TacoSpigot-0024)
++        @Comment("Whether optimize movement if tnt are traveling on long distance.")
++        @Comment("This option may not reflect vanilla behavior.")
 +        public boolean optimizeMovement = false;
 +
-+        //TODO comment this (See TacoSpigot-0024)
++        @Comment("Whether calculation of explosions in liquids should be processed.")
 +        public boolean optimizeLiquidExplosions = true;
 +
 +    }
 +
 +}
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 95c9ee2e9e836fa68399a270c1526bcbf9fb56e5..860fd4a57935da6d8c6fd81da330868247955f88 100644
+index 4b57e6691233ddc210536ccb9bbc4ed3acdd2ee5..f363e1398c02dd90736fc61b02be89e8e446496f 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -47,6 +47,9 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -165,7 +167,7 @@ index 95c9ee2e9e836fa68399a270c1526bcbf9fb56e5..860fd4a57935da6d8c6fd81da3308682
      @Comment("Configuration from ion.yml")
      public IonConfig ion = new IonConfig();
  
-@@ -133,6 +136,11 @@ public class TitaniumConfig extends TitaniumConfigSection {
+@@ -135,6 +138,11 @@ public class TitaniumConfig extends TitaniumConfigSection {
              }
              this.paperConfigHelper.saveSectionToFile();
  
@@ -177,7 +179,7 @@ index 95c9ee2e9e836fa68399a270c1526bcbf9fb56e5..860fd4a57935da6d8c6fd81da3308682
              if (this.ionConfigHelper == null) {
                  this.ionConfigHelper = new LegacyConfigHelper(this.ion, "ion", 1);
              }
-@@ -206,6 +214,13 @@ public class TitaniumConfig extends TitaniumConfigSection {
+@@ -208,6 +216,13 @@ public class TitaniumConfig extends TitaniumConfigSection {
          return this.paperConfigHelper;
      }
  

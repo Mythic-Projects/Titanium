@@ -1,0 +1,39 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: ysl3000 <yannicklamprecht@live.de>
+Date: Wed, 3 Nov 2021 14:29:02 -0400
+Subject: [PATCH] Implement [Paper-0614] Player Chunk Load/Unload Events by
+ ysl3000
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
+index f8cd8bc2c161563fd8f49a0a31bb96814ab964a9..6c0ab90c7bddac3022fe7e9a7ac52147f7b77aa4 100644
+--- a/src/main/java/net/minecraft/server/EntityPlayer.java
++++ b/src/main/java/net/minecraft/server/EntityPlayer.java
+@@ -253,6 +253,11 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+                             chunkList.add(chunk);
+                             tileEntities.addAll(chunk.tileEntities.values()); // CraftBukkit - Get tile entities directly from the chunk instead of the world
+                             iterator1.remove();
++                            // Paper start
++                            if (io.papermc.paper.event.packet.PlayerChunkLoadEvent.getHandlerList().getRegisteredListeners().length > 0) {
++                                new io.papermc.paper.event.packet.PlayerChunkLoadEvent(chunk.bukkitChunk, this.getBukkitEntity()).callEvent(); // Paper
++                            }
++                            // Paper end
+                         }
+                     }
+                 } else {
+diff --git a/src/main/java/net/minecraft/server/PlayerChunkMap.java b/src/main/java/net/minecraft/server/PlayerChunkMap.java
+index 7aa2b129d86159522c2ace7fbc952e5619f7898c..a8c53d1ca34df030033f576ade18b85592356125 100644
+--- a/src/main/java/net/minecraft/server/PlayerChunkMap.java
++++ b/src/main/java/net/minecraft/server/PlayerChunkMap.java
+@@ -427,6 +427,11 @@ public class PlayerChunkMap {
+                 this.players.remove(entityplayer); // CraftBukkit
+                 this.b.remove(entityplayer);
+                 entityplayer.chunkCoordIntPairQueue.remove(this.location);
++                // Paper start
++                if (io.papermc.paper.event.packet.PlayerChunkUnloadEvent.getHandlerList().getRegisteredListeners().length > 0) {
++                    new io.papermc.paper.event.packet.PlayerChunkUnloadEvent(chunk.bukkitChunk, entityplayer.getBukkitEntity()).callEvent();
++                }
++                // Paper end
+                 if (this.b.isEmpty()) {
+                     long i = (long) this.location.x + 2147483647L | (long) this.location.z + 2147483647L << 32;
+ 

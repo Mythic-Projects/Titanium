@@ -52,14 +52,15 @@ index dbaeee4c1979f39a0dd391b05ff781aaba573554..42c3f113f3cf597e4bf49231a53b4b99
                  double d10 = d0;
                  double d11 = d1;
 diff --git a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
-index 3a356dd3567b3b9f151a6ed5a699a5c9ecaa31a8..c8eb27730b207aca7b3ae6356df97badf82f87a3 100644
+index 7c32cdd78d8ba3a6ba05f85286df3171a5bd21fd..1ab14d47a202afa2b530350745815edc38d3a8d6 100644
 --- a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
 +++ b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
-@@ -7,6 +7,9 @@ import eu.okaeri.configs.annotation.Names;
+@@ -8,6 +8,10 @@ import eu.okaeri.configs.annotation.Names;
  @Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
  public class TacoSpigotWorldConfig extends TitaniumConfigSection {
  
-+    //TODO comment this (See TacoSpigot-0025)
++    @Comment("Cannoning on east and west normally is not calculated properly.")
++    @Comment("Enabling this option resolve this issue, but it's not vanilla behavior.")
 +    public boolean fixEastWestCannoning = false;
 +
      public Tnt tnt = new Tnt();

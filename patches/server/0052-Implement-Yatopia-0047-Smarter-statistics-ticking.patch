@@ -29,14 +29,16 @@ index 318477b307c5b634be908b89caa910db4f810a7c..ed464832567b67660553459621240b99
  
      public void a(Statistic statistic, int i) {}
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index f3cbbcaba0764596e1207d3e7446765e7605796d..95c9ee2e9e836fa68399a270c1526bcbf9fb56e5 100644
+index e6e862b654eeff89abde71e32b762121ddf1db79..4b57e6691233ddc210536ccb9bbc4ed3acdd2ee5 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
-@@ -68,6 +68,9 @@ public class TitaniumConfig extends TitaniumConfigSection {
+@@ -68,6 +68,11 @@ public class TitaniumConfig extends TitaniumConfigSection {
  
      }
  
-+    //TODO comment this
++    @Comment("How often player statistics (ESC -> Statistics) should be ticked.")
++    @Comment("Default vanilla value is every 1 tick, but every 1 second (20 ticks) is enough in most cases.")
++    @Comment("Making this value even bigger could be good idea and have good impact on performance.")
 +    public int playerTimeStatisticsInterval = 20;
 +
      public Chunk chunk = new Chunk();

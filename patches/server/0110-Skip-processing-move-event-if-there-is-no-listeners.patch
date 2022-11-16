@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Mon, 13 Jun 2022 18:22:44 +0200
+Subject: [PATCH] Skip processing move event if there is no listeners
+
+
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index e070a093877a608ae853b653fff303848df50da8..83a4a923d127cc1ced3c092e1ba9181947470879 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -268,7 +268,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+                     this.lastPitch = to.getPitch();
+ 
+                     // Skip the first time we do this
+-                    if (true) { // Spigot - don't skip any move events
++                    if (PlayerMoveEvent.getHandlerList().getRegisteredListeners().length > 0) { // Titanium - skip processing move event if there is no listeners // Spigot - don't skip any move events
+                         Location oldTo = to.clone();
+                         PlayerMoveEvent event = new PlayerMoveEvent(player, from, to);
+                         this.server.getPluginManager().callEvent(event);

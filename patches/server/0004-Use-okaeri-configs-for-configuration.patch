@@ -2562,7 +2562,7 @@ index 0000000000000000000000000000000000000000..b4a4615d863899c930f1d08dccbaae99
 +}
 diff --git a/src/main/java/net/titanium/config/PaperConfig.java b/src/main/java/net/titanium/config/PaperConfig.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..7cd09808bec3db8fc87c3e75e61b01b08ca86220
+index 0000000000000000000000000000000000000000..33f347746dc8023677a4262bf968e449d752f008
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/PaperConfig.java
 @@ -0,0 +1,124 @@
@@ -2605,7 +2605,7 @@ index 0000000000000000000000000000000000000000..7cd09808bec3db8fc87c3e75e61b01b0
 +        public int playerAutoSaveRate = -1;
 +
 +        @Comment("Maximum number of player data to save per tick.")
-+        @CustomKey("max-players-auto-save-per-tic")
++        @CustomKey("max-players-auto-save-per-tick")
 +        public int maxPlayersAutoSavePerTick_ = 10;
 +        @Exclude
 +        public int maxPlayersAutoSavePerTick = 10;
@@ -3005,7 +3005,7 @@ index 0000000000000000000000000000000000000000..9897a8ece0633cd743139d38df73239e
 +}
 diff --git a/src/main/java/net/titanium/config/SpigotConfig.java b/src/main/java/net/titanium/config/SpigotConfig.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..17ea0ffbad5e4d610370942e1ff51a71154b12a1
+index 0000000000000000000000000000000000000000..8b3ea0b49d1f6603dc20cf177493a4b561f5bec5
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/SpigotConfig.java
 @@ -0,0 +1,253 @@
@@ -3174,7 +3174,7 @@ index 0000000000000000000000000000000000000000..17ea0ffbad5e4d610370942e1ff51a71
 +                .add("tellraw")
 +                .build();
 +
-+        //TODO comment
++        +        @Comment("Which commands should be excluded from spamming disconnect (if player use commands to often servers disconnect him).")
 +        public Set<String> spamExclusions = ImmutableSet.<String>builder()
 +                .add("/skill")
 +                .build();
@@ -3264,10 +3264,10 @@ index 0000000000000000000000000000000000000000..17ea0ffbad5e4d610370942e1ff51a71
 +}
 diff --git a/src/main/java/net/titanium/config/SpigotWorldConfig.java b/src/main/java/net/titanium/config/SpigotWorldConfig.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..ef4fd3047c99b4e8ee7497b876213b5b3ca99fc2
+index 0000000000000000000000000000000000000000..47478b7caa7149773d8b7a9377a8999e4eca9a53
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/SpigotWorldConfig.java
-@@ -0,0 +1,315 @@
+@@ -0,0 +1,314 @@
 +package net.titanium.config;
 +
 +import com.google.common.collect.ImmutableSet;
@@ -3290,7 +3290,6 @@ index 0000000000000000000000000000000000000000..ef4fd3047c99b4e8ee7497b876213b5b
 +
 +    public AntiXray antiXray = new AntiXray();
 +
-+    //TODO Create xray instance
 +    public static class AntiXray extends TitaniumConfigSection {
 +
 +        @Comment("Whether to enable the anti-xray module.")
@@ -3585,7 +3584,7 @@ index 0000000000000000000000000000000000000000..ef4fd3047c99b4e8ee7497b876213b5b
 +}
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..d448513ce3dd39aa38abb9d3c0b024ba4417a074
+index 0000000000000000000000000000000000000000..f443fb1c41db03f597f60a4f50bed9e2b08d90f7
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -0,0 +1,189 @@
@@ -3622,12 +3621,12 @@ index 0000000000000000000000000000000000000000..d448513ce3dd39aa38abb9d3c0b024ba
 +
 +    // For tests to work properly
 +    @Exclude
-+    private static TitaniumConfig DEFAULT_INSTANCE = new TitaniumConfig();
++    private static final TitaniumConfig DEFAULT_INSTANCE = new TitaniumConfig();
 +    @Exclude
 +    private static TitaniumConfig INSTANCE;
 +
 +    @Exclude
-+    private static Map<String, Pair<String, Command>> COMMANDS = new HashMap<>();
++    private static final Map<String, Pair<String, Command>> COMMANDS = new HashMap<>();
 +
 +    @Comment("Configuration from bukkit.yml")
 +    public BukkitConfig bukkit = new BukkitConfig();

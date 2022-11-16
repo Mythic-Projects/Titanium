@@ -27,11 +27,11 @@ index b48eeb63ad61b18a630f2feb4fd6203e5e3e6c80..bec9b5e1bd8609dc33d8263b69c11848
      }
  
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index b7843b6b62a8f6c0d03efe267a826ec098920981..96a5372338d0bd372e4a94d6b9f159a1768f5b53 100644
+index 94d101d36bc0076e010f0991385222386d1ac746..18d6d367eb1958a8b131e2051cf5ce70f88b4c63 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
-@@ -74,6 +74,11 @@ public class TitaniumConfig extends TitaniumConfigSection {
-     //TODO comment this
+@@ -76,6 +76,11 @@ public class TitaniumConfig extends TitaniumConfigSection {
+     @Comment("Making this value even bigger could be good idea and have good impact on performance.")
      public int playerTimeStatisticsInterval = 20;
  
 +    @Comment("The max NBT size in bytes. The default value is 2097152 which is ~2Mb - it's insane big.")

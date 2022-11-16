@@ -47,10 +47,10 @@ index 8fa99c50f679a275f00cd1e9a7fa99c8f91274b8..1b7b28f9897f04141bdbaa86180fc923
                      ChunkSection[] achunksection = chunk.getSections();
                      int j1 = achunksection.length;
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 860fd4a57935da6d8c6fd81da330868247955f88..1be660fed7a1805c4461cfd25d51bda55b40cfcb 100644
+index f363e1398c02dd90736fc61b02be89e8e446496f..cfb948386b3e4dd36ea51ef3a860420117dc3efe 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
-@@ -102,6 +102,8 @@ public class TitaniumConfig extends TitaniumConfigSection {
+@@ -104,6 +104,8 @@ public class TitaniumConfig extends TitaniumConfigSection {
      @Comment("Enable this option only if some of your plugins are not compatible with the new configs.")
      public boolean enableLegacyConfigFiles = false;
  
@@ -61,10 +61,10 @@ index 860fd4a57935da6d8c6fd81da330868247955f88..1be660fed7a1805c4461cfd25d51bda5
      public static class Commands extends TitaniumConfigSection {
 diff --git a/src/main/java/net/titanium/config/TitaniumWorldConfig.java b/src/main/java/net/titanium/config/TitaniumWorldConfig.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..1b1bc1384c428efe05b4de2d4ecefc355398fe51
+index 0000000000000000000000000000000000000000..d484a5404de1b00d1869fe1b6b1f4987d041f162
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/TitaniumWorldConfig.java
-@@ -0,0 +1,19 @@
+@@ -0,0 +1,23 @@
 +package net.titanium.config;
 +
 +import eu.okaeri.configs.annotation.NameModifier;
@@ -78,7 +78,11 @@ index 0000000000000000000000000000000000000000..1b1bc1384c428efe05b4de2d4ecefc35
 +
 +    public static class DisabledGamerules extends TitaniumConfigSection {
 +
-+        //TODO comment this
++        @Comment("Whether gamerule randomTickSpeed should be enabled or not.")
++        @Comment("Plants growth, leaf decay, fire spread etc. depends on this value.")
++        @Comment("Normally we have to cast String to Integer every tick which is costly.")
++        @Comment("If this option is enabled, this gamerule is disabled and we use default vanilla value which is 3.")
++        @Comment("If you know you won't use this gamerule you should enable this option.")
 +        public boolean randomTickSpeed = false;
 +
 +    }

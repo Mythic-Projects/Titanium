@@ -5,14 +5,16 @@ Subject: [PATCH] Implement [FlamePaper-0030] Adaptive chunk GC
 
 
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 1be660fed7a1805c4461cfd25d51bda55b40cfcb..1ab7361bd3939448ca9015e7d88a496d4d9bd107 100644
+index cfb948386b3e4dd36ea51ef3a860420117dc3efe..f5e6cb99120cac3e991aaffce560613b6266d3e2 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
-@@ -78,6 +78,9 @@ public class TitaniumConfig extends TitaniumConfigSection {
+@@ -80,6 +80,11 @@ public class TitaniumConfig extends TitaniumConfigSection {
  
      public static class Chunk extends TitaniumConfigSection {
  
-+        //TODO comment this
++        @Comment("Normally we use bukkit.chunk-gc.load-threshold - it's define how many chunks should be loaded before running GC on them.")
++        @Comment("This option make that value more flexible and depends it on view distance and player count (playerCount * viewDistance^2).")
++        @Comment("We don't want to have a lots chunks loaded if we have empty server, but having to few on full server is not good idea too (especially if some chunks would be unloaded and almost again loaded).")
 +        public boolean adaptiveChunkGC = false;
 +
          @Comment("Enabling this option prevents entities from moving in unloaded chunk (and for eg. falling down in \"slow-motion\")")
