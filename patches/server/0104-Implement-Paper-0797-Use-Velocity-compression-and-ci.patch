@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0797] Use Velocity compression and cipher
 
 
 diff --git a/build.gradle b/build.gradle
-index d264d672ec5f5e22af62c16b0fc34da224b6c65a..8eb66ca508b0b3e7c8255496721b8ede212af650 100644
+index b7c8d830e6a78191d1e902f7a8ce69ca16ed5ef9..ee2482a1f25ffd8353129cca8f29134ca96e26fd 100644
 --- a/build.gradle
 +++ b/build.gradle
 @@ -26,6 +26,11 @@ dependencies {
@@ -17,7 +17,7 @@ index d264d672ec5f5e22af62c16b0fc34da224b6c65a..8eb66ca508b0b3e7c8255496721b8ede
 +    implementation 'net.minecrell:terminalconsoleappender:1.3.0'
 +    implementation 'org.jline:jline-terminal-jansi:3.20.0'
 +    // PandaSpigot end
-+    implementation 'com.velocitypowered:velocity-native:1.1.0-SNAPSHOT' // Nacho - Use Velocity natives & compression
++    implementation 'com.velocitypowered:velocity-native:1.1.9' // Nacho - Use Velocity natives & compression
      implementation 'com.eatthepath:fast-uuid:0.2.0' // Nacho - Use jchambers' FAST UUID methods
      // Titanium libraries end
  

@@ -3005,7 +3005,7 @@ index 0000000000000000000000000000000000000000..9897a8ece0633cd743139d38df73239e
 +}
 diff --git a/src/main/java/net/titanium/config/SpigotConfig.java b/src/main/java/net/titanium/config/SpigotConfig.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..8b3ea0b49d1f6603dc20cf177493a4b561f5bec5
+index 0000000000000000000000000000000000000000..349bb68f0d8c2da96e69ce8d50b6bce76276db8a
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/SpigotConfig.java
 @@ -0,0 +1,253 @@
@@ -3174,7 +3174,7 @@ index 0000000000000000000000000000000000000000..8b3ea0b49d1f6603dc20cf177493a4b5
 +                .add("tellraw")
 +                .build();
 +
-+        +        @Comment("Which commands should be excluded from spamming disconnect (if player use commands to often servers disconnect him).")
++        @Comment("Which commands should be excluded from spamming disconnect (if player use commands to often servers disconnect him).")
 +        public Set<String> spamExclusions = ImmutableSet.<String>builder()
 +                .add("/skill")
 +                .build();

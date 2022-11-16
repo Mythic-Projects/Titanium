@@ -61,12 +61,13 @@ index f363e1398c02dd90736fc61b02be89e8e446496f..cfb948386b3e4dd36ea51ef3a8604201
      public static class Commands extends TitaniumConfigSection {
 diff --git a/src/main/java/net/titanium/config/TitaniumWorldConfig.java b/src/main/java/net/titanium/config/TitaniumWorldConfig.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..d484a5404de1b00d1869fe1b6b1f4987d041f162
+index 0000000000000000000000000000000000000000..026aeb4004e8a4113988c6294557238ecde97eec
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/TitaniumWorldConfig.java
-@@ -0,0 +1,23 @@
+@@ -0,0 +1,24 @@
 +package net.titanium.config;
 +
++import eu.okaeri.configs.annotation.Comment;
 +import eu.okaeri.configs.annotation.NameModifier;
 +import eu.okaeri.configs.annotation.NameStrategy;
 +import eu.okaeri.configs.annotation.Names;

@@ -20,7 +20,7 @@ index 73c16b1d532c2e8d82a47db3ef47a2e44aa4bd8d..f92f6c5d7d68a6d4d9abfa33207c17c9
  
 diff --git a/build.gradle b/build.gradle
 new file mode 100644
-index 0000000000000000000000000000000000000000..2b26d7fba239de14fdfbc51c48d7bc7ea67c1433
+index 0000000000000000000000000000000000000000..9bc244ed1c91617c202ed7f5e931c61bd459f790
 --- /dev/null
 +++ b/build.gradle
 @@ -0,0 +1,78 @@
@@ -41,7 +41,7 @@ index 0000000000000000000000000000000000000000..2b26d7fba239de14fdfbc51c48d7bc7e
 +    // Titanium end
 +    implementation 'commons-io:commons-io:2.4'
 +    implementation 'commons-codec:commons-codec:1.9'
-+    implementation 'net.sf.jopt-simple:jopt-simple:5.0' // Titanium - updated jopt-simple to 5.0
++    implementation 'net.sf.jopt-simple:jopt-simple:3.2'
 +    implementation 'org.xerial:sqlite-jdbc:3.7.2'
 +    implementation 'mysql:mysql-connector-java:8.0.22'
 +    implementation 'com.mojang:authlib:1.5.21'
