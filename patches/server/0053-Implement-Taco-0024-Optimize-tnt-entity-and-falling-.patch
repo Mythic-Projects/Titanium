@@ -125,7 +125,7 @@ index 0000000000000000000000000000000000000000..da1cee705f44668506d3d72f1a1b3fc5
 +}
 diff --git a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..7c32cdd78d8ba3a6ba05f85286df3171a5bd21fd
+index 0000000000000000000000000000000000000000..8c401271e67be769b197a3f46357852ce0e38a7f
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
 @@ -0,0 +1,24 @@
@@ -147,8 +147,8 @@ index 0000000000000000000000000000000000000000..7c32cdd78d8ba3a6ba05f85286df3171
 +        @Comment("This option may not reflect vanilla behavior.")
 +        public boolean optimizeMovement = false;
 +
-+        @Comment("Whether calculation of explosions in liquids should be processed.")
-+        public boolean optimizeLiquidExplosions = true;
++        @Comment("Whether to disable explosions processing if tnt is in water.")
++        public boolean optimizeLiquidExplosions = false;
 +
 +    }
 +

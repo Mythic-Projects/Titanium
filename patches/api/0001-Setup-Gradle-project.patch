@@ -20,10 +20,10 @@ index edf9e5c3afdfcb9e357974d6536d25bd828d67b0..dfa15b1d499bd8bf1cb6b81441d0d409
  
 diff --git a/build.gradle b/build.gradle
 new file mode 100644
-index 0000000000000000000000000000000000000000..ce7732115bf7fc3822540780614a6cfeaff69e3a
+index 0000000000000000000000000000000000000000..a9a3e5af8057128b24b51fe07a7cd2914b205991
 --- /dev/null
 +++ b/build.gradle
-@@ -0,0 +1,44 @@
+@@ -0,0 +1,56 @@
 +dependencies {
 +    // Minecraft libraries start
 +    api 'com.google.guava:guava:17.0'
@@ -56,6 +56,18 @@ index 0000000000000000000000000000000000000000..ce7732115bf7fc3822540780614a6cfe
 +    file.write "version=${project.version}"
 +}
 +
++shadowJar {
++    dependsOn generateApiVersioningFile
++    from(layout.buildDirectory.file("pom.properties")) {
++        into("META-INF/maven/${project.group}/${project.name.toLowerCase()}")
++    }
++
++    manifest {
++        attributes(
++                "Automatic-Module-Name": "org.bukkit"
++        )
++    }
++}
 +jar {
 +    dependsOn generateApiVersioningFile
 +    from(layout.buildDirectory.file("pom.properties")) {

@@ -184,10 +184,10 @@ index 282ab263da89ab21364c48044b079b2b17473f67..eb839d9d7f1ddfbb888aba715b68d98a
  }
 diff --git a/src/main/java/net/titanium/config/IonWorldConfig.java b/src/main/java/net/titanium/config/IonWorldConfig.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..b368670289f330fad45a6b144308f47279cbc5ec
+index 0000000000000000000000000000000000000000..65e8ba65a2f816fe6fec48a296603ad8e284abd7
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/IonWorldConfig.java
-@@ -0,0 +1,22 @@
+@@ -0,0 +1,21 @@
 +package net.titanium.config;
 +
 +import eu.okaeri.configs.annotation.Comment;
@@ -203,8 +203,7 @@ index 0000000000000000000000000000000000000000..b368670289f330fad45a6b144308f472
 +    public static class Movement extends TitaniumConfigSection {
 +
 +        @Comment("Does entities movements should be cached.")
-+        @Comment("Enabled by default because shouldn't cause any bugs.")
-+        @Comment("Disable this if some bugs actually occur.")
++        @Comment("It will cache entities movement data and re-use them if entity didn't moved.")
 +        public boolean cache = false;
 +
 +    }

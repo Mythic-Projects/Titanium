@@ -122,7 +122,7 @@ index 0000000000000000000000000000000000000000..d37dc29092e6ce833c512388ff0ea6b8
 +
 +}
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 8acac454ab809d4720f23cb098c33045681240de..d3f0ec6d7a921d17895f927c904d2f969a26ff56 100644
+index add4cca9a0650ce12fe112e51e367b0fa64a6c87..2455c5cb00dcd8ebee840dc1ffcf9f623f9af514 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
 @@ -137,6 +137,7 @@ public abstract class Entity implements ICommandListener {
@@ -197,10 +197,10 @@ index 8e9597417845af723d1626313fd9a70ecd3e304f..651e5bfa07c9ccba74c223e402ee64a4
              // CraftBukkit start - Remove useless error spam, just return
              // EntityTrackerEntry.p.warn("Fetching addPacket for removed entity");
 diff --git a/src/main/java/net/titanium/config/IonWorldConfig.java b/src/main/java/net/titanium/config/IonWorldConfig.java
-index b368670289f330fad45a6b144308f47279cbc5ec..3e7abe0200a387d5df865206933f9e9ddf49db19 100644
+index 65e8ba65a2f816fe6fec48a296603ad8e284abd7..06416f52ee82e521f5a1a17f7aee631f95b43052 100644
 --- a/src/main/java/net/titanium/config/IonWorldConfig.java
 +++ b/src/main/java/net/titanium/config/IonWorldConfig.java
-@@ -19,4 +19,14 @@ public class IonWorldConfig extends TitaniumConfigSection {
+@@ -18,4 +18,14 @@ public class IonWorldConfig extends TitaniumConfigSection {
  
      }
  
