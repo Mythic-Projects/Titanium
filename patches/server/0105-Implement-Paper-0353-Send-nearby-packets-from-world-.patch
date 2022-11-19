@@ -58,7 +58,7 @@ index 644a6e6af7805df56de96cdf0d148bbb92221911..0754fa70a81bff330c77b01c929d823f
                  double d5 = d1 - entityplayer.locY;
                  double d6 = d2 - entityplayer.locZ;
 diff --git a/src/main/java/net/minecraft/server/WorldManager.java b/src/main/java/net/minecraft/server/WorldManager.java
-index 98164f25323ae72ad813ffff8e659a0d284decd4..7a9027fc6d22989e6ec84c77c51ce3ded3a7310c 100644
+index 55a2112d2ce3a5ccd4868888c4a529605ef54c34..c3bda441dfa2f59a0570d578676a6d3e9765fdb6 100644
 --- a/src/main/java/net/minecraft/server/WorldManager.java
 +++ b/src/main/java/net/minecraft/server/WorldManager.java
 @@ -29,8 +29,8 @@ public class WorldManager implements IWorldAccess {
@@ -81,7 +81,7 @@ index 98164f25323ae72ad813ffff8e659a0d284decd4..7a9027fc6d22989e6ec84c77c51ce3de
      }
  
      public void a(int i, BlockPosition blockposition, int j) {
-@@ -53,19 +53,25 @@ public class WorldManager implements IWorldAccess {
+@@ -53,24 +53,30 @@ public class WorldManager implements IWorldAccess {
      }
  
      public void b(int i, BlockPosition blockposition, int j) {
@@ -98,7 +98,6 @@ index 98164f25323ae72ad813ffff8e659a0d284decd4..7a9027fc6d22989e6ec84c77c51ce3de
 +        java.util.List<? extends EntityHuman> list = entity != null ? entity.world.players : this.a.getPlayerList().v();
 +        Iterator<? extends EntityHuman> iterator = list.iterator();
 +
-         PacketPlayOutBlockBreakAnimation packet = null; // SportPaper - cache packet
          while (iterator.hasNext()) {
 -            EntityPlayer entityplayer = (EntityPlayer) iterator.next();
 +            EntityHuman human = iterator.next();
@@ -111,6 +110,13 @@ index 98164f25323ae72ad813ffff8e659a0d284decd4..7a9027fc6d22989e6ec84c77c51ce3de
                  double d0 = (double) blockposition.getX() - entityplayer.locX;
                  double d1 = (double) blockposition.getY() - entityplayer.locY;
                  double d2 = (double) blockposition.getZ() - entityplayer.locZ;
+ 
+                 // CraftBukkit start
+-                if (entityhuman != null && entityhuman instanceof EntityPlayer && !entityplayer.getBukkitEntity().canSee(((EntityPlayer) entityhuman).getBukkitEntity())) {
++                if (entityhuman instanceof EntityPlayer && !entityplayer.getBukkitEntity().canSee(((EntityPlayer) entityhuman).getBukkitEntity())) {
+                     continue;
+                 }
+                 // CraftBukkit end
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
 index 3ff74dd9b95f1474739eaaf133e441a96c294f72..ff8ac6c5270ce40a21c4d9519a09c5ede68b1072 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java

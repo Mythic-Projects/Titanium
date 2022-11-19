@@ -91,3 +91,30 @@ index 0000000000000000000000000000000000000000..5eb283c13613d4b9dd6066c813f3936b
 +        return handlers;
 +    }
 +}
+diff --git a/src/main/java/org/bukkit/event/Event.java b/src/main/java/org/bukkit/event/Event.java
+index 6677e1bd6f5ae4385d3da9fe39caaa75468ee1fa..47dbc7218c8511bef2c83eee9b6a7156ebfa6e0e 100644
+--- a/src/main/java/org/bukkit/event/Event.java
++++ b/src/main/java/org/bukkit/event/Event.java
+@@ -33,6 +33,22 @@ public abstract class Event {
+         this.async = isAsync;
+     }
+ 
++    // Paper start
++    /**
++     * Calls the event and tests if cancelled.
++     *
++     * @return false if event was cancelled, if cancellable. otherwise true.
++     */
++    public boolean callEvent() {
++        org.bukkit.Bukkit.getPluginManager().callEvent(this);
++        if (this instanceof Cancellable) {
++            return !((Cancellable) this).isCancelled();
++        } else {
++            return true;
++        }
++    }
++    // Paper end
++
+     /**
+      * Convenience method for providing a user-friendly identifier. By
+      * default, it is the event's class's {@linkplain Class#getSimpleName()

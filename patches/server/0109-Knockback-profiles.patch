@@ -4,8 +4,31 @@ Date: Mon, 13 Jun 2022 17:56:45 +0200
 Subject: [PATCH] Knockback profiles
 
 
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index 2455c5cb00dcd8ebee840dc1ffcf9f623f9af514..fd2c4e56827cd0366aee757d1ef0a6291e1a3241 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -1807,6 +1807,18 @@ public abstract class Entity implements ICommandListener {
+         this.b(1, flag);
+     }
+ 
++    // Nacho start
++    public boolean extraKnockback;
++
++    public void setExtraKnockback(boolean flag) {
++        this.extraKnockback = flag;
++    }
++
++    public boolean isExtraKnockback() {
++        return this.extraKnockback;
++    }
++    // Nacho end
++
+     public boolean isSprinting() {
+         return this.g(3);
+     }
 diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
-index 7b814c1f001626a2c84239544e7c0f33ae4b3b51..2b7aa9e699e6cbd225b6b38b6d9a04db08190402 100644
+index 7b814c1f001626a2c84239544e7c0f33ae4b3b51..dfce6b03a0a16f71a328b44165148e7866067065 100644
 --- a/src/main/java/net/minecraft/server/EntityHuman.java
 +++ b/src/main/java/net/minecraft/server/EntityHuman.java
 @@ -10,6 +10,7 @@ import java.util.UUID;
@@ -25,7 +48,7 @@ index 7b814c1f001626a2c84239544e7c0f33ae4b3b51..2b7aa9e699e6cbd225b6b38b6d9a04db
                      ++i;
                  }
  
-@@ -1004,10 +1005,19 @@ public abstract class EntityHuman extends EntityLiving {
+@@ -1004,10 +1005,22 @@ public abstract class EntityHuman extends EntityLiving {
  
                      if (flag2) {
                          if (i > 0) {
@@ -34,21 +57,24 @@ index 7b814c1f001626a2c84239544e7c0f33ae4b3b51..2b7aa9e699e6cbd225b6b38b6d9a04db
 +                            KnockbackProfile kb = (this.getKnockbackProfile() == null) ? world.getServer().titanium().getKnockbackProfile() : this.getKnockbackProfile();
 +
 +                            if (this.isExtraKnockback()) {
-+                                entity.g(-MathHelper.sin((float) (this.yaw * Math.PI / 180.0F)) * (float) i * kb.getWTapExtraHorizontal(), kb.getWTapExtraVertical(), MathHelper.cos((float) (this.yaw * Math.PI / 180.0F)) * (float) i * kb.getWTapExtraHorizontal());
++                                entity.g(-MathHelper.sin(this.yaw * 3.1415927F / 180.0F) * (float) i * kb.getWTapExtraHorizontal(), kb.getWTapExtraVertical(), MathHelper.cos(this.yaw * 3.1415927F / 180.0F) * (float) i * kb.getWTapExtraHorizontal());
 +                            } else {
-+                                entity.g(-MathHelper.sin((float) (this.yaw * Math.PI / 180.0F)) * (float) i * kb.getExtraHorizontal(), kb.getExtraVertical(), MathHelper.cos((float) (this.yaw * Math.PI / 180.0F)) * (float) i * kb.getExtraHorizontal());
++                                entity.g(-MathHelper.sin(this.yaw * 3.1415927F / 180.0F) * (float) i * kb.getExtraHorizontal(), kb.getExtraVertical(), MathHelper.cos(this.yaw * 3.1415927F / 180.0F) * (float) i * kb.getExtraHorizontal());
 +                            }
                              this.motX *= 0.6D;
                              this.motZ *= 0.6D;
 -                            this.setSprinting(false);
 +                            //this.setSprinting(false);
-+                            if (kb.isStopSprint()) this.setExtraKnockback(false); //Nacho - Prevent desync player sprinting
++                            if (kb.isStopSprint()) {
++                                this.setExtraKnockback(false); //Nacho - Prevent desync player sprinting
++                                this.setSprinting(false);
++                            }
 +                            // Titanium end
                          }
  
                          if (entity instanceof EntityPlayer && entity.velocityChanged) {
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index e9531e84784312965bcf371e7e85fb1f2f62e73e..9077f53ac4bcd291970255f23ca4f49fffdbb502 100644
+index e9531e84784312965bcf371e7e85fb1f2f62e73e..a1122f1f11646a8b55af401060585fc6bfd9c44c 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
 @@ -15,6 +15,8 @@ import java.util.UUID;
@@ -69,28 +95,14 @@ index e9531e84784312965bcf371e7e85fb1f2f62e73e..9077f53ac4bcd291970255f23ca4f49f
  // PaperSpigot start
  import org.bukkit.Bukkit;
  import org.spigotmc.event.entity.EntityDismountEvent;
-@@ -795,16 +795,19 @@ public abstract class EntityLiving extends Entity {
-                     }
- 
-                     if (entity != null) {
--                        double d0 = entity.locX - this.locX;
-+                        double distanceX = entity.locX - this.locX;
- 
--                        double d1;
-+                        double distanceZ;
- 
--                        for (d1 = entity.locZ - this.locZ; d0 * d0 + d1 * d1 < 1.0E-4D; d1 = (Math.random() - Math.random()) * 0.01D) {
--                            d0 = (Math.random() - Math.random()) * 0.01D;
-+                        for (distanceZ = entity.locZ - this.locZ; distanceX * distanceX + distanceZ * distanceZ < 1.0E-4D; distanceZ = (Math.random() - Math.random()) * 0.01D) {
-+                            distanceX = (Math.random() - Math.random()) * 0.01D;
+@@ -804,7 +804,10 @@ public abstract class EntityLiving extends Entity {
                          }
  
--                        this.aw = (float) (MathHelper.b(d1, d0) * 180.0D / 3.1415927410125732D - (double) this.yaw);
+                         this.aw = (float) (MathHelper.b(d1, d0) * 180.0D / 3.1415927410125732D - (double) this.yaw);
 -                        this.a(entity, f, d0, d1);
-+                        this.aw = (float) (MathHelper.b(distanceZ, distanceX) * 180.0D / 3.1415927410125732D - (double) this.yaw);
 +                        // Titanium start - knockback profiles
 +                        //this.a(entity, f, distanceX, distanceZ);
-+                        this.a(distanceX, distanceZ, damagesource);
++                        this.a(d0, d1, damagesource);
 +                        // Titanium end
                      } else {
                          this.aw = (float) ((int) (Math.random() * 2.0D) * 180);
@@ -104,7 +116,7 @@ index e9531e84784312965bcf371e7e85fb1f2f62e73e..9077f53ac4bcd291970255f23ca4f49f
      public void a(Entity entity, float f, double d0, double d1) {
          if (this.random.nextDouble() >= this.getAttributeInstance(GenericAttributes.c).getValue()) {
              this.ai = true;
-@@ -913,6 +918,63 @@ public abstract class EntityLiving extends Entity {
+@@ -913,6 +918,62 @@ public abstract class EntityLiving extends Entity {
  
          }
      }
@@ -114,11 +126,11 @@ index e9531e84784312965bcf371e7e85fb1f2f62e73e..9077f53ac4bcd291970255f23ca4f49f
 +        if (this.random.nextDouble() >= this.getAttributeInstance(GenericAttributes.c).getValue()) {
 +            this.ai = true;
 +
-+            double magnitude = Math.sqrt(MathUtil.pow2(x) + MathUtil.pow2(z));
-+            double horizontal = 0.4D;
-+            double vertical = 0.4D;
-+
 +            KnockbackProfile kb = (this.getKnockbackProfile() == null) ? world.getServer().titanium().getKnockbackProfile(): this.getKnockbackProfile();
++
++            double magnitude = Math.sqrt(MathUtil.pow2(x) + MathUtil.pow2(z));
++            double horizontal = kb.getHorizontal();
++            double vertical = kb.getVertical();
 +
 +            if (source instanceof EntityDamageSourceIndirect) {
 +                if (((EntityDamageSourceIndirect) source).getProximateDamageSource() instanceof EntityFishingHook) {
@@ -141,9 +153,6 @@ index e9531e84784312965bcf371e7e85fb1f2f62e73e..9077f53ac4bcd291970255f23ca4f49f
 +                    horizontal = kb.getPearlHorizontal();
 +                    vertical = kb.getPearlVertical();
 +                }
-+            } else {
-+                horizontal = kb.getHorizontal();
-+                vertical = kb.getVertical();
 +            }
 +
 +            this.motX /= kb.getFrictionHorizontal();
@@ -154,11 +163,13 @@ index e9531e84784312965bcf371e7e85fb1f2f62e73e..9077f53ac4bcd291970255f23ca4f49f
 +            this.motY += vertical;
 +            this.motZ -= z / magnitude * horizontal;
 +
++            /*
 +            if (this.motX > kb.getHorizontalMax()) this.motX = kb.getHorizontalMax();
 +            if (this.motX < kb.getHorizontalMin()) this.motX = kb.getHorizontalMin();
 +
 +            if (this.motZ > kb.getHorizontalMax()) this.motZ = kb.getHorizontalMax();
 +            if (this.motZ < kb.getHorizontalMin()) this.motZ = kb.getHorizontalMin();
++             */
 +
 +            if (this.motY > kb.getVerticalMax()) this.motY = kb.getVerticalMax();
 +            if (this.motY < kb.getVerticalMin()) this.motY = kb.getVerticalMin();
@@ -168,25 +179,7 @@ index e9531e84784312965bcf371e7e85fb1f2f62e73e..9077f53ac4bcd291970255f23ca4f49f
  
      protected String bo() {
          return "game.neutral.hurt";
-@@ -1232,6 +1294,17 @@ public abstract class EntityLiving extends Entity {
- 
-     public abstract void setEquipment(int i, ItemStack itemstack);
- 
-+    // Nacho start
-+    public boolean extraKnockback;
-+
-+    public void setExtraKnockback(boolean flag) {
-+        this.extraKnockback = flag;
-+    }
-+    public boolean isExtraKnockback() {
-+        return this.extraKnockback;
-+    }
-+    // Nacho end
-+
-     public void setSprinting(boolean flag) {
-         super.setSprinting(flag);
-         AttributeInstance attributeinstance = this.getAttributeInstance(GenericAttributes.MOVEMENT_SPEED);
-@@ -1843,4 +1916,16 @@ public abstract class EntityLiving extends Entity {
+@@ -1843,4 +1904,16 @@ public abstract class EntityLiving extends Entity {
      protected void bP() {
          this.updateEffects = true;
      }
@@ -357,7 +350,7 @@ index f2e1df019b2ff6268a5decf5309afbac3dd9840f..2be0572b38086542b617fff34a4b7ec3
      }
 diff --git a/src/main/java/net/titanium/config/knockback/KnockbackConfig.java b/src/main/java/net/titanium/config/knockback/KnockbackConfig.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..0ed86a75caec494592f015f9308c79d437e07ca5
+index 0000000000000000000000000000000000000000..28513f872af18c76b6cce96b163ae45b2ccc9e02
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/knockback/KnockbackConfig.java
 @@ -0,0 +1,211 @@
@@ -416,10 +409,10 @@ index 0000000000000000000000000000000000000000..0ed86a75caec494592f015f9308c79d4
 +                .map(key -> profiles.computeIfAbsent(key, TitaniumKnockbackProfile::new))
 +                .forEach(this::loadProfile);
 +
-+        KnockbackProfile defaultProfile = profiles.computeIfAbsent("default", key -> {
-+            KnockbackProfile profile = new TitaniumKnockbackProfile("default");
++        KnockbackProfile defaultProfile = profiles.computeIfAbsent("vanilla", key -> {
++            KnockbackProfile profile = new TitaniumKnockbackProfile("vanilla");
 +            this.saveProfile(profile, true);
-+            log(Level.WARNING, "No default knockback profile found, created new one");
++            log(Level.WARNING, "No vanilla knockback profile found, created new one");
 +            return profile;
 +        });
 +        Bukkit.titanium().setKnockbackProfile(defaultProfile);
@@ -488,8 +481,8 @@ index 0000000000000000000000000000000000000000..0ed86a75caec494592f015f9308c79d4
 +        config.set(path + ".friction-horizontal", profile.getFrictionHorizontal());
 +        config.set(path + ".friction-vertical", profile.getFrictionVertical());
 +
-+        config.set(path + ".wtap-extra-horizontal", profile.getWTapExtraHorizontal());
-+        config.set(path + ".wtap-extra-vertical", profile.getWTapExtraVertical());
++        config.set(path + ".w-tap-extra-horizontal", profile.getWTapExtraHorizontal());
++        config.set(path + ".w-tap-extra-vertical", profile.getWTapExtraVertical());
 +
 +        config.set(path + ".stop-sprint", profile.isStopSprint());
 +
@@ -574,17 +567,12 @@ index 0000000000000000000000000000000000000000..0ed86a75caec494592f015f9308c79d4
 +}
 diff --git a/src/main/java/net/titanium/knockback/TitaniumKnockbackProfile.java b/src/main/java/net/titanium/knockback/TitaniumKnockbackProfile.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..4169ed628b28e941bf2798050cbe542285677705
+index 0000000000000000000000000000000000000000..93397a940ecb9ab7112e1d38daa7620d059b23c6
 --- /dev/null
 +++ b/src/main/java/net/titanium/knockback/TitaniumKnockbackProfile.java
-@@ -0,0 +1,411 @@
+@@ -0,0 +1,386 @@
 +package net.titanium.knockback;
 +
-+import eu.okaeri.configs.OkaeriConfig;
-+import eu.okaeri.configs.annotation.NameModifier;
-+import eu.okaeri.configs.annotation.NameStrategy;
-+import eu.okaeri.configs.annotation.Names;
-+import java.util.concurrent.atomic.AtomicBoolean;
 +import net.titanium.config.knockback.KnockbackConfig;
 +import org.bukkit.ChatColor;
 +
@@ -606,48 +594,53 @@ index 0000000000000000000000000000000000000000..4169ed628b28e941bf2798050cbe5422
 +    public double frictionHorizontal = 2.0D;
 +    public double frictionVertical = 2.0D;
 +
-+    private double wTapHorizontal = 0.5D;
-+    private double wTapVertical = 0.1D;
++    private double wTapExtraHorizontal = 0.5D;
++    private double wTapExtraVertical = 0.1D;
 +
 +    public boolean stopSprint = true;
 +
 +    public final Projectiles projectiles = new Projectiles();
 +
-+    public static class Projectiles {
++    public static class Projectiles implements Cloneable {
 +
-+        public Rod rod = new Rod();
++        public Projectile rod = new Projectile();
++        public Projectile arrow = new Projectile();
++        public Projectile pearl = new Projectile();
++        public Projectile snowball = new Projectile();
++        public Projectile egg = new Projectile();
 +
-+        public static class Rod {
-+            public double horizontal = 0.4D;
-+            public double vertical = 0.4D;
++        @Override
++        public Projectiles clone() {
++            try {
++                return (Projectiles) super.clone();
++            } catch (CloneNotSupportedException e) {
++                throw new AssertionError();
++            }
 +        }
 +
-+        public Arrow arrow = new Arrow();
++        public static class Projectile implements Cloneable {
 +
-+        public static class Arrow {
-+            public double horizontal = 0.4D;
-+            public double vertical = 0.4D;
-+        }
++            public double horizontal;
++            public double vertical;
 +
-+        public Pearl pearl = new Pearl();
++            public Projectile(double horizontal, double vertical) {
++                this.horizontal = horizontal;
++                this.vertical = vertical;
++            }
 +
-+        public static class Pearl {
-+            public double horizontal = 0.4D;
-+            public double vertical = 0.4D;
-+        }
++            public Projectile() {
++                this(0.4D, 0.4D);
++            }
 +
-+        public Snowball snowball = new Snowball();
++            @Override
++            public Projectile clone() {
++                try {
++                    return (Projectile) super.clone();
++                } catch (CloneNotSupportedException e) {
++                    throw new AssertionError();
++                }
++            }
 +
-+        public static class Snowball {
-+            public double horizontal = 0.4D;
-+            public double vertical = 0.4D;
-+        }
-+
-+        public Egg egg = new Egg();
-+
-+        public static class Egg {
-+            public double horizontal = 0.4D;
-+            public double vertical = 0.4D;
 +        }
 +
 +    }
@@ -778,22 +771,22 @@ index 0000000000000000000000000000000000000000..4169ed628b28e941bf2798050cbe5422
 +
 +    @Override
 +    public double getWTapExtraHorizontal() {
-+        return this.wTapHorizontal;
++        return this.wTapExtraHorizontal;
 +    }
 +
 +    @Override
 +    public void setWTapExtraHorizontal(double wTapHorizontal) {
-+        this.wTapHorizontal = wTapHorizontal;
++        this.wTapExtraHorizontal = wTapHorizontal;
 +    }
 +
 +    @Override
 +    public double getWTapExtraVertical() {
-+        return this.wTapVertical;
++        return this.wTapExtraVertical;
 +    }
 +
 +    @Override
 +    public void setWTapExtraVertical(double wTapVertical) {
-+        this.wTapVertical = wTapVertical;
++        this.wTapExtraVertical = wTapVertical;
 +    }
 +
 +    @Override
@@ -956,36 +949,11 @@ index 0000000000000000000000000000000000000000..4169ed628b28e941bf2798050cbe5422
 +
 +    @Override
 +    public TitaniumKnockbackProfile clone() {
-+        TitaniumKnockbackProfile profile = new TitaniumKnockbackProfile(this.getName());
-+
-+        profile.setHorizontal(this.getHorizontal());
-+        profile.setHorizontalMax(this.getHorizontalMax());
-+        profile.setHorizontalMin(this.getHorizontalMin());
-+        profile.setVertical(this.getVertical());
-+        profile.setVerticalMax(this.getVerticalMax());
-+        profile.setVerticalMin(this.getVerticalMin());
-+        profile.setExtraHorizontal(this.getExtraHorizontal());
-+        profile.setExtraVertical(this.getExtraVertical());
-+        profile.setFrictionHorizontal(this.getFrictionHorizontal());
-+        profile.setFrictionVertical(this.getFrictionVertical());
-+
-+        profile.setWTapExtraHorizontal(this.getWTapExtraHorizontal());
-+        profile.setWTapExtraVertical(this.getWTapExtraVertical());
-+
-+        profile.setStopSprint(this.isStopSprint());
-+
-+        profile.setRodHorizontal(this.getRodHorizontal());
-+        profile.setRodVertical(this.getRodVertical());
-+        profile.setArrowHorizontal(this.getArrowHorizontal());
-+        profile.setArrowVertical(this.getArrowVertical());
-+        profile.setPearlHorizontal(this.getPearlHorizontal());
-+        profile.setPearlVertical(this.getPearlVertical());
-+        profile.setSnowballHorizontal(this.getSnowballHorizontal());
-+        profile.setSnowballVertical(this.getSnowballVertical());
-+        profile.setEggHorizontal(this.getEggHorizontal());
-+        profile.setEggVertical(this.getEggVertical());
-+
-+        return profile;
++        try {
++            return (TitaniumKnockbackProfile) super.clone();
++        } catch (CloneNotSupportedException e) {
++            throw new AssertionError(e);
++        }
 +    }
 +
 +}
@@ -1188,15 +1156,3 @@ index 3e3a04808196e722fd1dcdae638bfcf45a79f4d9..cb0a5b90f6d4bb19a9d110f007dcaf18
 +    // Titanium end
 +
  }
-diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-index edad1260e98c95c36c33ea97c4e087539414197b..afed8b6915f3e66dbd1d8bc394e91a46820e7f76 100644
---- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-+++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-@@ -25,6 +25,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
- import net.minecraft.server.*;
- import net.minecraft.server.PacketPlayOutTitle.EnumTitleAction;
- 
-+import net.titanium.knockback.KnockbackProfile;
- import org.apache.commons.lang.Validate;
- import org.apache.commons.lang.NotImplementedException;
- import org.bukkit.*;

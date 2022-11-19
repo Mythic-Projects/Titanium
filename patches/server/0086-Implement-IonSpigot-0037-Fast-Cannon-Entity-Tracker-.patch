@@ -171,7 +171,7 @@ index 4668a1fca0a7c7016264c56f54ac8464768751c4..addf86937c1fbd0e8ead1e64637faa89
      public void untrackEntity(Entity entity) {
          org.spigotmc.AsyncCatcher.catchOp( "entity untrack"); // Spigot
 diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-index 8e9597417845af723d1626313fd9a70ecd3e304f..651e5bfa07c9ccba74c223e402ee64a45cd4841b 100644
+index 8e9597417845af723d1626313fd9a70ecd3e304f..cf1ac2c43fe5f7bf4baf539d88e7a0f8b8397a2a 100644
 --- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 +++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 @@ -451,7 +451,7 @@ public class EntityTrackerEntry {
@@ -183,16 +183,14 @@ index 8e9597417845af723d1626313fd9a70ecd3e304f..651e5bfa07c9ccba74c223e402ee64a4
          return entityplayer.u().getPlayerChunkMap().a(entityplayer, this.tracker.ae, this.tracker.ag);
      }
  
-@@ -462,7 +462,11 @@ public class EntityTrackerEntry {
+@@ -462,7 +462,9 @@ public class EntityTrackerEntry {
  
      }
  
 -    private Packet c() {
-+    protected Packet createPacket() {
-+        return this.c();
-+    }
++    protected Packet createPacket() { return this.c(); } // IonSpigot - OBFHELPER
 +
-+    protected Packet c() {
++    protected Packet c() { // IonSpigot - private -> protected
          if (this.tracker.dead) {
              // CraftBukkit start - Remove useless error spam, just return
              // EntityTrackerEntry.p.warn("Fetching addPacket for removed entity");
