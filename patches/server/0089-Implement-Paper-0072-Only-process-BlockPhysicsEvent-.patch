@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0072] Only process BlockPhysicsEvent if a
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 8af1a6ee2f8fd5562192198d5407b598e6da2cb9..c3c618331961e289b5ecb6d67fe38104cbf1e567 100644
+index b1c2f33f837ed445e8b83d48f56e9bfeeeeb8732..7f6711249d7e5264b2969fb2a18404f3d7ea2ff9 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -843,6 +843,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
@@ -18,10 +18,10 @@ index 8af1a6ee2f8fd5562192198d5407b598e6da2cb9..c3c618331961e289b5ecb6d67fe38104
                  this.methodProfiler.a(worldserver.getWorldData().getName());
                  /* Drop global time updates
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 6645e4cb4598f14400342508ab96f9641e7b51a8..2af35322287456b9604848deb41a768f6fcdb910 100644
+index 2c191181242ff91eccb4472681e3ad8f60f68714..8904049fe7c4a89551d1d68c8f4a6943aef3ad06 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -611,7 +611,7 @@ public abstract class World implements IBlockAccess {
+@@ -612,7 +612,7 @@ public abstract class World implements IBlockAccess {
              try {
                  // CraftBukkit start
                  CraftWorld world = ((WorldServer) this).getWorld();

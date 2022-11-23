@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0210] Use TerminalConsoleAppender for
 
 
 diff --git a/build.gradle b/build.gradle
-index f867cbcbadd1366be200a2966bb05f7302910e23..d264d672ec5f5e22af62c16b0fc34da224b6c65a 100644
+index 2dfcd60e6f38fdf9b8866ef7a3291b7d063d6296..b7c8d830e6a78191d1e902f7a8ce69ca16ed5ef9 100644
 --- a/build.gradle
 +++ b/build.gradle
 @@ -21,7 +21,13 @@ dependencies {
@@ -75,7 +75,7 @@ index c6b8a9d8ce755aa94c0ab6283936938eb7381924..ed27343f889934673b9cc2e0939a4ff8
          System.setOut(new PrintStream(new LoggerOutputStream(logger, Level.INFO), true));
          System.setErr(new PrintStream(new LoggerOutputStream(logger, Level.WARN), true));
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 337aefc030b74d786c00ae3caa260108528af134..8af1a6ee2f8fd5562192198d5407b598e6da2cb9 100644
+index e416ec437b04649012a9c45a7ebc41d2e60232e3..b1c2f33f837ed445e8b83d48f56e9bfeeeeb8732 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -42,7 +42,6 @@ import org.apache.logging.log4j.Logger;
@@ -122,7 +122,7 @@ index 337aefc030b74d786c00ae3caa260108528af134..8af1a6ee2f8fd5562192198d5407b598
                  } catch (Exception ignored) {
                  }
                  // CraftBukkit end
-@@ -1224,7 +1227,8 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+@@ -1225,7 +1228,8 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
      }
  
      public void sendMessage(IChatBaseComponent ichatbasecomponent) {

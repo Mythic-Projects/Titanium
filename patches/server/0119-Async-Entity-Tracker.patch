@@ -963,7 +963,7 @@ index cf1ac2c43fe5f7bf4baf539d88e7a0f8b8397a2a..0b2b02fd4b8a79f916e95699d2f96344
          }
  
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 78fb4eca6bf804a168ea8b483aab4f6006a24545..8514f95bb57ca8d228f1ad5d0b6e1a8ac6a8d06c 100644
+index 7476ece1e4fa58e94132fd8627cd2eef13e3845e..13ac82adf72f02dfcd2b425a2012c00093780587 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -10,6 +10,7 @@ import com.mojang.authlib.GameProfile;
@@ -1027,7 +1027,7 @@ index b8daeda95f0f7029da9cc62be90959a924c3d7a1..37703b8301117a87ff4f60ea5bf8d5b5
  
      public String disconnect(EntityPlayer entityplayer) { // CraftBukkit - return string
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 7da9e928145d420fbaff552ac97c242e947b2595..647e4ab36dd9a12ce9db0a033b41df9199513617 100644
+index 18df311cafd2ca777a07292a69a75f3259d907bc..3c994004c33458ac43891aaa01dfe32289e8849a 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
@@ -1046,7 +1046,7 @@ index 7da9e928145d420fbaff552ac97c242e947b2595..647e4ab36dd9a12ce9db0a033b41df91
      public ExecutorService lightingExecutor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("PaperSpigot - Lighting Thread").build()); // PaperSpigot - Asynchronous lighting updates
      public final Map<Explosion.CacheKey, Float> explosionDensityCache = new HashMap<Explosion.CacheKey, Float>(); // PaperSpigot - Optimize explosions
  
-@@ -1148,6 +1150,7 @@ public abstract class World implements IBlockAccess {
+@@ -1149,6 +1151,7 @@ public abstract class World implements IBlockAccess {
                  EntityHuman entityhuman = (EntityHuman) entity;
  
                  this.players.add(entityhuman);
@@ -1054,7 +1054,7 @@ index 7da9e928145d420fbaff552ac97c242e947b2595..647e4ab36dd9a12ce9db0a033b41df91
                  this.everyoneSleeping();
              }
  
-@@ -1187,6 +1190,7 @@ public abstract class World implements IBlockAccess {
+@@ -1188,6 +1191,7 @@ public abstract class World implements IBlockAccess {
          if (entity instanceof EntityHuman) {
              this.players.remove(entity);
              this.worldMaps.removeTrackedPlayer((EntityHuman) entity); // FlamePaper - Minetick fix memory leaks
@@ -1062,7 +1062,7 @@ index 7da9e928145d420fbaff552ac97c242e947b2595..647e4ab36dd9a12ce9db0a033b41df91
              // Spigot start
              for ( Object o : worldMaps.c )
              {
-@@ -1216,6 +1220,7 @@ public abstract class World implements IBlockAccess {
+@@ -1217,6 +1221,7 @@ public abstract class World implements IBlockAccess {
          if (entity instanceof EntityHuman) {
              this.players.remove(entity);
              this.worldMaps.removeTrackedPlayer((EntityHuman) entity); // FlamePaper - Minetick fix memory leaks
@@ -1070,7 +1070,7 @@ index 7da9e928145d420fbaff552ac97c242e947b2595..647e4ab36dd9a12ce9db0a033b41df91
              this.everyoneSleeping();
          }
  
-@@ -2960,11 +2965,14 @@ public abstract class World implements IBlockAccess {
+@@ -2961,11 +2966,14 @@ public abstract class World implements IBlockAccess {
      }
  
      public EntityHuman findNearbyPlayer(double d0, double d1, double d2, double d3) {
@@ -1087,7 +1087,7 @@ index 7da9e928145d420fbaff552ac97c242e947b2595..647e4ab36dd9a12ce9db0a033b41df91
              // CraftBukkit start - Fixed an NPE
              if (entityhuman1 == null || entityhuman1.dead) {
                  continue;
-@@ -3006,6 +3014,7 @@ public abstract class World implements IBlockAccess {
+@@ -3007,6 +3015,7 @@ public abstract class World implements IBlockAccess {
      }
  
      public EntityHuman findNearbyPlayerWhoAffectsSpawning(double d0, double d1, double d2, double d3) {

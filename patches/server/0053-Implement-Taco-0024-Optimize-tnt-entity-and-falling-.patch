@@ -68,7 +68,7 @@ index cf48af7ead55dee7f027a9e7c00471522614b100..741697e2f6410fb891c16e95ad8769f9
          this.blocks.addAll(hashset);
          float f3 = this.size * 2.0F;
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index b0c5da5cff0166c1f3b9eec8aa175449d365457c..16441d096f33ee96484a0a38df7a476442b58b82 100644
+index ab0c103ea61f281e14c0362cc92c29f6f36b5298..4896a2e81bb8563994a50c4038deacf741f611f5 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -8,6 +8,7 @@ import me.suicidalkids.ion.blocks.movement.MovementCache;
@@ -95,7 +95,7 @@ index b0c5da5cff0166c1f3b9eec8aa175449d365457c..16441d096f33ee96484a0a38df7a4764
          this.ionConfigTitanium = serverConfig.ion.worldSettings;
          // Titanium end
          this.generator = gen;
-@@ -1319,6 +1322,9 @@ public abstract class World implements IBlockAccess {
+@@ -1320,6 +1323,9 @@ public abstract class World implements IBlockAccess {
  
          if (entity instanceof EntityItem) return arraylist; // PaperSpigot - Optimize item movement
  

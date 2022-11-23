@@ -94,7 +94,7 @@ index 0000000000000000000000000000000000000000..a8590038aa6f947fbc89dbb7cb4ce26a
 +}
 \ No newline at end of file
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 8e15314484ce1f4de73e6953d9e85ad1093a28a6..6707b5b92b447de613d4540695d21b46c45a043d 100644
+index b47a403c33cb187dcc58f6d8e822cadf22716178..39f7293b815b77e9d1232d8276f3b3bcac4c1bd1 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -115,6 +115,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
@@ -105,7 +105,7 @@ index 8e15314484ce1f4de73e6953d9e85ad1093a28a6..6707b5b92b447de613d4540695d21b46
      public int autosavePeriod;
      // CraftBukkit end
  
-@@ -896,6 +897,12 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+@@ -897,6 +898,12 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
              // this.i[i][this.ticks % 100] = System.nanoTime() - j; // CraftBukkit
          }
  

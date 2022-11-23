@@ -20,7 +20,7 @@ index 5c490c9ea8f094e5b8357deae81cec8178d42843..7a44b757c34bb337812aeb7e9f6dd378
          Thread thread = new Thread("Server Infinisleeper") {
              {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index e18bfff6219339fd8efcc555b1c2b7afa3b9fd99..e6536401ec51e6b306da62d5402ba2e14037f309 100644
+index e5421303e6be8aff17c8e3eff10a65b1925387b0..ccbb68fb13348ff5e8294e388cd2a5815111e492 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -10,6 +10,8 @@ import com.mojang.authlib.GameProfile;
@@ -326,7 +326,7 @@ index e18bfff6219339fd8efcc555b1c2b7afa3b9fd99..e6536401ec51e6b306da62d5402ba2e1
          this.methodProfiler.a("tallying");
          this.h[this.ticks % 100] = System.nanoTime() - i;
          this.methodProfiler.b();
-@@ -960,7 +1089,8 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+@@ -961,7 +1090,8 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
          this.p.add(iupdateplayerlistbox);
      }
  
@@ -336,7 +336,7 @@ index e18bfff6219339fd8efcc555b1c2b7afa3b9fd99..e6536401ec51e6b306da62d5402ba2e1
          DispenserRegistry.c();
  
          try {
-@@ -1044,7 +1174,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+@@ -1045,7 +1175,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
              });
              */
  
@@ -345,7 +345,7 @@ index e18bfff6219339fd8efcc555b1c2b7afa3b9fd99..e6536401ec51e6b306da62d5402ba2e1
  
              if (options.has("port")) {
                  int port = (Integer) options.valueOf("port");
-@@ -1067,7 +1197,8 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+@@ -1068,7 +1198,8 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
              MinecraftServer.LOGGER.fatal("Failed to start the minecraft server", exception);
          }
  
@@ -355,7 +355,7 @@ index e18bfff6219339fd8efcc555b1c2b7afa3b9fd99..e6536401ec51e6b306da62d5402ba2e1
  
      public void C() {
          /* CraftBukkit start - prevent abuse
-@@ -1546,9 +1677,19 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+@@ -1547,9 +1678,19 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
          return this.e;
      }
  

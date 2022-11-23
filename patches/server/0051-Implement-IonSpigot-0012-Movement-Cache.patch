@@ -121,6 +121,18 @@ index 7732fbd111ee82f5b331bd8d1b8659e93782a4b4..8305cf6d1fd8243aea80bca8f6ec7f55
  
              // CraftBukkit start
              if (positionChanged && getBukkitEntity() instanceof Vehicle) {
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 8e15314484ce1f4de73e6953d9e85ad1093a28a6..b47a403c33cb187dcc58f6d8e822cadf22716178 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -891,6 +891,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+                 this.methodProfiler.b();
+                 this.methodProfiler.b();
+                 worldserver.explosionDensityCache.clear(); // PaperSpigot - Optimize explosions
++                worldserver.movementCache.clear(); // IonSpigot - Movement Cache
+             // } // CraftBukkit
+ 
+             // this.i[i][this.ticks % 100] = System.nanoTime() - j; // CraftBukkit
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
 index e4da0544b203b49dc055339f2bac246a4d62debf..4e4610b248f2b55dd586bcb03ab9e650a888dc27 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
@@ -134,7 +146,7 @@ index e4da0544b203b49dc055339f2bac246a4d62debf..4e4610b248f2b55dd586bcb03ab9e650
                      this.player.onGround = packetplayinflying.f();
                      double d16 = d12;
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index fd416f20715d0a1600b8595940874364d51d9cd5..b0c5da5cff0166c1f3b9eec8aa175449d365457c 100644
+index fd416f20715d0a1600b8595940874364d51d9cd5..ab0c103ea61f281e14c0362cc92c29f6f36b5298 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -4,6 +4,8 @@ import com.google.common.base.Predicate;
@@ -171,6 +183,14 @@ index fd416f20715d0a1600b8595940874364d51d9cd5..b0c5da5cff0166c1f3b9eec8aa175449
          // Titanium end
          this.generator = gen;
          this.world = new CraftWorld((WorldServer) this, gen, env);
+@@ -442,6 +448,7 @@ public abstract class World implements IBlockAccess {
+                     this.methodProfiler.b();
+                 }
+ 
++                movementCache.clear(); // IonSpigot - Movement Cache
+                 /*
+                 if ((i & 2) != 0 && (!this.isClientSide || (i & 4) == 0) && chunk.isReady()) {
+                     this.notify(blockposition);
 diff --git a/src/main/java/net/titanium/config/IonConfig.java b/src/main/java/net/titanium/config/IonConfig.java
 index 282ab263da89ab21364c48044b079b2b17473f67..eb839d9d7f1ddfbb888aba715b68d98a6092aab1 100644
 --- a/src/main/java/net/titanium/config/IonConfig.java
