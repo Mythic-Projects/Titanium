@@ -6,9 +6,18 @@ Subject: [PATCH] Implement [Paper-0328] Optimize Network Manager and add
 
 
 diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
-index 1a4cf2abcdfa223a78921ad22ab875803fdcf37d..2df10cb22767a4c9673cb051f887a3a639649201 100644
+index 1a4cf2abcdfa223a78921ad22ab875803fdcf37d..37a7607c7f0e1d64b26edb98519b0b0400a2e1b0 100644
 --- a/src/main/java/net/minecraft/server/NetworkManager.java
 +++ b/src/main/java/net/minecraft/server/NetworkManager.java
+@@ -62,7 +62,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+     };
+     private final EnumProtocolDirection h;
+     private final Queue<NetworkManager.QueuedPacket> i = Queues.newConcurrentLinkedQueue();
+-    private final ReentrantReadWriteLock j = new ReentrantReadWriteLock();
++    //private final ReentrantReadWriteLock j = new ReentrantReadWriteLock(); // Paper - remove unused lock
+     public Channel channel;
+     // Spigot Start // PAIL
+     public SocketAddress l;
 @@ -75,6 +75,11 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
      private boolean o;
      private boolean p;
@@ -25,7 +34,7 @@ index 1a4cf2abcdfa223a78921ad22ab875803fdcf37d..2df10cb22767a4c9673cb051f887a3a6
      }
  
      public void a(EnumProtocol enumprotocol) {
-+        protocol = enumprotocol; // Paper
++        this.protocol = enumprotocol; // Paper
          this.channel.attr(NetworkManager.c).set(enumprotocol);
          this.channel.config().setAutoRead(true);
          NetworkManager.g.debug("Enabled auto read");
@@ -83,16 +92,17 @@ index 1a4cf2abcdfa223a78921ad22ab875803fdcf37d..2df10cb22767a4c9673cb051f887a3a6
 +    // Paper end
  
 +    public void sendPacket(Packet<?> packet) { this.handle(packet); } // Titanium - Compatibility
-+    public void handle(Packet packet) {
-+        this.sendPacket(packet, null, null); // Paper
++    public void handle(Packet<?> packet) {
++        this.sendPacket(packet, null, (GenericFutureListener<? extends Future<? super Void>>) null); // Paper
      }
  
-+    public void sendPacket(Packet<?> packet, GenericFutureListener<? extends Future<? super Void>> genericfuturelistener) { this.sendPacket(packet, genericfuturelistener, null); } // Titanium - Compatibility
-+    public void sendPacket(Packet packet, GenericFutureListener<? extends Future<? super Void>> genericfuturelistener, GenericFutureListener<? extends Future<? super Void>>... agenericfuturelistener) { this.a(packet, genericfuturelistener, agenericfuturelistener); } // Titanium - OBFHELPER
-     public void a(Packet packet, GenericFutureListener<? extends Future<? super Void>> genericfuturelistener, GenericFutureListener<? extends Future<? super Void>>... agenericfuturelistener) {
+-    public void a(Packet packet, GenericFutureListener<? extends Future<? super Void>> genericfuturelistener, GenericFutureListener<? extends Future<? super Void>>... agenericfuturelistener) {
 -        if (this.g()) {
 -            this.m();
 -            this.a(packet, (GenericFutureListener[]) ArrayUtils.add(agenericfuturelistener, 0, genericfuturelistener));
++    public void sendPacket(Packet<?> packet, GenericFutureListener<? extends Future<? super Void>> genericfuturelistener) { this.sendPacket(packet, genericfuturelistener, (GenericFutureListener<? extends Future<? super Void>>) null); } // Titanium - Compatibility
++    public void sendPacket(Packet<?> packet, GenericFutureListener<? extends Future<? super Void>> genericfuturelistener, GenericFutureListener<? extends Future<? super Void>>... agenericfuturelistener) { this.a(packet, genericfuturelistener, agenericfuturelistener); } // Titanium - OBFHELPER
++    public void a(Packet<?> packet, GenericFutureListener<? extends Future<? super Void>> genericfuturelistener, GenericFutureListener<? extends Future<? super Void>>... agenericfuturelistener) {
 +        // Paper start - handle oversized packets better
 +        GenericFutureListener<? extends Future<? super Void>>[] listeners = null;
 +        if (genericfuturelistener != null || agenericfuturelistener != null) { // cannot call ArrayUtils.add with both null arguments
@@ -114,11 +124,11 @@ index 1a4cf2abcdfa223a78921ad22ab875803fdcf37d..2df10cb22767a4c9673cb051f887a3a6
 +        java.util.List<Packet> extraPackets = InnerUtil.buildExtraPackets(packet);
 +        boolean hasExtraPackets = extraPackets != null && !extraPackets.isEmpty();
 +        if (!hasExtraPackets) {
-+            this.i.add(new NetworkManager.QueuedPacket(packet, genericfuturelistener));
++            this.i.add(new NetworkManager.QueuedPacket(packet, listeners));
          } else {
 -            this.j.writeLock().lock();
 +            java.util.List<NetworkManager.QueuedPacket> packets = new java.util.ArrayList<>(1 + extraPackets.size());
-+            packets.add(new NetworkManager.QueuedPacket(packet, null)); // delay the future listener until the end of the extra packets
++            packets.add(new NetworkManager.QueuedPacket(packet, (GenericFutureListener<? extends Future<? super Void>>) null)); // delay the future listener until the end of the extra packets
  
 -            try {
 -                this.i.add(new NetworkManager.QueuedPacket(packet, (GenericFutureListener[]) ArrayUtils.add(agenericfuturelistener, 0, genericfuturelistener)));
@@ -127,7 +137,7 @@ index 1a4cf2abcdfa223a78921ad22ab875803fdcf37d..2df10cb22767a4c9673cb051f887a3a6
 +            for (int i = 0, len = extraPackets.size(); i < len;) {
 +                Packet extra = extraPackets.get(i);
 +                boolean end = ++i == len;
-+                packets.add(new NetworkManager.QueuedPacket(extra, end ? genericfuturelistener : null)); // append listener to the end
++                packets.add(new NetworkManager.QueuedPacket(extra, end ? listeners : null)); // append listener to the end
              }
 -        }
  

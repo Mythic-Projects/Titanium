@@ -1,0 +1,63 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 17 Jun 2022 21:02:35 +0200
+Subject: [PATCH] Make messages configurable
+
+
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index 1ee7292123246de64d052d50d8f94362f8866a37..7f5d714d48de47a281f2458f98a4934d6a0cb111 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -1083,10 +1083,23 @@ public interface Server extends PluginMessageRecipient {
+ 
+     public class Titanium {
+ 
++        //TODO document it
+         public OkaeriConfig getServerConfig() {
+             throw new UnsupportedOperationException("Not supported yet.");
+         }
+ 
++        //TODO document it
++        public Messages getMessages() {
++            throw new UnsupportedOperationException("Not supported yet.");
++        }
++
++        //TODO document it
++        public interface Messages {
++
++            String getMissingPermissionCommand();
++
++        }
++
+         /**
+          * @return time when the server was started
+          */
+diff --git a/src/main/java/org/bukkit/command/Command.java b/src/main/java/org/bukkit/command/Command.java
+index eebb817f8c0b8b76d12a1a597758c02f4eec26cd..523b4679d84167376d0993e45a49ebb787c455a9 100644
+--- a/src/main/java/org/bukkit/command/Command.java
++++ b/src/main/java/org/bukkit/command/Command.java
+@@ -198,13 +198,19 @@ public abstract class Command {
+             return true;
+         }
+ 
++        // Titanium start - make default permission message configurable
++        String permissionMessage = this.permissionMessage;
+         if (permissionMessage == null) {
+-            target.sendMessage(ChatColor.RED + "I'm sorry, but you do not have permission to perform this command. Please contact the server administrators if you believe that this is in error.");
+-        } else if (permissionMessage.length() != 0) {
+-            for (String line : permissionMessage.replace("<permission>", permission).split("\n")) {
+-                target.sendMessage(line);
+-            }
++            permissionMessage = Bukkit.titanium().getMessages().getMissingPermissionCommand();
++        }
++
++        permissionMessage = permissionMessage.replace("<permission>", "{PERMISSION}");
++        permissionMessage = permissionMessage.replace("{PERMISSION}", permission);
++
++        for (String line : permissionMessage.split("\n")) {
++            target.sendMessage(line);
+         }
++        // Titanium end
+ 
+         return false;
+     }

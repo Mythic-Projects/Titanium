@@ -1,0 +1,585 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Rastrian <me@rastrian.dev>
+Date: Fri, 24 Jun 2022 21:02:34 +0200
+Subject: [PATCH] Async Combat packet handling
+
+Co-authored-by: windcolor-dev <teaglehao@gmail.com>
+Co-authored-by: Peridot <peridot491@protonmail.com>
+
+diff --git a/src/main/java/ga/windpvp/windspigot/async/netty/Spigot404Write.java b/src/main/java/ga/windpvp/windspigot/async/netty/Spigot404Write.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..c7d31d48ad94744b10725af7e78db40ed082a946
+--- /dev/null
++++ b/src/main/java/ga/windpvp/windspigot/async/netty/Spigot404Write.java
+@@ -0,0 +1,70 @@
++package ga.windpvp.windspigot.async.netty;
++
++import com.google.common.collect.Queues;
++import io.netty.channel.Channel;
++import io.netty.channel.ChannelFuture;
++import io.netty.channel.ChannelFutureListener;
++import io.netty.util.concurrent.Future;
++import io.netty.util.concurrent.GenericFutureListener;
++import java.util.Queue;
++import net.minecraft.server.Packet;
++
++public class Spigot404Write {
++
++    private static final Queue<PacketQueue> queue = Queues.newConcurrentLinkedQueue();
++    private static final Tasks tasks = new Tasks();
++    private final Channel channel;
++
++    public Spigot404Write(Channel channel) {
++        this.channel = channel;
++    }
++
++    public static void writeThenFlush(Channel channel, Packet<?> value, GenericFutureListener<? extends Future<? super Void>>[] listener) {
++        queue.add(new PacketQueue(value, listener));
++        if (!tasks.addTask()) {
++            return;
++        }
++
++        try {
++            Spigot404Write writer = new Spigot404Write(channel);
++            channel.pipeline().lastContext().executor().execute(writer::writeQueueAndFlush);
++        } catch (NullPointerException ignored) { // Sometimes player could leave just before packet send
++        }
++    }
++
++    public void writeQueueAndFlush() {
++        while (tasks.fetchTask()) {
++            while (queue.size() > 0) {
++                PacketQueue messages = queue.poll();
++                if (messages == null) continue;
++                ChannelFuture future = this.channel.write(messages.getPacket());
++                if (messages.getListener() != null) {
++                    future.addListeners(messages.getListener());
++                }
++                future.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
++            }
++        }
++        this.channel.flush();
++    }
++
++    private static class PacketQueue {
++
++        private final Packet<?> item;
++        private final GenericFutureListener<? extends Future<? super Void>>[] listener;
++
++        private PacketQueue(Packet<?> item, GenericFutureListener<? extends Future<? super Void>>[] listener) {
++            this.item = item;
++            this.listener = listener;
++        }
++
++        public Packet<?> getPacket() {
++            return this.item;
++        }
++
++        public GenericFutureListener<? extends Future<? super Void>>[] getListener() {
++            return this.listener;
++        }
++
++    }
++
++}
+\ No newline at end of file
+diff --git a/src/main/java/ga/windpvp/windspigot/async/netty/Tasks.java b/src/main/java/ga/windpvp/windspigot/async/netty/Tasks.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..35a11277ec475dbcf6bc9a197c80e0a9cdc460b5
+--- /dev/null
++++ b/src/main/java/ga/windpvp/windspigot/async/netty/Tasks.java
+@@ -0,0 +1,34 @@
++package ga.windpvp.windspigot.async.netty;
++
++import java.util.concurrent.atomic.AtomicInteger;
++
++public class Tasks {
++
++    private final AtomicInteger state = new AtomicInteger();
++
++    public boolean fetchTask() {
++        int old = this.state.getAndDecrement();
++        if (old == State.RUNNING_GOT_TASKS.ordinal()) {
++            return true;
++        }
++        if (old == State.RUNNING_NO_TASKS.ordinal()) {
++            return false;
++        }
++        throw new AssertionError();
++    }
++
++    public boolean addTask() {
++        if (this.state.get() == State.RUNNING_GOT_TASKS.ordinal()) {
++            return false;
++        }
++        int old = this.state.getAndSet(State.RUNNING_GOT_TASKS.ordinal());
++        return old == State.WAITING.ordinal();
++    }
++
++    private enum State {
++        WAITING,
++        RUNNING_NO_TASKS,
++        RUNNING_GOT_TASKS;
++    }
++
++}
+\ No newline at end of file
+diff --git a/src/main/java/ga/windpvp/windspigot/async/thread/CombatThread.java b/src/main/java/ga/windpvp/windspigot/async/thread/CombatThread.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..a9f4ab47ae26cc4e3cd484ce337919948b72f25f
+--- /dev/null
++++ b/src/main/java/ga/windpvp/windspigot/async/thread/CombatThread.java
+@@ -0,0 +1,20 @@
++package ga.windpvp.windspigot.async.thread;
++
++import net.titanium.config.TitaniumConfig;
++import net.titanium.util.async.AsyncPacketThread;
++
++public class CombatThread extends AsyncPacketThread {
++
++    public CombatThread(String name) {
++        super(name, TitaniumConfig.get().combat.async.tps);
++    }
++
++    @Override
++    public void run() {
++        while (this.packets.size() > 0) {
++            this.packets.poll().run();
++        }
++    }
++
++}
++
+diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
+index dcc7013cb63344c614e65eadc494ab2c99a64964..a451f90c933765c31d39242ac994e1fbc267afd2 100644
+--- a/src/main/java/net/minecraft/server/NetworkManager.java
++++ b/src/main/java/net/minecraft/server/NetworkManager.java
+@@ -4,6 +4,7 @@ import com.google.common.collect.Queues;
+ import com.google.common.util.concurrent.ThreadFactoryBuilder;
+ import com.velocitypowered.natives.compression.VelocityCompressor;
+ import com.velocitypowered.natives.util.Natives;
++import ga.windpvp.windspigot.async.thread.CombatThread;
+ import io.netty.channel.Channel;
+ import io.netty.channel.ChannelFuture;
+ import io.netty.channel.ChannelFutureListener;
+@@ -23,6 +24,8 @@ import java.util.Queue;
+ import java.util.concurrent.locks.ReentrantReadWriteLock;
+ import javax.crypto.SecretKey;
+ import dev.cobblesword.nachospigot.commons.minecraft.CryptException;
++import net.titanium.Titanium;
++import net.titanium.config.TitaniumConfig;
+ import org.apache.commons.lang3.ArrayUtils;
+ import org.apache.commons.lang3.Validate;
+ import org.apache.logging.log4j.LogManager;
+@@ -87,7 +90,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+     public boolean queueImmunity = false;
+     public EnumProtocol protocol;
+     // Paper end
+-    
++
+     // Tuinity start - allow controlled flushing
+     volatile boolean canFlush = true;
+     private final java.util.concurrent.atomic.AtomicInteger packetWrites = new java.util.concurrent.atomic.AtomicInteger();
+@@ -230,6 +233,19 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+     public void sendPacket(Packet<?> packet, GenericFutureListener<? extends Future<? super Void>> genericfuturelistener) { this.sendPacket(packet, genericfuturelistener, (GenericFutureListener<? extends Future<? super Void>>) null); } // Titanium - Compatibility
+     public void sendPacket(Packet<?> packet, GenericFutureListener<? extends Future<? super Void>> genericfuturelistener, GenericFutureListener<? extends Future<? super Void>>... agenericfuturelistener) { this.a(packet, genericfuturelistener, agenericfuturelistener); } // Titanium - OBFHELPER
+     public void a(Packet<?> packet, GenericFutureListener<? extends Future<? super Void>> genericfuturelistener, GenericFutureListener<? extends Future<? super Void>>... agenericfuturelistener) {
++        // Nacho/WindSpigot start - Async combat
++        CombatThread hitDetectionThread = Titanium.get().getHitDetectionThread();
++        if (hitDetectionThread != null && this.g() && packet instanceof PacketPlayInUseEntity && ((PacketPlayInUseEntity)packet).a() == PacketPlayInUseEntity.EnumEntityUseAction.ATTACK) {
++            hitDetectionThread.addPacket(packet, this, agenericfuturelistener);
++            return;
++        }
++
++        CombatThread knockbackThread = Titanium.get().getKnockbackThread();
++        if (knockbackThread != null && this.g() && (packet instanceof PacketPlayOutEntityVelocity || packet instanceof PacketPlayOutPosition || packet instanceof PacketPlayInFlying)) {
++            knockbackThread.addPacket(packet, this, agenericfuturelistener);
++            return;
++        }
++        // Nacho/WindSpigot end
+         // Paper start - handle oversized packets better
+         GenericFutureListener<? extends Future<? super Void>>[] listeners = null;
+         if (genericfuturelistener != null || agenericfuturelistener != null) { // cannot call ArrayUtils.add with both null arguments
+diff --git a/src/main/java/net/titanium/Titanium.java b/src/main/java/net/titanium/Titanium.java
+index 96e10acf31d95211a7815494891a19972c68cb78..da69cb6eca6c822e5ca56f164b9cba3cf28a4c7a 100644
+--- a/src/main/java/net/titanium/Titanium.java
++++ b/src/main/java/net/titanium/Titanium.java
+@@ -3,6 +3,7 @@ package net.titanium;
+ import eu.okaeri.configs.ConfigManager;
+ import eu.okaeri.configs.serdes.commons.SerdesCommons;
+ import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
++import ga.windpvp.windspigot.async.thread.CombatThread;
+ import java.io.File;
+ import net.minecraft.server.MinecraftServer;
+ import net.titanium.config.TitaniumConfig;
+@@ -23,6 +24,9 @@ public class Titanium {
+     private MessageConfig messageConfig;
+     private KnockbackConfig knockbackConfig;
+ 
++    private CombatThread hitDetectionThread;
++    private CombatThread knockbackThread;
++
+     public Titanium(MinecraftServer server) {
+         INSTANCE = this;
+ 
+@@ -31,6 +35,13 @@ public class Titanium {
+         this.loadServerConfig();
+         this.loadMessageConfig();
+         this.loadKnockbackConfig();
++
++        if (serverConfig.combat.async.hitDetection) {
++            this.hitDetectionThread = new CombatThread("Titanium - Hit Detection Thread");
++        }
++        if (serverConfig.combat.async.knockback) {
++            this.knockbackThread = new CombatThread("Titanium - Knockback Thread");
++        }
+     }
+ 
+     public static Titanium get() {
+@@ -97,4 +108,12 @@ public class Titanium {
+         knockbackConfig = new KnockbackConfig((File) server.options.valueOf("knockback-settings"));
+     }
+ 
++    public CombatThread getHitDetectionThread() {
++        return hitDetectionThread;
++    }
++
++    public CombatThread getKnockbackThread() {
++        return knockbackThread;
++    }
++
+ }
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index c3f914d5ae59b210d309858e846b0cb55ac190b3..2584a4c83d32ed671f687a069140580e41484f07 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -197,6 +197,28 @@ public class TitaniumConfig extends TitaniumConfigSection {
+ 
+     }
+ 
++    public Combat combat = new Combat();
++
++    public static class Combat extends TitaniumConfigSection {
++
++        public Async async = new Async();
++
++        public static class Async extends TitaniumConfigSection {
++
++            @Comment("TPS of combat thread (hit detection & knockback).")
++            @Comment("Bigger values should give more \"smooth\" combat experience, but it may not match vanilla behavior.")
++            public int tps = 40;
++
++            @Comment("Whether to handle hit packets on separate thread.")
++            public boolean hitDetection = false;
++
++            @Comment("Whether to handle knockback packets on separate thread.")
++            public boolean knockback = false;
++
++        }
++
++    }
++
+     @Comment("After enabling this option old configuration files (bukkit.yml, spigot.yml etc.) will be migrated.")
+     @Comment("This option force this migration even, if titanium.yml exists.")
+     @Comment("This option will be automatically disabled after running it.")
+diff --git a/src/main/java/net/titanium/config/message/MessageConfig.java b/src/main/java/net/titanium/config/message/MessageConfig.java
+index c0c84785bfc5781a804d3c6b681c57615b45e094..ddc83deed6fe55aa736b2d0467fdb5c089a31326 100644
+--- a/src/main/java/net/titanium/config/message/MessageConfig.java
++++ b/src/main/java/net/titanium/config/message/MessageConfig.java
+@@ -10,6 +10,8 @@ import eu.okaeri.configs.annotation.Names;
+ import eu.okaeri.configs.exception.OkaeriException;
+ import java.util.Arrays;
+ import java.util.List;
++import net.titanium.Titanium;
++import net.titanium.config.TitaniumConfig;
+ import net.titanium.config.TitaniumConfigSection;
+ import net.titanium.util.range.RangeFormatting;
+ import org.bukkit.Server;
+@@ -49,9 +51,12 @@ public class MessageConfig extends TitaniumConfigSection implements Server.Titan
+ 
+     }
+ 
+-    @Comment("Supported placeholders: {TPS_AVG}, {TPS_1M}, {TPS_5M}, {TPS_15M}, {MEMORY_USED}, {FREE_MEMORY}, {MAX_MEMORY}, {UPTIME}")
++    //TODO: improve default message
++    @Comment("Supported placeholders: {TPS_AVG}, {TPS_1M}, {TPS_5M}, {TPS_15M}, {TPS_HITS_AVG}, {TPS_HITS_1M}, {TPS_HITS_5M}, {TPS_HITS_15M}, {TPS_KNOCKBACK_AVG}, {TPS_KNOCKBACK_1M}, {TPS_KNOCKBACK_5M}, {TPS_KNOCKBACK_15M}, {MEMORY_USED}, {FREE_MEMORY}, {MAX_MEMORY}, {UPTIME}")
+     public List<String> ticksPerSeconds = Arrays.asList(
+             "&6TPS from last 1m, 5m, 15m: &f{TPS_AVG}",
++            "&6TPS (Hit Detection) from last 1m, 5m, 15m: &f{TPS_HITS_AVG}",
++            "&6TPS (Knockback) from last 1m, 5m, 15m: &f{TPS_KNOCKBACK_AVG}",
+             " ",
+             "&6Memory usage: &a{MEMORY_USED}&a/{MEMORY_MAX} MB",
+             "&6Uptime: &a{UPTIME}"
+diff --git a/src/main/java/net/titanium/util/async/AsyncPacketThread.java b/src/main/java/net/titanium/util/async/AsyncPacketThread.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..b42591f5a3aabd0d8e94fc25731dc8f82161cfc9
+--- /dev/null
++++ b/src/main/java/net/titanium/util/async/AsyncPacketThread.java
+@@ -0,0 +1,168 @@
++package net.titanium.util.async;
++
++import ga.windpvp.windspigot.async.netty.Spigot404Write;
++import io.netty.util.concurrent.Future;
++import io.netty.util.concurrent.GenericFutureListener;
++import java.math.BigDecimal;
++import java.util.Queue;
++import java.util.concurrent.ConcurrentLinkedQueue;
++import net.minecraft.server.NetworkManager;
++import net.minecraft.server.Packet;
++import org.apache.logging.log4j.LogManager;
++import org.apache.logging.log4j.Logger;
++
++public abstract class AsyncPacketThread {
++
++    private static final long SEC_IN_NANO = 1000000000;
++
++    private final String name;
++
++    private final int tps;
++    private final long tickTime;
++    private final long maxCatchupBuffer;
++
++    private final Thread thread;
++
++    protected final Queue<Runnable> packets = new ConcurrentLinkedQueue<Runnable>();
++
++    private int currentTick = 0;
++    public final RollingAverage tps1;
++    public final RollingAverage tps5;
++    public final RollingAverage tps15;
++    private final java.math.BigDecimal tpsBase;
++
++    public AsyncPacketThread(String name, int tps) {
++        this.name = name;
++
++        this.tps = tps;
++        this.tickTime = SEC_IN_NANO / tps;
++        this.maxCatchupBuffer = tickTime * tps * 60L;
++
++        this.thread = new Thread(AsyncPacketThread.this::loop, AsyncPacketThread.this.name);
++        this.thread.start();
++
++        this.tps1 = new RollingAverage(60);
++        this.tps5 = new RollingAverage(60 * 5);
++        this.tps15 = new RollingAverage(60 * 15);
++
++        this.tpsBase = new java.math.BigDecimal(1E9).multiply(new java.math.BigDecimal(tps));
++    }
++
++    public void loop() {
++        long start = System.nanoTime();
++        long lastTick = start - this.tickTime;
++        long catchupTime = 0;
++        long wait;
++        long tickSection = start;
++
++        boolean running = true;
++        while (running) {
++            long curTime = System.nanoTime();
++            wait = tickTime - (curTime - start);
++
++            if (wait > 0) {
++                if (catchupTime < 2E6) {
++                    wait += Math.abs(catchupTime);
++                } else if (wait < catchupTime) {
++                    catchupTime -= wait;
++                    wait = 0;
++                } else {
++                    wait -= catchupTime;
++                    catchupTime = 0;
++                }
++            }
++
++            if (wait > 0) {
++                try {
++                    // Wait a bit before checking for new packets
++                    Thread.sleep(wait / 1000000);
++
++                    curTime = System.nanoTime();
++                    wait = this.tickTime - (curTime - lastTick);
++                } catch (InterruptedException e) {
++                    e.printStackTrace();
++                }
++            }
++
++            catchupTime = Math.min(this.maxCatchupBuffer, catchupTime - wait);
++
++            if ( ++this.currentTick % this.tps == 0 )
++            {
++                final long diff = curTime - tickSection;
++                BigDecimal currentTps = this.tpsBase.divide(new java.math.BigDecimal(diff), 30, java.math.RoundingMode.HALF_UP);
++                tps1.add(currentTps, diff);
++                tps5.add(currentTps, diff);
++                tps15.add(currentTps, diff);
++                tickSection = curTime;
++            }
++            lastTick = curTime;
++
++            // Handle packets
++            this.run();
++        }
++    }
++
++    public abstract void run();
++
++    public void addPacket(final Packet<?> packet, final NetworkManager manager, final GenericFutureListener<? extends Future<? super Void>>[] agenericfuturelistener) {
++        this.packets.add(() -> Spigot404Write.writeThenFlush(manager.channel, packet, agenericfuturelistener));
++    }
++
++    public Thread getThread() {
++        return this.thread;
++    }
++
++    public int getTps() {
++        return tps;
++    }
++
++    public double[] getTPS() {
++        return new double[] {
++                this.tps1.getAverage(),
++                this.tps5.getAverage(),
++                this.tps15.getAverage()
++        };
++    }
++
++    public class RollingAverage {
++        private final int size;
++        private long time;
++        private java.math.BigDecimal total;
++        private int index = 0;
++        private final java.math.BigDecimal[] samples;
++        private final long[] times;
++
++        RollingAverage(int size) {
++            this.size = size;
++            this.time = size * SEC_IN_NANO;
++            this.total = dec(AsyncPacketThread.this.tps).multiply(dec(SEC_IN_NANO)).multiply(dec(size));
++            this.samples = new java.math.BigDecimal[size];
++            this.times = new long[size];
++            for (int i = 0; i < size; i++) {
++                this.samples[i] = dec(AsyncPacketThread.this.tps);
++                this.times[i] = SEC_IN_NANO;
++            }
++        }
++
++        private java.math.BigDecimal dec(long t) {
++            return new java.math.BigDecimal(t);
++        }
++
++        public void add(java.math.BigDecimal x, long t) {
++            time -= times[index];
++            total = total.subtract(samples[index].multiply(dec(times[index])));
++            samples[index] = x;
++            times[index] = t;
++            time += t;
++            total = total.add(x.multiply(dec(t)));
++            if (++index == size) {
++                index = 0;
++            }
++        }
++
++        public double getAverage() {
++            return total.divide(dec(time), 30, java.math.RoundingMode.HALF_UP).doubleValue();
++        }
++    }
++
++}
+\ No newline at end of file
+diff --git a/src/main/java/org/spigotmc/TicksPerSecondCommand.java b/src/main/java/org/spigotmc/TicksPerSecondCommand.java
+index f775f05f48878045a26113c4723e77cc023f6abb..83e1022db8ef7966be7d046cf4ae6b40005c075b 100644
+--- a/src/main/java/org/spigotmc/TicksPerSecondCommand.java
++++ b/src/main/java/org/spigotmc/TicksPerSecondCommand.java
+@@ -1,8 +1,10 @@
+ package org.spigotmc;
+ 
++import ga.windpvp.windspigot.async.thread.CombatThread;
+ import java.util.Arrays;
+ import java.util.List;
+ import java.util.stream.Collectors;
++import net.titanium.Titanium;
+ import net.titanium.config.message.MessageConfig;
+ import org.apache.commons.lang3.time.DurationFormatUtils;
+ import org.bukkit.Bukkit;
+@@ -37,6 +39,37 @@ public class TicksPerSecondCommand extends Command
+         for (int i = 0; i < tps.length; i++) {
+             tpsAvg[i] = formatTps(tps[i]);
+         }
++        // PaperSpigot end
++
++        // Titanium start - async combat
++        CombatThread hitDetectionThread = Titanium.get().getHitDetectionThread();
++
++        String[] tpsHitDetectionAvg;
++        if (hitDetectionThread != null) {
++            double[] tpsHitDetection = hitDetectionThread.getTPS();
++            tpsHitDetectionAvg = new String[tpsHitDetection.length];
++
++            for (int i = 0; i < tpsHitDetection.length; i++) {
++                tpsHitDetectionAvg[i] = formatTps(tpsHitDetection[i], hitDetectionThread.getTps());
++            }
++        } else {
++            tpsHitDetectionAvg = new String [] { "N/A", "N/A", "N/A" };
++        }
++
++        CombatThread knockbackThread = Titanium.get().getKnockbackThread();
++
++        String[] tpsKnockbackAvg;
++        if (knockbackThread != null) {
++            double[] tpsKnockback = knockbackThread.getTPS();
++            tpsKnockbackAvg = new String[tpsKnockback.length];
++
++            for (int i = 0; i < tpsKnockback.length; i++) {
++                tpsKnockbackAvg[i] = formatTps(tpsKnockback[i], knockbackThread.getTps());
++            }
++        } else {
++            tpsKnockbackAvg = new String [] { "N/A", "N/A", "N/A" };
++        }
++        // Titanium end
+ 
+         // Titanium start - make messages configurable
+         List<String> message = MessageConfig.get().ticksPerSeconds;
+@@ -50,6 +83,16 @@ public class TicksPerSecondCommand extends Command
+                     messageLine = messageLine.replace("{TPS_1M}", tpsAvg[0]);
+                     messageLine = messageLine.replace("{TPS_5M}", tpsAvg[1]);
+                     messageLine = messageLine.replace("{TPS_15M}", tpsAvg[2]);
++                    // TPS - HITS
++                    messageLine = messageLine.replace("{TPS_HITS_AVG}", "{TPS_HITS_1M}, {TPS_HITS_5M}, {TPS_HITS_15M}");
++                    messageLine = messageLine.replace("{TPS_HITS_1M}", tpsHitDetectionAvg[0]);
++                    messageLine = messageLine.replace("{TPS_HITS_5M}", tpsHitDetectionAvg[1]);
++                    messageLine = messageLine.replace("{TPS_HITS_15M}", tpsHitDetectionAvg[2]);
++                    // TPS - KNOCKBACK
++                    messageLine = messageLine.replace("{TPS_KNOCKBACK_AVG}", "{TPS_KNOCKBACK_1M}, {TPS_KNOCKBACK_5M}, {TPS_KNOCKBACK_15M}");
++                    messageLine = messageLine.replace("{TPS_KNOCKBACK_1M}", tpsKnockbackAvg[0]);
++                    messageLine = messageLine.replace("{TPS_KNOCKBACK_5M}", tpsKnockbackAvg[1]);
++                    messageLine = messageLine.replace("{TPS_KNOCKBACK_15M}", tpsKnockbackAvg[2]);
+                     // MEMORY
+                     messageLine = messageLine.replace("{MEMORY_USED}", formatMemoryUsage(runtime.totalMemory() - runtime.freeMemory(), runtime.maxMemory()));
+                     messageLine = messageLine.replace("{MEMORY_FREE}", formatFreeMemory(runtime.freeMemory(), runtime.maxMemory()));
+@@ -75,9 +118,27 @@ public class TicksPerSecondCommand extends Command
+ 
+     private static String formatTps(double tps) // PaperSpigot - made static
+     {
+-        return ( ( tps > 18.0 ) ? ChatColor.GREEN : ( tps > 16.0 ) ? ChatColor.YELLOW : ChatColor.RED )
++        // Titanium start - support threads with custom TPS
++        /*return ( ( tps > 18.0 ) ? ChatColor.GREEN : ( tps > 16.0 ) ? ChatColor.YELLOW : ChatColor.RED )
+                 + ( ( tps > 21.0 ) ? "*" : "" ) + Math.min( Math.round( tps * 100.0 ) / 100.0, 20.0 ); // Paper - only print * at 21, we commonly peak to 20.02 as the tick sleep is not accurate enough, stop the noise
++        */
++        return formatTps(tps, 20);
++        // Titanium end
++    }
++
++    // Titanium start - support threads with custom TPS
++    private static String formatTps(double tps, int maxTps)
++    {
++        double tpsPercent = tps / maxTps;
++        return ((tpsPercent > 0.8) ?
++                ChatColor.GREEN
++                : (tpsPercent > 0.6)
++                ? ChatColor.YELLOW
++                : ChatColor.RED)
++                + (tpsPercent >= 1.05 ? "*" : "")
++                +  Math.min(Math.round(tps * 100.0) / 100.0, maxTps);
+     }
++    // Titanium end
+ 
+     // Titanium start
+     private static String formatMemoryUsage(long usage, long max) {

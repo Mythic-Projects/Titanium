@@ -442,6 +442,66 @@ index bef6f8c2a5fa6303d4181437a9f1444347f42afe..de19f10022a84714db0c23fe3ca40ed3
          this.worldData.a(DemoWorldServer.a);
      }
  }
+diff --git a/src/main/java/net/minecraft/server/EntityBat.java b/src/main/java/net/minecraft/server/EntityBat.java
+index 52416203a74782a9dc56754f71f6f064c2fe9d3d..3183a41f846e0d4ccc44a3cba1bef8ddc890ea7c 100644
+--- a/src/main/java/net/minecraft/server/EntityBat.java
++++ b/src/main/java/net/minecraft/server/EntityBat.java
+@@ -14,7 +14,7 @@ public class EntityBat extends EntityAmbient {
+ 
+     protected void h() {
+         super.h();
+-        this.datawatcher.a(16, new Byte((byte) 0));
++        this.datawatcher.a(16, (byte) 0);
+     }
+ 
+     protected float bB() {
+diff --git a/src/main/java/net/minecraft/server/EntityBlaze.java b/src/main/java/net/minecraft/server/EntityBlaze.java
+index c6b711385d3ee6627966a401c8d4f34044a30b8b..05d3361428362f065c807a10c9d5f6e5be13ec22 100644
+--- a/src/main/java/net/minecraft/server/EntityBlaze.java
++++ b/src/main/java/net/minecraft/server/EntityBlaze.java
+@@ -27,7 +27,7 @@ public class EntityBlaze extends EntityMonster {
+ 
+     protected void h() {
+         super.h();
+-        this.datawatcher.a(16, new Byte((byte) 0));
++        this.datawatcher.a(16, (byte) 0);
+     }
+ 
+     protected String z() {
+diff --git a/src/main/java/net/minecraft/server/EntityBoat.java b/src/main/java/net/minecraft/server/EntityBoat.java
+index 0e6f8c03501dd6ce5bda003ae54729763201ebd3..2d40ba90fd50eaf34e0b4709414e8f05bb984f97 100644
+--- a/src/main/java/net/minecraft/server/EntityBoat.java
++++ b/src/main/java/net/minecraft/server/EntityBoat.java
+@@ -57,9 +57,9 @@ public class EntityBoat extends Entity {
+     }
+ 
+     protected void h() {
+-        this.datawatcher.a(17, new Integer(0));
+-        this.datawatcher.a(18, new Integer(1));
+-        this.datawatcher.a(19, new Float(0.0F));
++        this.datawatcher.a(17, 0);
++        this.datawatcher.a(18, 1);
++        this.datawatcher.a(19, 0.0F);
+     }
+ 
+     public AxisAlignedBB j(Entity entity) {
+diff --git a/src/main/java/net/minecraft/server/EntityEnderman.java b/src/main/java/net/minecraft/server/EntityEnderman.java
+index f3afbbd3a20ebf7d51a8fac418cff3e6f59ab56f..df797ffb10b894879f548c265f5ec2b6ca610d29 100644
+--- a/src/main/java/net/minecraft/server/EntityEnderman.java
++++ b/src/main/java/net/minecraft/server/EntityEnderman.java
+@@ -55,9 +55,9 @@ public class EntityEnderman extends EntityMonster {
+ 
+     protected void h() {
+         super.h();
+-        this.datawatcher.a(16, new Short((short) 0));
+-        this.datawatcher.a(17, new Byte((byte) 0));
+-        this.datawatcher.a(18, new Byte((byte) 0));
++        this.datawatcher.a(16, (short) 0);
++        this.datawatcher.a(17, (byte) 0);
++        this.datawatcher.a(18, (byte) 0);
+     }
+ 
+     public void b(NBTTagCompound nbttagcompound) {
 diff --git a/src/main/java/net/minecraft/server/EntityGuardian.java b/src/main/java/net/minecraft/server/EntityGuardian.java
 index bcac87081e1efa5e57cbc66783f7e187dd771091..4dfe5a68f733e9c7533569e6e7dda9c8a28f7afe 100644
 --- a/src/main/java/net/minecraft/server/EntityGuardian.java
@@ -549,6 +609,71 @@ index 4bf790cdffdbc8950450644a813d9c7bb539793d..0446e2be5003e8aa785618de48767d16
              }
  
          }
+diff --git a/src/main/java/net/minecraft/server/EntityMinecartFurnace.java b/src/main/java/net/minecraft/server/EntityMinecartFurnace.java
+index 908620d41116f7d0474b11ec823acf8222bebe80..40ca81e8000b497e65d3ec6d62be96e66b578220 100644
+--- a/src/main/java/net/minecraft/server/EntityMinecartFurnace.java
++++ b/src/main/java/net/minecraft/server/EntityMinecartFurnace.java
+@@ -20,7 +20,7 @@ public class EntityMinecartFurnace extends EntityMinecartAbstract {
+ 
+     protected void h() {
+         super.h();
+-        this.datawatcher.a(16, new Byte((byte) 0));
++        this.datawatcher.a(16, (byte) 0);
+     }
+ 
+     public void t_() {
+diff --git a/src/main/java/net/minecraft/server/EntitySheep.java b/src/main/java/net/minecraft/server/EntitySheep.java
+index 29611a194b8a582d57159231091c66adb7c6944f..e1baf50ebc6ba7e2df799e09a78fbee6e4ec8177 100644
+--- a/src/main/java/net/minecraft/server/EntitySheep.java
++++ b/src/main/java/net/minecraft/server/EntitySheep.java
+@@ -71,7 +71,7 @@ public class EntitySheep extends EntityAnimal {
+ 
+     protected void h() {
+         super.h();
+-        this.datawatcher.a(16, new Byte((byte) 0));
++        this.datawatcher.a(16, (byte) 0);
+     }
+ 
+     protected void dropDeathLoot(boolean flag, int i) {
+diff --git a/src/main/java/net/minecraft/server/EntitySkeleton.java b/src/main/java/net/minecraft/server/EntitySkeleton.java
+index 46bff95d8bf73e34eb8e0a9b94fb9fa9e9cc5cfb..cbd5fd36151af716f0ade99f8a43b4f4b4c22b5f 100644
+--- a/src/main/java/net/minecraft/server/EntitySkeleton.java
++++ b/src/main/java/net/minecraft/server/EntitySkeleton.java
+@@ -34,7 +34,7 @@ public class EntitySkeleton extends EntityMonster implements IRangedEntity {
+ 
+     protected void h() {
+         super.h();
+-        this.datawatcher.a(13, new Byte((byte) 0));
++        this.datawatcher.a(13, (byte) 0);
+     }
+ 
+     protected String z() {
+diff --git a/src/main/java/net/minecraft/server/EntitySpider.java b/src/main/java/net/minecraft/server/EntitySpider.java
+index 68a253c9698d2b239e400d7a9406c4430072cc33..4b17765b001774dfc06023002a4c7bbc8f1a1b43 100644
+--- a/src/main/java/net/minecraft/server/EntitySpider.java
++++ b/src/main/java/net/minecraft/server/EntitySpider.java
+@@ -29,7 +29,7 @@ public class EntitySpider extends EntityMonster {
+ 
+     protected void h() {
+         super.h();
+-        this.datawatcher.a(16, new Byte((byte) 0));
++        this.datawatcher.a(16, (byte) 0);
+     }
+ 
+     public void t_() {
+diff --git a/src/main/java/net/minecraft/server/EntityTNTPrimed.java b/src/main/java/net/minecraft/server/EntityTNTPrimed.java
+index 872d9659c20a8f6931e35f41c58f56efeacd9c03..868a100b159562d91d30c8294fa13b35141d0c4c 100644
+--- a/src/main/java/net/minecraft/server/EntityTNTPrimed.java
++++ b/src/main/java/net/minecraft/server/EntityTNTPrimed.java
+@@ -174,7 +174,7 @@ public class EntityTNTPrimed extends Entity {
+     }
+ 
+     /**
+-     * Author: Jedediah Smith <jedediah@silencegreys.com>
++     * Author: Jedediah Smith {@literal <jedediah@silencegreys.com>}
+      */
+     @Override
+     public boolean W() {
 diff --git a/src/main/java/net/minecraft/server/EntityTameableAnimal.java b/src/main/java/net/minecraft/server/EntityTameableAnimal.java
 index 2b170a15a42b257e92178df8124fd4ce64fa26c9..1cc087d0470c60e26f7c585e1d50156bce6b1f46 100644
 --- a/src/main/java/net/minecraft/server/EntityTameableAnimal.java
@@ -562,6 +687,42 @@ index 2b170a15a42b257e92178df8124fd4ce64fa26c9..1cc087d0470c60e26f7c585e1d50156b
 -        return this.getOwner();
 -    }
  }
+diff --git a/src/main/java/net/minecraft/server/EntityWither.java b/src/main/java/net/minecraft/server/EntityWither.java
+index fb19bad3c01b03991f9dbaff6041acbccda3c8b3..6f7a68814ae7532a8934d9ba928dbed87be55850 100644
+--- a/src/main/java/net/minecraft/server/EntityWither.java
++++ b/src/main/java/net/minecraft/server/EntityWither.java
+@@ -48,10 +48,10 @@ public class EntityWither extends EntityMonster implements IRangedEntity {
+ 
+     protected void h() {
+         super.h();
+-        this.datawatcher.a(17, new Integer(0));
+-        this.datawatcher.a(18, new Integer(0));
+-        this.datawatcher.a(19, new Integer(0));
+-        this.datawatcher.a(20, new Integer(0));
++        this.datawatcher.a(17, 0);
++        this.datawatcher.a(18, 0);
++        this.datawatcher.a(19, 0);
++        this.datawatcher.a(20, 0);
+     }
+ 
+     public void b(NBTTagCompound nbttagcompound) {
+diff --git a/src/main/java/net/minecraft/server/EntityWolf.java b/src/main/java/net/minecraft/server/EntityWolf.java
+index 469c87a179b452b5df06e79a6bc1d8e7fce07965..01daab0b2788a6e206530a5c1932ff87af298b56 100644
+--- a/src/main/java/net/minecraft/server/EntityWolf.java
++++ b/src/main/java/net/minecraft/server/EntityWolf.java
+@@ -87,9 +87,9 @@ public class EntityWolf extends EntityTameableAnimal {
+ 
+     protected void h() {
+         super.h();
+-        this.datawatcher.a(18, new Float(this.getHealth()));
+-        this.datawatcher.a(19, new Byte((byte) 0));
+-        this.datawatcher.a(20, new Byte((byte) EnumColor.RED.getColorIndex()));
++        this.datawatcher.a(18, this.getHealth());
++        this.datawatcher.a(19, (byte) 0);
++        this.datawatcher.a(20, (byte) EnumColor.RED.getColorIndex());
+     }
+ 
+     protected void a(BlockPosition blockposition, Block block) {
 diff --git a/src/main/java/net/minecraft/server/EnumDirection.java b/src/main/java/net/minecraft/server/EnumDirection.java
 index 1284478d375a47d3e1d8f4fc71a930a5fcad35c9..485dcd80ee45909aa25a4528216473516ebc6766 100644
 --- a/src/main/java/net/minecraft/server/EnumDirection.java

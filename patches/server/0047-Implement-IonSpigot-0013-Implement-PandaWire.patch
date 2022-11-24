@@ -6,10 +6,10 @@ Subject: [PATCH] Implement [IonSpigot-0013] Implement PandaWire
 
 diff --git a/src/main/java/me/suicidalkids/ion/blocks/redstone/PandaRedstoneWire.java b/src/main/java/me/suicidalkids/ion/blocks/redstone/PandaRedstoneWire.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..aa118132b6e486d4b7f1d28103511038cdbb8eef
+index 0000000000000000000000000000000000000000..50a0f71d38950159db90428c605ccdd3990f6ba2
 --- /dev/null
 +++ b/src/main/java/me/suicidalkids/ion/blocks/redstone/PandaRedstoneWire.java
-@@ -0,0 +1,476 @@
+@@ -0,0 +1,465 @@
 +package me.suicidalkids.ion.blocks.redstone;
 +
 +import com.google.common.collect.Lists;
@@ -34,7 +34,7 @@ index 0000000000000000000000000000000000000000..aa118132b6e486d4b7f1d28103511038
 +import org.apache.commons.lang3.ArrayUtils;
 +import org.bukkit.event.block.BlockRedstoneEvent;
 +
-+/*
++/**
 + * Based on https://gist.github.com/Panda4994/70ed6d39c89396570e062e4404a8d518
 + *          https://www.spigotmc.org/resources/pandawire-1-8-8-1-15-2.41991/
 + *
@@ -42,6 +42,7 @@ index 0000000000000000000000000000000000000000..aa118132b6e486d4b7f1d28103511038
 + * from the original copied over. This get rid of any errors the decompiler made.
 + *
 + * On top of that theres additional optimisations in places.
++ * @author panda
 + */
 +public class PandaRedstoneWire extends BlockRedstoneWire {
 +    /*
@@ -199,8 +200,6 @@ index 0000000000000000000000000000000000000000..aa118132b6e486d4b7f1d28103511038
 +    /**
 +     * Checks if an wire needs to be marked for update depending on the power next to it
 +     *
-+     * @author panda
-+     *
 +     * @param worldIn       World
 +     * @param pos		    Position of the wire that might need to change
 +     * @param otherPower	Power of the wire next to it
@@ -226,8 +225,6 @@ index 0000000000000000000000000000000000000000..aa118132b6e486d4b7f1d28103511038
 +     * Checks if the wires around need to get updated depending on this wires state.
 +     * Checks all wires below before the same layer before on top to keep
 +     * some more rotational symmetry around the y-axis.
-+     *
-+     * @author panda
 +     *
 +     * @param worldIn		World
 +     * @param pos			Position of the wire
@@ -259,8 +256,6 @@ index 0000000000000000000000000000000000000000..aa118132b6e486d4b7f1d28103511038
 +    /**
 +     * Gets the maximum power of the surrounding wires
 +     *
-+     * @author panda
-+     *
 +     * @param worldIn	World
 +     * @param pos		Position of the asking wire
 +     * @return			The maximum power of the wires that could power the wire at pos
@@ -288,8 +283,6 @@ index 0000000000000000000000000000000000000000..aa118132b6e486d4b7f1d28103511038
 +    /**
 +     * Adds all blocks that need to receive an update from a redstone change in this position.
 +     * This means only blocks that actually could change.
-+     *
-+     * @author panda
 +     *
 +     * @param worldIn	World
 +     * @param pos		Position of the wire
@@ -330,8 +323,6 @@ index 0000000000000000000000000000000000000000..aa118132b6e486d4b7f1d28103511038
 +     *  2. It prevents updates from "jumping".
 +     *     Or rather it prevents this wire to update a block that would get powered by the next one of the same line.
 +     *     This is to prefer as it makes understanding the update order of the wire really easy. The signal "travels" from the power source.
-+     *
-+     * @author panda
 +     *
 +     * @param state		State of the block
 +     * @param side		Side from which it gets powered
@@ -414,8 +405,6 @@ index 0000000000000000000000000000000000000000..aa118132b6e486d4b7f1d28103511038
 +
 +    /**
 +     * Sets the block state of a wire with a new power level and marks for updates
-+     *
-+     * @author panda
 +     *
 +     * @param worldIn	World
 +     * @param pos		Position at which the state needs to be set
@@ -580,7 +569,7 @@ index 0000000000000000000000000000000000000000..282ab263da89ab21364c48044b079b2b
 +
 +}
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index d448513ce3dd39aa38abb9d3c0b024ba4417a074..b6cdfdea835fe6175f6f915749d5ff6f82c270f8 100644
+index f443fb1c41db03f597f60a4f50bed9e2b08d90f7..bfb8a4ee3b945f16ebfe33791572cc6483d8ce64 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -47,6 +47,9 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -620,7 +609,7 @@ index d448513ce3dd39aa38abb9d3c0b024ba4417a074..b6cdfdea835fe6175f6f915749d5ff6f
          return ChatColor.translateAlternateColorCodes('&', input);
      }
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 28e395e8569ea5776574c62108ceb91fc8b2dbc4..d9bde8659a3ee59b243fc3885f66d2069b68fb37 100644
+index ab4821e551e7d1e899b4f98be7481d17aea753b1..7ceb6ce50c734a25f1fd6c2593197ef66b427770 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -1889,6 +1889,18 @@ public final class CraftServer implements Server {

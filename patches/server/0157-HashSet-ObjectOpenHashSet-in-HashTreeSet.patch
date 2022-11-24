@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 23 Sep 2022 21:15:46 +0200
+Subject: [PATCH] HashSet -> ObjectOpenHashSet in HashTreeSet
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/util/HashTreeSet.java b/src/main/java/org/bukkit/craftbukkit/util/HashTreeSet.java
+index 80a5c29f3b9f0e6ccb2acb01a6be3726d6b368b3..dce79d186993638e57d7c485464160001254d23f 100644
+--- a/src/main/java/org/bukkit/craftbukkit/util/HashTreeSet.java
++++ b/src/main/java/org/bukkit/craftbukkit/util/HashTreeSet.java
+@@ -8,7 +8,7 @@ import java.util.TreeSet;
+ 
+ public class HashTreeSet<V> implements Set<V> {
+ 
+-    private HashSet<V> hash = new HashSet<V>();
++    private Set<V> hash = new it.unimi.dsi.fastutil.objects.ObjectOpenHashSet<V>(); // Paper - Replace java.util.HashSet with ObjectOpenHashSet
+     private TreeSet<V> tree = new TreeSet<V>();
+ 
+     public HashTreeSet() {

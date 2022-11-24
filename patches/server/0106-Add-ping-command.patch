@@ -136,7 +136,7 @@ index 1a9607b692f3f028cc8fc56cb12c2a872fb05671..19ae5ed01304b33e7c106e4d5fbe4f38
 +
  }
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 11861cd79b05064f082796e958305d8dfdf4cb88..6486fc70a57c362541689c8b11fcec09917d6a07 100644
+index 2f849e45dbe02a3a5c653c13c8c4d33ccba2aa47..9235a9bf3c75a8f809bf4a5fe8f9f5a0c62cd33d 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -16,6 +16,7 @@ import java.util.Map;
@@ -147,7 +147,7 @@ index 11861cd79b05064f082796e958305d8dfdf4cb88..6486fc70a57c362541689c8b11fcec09
  import net.titanium.util.Pair;
  import org.bukkit.Bukkit;
  import org.bukkit.ChatColor;
-@@ -218,8 +219,7 @@ public class TitaniumConfig extends TitaniumConfigSection {
+@@ -219,8 +220,7 @@ public class TitaniumConfig extends TitaniumConfigSection {
  
          this.loadProperties();
  
@@ -444,7 +444,7 @@ index 0000000000000000000000000000000000000000..53d9319e4dd004ad35022db471cccd50
 +
 +}
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 19465a2ab731166a5459e513b667ffb02022e0c4..28f7855f59d312b8035aa1c06bdc85070fba6ef4 100644
+index 016f9cb80b5c67c52f0b18ba9999f4a40a370cc3..7c50e00b03ebc943625611b6062d1f688bc27fda 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -35,6 +35,7 @@ import net.titanium.config.BukkitConfig;

@@ -7,14 +7,14 @@ Co-authored-by: windcolor-dev <teaglehao@gmail.com>
 Co-authored-by: Peridot <peridot491@protonmail.com>
 
 diff --git a/build.gradle b/build.gradle
-index ee2482a1f25ffd8353129cca8f29134ca96e26fd..9cd93691c6dfafd59c7f4dd905c4609d7828700e 100644
+index 52ba617ff349f16bc583da4fb38e4e4db91f76bd..0a21a6c06b02bf67514a685f3a329ddf244ab343 100644
 --- a/build.gradle
 +++ b/build.gradle
 @@ -32,6 +32,7 @@ dependencies {
      // PandaSpigot end
      implementation 'com.velocitypowered:velocity-native:1.1.9' // Nacho - Use Velocity natives & compression
      implementation 'com.eatthepath:fast-uuid:0.2.0' // Nacho - Use jchambers' FAST UUID methods
-+    implementation 'com.github.matejtymes:javafixes:1.3.6.1' // WindSpigot
++    implementation 'com.github.matejtymes:javafixes:1.3.7.1' // WindSpigot
      // Titanium libraries end
  
      testImplementation 'junit:junit:4.13.2' // Titanium - Updated junit to 4.13.2
@@ -1074,10 +1074,10 @@ index ff8ac6c5270ce40a21c4d9519a09c5ede68b1072..b504a01f9ada3104604e79a661b6d562
          this.worldProvider.a(this);
          this.chunkProvider = this.k();
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 8947d16f030a0a578299491e8940e82db8250bc7..1b461c79a1334c8e2fec89b32c3b1c0f654be83e 100644
+index ea88bd80553d7e3dbee5306fb0c6e1b0f299cc2d..240b34d4991270e44123ea83f0ca9dc98833fba5 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
-@@ -176,6 +176,26 @@ TitaniumConfig extends TitaniumConfigSection {
+@@ -177,6 +177,26 @@ TitaniumConfig extends TitaniumConfigSection {
  
      }
  
@@ -1208,7 +1208,7 @@ index 0000000000000000000000000000000000000000..7c36c1fd2e3678c7bcdcf1a066ab1ced
 +}
 \ No newline at end of file
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 5e6fc10726aed332b2a4560df9defbc3bde38a2d..55d5c1d617f221ddb502b608587c8c024f9493a4 100644
+index a28e466e493ecc78bd17873edabef30be32fc32e..61e27ed4bcac9fcc0a2c3454ec8ad39b0cbdfe52 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -7,6 +7,7 @@ import com.google.common.collect.Lists;

@@ -190,7 +190,7 @@ index 19ae5ed01304b33e7c106e4d5fbe4f38d5d10330..d25c9541cc50cc1ffa74067a208df15d
  
      public Commands commands = new Commands();
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 2d41a0f67fa54dcb3c71113e1598d0904e3f7e46..8947d16f030a0a578299491e8940e82db8250bc7 100644
+index 9305d9f5d3b677bef695d15006cb124e3c4dbc1e..ea88bd80553d7e3dbee5306fb0c6e1b0f299cc2d 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -17,6 +17,7 @@ import java.util.Set;
@@ -201,7 +201,7 @@ index 2d41a0f67fa54dcb3c71113e1598d0904e3f7e46..8947d16f030a0a578299491e8940e82d
  import net.titanium.util.Pair;
  import org.bukkit.Bukkit;
  import org.bukkit.ChatColor;
-@@ -230,7 +231,8 @@ TitaniumConfig extends TitaniumConfigSection {
+@@ -231,7 +232,8 @@ TitaniumConfig extends TitaniumConfigSection {
              this.ionConfigHelper.saveSectionToFile();
          }
  

@@ -1,0 +1,70 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 23 Sep 2022 21:49:49 +0200
+Subject: [PATCH] Option to disable statistics and achievements
+
+
+diff --git a/src/main/java/net/minecraft/server/StatisticManager.java b/src/main/java/net/minecraft/server/StatisticManager.java
+index 5d6c3deac0d16d522ac3ef793a3fea3d74f05e68..e80e5d932fb74e7ccb9310bf04e18cdc53c31c8b 100644
+--- a/src/main/java/net/minecraft/server/StatisticManager.java
++++ b/src/main/java/net/minecraft/server/StatisticManager.java
+@@ -2,6 +2,7 @@ package net.minecraft.server;
+ 
+ import com.google.common.collect.Maps;
+ import java.util.Map;
++import net.titanium.config.TitaniumConfig;
+ 
+ public class StatisticManager {
+ 
+@@ -18,6 +19,11 @@ public class StatisticManager {
+     }
+ 
+     public void b(EntityHuman entityhuman, Statistic statistic, int i) {
++        // Titanium start - option to disable statistics
++        if (TitaniumConfig.get().gameMechanics.disableStatistics) {
++            return;
++        }
++        // Titanium end
+         if (!statistic.d() || this.b((Achievement) statistic)) {
+             // CraftBukkit start - fire Statistic events
+             org.bukkit.event.Cancellable cancellable = org.bukkit.craftbukkit.event.CraftEventFactory.handleStatisticsIncrease(entityhuman, statistic, this.getStatisticValue(statistic), i);
+@@ -30,6 +36,11 @@ public class StatisticManager {
+     }
+ 
+     public void setStatistic(EntityHuman entityhuman, Statistic statistic, int i) {
++        // Titanium start - option to disable statistics
++        if (TitaniumConfig.get().gameMechanics.disableStatistics) {
++            return;
++        }
++        // Titanium end
+         StatisticWrapper statisticwrapper = (StatisticWrapper) this.a.get(statistic);
+ 
+         if (statisticwrapper == null) {
+@@ -41,6 +52,11 @@ public class StatisticManager {
+     }
+ 
+     public int getStatisticValue(Statistic statistic) {
++        // Titanium start - option to disable statistics
++        if (TitaniumConfig.get().gameMechanics.disableStatistics) {
++            return 0;
++        }
++        // Titanium end
+         StatisticWrapper statisticwrapper = (StatisticWrapper) this.a.get(statistic);
+ 
+         return statisticwrapper == null ? 0 : statisticwrapper.a();
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index 2f51c12021f905dfda3aa349cc81f49061dd39c5..5e146dc26f2749d204e1ae27bdc525b007e2afb5 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -99,6 +99,11 @@ public class TitaniumConfig extends TitaniumConfigSection {
+ 
+         public boolean tickFluids = true;
+ 
++        @Comment("Whether to disable statistics (ESC -> Statistics) and achievements.")
++        @Comment("This option could improve performance a little especially on large servers.")
++        @Comment("Of course it's not vanilla mechanic.")
++        public boolean disableStatistics = false;
++
+     }
+ 
+     @Comment("Whether saving of fireworks and arrows should be disabled.")

@@ -5,7 +5,7 @@ Subject: [PATCH] Cache bukkit version
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/util/Versioning.java b/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
-index ce192cde20ea559efab60224a01d7c5128e1d668..5aa56804691d27a0d57af94dc1b1966749196220 100644
+index 61ef35a3560ff1bf523ec7ea505d275aca7aaada..d5d6be8f5bc8f02fc42e42fbb180abc47abd45db 100644
 --- a/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
 +++ b/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
 @@ -8,8 +8,13 @@ import java.util.logging.Logger;
@@ -21,7 +21,7 @@ index ce192cde20ea559efab60224a01d7c5128e1d668..5aa56804691d27a0d57af94dc1b19667
 +            return bukkitVersion;
 +        }
  
-         InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/net.titanvale/titanium-api/pom.properties");
+         InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/net.titanvale/titanium-api/pom.properties"); // Titanium
          Properties properties = new Properties();
 @@ -17,13 +22,13 @@ public final class Versioning {
          if (stream != null) {

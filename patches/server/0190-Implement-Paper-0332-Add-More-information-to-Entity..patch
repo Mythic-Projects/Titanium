@@ -1,0 +1,20 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Aikar <aikar@aikar.co>
+Date: Thu, 19 Jul 2018 01:13:28 -0400
+Subject: [PATCH] Implement [Paper-0332] Add More information to
+ Entity.toString() by Aikar
+
+
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index 879683f9e1572e50deb5b6c87ac3256bfe2f3b65..32ad47f9aa3ed3d76a25e81a9ce41d279809397b 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -2048,7 +2048,7 @@ public abstract class Entity implements ICommandListener {
+     }
+ 
+     public String toString() {
+-        return String.format("%s[\'%s\'/%d, l=\'%s\', x=%.2f, y=%.2f, z=%.2f]", new Object[] { this.getClass().getSimpleName(), this.getName(), Integer.valueOf(this.id), this.world == null ? "~NULL~" : this.world.getWorldData().getName(), Double.valueOf(this.locX), Double.valueOf(this.locY), Double.valueOf(this.locZ)});
++        return String.format("%s[\'%s\'/%d, uuid=\'%s\', l=\'%s\', x=%.2f, y=%.2f, z=%.2f, cx=%d, cd=%d, tl=%d, v=%b, d=%b]", this.getClass().getSimpleName(), this.getName(), this.id, this.uniqueID.toString(), this.world == null ? "~NULL~" : this.world.getWorldData().getName(), this.locX, this.locY, this.locZ, getChunkX(), getChunkZ(), this.ticksLived, this.valid, this.dead); // Paper - add more information
+     }
+ 
+     public boolean isInvulnerable(DamageSource damagesource) {

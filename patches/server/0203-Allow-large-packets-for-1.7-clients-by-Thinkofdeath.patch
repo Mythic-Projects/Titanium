@@ -1,0 +1,66 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Thinkofdeath <thinkofdeath@spigotmc.org>
+Date: Mon, 28 Mar 2016 15:41:31 -0700
+Subject: [PATCH] Allow large packets for 1.7 clients by Thinkofdeath
+
+
+diff --git a/src/main/java/net/minecraft/server/PacketDataSerializer.java b/src/main/java/net/minecraft/server/PacketDataSerializer.java
+index 034ffd623385532dc4be2a893c2589b00ef027d7..d50c6124bb00f06306aaa2ac50002b538127b54a 100644
+--- a/src/main/java/net/minecraft/server/PacketDataSerializer.java
++++ b/src/main/java/net/minecraft/server/PacketDataSerializer.java
+@@ -25,6 +25,7 @@ import io.netty.util.ByteProcessor;
+ import java.nio.channels.FileChannel;
+ // PandaSpigot end
+ 
++import net.techcable.tacospigot.CompatHacks;
+ import net.titanium.config.TitaniumConfig;
+ import org.bukkit.craftbukkit.inventory.CraftItemStack; // CraftBukkit
+ 
+@@ -32,7 +33,21 @@ public class PacketDataSerializer extends ByteBuf {
+ 
+     private final ByteBuf a;
+ 
++    // TacoSpigot start
++    private final boolean allowLargePackets;
++    private static final int DEFAULT_LIMIT = Short.MAX_VALUE;
++    private static final int LARGE_PACKET_LIMIT = Short.MAX_VALUE * 1024;
+     public PacketDataSerializer(ByteBuf bytebuf) {
++        /*
++         * By default, we limit the size of the received byte array to Short.MAX_VALUE, which is 31 KB.
++         * However, we make an exception when ProtocolSupport is installed, to allow 1.7 clients to work,
++         * and limit them to 31 MEGABYTES as they seem to need to send larger packets sometimes.
++         * Although a 31 MB limit leaves the server slightly vulnerable,
++         * it's still much better than the old system of having no limit,
++         * which would leave the server vulnerable to packets up to 2 GIGABYTES in size.
++         */
++        this.allowLargePackets = CompatHacks.hasProtocolSupport();
++    // TacoSpigot end
+         this.a = bytebuf;
+     }
+ 
+@@ -53,7 +68,7 @@ public class PacketDataSerializer extends ByteBuf {
+ 
+     // Paper start
+     public byte[] a() {
+-        return readByteArray(Short.MAX_VALUE);
++        return readByteArray(this.allowLargePackets ? LARGE_PACKET_LIMIT : DEFAULT_LIMIT); // TacoSpigot - large packet limit
+     }
+ 
+     public byte[]readByteArray(int limit) {
+diff --git a/src/main/java/net/techcable/tacospigot/CompatHacks.java b/src/main/java/net/techcable/tacospigot/CompatHacks.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..46c303732f5b2143d64c8dcd80b5dd20c8de34c2
+--- /dev/null
++++ b/src/main/java/net/techcable/tacospigot/CompatHacks.java
+@@ -0,0 +1,10 @@
++package net.techcable.tacospigot;
++
++import org.bukkit.Bukkit;
++
++public class CompatHacks {
++    private CompatHacks() {}
++    public static boolean hasProtocolSupport() {
++        return Bukkit.getPluginManager().isPluginEnabled("ProtocolSupport") || Bukkit.getPluginManager().isPluginEnabled("ViaRewind"); // Titanium - Add ViaRewind
++    }
++}
+\ No newline at end of file

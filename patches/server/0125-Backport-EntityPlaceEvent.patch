@@ -1,0 +1,119 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Wed, 6 Jul 2022 11:00:37 +0200
+Subject: [PATCH] Backport EntityPlaceEvent
+
+
+diff --git a/src/main/java/net/minecraft/server/ItemArmorStand.java b/src/main/java/net/minecraft/server/ItemArmorStand.java
+index d8de619021b61e7c57c69c4339d6f9ac68e014a7..46d941099f2360c9926d95b8a06bce3d2002085a 100644
+--- a/src/main/java/net/minecraft/server/ItemArmorStand.java
++++ b/src/main/java/net/minecraft/server/ItemArmorStand.java
+@@ -2,6 +2,7 @@ package net.minecraft.server;
+ 
+ import java.util.List;
+ import java.util.Random;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public class ItemArmorStand extends Item {
+ 
+@@ -52,6 +53,12 @@ public class ItemArmorStand extends Item {
+                                 entityarmorstand.f(nbttagcompound1);
+                             }
+ 
++                            // Titanium start - Backport EntityPlaceEvent
++                            if (CraftEventFactory.callEntityPlaceEvent(world, blockposition, enumdirection, entityhuman, entityarmorstand).isCancelled()) {
++                                return false;
++                            }
++                            // Titanium end
++
+                             world.addEntity(entityarmorstand);
+                         }
+ 
+diff --git a/src/main/java/net/minecraft/server/ItemBoat.java b/src/main/java/net/minecraft/server/ItemBoat.java
+index eb62bbb68c0a37aa837052d5a3e18229fcbe7da2..0b9bedebbcc88540f76cca7fc5cf1e5f6dc7285c 100644
+--- a/src/main/java/net/minecraft/server/ItemBoat.java
++++ b/src/main/java/net/minecraft/server/ItemBoat.java
+@@ -1,6 +1,7 @@
+ package net.minecraft.server;
+ 
+ import java.util.List;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public class ItemBoat extends Item {
+ 
+@@ -74,6 +75,12 @@ public class ItemBoat extends Item {
+                     }
+ 
+                     if (!world.isClientSide) {
++                        // Titanium start - Backport EntityPlaceEvent
++                        if (CraftEventFactory.callEntityPlaceEvent(world, movingobjectposition.a(), movingobjectposition.direction, entityhuman, entityboat).isCancelled()) {
++                            return itemstack;
++                        }
++                        // Titanium end
++
+                         world.addEntity(entityboat);
+                     }
+ 
+diff --git a/src/main/java/net/minecraft/server/ItemMinecart.java b/src/main/java/net/minecraft/server/ItemMinecart.java
+index e9fc40e936b2dd963bb7a7460cdbeb8ca5222f9d..8ef1a975709af2fec1a57f3968f5f29743274f0e 100644
+--- a/src/main/java/net/minecraft/server/ItemMinecart.java
++++ b/src/main/java/net/minecraft/server/ItemMinecart.java
+@@ -1,6 +1,7 @@
+ package net.minecraft.server;
+ 
+ // CraftBukkit start
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ import org.bukkit.craftbukkit.inventory.CraftItemStack;
+ import org.bukkit.event.block.BlockDispenseEvent;
+ // CraftBukkit end
+@@ -121,6 +122,12 @@ public class ItemMinecart extends Item {
+                     entityminecartabstract.setCustomName(itemstack.getName());
+                 }
+ 
++                // Titanium start - Backport EntityPlaceEvent
++                if (CraftEventFactory.callEntityPlaceEvent(world, blockposition, enumdirection, entityhuman, entityminecartabstract).isCancelled()) {
++                    return false;
++                }
++                // Titanium end
++
+                 world.addEntity(entityminecartabstract);
+             }
+ 
+diff --git a/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java b/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
+index 54fa1a2a232167cdf199f05570829c2f1a8289be..72d21f366b69767402f9503b4c94db4cf056ea42 100644
+--- a/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
++++ b/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
+@@ -19,6 +19,7 @@ import org.bukkit.block.Block;
+ import org.bukkit.block.BlockFace;
+ import org.bukkit.block.BlockState;
+ import org.bukkit.block.CreatureSpawner;
++import org.bukkit.craftbukkit.CraftChunk;
+ import org.bukkit.craftbukkit.CraftServer;
+ import org.bukkit.craftbukkit.CraftStatistic;
+ import org.bukkit.craftbukkit.CraftWorld;
+@@ -145,6 +146,25 @@ public class CraftEventFactory {
+         return event;
+     }
+ 
++    // Titanium start - Backport EntityPlaceEvent
++    public static EntityPlaceEvent callEntityPlaceEvent(World world, BlockPosition clickPosition, EnumDirection clickedFace, EntityHuman human, Entity entity) {
++        Player who = (human == null) ? null : (Player) human.getBukkitEntity();
++
++        int x = clickPosition.getX();
++        int y = clickPosition.getY();
++        int z = clickPosition.getZ();
++
++        org.bukkit.Chunk chunk = world.getWorld().getChunkAt(x, z);
++        org.bukkit.block.Block blockClicked = chunk.getBlock(x, y, z);
++        org.bukkit.block.BlockFace blockFace = org.bukkit.craftbukkit.block.CraftBlock.notchToBlockFace(clickedFace);
++
++        EntityPlaceEvent event = new EntityPlaceEvent(entity.getBukkitEntity(), who, blockClicked, blockFace);
++        entity.world.getServer().getPluginManager().callEvent(event);
++
++        return event;
++    }
++    // Titanium end
++
+     /**
+      * Bucket methods
+      */

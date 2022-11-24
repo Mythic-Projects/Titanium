@@ -1,0 +1,80 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Mon, 24 Oct 2022 11:24:32 +0200
+Subject: [PATCH] Improve versioning and add source & branch to Metrics
+
+
+diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
+index 45afb38bb7cd72014e6d50510feaf041be69e5a8..d341af5e57a6c03737505dcff22fce0f5cb70a8d 100644
+--- a/src/main/java/net/minecraft/server/DedicatedServer.java
++++ b/src/main/java/net/minecraft/server/DedicatedServer.java
+@@ -20,6 +20,7 @@ import org.apache.logging.log4j.Logger;
+ import java.io.PrintStream;
+ import org.apache.logging.log4j.Level;
+ 
++import org.bukkit.Bukkit;
+ import org.bukkit.craftbukkit.LoggerOutputStream;
+ import co.aikar.timings.SpigotTimings; // Spigot
+ import org.bukkit.event.server.ServerCommandEvent;
+@@ -178,7 +179,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+             // Spigot start
+             this.a((PlayerList) (new DedicatedPlayerList(this)));
+             // Spigot end
+-            new net.titanium.Metrics(); // PandaSpigot
++            prepareMetrics(); // Titanium - moved to method
+             java.net.SocketAddress bindAddress;
+             if (this.getServerIp().startsWith("unix:")) {
+                 if (!io.netty.channel.epoll.Epoll.isAvailable()) {
+@@ -351,6 +352,34 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+         }
+     }
+ 
++    // Titanium start - moved to method
++    private static void prepareMetrics() {
++        net.titanium.Metrics metrics = new net.titanium.Metrics(); // PandaSpigot
++        // Titanium start - Add source & branch pie
++        String bukkitVersion = Bukkit.getVersion();
++        int idx = bukkitVersion.indexOf(" (MC: ");
++        if (idx != -1) {
++            bukkitVersion = bukkitVersion.substring(0, idx);
++        }
++        String source = "Unknown";
++        String branch = "Unknown";
++        java.util.regex.Matcher versionMatcher = java.util.regex.Pattern.compile("(git-Titanium-)([a-zA-Z0-9]+)-([a-zA-Z0-9]+)-([a-zA-Z0-9]+)").matcher(bukkitVersion);
++        if (versionMatcher.find()) {
++            source = versionMatcher.group(2);
++            if (source.equalsIgnoreCase("GH")) {
++                source = "GitHub";
++            } else {
++                source = versionMatcher.group(2).toLowerCase();
++                source = source.substring(0, 1).toUpperCase() + source.substring(1);
++            }
++            branch = versionMatcher.group(3);
++        }
++        metrics.addCustomChart(new net.titanium.Metrics.SimplePie("source", source));
++        metrics.addCustomChart(new net.titanium.Metrics.SimplePie("branch", branch));
++        // Titanium end
++    }
++    // Titanium end
++
+     // CraftBukkit start
+     public PropertyManager getPropertyManager() {
+         return this.propertyManager;
+diff --git a/src/main/java/net/titanium/Metrics.java b/src/main/java/net/titanium/Metrics.java
+index 07080ee8240b135090101e9234c0456ef9b06c88..dcb40013f2633c6da8be658a1434a10a9e5ea4c0 100644
+--- a/src/main/java/net/titanium/Metrics.java
++++ b/src/main/java/net/titanium/Metrics.java
+@@ -558,6 +558,13 @@ public class Metrics {
+             this.callable = callable;
+         }
+ 
++        // Titanium start
++        public SimplePie(String chartId, String value) {
++            super(chartId);
++            this.callable = () -> value;
++        }
++        // Titanium end
++
+         @Override
+         protected JsonObjectBuilder.JsonObject getChartData() throws Exception {
+             String value = callable.call();

@@ -18,7 +18,7 @@ index 864b3bc1375cb72588b63855eee8fa4ff569a5d3..2a7cd7c86515662226014fcd95b34896
  
      public CrashReport b(CrashReport crashreport) {
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 69485fa696f27c965dd576d9cda7b4b56ef57032..6428f00930fe47ec01df1523840ff1cc6584fda3 100644
+index 69485fa696f27c965dd576d9cda7b4b56ef57032..520ba6f0fef5f246a99d8655231294eb53c9930f 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -127,7 +127,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
@@ -26,12 +26,12 @@ index 69485fa696f27c965dd576d9cda7b4b56ef57032..6428f00930fe47ec01df1523840ff1cc
  public final class CraftServer implements Server {
      private static final Player[] EMPTY_PLAYER_ARRAY = new Player[0];
 -    private final String serverName = "CraftBukkit";
-+    private final String serverName = "Titanium";
++    private final String serverName = "Titanium"; // Titanium
      private final String serverVersion;
      private final String bukkitVersion = Versioning.getBukkitVersion();
      private final Logger logger = Logger.getLogger("Minecraft");
 diff --git a/src/main/java/org/bukkit/craftbukkit/util/Versioning.java b/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
-index 3a4b14246bb99b989a4685242ccedd0030e481aa..ce192cde20ea559efab60224a01d7c5128e1d668 100644
+index 3a4b14246bb99b989a4685242ccedd0030e481aa..61ef35a3560ff1bf523ec7ea505d275aca7aaada 100644
 --- a/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
 +++ b/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
 @@ -11,7 +11,7 @@ public final class Versioning {
@@ -39,7 +39,7 @@ index 3a4b14246bb99b989a4685242ccedd0030e481aa..ce192cde20ea559efab60224a01d7c51
          String result = "Unknown-Version";
  
 -        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/org.github.paperspigot/paperspigot-api/pom.properties");
-+        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/net.titanvale/titanium-api/pom.properties");
++        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/net.titanvale/titanium-api/pom.properties"); // Titanium
          Properties properties = new Properties();
  
          if (stream != null) {
@@ -57,7 +57,7 @@ index 558989ce7ed25c7c720b35d80abd428b2f39d1be..448134e65b47d7f947a81dfc8e71a68f
          String pluginVersion = (Metrics.class.getPackage().getImplementationVersion() != null) ? Metrics.class.getPackage().getImplementationVersion() : "unknown";
          String serverVersion = Bukkit.getVersion();
 diff --git a/src/main/java/org/spigotmc/WatchdogThread.java b/src/main/java/org/spigotmc/WatchdogThread.java
-index c8f619a7eddd0fbfe10e13164c946b50734e3100..fe330bf0bd290781d0e6ed9efba4a85251a15710 100644
+index c8f619a7eddd0fbfe10e13164c946b50734e3100..bf4d740c274d20f7f7e495b7c5e1ee5acd5ed420 100644
 --- a/src/main/java/org/spigotmc/WatchdogThread.java
 +++ b/src/main/java/org/spigotmc/WatchdogThread.java
 @@ -56,9 +56,9 @@ public class WatchdogThread extends Thread
@@ -65,10 +65,10 @@ index c8f619a7eddd0fbfe10e13164c946b50734e3100..fe330bf0bd290781d0e6ed9efba4a852
                  Logger log = Bukkit.getServer().getLogger();
                  log.log( Level.SEVERE, "The server has stopped responding!" );
 -                log.log( Level.SEVERE, "Please report this to PaperSpigot directly!" );
-+                log.log( Level.SEVERE, "Please report this to https://github.com/TitaniumMC/Titanium" );
++                log.log( Level.SEVERE, "Please report this to https://github.com/TitaniumMC/Titanium" ); // Titanium
                  log.log( Level.SEVERE, "Be sure to include ALL relevant console errors and Minecraft crash reports" );
 -                log.log( Level.SEVERE, "PaperSpigot version: " + Bukkit.getServer().getVersion() );
-+                log.log( Level.SEVERE, "Titanium version: " + Bukkit.getServer().getVersion() );
++                log.log( Level.SEVERE, "Titanium version: " + Bukkit.getServer().getVersion() ); // Titanium
                  //
                  if(net.minecraft.server.World.haveWeSilencedAPhysicsCrash)
                  {
@@ -77,7 +77,7 @@ index c8f619a7eddd0fbfe10e13164c946b50734e3100..fe330bf0bd290781d0e6ed9efba4a852
                  //
                  log.log( Level.SEVERE, "------------------------------" );
 -                log.log( Level.SEVERE, "Server thread dump (Look for plugins here before reporting to PaperSpigot!):" );
-+                log.log( Level.SEVERE, "Server thread dump (Look for plugins here before reporting to Titanium!):" );
++                log.log( Level.SEVERE, "Server thread dump (Look for plugins here before reporting to Titanium!):" ); // Titanium
                  dumpThread( ManagementFactory.getThreadMXBean().getThreadInfo( MinecraftServer.getServer().primaryThread.getId(), Integer.MAX_VALUE ), log );
                  log.log( Level.SEVERE, "------------------------------" );
                  //

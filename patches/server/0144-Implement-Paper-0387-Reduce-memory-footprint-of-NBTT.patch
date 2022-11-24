@@ -1,0 +1,27 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Spottedleaf <spottedleaf@spottedleaf.dev>
+Date: Mon, 6 Apr 2020 17:39:25 -0700
+Subject: [PATCH] Implement [Paper-0387] Reduce memory footprint of
+ NBTTagCompound by Spottedleaf
+
+
+diff --git a/src/main/java/net/minecraft/server/NBTTagCompound.java b/src/main/java/net/minecraft/server/NBTTagCompound.java
+index 22d7c2ab36f11f93c0b9d08b786c784562ef7077..b28d7d60884e0fca3d2e5826a5847352d1d58dc0 100644
+--- a/src/main/java/net/minecraft/server/NBTTagCompound.java
++++ b/src/main/java/net/minecraft/server/NBTTagCompound.java
+@@ -1,6 +1,5 @@
+ package net.minecraft.server;
+ 
+-import com.google.common.collect.Maps;
+ import java.io.DataInput;
+ import java.io.DataOutput;
+ import java.io.IOException;
+@@ -12,7 +11,7 @@ import java.util.concurrent.Callable;
+ 
+ public class NBTTagCompound extends NBTBase {
+ 
+-    private Map<String, NBTBase> map = Maps.newHashMap();
++    private Map<String, NBTBase> map = new it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap<>(8, 0.8f); // Paper - reduce memory footprint of NBTTagCompound
+ 
+     public NBTTagCompound() {}
+ 

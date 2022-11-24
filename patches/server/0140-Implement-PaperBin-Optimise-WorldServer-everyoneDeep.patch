@@ -1,0 +1,69 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Thu, 4 Aug 2022 00:34:23 +0200
+Subject: [PATCH] Implement [PaperBin-????] Optimise
+ WorldServer#everyoneDeeplySleeping
+
+
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index 409a4b73cd67b59510420498c0f9e324781f6b34..7357ea24022d3e836723486ec26ec8cc74640048 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -291,6 +291,16 @@ public abstract class Entity implements ICommandListener {
+         this.K();
+     }
+ 
++    // Titanium start
++    public boolean isNether() {
++        return this.world.getWorld().getEnvironment() == org.bukkit.World.Environment.NETHER;
++    }
++
++    public boolean isEnd() {
++        return this.world.getWorld().getEnvironment() == org.bukkit.World.Environment.THE_END;
++    }
++    // Titanium end
++
+     /**
+      * PaperSpigot - Checks if the feature is enabled and the entity is above the nether world bedrock height
+      */
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index ebcae05f04058de8c1bd3b584e3222d73dc683c7..744ccfd98132cdb61b1ea91cb40ee0877c203245 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -363,7 +363,25 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+     }
+ 
+     public boolean everyoneDeeplySleeping() {
+-        if (this.O && !this.isClientSide) {
++        // PaperBin start - WorldServer#everyoneDeeplySleeping optimization
++        if (this.players.isEmpty() || this.isClientSide || !this.O) {
++            return false;
++        }
++
++        for (EntityHuman human : this.players) {
++            if (!human.isSpectator() && !human.isDeeplySleeping() && !human.fauxSleeping) {
++                return false;
++            }
++
++            // Titanium start - ignore players who are not in overworld
++            if (!human.isNether() && !human.isEnd()) {
++                return false;
++            }
++            // Titanium end
++        }
++
++        return true;
++        /*if (this.O && !this.isClientSide) {
+             Iterator iterator = this.players.iterator();
+ 
+             // CraftBukkit - This allows us to assume that some people are in bed but not really, allowing time to pass in spite of AFKers
+@@ -388,7 +406,8 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+             return false;
+         } else {
+             return false;
+-        }
++        }*/
++        // PaperBin end
+     }
+ 
+     protected void h() {

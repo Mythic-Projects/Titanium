@@ -1,0 +1,20 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: RoccoDev <roccodev.business@gmail.com>
+Date: Mon, 10 Aug 2020 17:50:02 +0200
+Subject: [PATCH] Implement [KigPaper-0108] Fix CraftPlayer setFlying not
+ working by RoccoDev
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+index 5f2b9f1c7c295f2e07cc27c9016c0e6d9853f8d5..0341d5cfba4cf6251fcd82090174226d75a91fde 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+@@ -1306,7 +1306,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+ 
+     @Override
+     public void setFlying(boolean value) {
+-        boolean needsUpdate = getHandle().abilities.canFly != value; // PaperSpigot - Only refresh abilities if needed
++        boolean needsUpdate = getHandle().abilities.isFlying != value; // PaperSpigot - Only refresh abilities if needed // KigPaper - canFly -> isFlying
+         if (!getAllowFlight() && value) {
+             throw new IllegalArgumentException("Cannot make player fly if getAllowFlight() is false");
+         }

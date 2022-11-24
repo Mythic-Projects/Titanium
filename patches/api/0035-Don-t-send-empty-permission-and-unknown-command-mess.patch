@@ -1,0 +1,21 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Thu, 8 Sep 2022 01:17:38 +0200
+Subject: [PATCH] Don't send empty permission and unknown command message
+
+
+diff --git a/src/main/java/org/bukkit/command/Command.java b/src/main/java/org/bukkit/command/Command.java
+index 523b4679d84167376d0993e45a49ebb787c455a9..b8bd959fe76c77910b29ff52fe48ae5d8461ef19 100644
+--- a/src/main/java/org/bukkit/command/Command.java
++++ b/src/main/java/org/bukkit/command/Command.java
+@@ -204,6 +204,10 @@ public abstract class Command {
+             permissionMessage = Bukkit.titanium().getMessages().getMissingPermissionCommand();
+         }
+ 
++        if (permissionMessage == null || permissionMessage.isEmpty()) {
++            return false;
++        }
++
+         permissionMessage = permissionMessage.replace("<permission>", "{PERMISSION}");
+         permissionMessage = permissionMessage.replace("{PERMISSION}", permission);
+ 

@@ -1,0 +1,43 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Aikar <aikar@aikar.co>
+Date: Tue, 8 Mar 2016 23:25:45 -0500
+Subject: [PATCH] Implement [Taco-0013] Option to disable Scoreboard for non
+ players by Aikar
+
+
+diff --git a/src/main/java/net/minecraft/server/CommandScoreboard.java b/src/main/java/net/minecraft/server/CommandScoreboard.java
+index 27d08a7de54de062041a107490a9d4684872ec8b..fdbf259a79954dab90938c16404df493b1618fb3 100644
+--- a/src/main/java/net/minecraft/server/CommandScoreboard.java
++++ b/src/main/java/net/minecraft/server/CommandScoreboard.java
+@@ -471,6 +471,7 @@ public class CommandScoreboard extends CommandAbstract {
+ 
+                     while (iterator.hasNext()) {
+                         Entity entity = (Entity) iterator.next();
++                        if (!entity.world.tacoConfigTitanium.allowNonPlayerEntitiesOnScoreboard && !(entity instanceof EntityPlayer)) continue; // TacoSpigot
+                         String s2 = e(icommandlistener, entity.getUniqueID().toString());
+ 
+                         if (scoreboard.addPlayerToTeam(s2, s)) {
+diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
+index a1122f1f11646a8b55af401060585fc6bfd9c44c..eafbd92d3dd4b9a9670cf0af3d96ec0f9770feed 100644
+--- a/src/main/java/net/minecraft/server/EntityLiving.java
++++ b/src/main/java/net/minecraft/server/EntityLiving.java
+@@ -1886,6 +1886,7 @@ public abstract class EntityLiving extends Entity {
+     }
+ 
+     public ScoreboardTeamBase getScoreboardTeam() {
++        if (!this.world.tacoConfigTitanium.allowNonPlayerEntitiesOnScoreboard && !(this instanceof EntityPlayer)) return null; // TacoSpigot
+         return this.world.getScoreboard().getPlayerTeam(this.getUniqueID().toString());
+     }
+ 
+diff --git a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
+index d2e2562210180427bb994d4bf7e318c6c8a47c56..d91fa559e70ef79c9dd13f4c9ad80acc6fa972bc 100644
+--- a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
++++ b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
+@@ -41,4 +41,7 @@ public class TacoSpigotWorldConfig extends TitaniumConfigSection {
+ 
+     }
+ 
++    @Comment("Whether to allow non-players (animals, monsters etc.) to be on scoreboard.")
++    public boolean allowNonPlayerEntitiesOnScoreboard = true;
++
+ }

@@ -1,0 +1,240 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Wed, 28 Sep 2022 17:22:52 +0200
+Subject: [PATCH] Backport EntityTransformEvent and EntityZapEvent
+
+
+diff --git a/src/main/java/com/destroystokyo/paper/event/entity/EntityZapEvent.java b/src/main/java/com/destroystokyo/paper/event/entity/EntityZapEvent.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..a8e818796878fc0bed9610616deb2e01db85d307
+--- /dev/null
++++ b/src/main/java/com/destroystokyo/paper/event/entity/EntityZapEvent.java
+@@ -0,0 +1,67 @@
++package com.destroystokyo.paper.event.entity;
++
++import java.util.Collections;
++import org.apache.commons.lang.Validate;
++import org.bukkit.entity.Entity;
++import org.bukkit.event.entity.EntityTransformEvent;
++import org.bukkit.entity.LightningStrike;
++import org.bukkit.event.Cancellable;
++import org.bukkit.event.HandlerList;
++import org.jetbrains.annotations.NotNull;
++
++/**
++ * Fired when lightning strikes an entity
++ */
++public class EntityZapEvent extends EntityTransformEvent implements Cancellable {
++
++    private static final HandlerList handlers = new HandlerList();
++    private boolean cancelled;
++    @NotNull private final LightningStrike bolt;
++
++    public EntityZapEvent(@NotNull final Entity entity, @NotNull final LightningStrike bolt, @NotNull final Entity replacementEntity) {
++        super(entity, Collections.singletonList(replacementEntity), TransformReason.LIGHTNING);
++        Validate.notNull(bolt);
++        Validate.notNull(replacementEntity);
++        this.bolt = bolt;
++    }
++
++    public boolean isCancelled() {
++        return cancelled;
++    }
++
++    public void setCancelled(boolean cancel) {
++        this.cancelled = cancel;
++    }
++
++    /**
++     * Gets the lightning bolt that is striking the entity.
++     *
++     * @return The lightning bolt responsible for this event
++     */
++    @NotNull
++    public LightningStrike getBolt() {
++        return bolt;
++    }
++
++    /**
++     * Gets the entity that will replace the struck entity.
++     *
++     * @return The entity that will replace the struck entity
++     */
++    @NotNull
++    public Entity getReplacementEntity() {
++        return getTransformedEntity();
++    }
++
++    @NotNull
++    @Override
++    public HandlerList getHandlers() {
++        return handlers;
++    }
++
++    @NotNull
++    public static HandlerList getHandlerList() {
++        return handlers;
++    }
++
++}
+diff --git a/src/main/java/org/bukkit/event/entity/EntityTransformEvent.java b/src/main/java/org/bukkit/event/entity/EntityTransformEvent.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..a751d39f420a9af4ac99f537b41dc484b85e6d00
+--- /dev/null
++++ b/src/main/java/org/bukkit/event/entity/EntityTransformEvent.java
+@@ -0,0 +1,109 @@
++package org.bukkit.event.entity;
++
++import java.util.Collections;
++import java.util.List;
++import org.bukkit.entity.Entity;
++import org.bukkit.event.Cancellable;
++import org.bukkit.event.HandlerList;
++import org.bukkit.event.entity.EntityEvent;
++import org.jetbrains.annotations.NotNull;
++
++/**
++ * Called when an entity is about to be replaced by another entity.
++ */
++public class EntityTransformEvent extends EntityEvent implements Cancellable {
++
++    private static final HandlerList handlers = new HandlerList();
++    private boolean cancelled;
++    private final Entity converted;
++    private final List<Entity> convertedList;
++    private final TransformReason transformReason;
++
++    public EntityTransformEvent(@NotNull Entity original, @NotNull List<Entity> convertedList, @NotNull TransformReason transformReason) {
++        super(original);
++        this.convertedList = Collections.unmodifiableList(convertedList);
++        this.converted = convertedList.get(0);
++        this.transformReason = transformReason;
++    }
++
++    /**
++     * Gets the entity that the original entity was transformed to.
++     *
++     * This returns the first entity in the transformed entity list.
++     *
++     * @return The transformed entity.
++     * @see #getTransformedEntities()
++     */
++    @NotNull
++    public Entity getTransformedEntity() {
++        return converted;
++    }
++
++    /**
++     * Gets the entities that the original entity was transformed to.
++     *
++     * @return The transformed entities.
++     */
++    @NotNull
++    public List<Entity> getTransformedEntities() {
++        return convertedList;
++    }
++
++    /**
++     * Gets the reason for the conversion that has occurred.
++     *
++     * @return The reason for conversion that has occurred.
++     */
++    @NotNull
++    public TransformReason getTransformReason() {
++        return transformReason;
++    }
++
++    @Override
++    public boolean isCancelled() {
++        return cancelled;
++    }
++
++    @Override
++    public void setCancelled(boolean cancel) {
++        cancelled = cancel;
++    }
++
++    @NotNull
++    @Override
++    public HandlerList getHandlers() {
++        return handlers;
++    }
++
++    @NotNull
++    public static HandlerList getHandlerList() {
++        return handlers;
++    }
++
++    public enum TransformReason {
++        /**
++         * When a zombie gets cured and a villager is spawned.
++         */
++        CURED,
++        /**
++         * When a villager gets infected and a zombie villager spawns.
++         */
++        INFECTION,
++        /**
++         * When a mooshroom (or MUSHROOM_COW) is sheared and a cow spawns.
++         */
++        SHEARED,
++        /**
++         * When lightning strikes a entity.
++         */
++        LIGHTNING,
++        /**
++         * When a slime splits into multiple smaller slimes.
++         */
++        SPLIT,
++        /**
++         * When reason is unknown.
++         */
++        UNKNOWN
++    }
++}
+\ No newline at end of file
+diff --git a/src/main/java/org/bukkit/event/entity/PigZapEvent.java b/src/main/java/org/bukkit/event/entity/PigZapEvent.java
+index aa80ebf1df632d19f6ab73e5eafee9d29c4b79ca..cf1960754d310ca03e25706cd6c0e4b0e9df76c8 100644
+--- a/src/main/java/org/bukkit/event/entity/PigZapEvent.java
++++ b/src/main/java/org/bukkit/event/entity/PigZapEvent.java
+@@ -1,5 +1,6 @@
+ package org.bukkit.event.entity;
+ 
++import com.destroystokyo.paper.event.entity.EntityZapEvent;
+ import org.bukkit.entity.LightningStrike;
+ import org.bukkit.entity.Pig;
+ import org.bukkit.entity.PigZombie;
+@@ -9,14 +10,14 @@ import org.bukkit.event.HandlerList;
+ /**
+  * Stores data for pigs being zapped
+  */
+-public class PigZapEvent extends EntityEvent implements Cancellable {
+-    private static final HandlerList handlers = new HandlerList();
++public class PigZapEvent extends EntityZapEvent implements Cancellable {
++    //private static final HandlerList handlers = new HandlerList(); // Paper
+     private boolean canceled;
+     private final PigZombie pigzombie;
+     private final LightningStrike bolt;
+ 
+     public PigZapEvent(final Pig pig, final LightningStrike bolt, final PigZombie pigzombie) {
+-        super(pig);
++        super(pig, bolt, pigzombie);
+         this.bolt = bolt;
+         this.pigzombie = pigzombie;
+     }
+@@ -53,6 +54,8 @@ public class PigZapEvent extends EntityEvent implements Cancellable {
+         return pigzombie;
+     }
+ 
++    // Paper start
++    /*
+     @Override
+     public HandlerList getHandlers() {
+         return handlers;
+@@ -61,4 +64,6 @@ public class PigZapEvent extends EntityEvent implements Cancellable {
+     public static HandlerList getHandlerList() {
+         return handlers;
+     }
++     */
++    // Paper end
+ }
