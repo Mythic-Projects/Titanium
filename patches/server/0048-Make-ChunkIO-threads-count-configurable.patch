@@ -5,10 +5,10 @@ Subject: [PATCH] Make ChunkIO threads count configurable
 
 
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index b6cdfdea835fe6175f6f915749d5ff6f82c270f8..e15abb056b56a6e3f196d7f7825522b035dba54a 100644
+index bfb8a4ee3b945f16ebfe33791572cc6483d8ce64..be0ff6a65b3d813e6246ca22faa8c0fbad3f06b4 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
-@@ -50,13 +50,33 @@ public class TitaniumConfig extends TitaniumConfigSection {
+@@ -50,13 +50,35 @@ public class TitaniumConfig extends TitaniumConfigSection {
      @Comment("Configuration from ion.yml")
      public IonConfig ion = new IonConfig();
  
@@ -22,6 +22,7 @@ index b6cdfdea835fe6175f6f915749d5ff6f82c270f8..e15abb056b56a6e3f196d7f7825522b0
 +        public IO io = new IO();
 +
 +        public static class IO extends TitaniumConfigSection {
++
 +            @Comment("The amount of threads to use for chunk loading (start value).")
 +            public int baseThreads = 2; // PaperSpigot - Bumped value
 +
@@ -29,6 +30,7 @@ index b6cdfdea835fe6175f6f915749d5ff6f82c270f8..e15abb056b56a6e3f196d7f7825522b0
 +            @Comment("This values represents how many players are needed to create a new thread.")
 +            @Comment("For eg. base-threads is 2, on server is 100 players, when one more joins server new thread will be created and so on.")
 +            public int playersPerThread = 50;
++
 +        }
 +
 +    }

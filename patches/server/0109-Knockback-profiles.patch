@@ -283,7 +283,7 @@ index 0000000000000000000000000000000000000000..4e85f8b45d4c46f25477098be4a49552
 +
 +}
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index f2e1df019b2ff6268a5decf5309afbac3dd9840f..2be0572b38086542b617fff34a4b7ec30548174c 100644
+index d4ade863213eb4c4eb1f49533cf4f0dab6f69a1a..2d41a0f67fa54dcb3c71113e1598d0904e3f7e46 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -28,7 +28,8 @@ import org.spigotmc.TicksPerSecondCommand;
@@ -296,7 +296,7 @@ index f2e1df019b2ff6268a5decf5309afbac3dd9840f..2be0572b38086542b617fff34a4b7ec3
  
      // For tests to work properly
      @Exclude
-@@ -193,10 +194,13 @@ public class TitaniumConfig extends TitaniumConfigSection {
+@@ -195,10 +196,13 @@ public class TitaniumConfig extends TitaniumConfigSection {
  
      @Override
      public OkaeriConfig load() throws OkaeriException {
@@ -312,7 +312,7 @@ index f2e1df019b2ff6268a5decf5309afbac3dd9840f..2be0572b38086542b617fff34a4b7ec3
          if (enableLegacyConfigFiles) {
              if (this.bukkitConfigHelper == null) {
                  this.bukkitConfigHelper = new LegacyConfigHelper(this.bukkit, "bukkit");
-@@ -224,8 +228,6 @@ public class TitaniumConfig extends TitaniumConfigSection {
+@@ -226,8 +230,6 @@ public class TitaniumConfig extends TitaniumConfigSection {
              this.ionConfigHelper.saveSectionToFile();
          }
  
@@ -321,7 +321,7 @@ index f2e1df019b2ff6268a5decf5309afbac3dd9840f..2be0572b38086542b617fff34a4b7ec3
          this.registerCommand("ping", new PingCommand("ping"));
  
          return this;
-@@ -308,12 +310,12 @@ public class TitaniumConfig extends TitaniumConfigSection {
+@@ -310,12 +312,12 @@ public class TitaniumConfig extends TitaniumConfigSection {
          return ChatColor.translateAlternateColorCodes('&', input);
      }
  
@@ -337,7 +337,7 @@ index f2e1df019b2ff6268a5decf5309afbac3dd9840f..2be0572b38086542b617fff34a4b7ec3
              return;
          }
  
-@@ -324,6 +326,10 @@ public class TitaniumConfig extends TitaniumConfigSection {
+@@ -326,6 +328,10 @@ public class TitaniumConfig extends TitaniumConfigSection {
          Bukkit.getLogger().log(level, log, params);
      }
  

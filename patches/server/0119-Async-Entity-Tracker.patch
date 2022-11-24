@@ -379,7 +379,7 @@ index 0000000000000000000000000000000000000000..70d4abbd2b4e86a2fa60cb7e7a67e20b
 +}
 \ No newline at end of file
 diff --git a/src/main/java/me/suicidalkids/ion/visuals/CannonTrackerEntry.java b/src/main/java/me/suicidalkids/ion/visuals/CannonTrackerEntry.java
-index d37dc29092e6ce833c512388ff0ea6b83b316b41..ffe921078d830211075921f09c4900c7dd83d446 100644
+index d37dc29092e6ce833c512388ff0ea6b83b316b41..7f8aa991787f115b41ad63d2aae8876c04ca34a8 100644
 --- a/src/main/java/me/suicidalkids/ion/visuals/CannonTrackerEntry.java
 +++ b/src/main/java/me/suicidalkids/ion/visuals/CannonTrackerEntry.java
 @@ -43,7 +43,7 @@ public class CannonTrackerEntry extends EntityTrackerEntry {
@@ -387,7 +387,7 @@ index d37dc29092e6ce833c512388ff0ea6b83b316b41..ffe921078d830211075921f09c4900c7
          // This entity has moved 4 blocks since the last update, search for players
          if (this.tracker.e(updateX, updateY, updateZ) > 16.0D) {
 -            this.scanPlayers(list);
-+            // this.scanPlayers(list); // Nacho - Async Entity Tracker
++            // this.scanPlayers(list); // Nacho - Async entity tracker
              this.updateX = this.tracker.locX;
              this.updateY = this.tracker.locY;
              this.updateZ = this.tracker.locZ;
@@ -395,7 +395,7 @@ index d37dc29092e6ce833c512388ff0ea6b83b316b41..ffe921078d830211075921f09c4900c7
      public void updatePlayer(EntityPlayer entityplayer) {
          // Check configurable distance as a cube then visible distance.
          if (this.c(entityplayer) && this.tracker.h(entityplayer) < 4096.0D) {
-+            // Nacho start - Async Entity Tracker
++            // Nacho start - Async entity tracker
 +            if (this.tracker instanceof EntityPlayer && withinNoTrack()) {
 +                return;
 +            }
@@ -405,7 +405,7 @@ index d37dc29092e6ce833c512388ff0ea6b83b316b41..ffe921078d830211075921f09c4900c7
              }
  
 -            entityplayer.removeQueue.remove(Integer.valueOf(this.tracker.getId()));
-+            // entityplayer.removeQueue.remove(Integer.valueOf(this.tracker.getId())) // Nacho - Async Entity Tracker;
++            // entityplayer.removeQueue.remove(Integer.valueOf(this.tracker.getId())) // Nacho - Async entity tracker;
  
              this.trackedPlayerMap.put(entityplayer, true); // Paper
              Packet packet = this.createPacket(); // IonSpigot
@@ -420,7 +420,7 @@ index d37dc29092e6ce833c512388ff0ea6b83b316b41..ffe921078d830211075921f09c4900c7
          }
      }
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index 6c0ab90c7bddac3022fe7e9a7ac52147f7b77aa4..d88128a68f56f82e743068d008c0f080f41dac8d 100644
+index 6c0ab90c7bddac3022fe7e9a7ac52147f7b77aa4..1dbdf18a339b837596682a471dbd378bd6873aa9 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
 @@ -35,7 +35,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
@@ -486,7 +486,7 @@ index 6c0ab90c7bddac3022fe7e9a7ac52147f7b77aa4..d88128a68f56f82e743068d008c0f080
          // PandaSpigot end
      }
  
-@@ -1086,12 +1094,15 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+@@ -1086,12 +1094,14 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
      }
  
      public void d(Entity entity) {
@@ -497,15 +497,15 @@ index 6c0ab90c7bddac3022fe7e9a7ac52147f7b77aa4..d88128a68f56f82e743068d008c0f080
          } else {
              this.removeQueue.add(Integer.valueOf(entity.getId()));
 -        }
+-
 +        }*/
-+        // Nacho end
- 
 +        this.playerConnection.sendPacket(new PacketPlayOutEntityDestroy(entity.getId()));
++        // Nacho end
      }
  
      protected void B() {
 diff --git a/src/main/java/net/minecraft/server/EntityTracker.java b/src/main/java/net/minecraft/server/EntityTracker.java
-index addf86937c1fbd0e8ead1e64637faa890ba7967f..342ee7dbe2a554d3b12eefb68bc7bce07818e5b7 100644
+index addf86937c1fbd0e8ead1e64637faa890ba7967f..c9bb63fb84bdbe4391c1eda2013f0a13add3a80d 100644
 --- a/src/main/java/net/minecraft/server/EntityTracker.java
 +++ b/src/main/java/net/minecraft/server/EntityTracker.java
 @@ -3,9 +3,11 @@ package net.minecraft.server;
@@ -520,7 +520,7 @@ index addf86937c1fbd0e8ead1e64637faa890ba7967f..342ee7dbe2a554d3b12eefb68bc7bce0
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
-@@ -13,19 +15,26 @@ public class EntityTracker {
+@@ -13,19 +15,25 @@ public class EntityTracker {
  
      private static final Logger a = LogManager.getLogger();
      private final WorldServer world;
@@ -530,7 +530,6 @@ index addf86937c1fbd0e8ead1e64637faa890ba7967f..342ee7dbe2a554d3b12eefb68bc7bce0
 +    protected IndexedLinkedSet<EntityTrackerEntry> c = new IndexedLinkedSet<>();
 +    public IntHashMap<EntityTrackerEntry> trackedEntities = new ConcurrentIntHashMap<>(); // WindSpigot
 +    // Nacho end
-+
      private int e;
  
      public EntityTracker(WorldServer worldserver) {
@@ -551,7 +550,7 @@ index addf86937c1fbd0e8ead1e64637faa890ba7967f..342ee7dbe2a554d3b12eefb68bc7bce0
              Iterator iterator = this.c.iterator();
  
              while (iterator.hasNext()) {
-@@ -34,7 +43,8 @@ public class EntityTracker {
+@@ -34,7 +42,8 @@ public class EntityTracker {
                  if (entitytrackerentry.tracker != entityplayer) {
                      entitytrackerentry.updatePlayer(entityplayer);
                  }
@@ -561,7 +560,7 @@ index addf86937c1fbd0e8ead1e64637faa890ba7967f..342ee7dbe2a554d3b12eefb68bc7bce0
          } else if (entity instanceof EntityFishingHook) {
              this.addEntity(entity, 64, 5, true);
          } else if (entity instanceof EntityArrow) {
-@@ -102,14 +112,20 @@ public class EntityTracker {
+@@ -102,14 +111,20 @@ public class EntityTracker {
  
          try {
              if (this.trackedEntities.b(entity.getId())) {
@@ -584,16 +583,16 @@ index addf86937c1fbd0e8ead1e64637faa890ba7967f..342ee7dbe2a554d3b12eefb68bc7bce0
          } catch (Throwable throwable) {
              CrashReport crashreport = CrashReport.a(throwable, "Adding entity to track");
              CrashReportSystemDetails crashreportsystemdetails = crashreport.a("Entity To Track");
-@@ -145,7 +161,7 @@ public class EntityTracker {
+@@ -145,7 +160,7 @@ public class EntityTracker {
  
      }
      // IonSpigot start
 -    private EntityTrackerEntry createTracker(Entity entity, int i, int j, boolean flag) {
-+    protected EntityTrackerEntry createTracker(Entity entity, int i, int j, boolean flag) {
++    protected EntityTrackerEntry createTracker(Entity entity, int i, int j, boolean flag) { // Nacho - private -> protected
          if (entity.isCannoningEntity && world.ionConfigTitanium.tnt.useFasterTracker) {
              return new me.suicidalkids.ion.visuals.CannonTrackerEntry(entity, i, j, flag);
          } else {
-@@ -177,7 +193,11 @@ public class EntityTracker {
+@@ -177,7 +192,11 @@ public class EntityTracker {
      }
  
      public void updatePlayers() {
@@ -606,7 +605,7 @@ index addf86937c1fbd0e8ead1e64637faa890ba7967f..342ee7dbe2a554d3b12eefb68bc7bce0
          Iterator iterator = this.c.iterator();
  
          while (iterator.hasNext()) {
-@@ -200,8 +220,8 @@ public class EntityTracker {
+@@ -200,8 +219,8 @@ public class EntityTracker {
                      entitytrackerentry1.updatePlayer(entityplayer);
                  }
              }
@@ -617,7 +616,7 @@ index addf86937c1fbd0e8ead1e64637faa890ba7967f..342ee7dbe2a554d3b12eefb68bc7bce0
      }
  
      public void a(EntityPlayer entityplayer) {
-@@ -211,7 +231,10 @@ public class EntityTracker {
+@@ -211,7 +230,10 @@ public class EntityTracker {
              EntityTrackerEntry entitytrackerentry = (EntityTrackerEntry) iterator.next();
  
              if (entitytrackerentry.tracker == entityplayer) {
@@ -629,7 +628,7 @@ index addf86937c1fbd0e8ead1e64637faa890ba7967f..342ee7dbe2a554d3b12eefb68bc7bce0
              } else {
                  entitytrackerentry.updatePlayer(entityplayer);
              }
-@@ -252,7 +275,8 @@ public class EntityTracker {
+@@ -252,7 +274,8 @@ public class EntityTracker {
          return this.c.iterator();
      }
  
@@ -639,7 +638,7 @@ index addf86937c1fbd0e8ead1e64637faa890ba7967f..342ee7dbe2a554d3b12eefb68bc7bce0
          Iterator iterator = this.c.iterator();
  
          while (iterator.hasNext()) {
-@@ -263,5 +287,6 @@ public class EntityTracker {
+@@ -263,5 +286,6 @@ public class EntityTracker {
              }
          }
  
@@ -648,7 +647,7 @@ index addf86937c1fbd0e8ead1e64637faa890ba7967f..342ee7dbe2a554d3b12eefb68bc7bce0
 +    // Nacho end
  }
 diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-index cf1ac2c43fe5f7bf4baf539d88e7a0f8b8397a2a..0b2b02fd4b8a79f916e95699d2f96344eee5c7c5 100644
+index cf1ac2c43fe5f7bf4baf539d88e7a0f8b8397a2a..33072edfccb68a1f977977da74acebfdb40618e8 100644
 --- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 +++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 @@ -1,10 +1,14 @@
@@ -780,15 +779,6 @@ index cf1ac2c43fe5f7bf4baf539d88e7a0f8b8397a2a..0b2b02fd4b8a79f916e95699d2f96344
          }
  
          if (this.w != this.tracker.vehicle || this.tracker.vehicle != null && this.m % 60 == 0) {
-@@ -100,7 +187,7 @@ public class EntityTrackerEntry {
-                     Packet packet = Items.FILLED_MAP.c(itemstack, this.tracker.world, entityplayer);
- 
-                     if (packet != null) {
--                        entityplayer.playerConnection.sendPacket(packet);
-+                        entityplayer.playerConnection.sendPacket(packet); 
-                     }
-                 }
-             }
 @@ -154,9 +241,11 @@ public class EntityTrackerEntry {
                          this.y = this.tracker.onGround;
                          this.v = 0;
@@ -803,18 +793,6 @@ index cf1ac2c43fe5f7bf4baf539d88e7a0f8b8397a2a..0b2b02fd4b8a79f916e95699d2f96344
                          // CraftBukkit end
                          object = new PacketPlayOutEntityTeleport(this.tracker.getId(), i, j, k, (byte) l, (byte) i1, this.tracker.onGround);
                      }
-@@ -191,9 +280,9 @@ public class EntityTrackerEntry {
-                                 if (teleportPacket == null) {
-                                     teleportPacket = new PacketPlayOutEntityTeleport(this.tracker.getId(), i, j, k, (byte) l, (byte) i1, this.tracker.onGround);
-                                 }
--                                viewer.getKey().playerConnection.sendPacket(teleportPacket);
-+                                viewer.getKey().playerConnection.sendPacket(teleportPacket); 
-                             } else {
--                                viewer.getKey().playerConnection.sendPacket((Packet) object);
-+                                viewer.getKey().playerConnection.sendPacket((Packet) object); 
-                             }
-                         }
-                     }
 @@ -334,10 +423,12 @@ public class EntityTrackerEntry {
      }
  
@@ -822,15 +800,15 @@ index cf1ac2c43fe5f7bf4baf539d88e7a0f8b8397a2a..0b2b02fd4b8a79f916e95699d2f96344
 -        org.spigotmc.AsyncCatcher.catchOp( "player tracker update"); // Spigot
 +        //org.spigotmc.AsyncCatcher.catchOp( "player tracker update"); // Spigot // Nacho - Async entity tracker
          if (entityplayer != this.tracker) {
-+            boolean isPlayerEntityTracked = this.trackedPlayers.contains(entityplayer);
++            boolean isPlayerEntityTracked = this.trackedPlayers.contains(entityplayer); // Nacho - Micro optimization
              if (this.c(entityplayer)) {
 -                if (!this.trackedPlayers.contains(entityplayer) && (this.e(entityplayer) || this.tracker.attachedToPlayer)) {
-+                if (!isPlayerEntityTracked && (this.e(entityplayer) || this.tracker.attachedToPlayer)) {
++                if (!isPlayerEntityTracked && (this.e(entityplayer) || this.tracker.attachedToPlayer)) { // Nacho - Micro optimization
 +                    if (this.tracker instanceof EntityPlayer && withinNoTrack()) return; // Nacho - Async entity tracker
                      // CraftBukkit start - respect vanish API
                      if (this.tracker instanceof EntityPlayer) {
                          Player player = ((EntityPlayer) this.tracker).getBukkitEntity();
-@@ -346,20 +437,20 @@ public class EntityTrackerEntry {
+@@ -346,7 +437,7 @@ public class EntityTrackerEntry {
                          }
                      }
  
@@ -839,88 +817,12 @@ index cf1ac2c43fe5f7bf4baf539d88e7a0f8b8397a2a..0b2b02fd4b8a79f916e95699d2f96344
                      // CraftBukkit end
                      this.trackedPlayerMap.put(entityplayer, true); // PaperBukkit
                      Packet packet = this.c();
- 
--                    entityplayer.playerConnection.sendPacket(packet);
-+                    entityplayer.playerConnection.sendPacket(packet); 
-                     if (!this.tracker.getDataWatcher().d()) {
--                        entityplayer.playerConnection.sendPacket(new PacketPlayOutEntityMetadata(this.tracker.getId(), this.tracker.getDataWatcher(), true));
-+                        entityplayer.playerConnection.sendPacket(new PacketPlayOutEntityMetadata(this.tracker.getId(), this.tracker.getDataWatcher(), true)); 
-                     }
- 
-                     NBTTagCompound nbttagcompound = this.tracker.getNBTTag();
- 
-                     if (nbttagcompound != null) {
--                        entityplayer.playerConnection.sendPacket(new PacketPlayOutUpdateEntityNBT(this.tracker.getId(), nbttagcompound));
-+                        entityplayer.playerConnection.sendPacket(new PacketPlayOutUpdateEntityNBT(this.tracker.getId(), nbttagcompound)); 
-                     }
- 
-                     if (this.tracker instanceof EntityLiving) {
-@@ -373,7 +464,7 @@ public class EntityTrackerEntry {
-                         // CraftBukkit end
- 
-                         if (!collection.isEmpty()) {
--                            entityplayer.playerConnection.sendPacket(new PacketPlayOutUpdateAttributes(this.tracker.getId(), collection));
-+                            entityplayer.playerConnection.sendPacket(new PacketPlayOutUpdateAttributes(this.tracker.getId(), collection)); 
-                         }
-                     }
- 
-@@ -381,15 +472,15 @@ public class EntityTrackerEntry {
-                     this.k = this.tracker.motY;
-                     this.l = this.tracker.motZ;
-                     if (this.u && !(packet instanceof PacketPlayOutSpawnEntityLiving)) {
--                        entityplayer.playerConnection.sendPacket(new PacketPlayOutEntityVelocity(this.tracker.getId(), this.tracker.motX, this.tracker.motY, this.tracker.motZ));
-+                        entityplayer.playerConnection.sendPacket(new PacketPlayOutEntityVelocity(this.tracker.getId(), this.tracker.motX, this.tracker.motY, this.tracker.motZ)); 
-                     }
- 
-                     if (this.tracker.vehicle != null) {
--                        entityplayer.playerConnection.sendPacket(new PacketPlayOutAttachEntity(0, this.tracker, this.tracker.vehicle));
-+                        entityplayer.playerConnection.sendPacket(new PacketPlayOutAttachEntity(0, this.tracker, this.tracker.vehicle)); 
-                     }
- 
-                     if (this.tracker instanceof EntityInsentient && ((EntityInsentient) this.tracker).getLeashHolder() != null) {
--                        entityplayer.playerConnection.sendPacket(new PacketPlayOutAttachEntity(1, this.tracker, ((EntityInsentient) this.tracker).getLeashHolder()));
-+                        entityplayer.playerConnection.sendPacket(new PacketPlayOutAttachEntity(1, this.tracker, ((EntityInsentient) this.tracker).getLeashHolder())); 
-                     }
- 
-                     if (this.tracker instanceof EntityLiving) {
-@@ -397,7 +488,7 @@ public class EntityTrackerEntry {
-                             ItemStack itemstack = ((EntityLiving) this.tracker).getEquipment(i);
- 
-                             if (itemstack != null) {
--                                entityplayer.playerConnection.sendPacket(new PacketPlayOutEntityEquipment(this.tracker.getId(), i, itemstack));
-+                                entityplayer.playerConnection.sendPacket(new PacketPlayOutEntityEquipment(this.tracker.getId(), i, itemstack)); 
-                             }
-                         }
-                     }
-@@ -406,7 +497,7 @@ public class EntityTrackerEntry {
-                         EntityHuman entityhuman = (EntityHuman) this.tracker;
- 
-                         if (entityhuman.isSleeping()) {
--                            entityplayer.playerConnection.sendPacket(new PacketPlayOutBed(entityhuman, new BlockPosition(this.tracker)));
-+                            entityplayer.playerConnection.sendPacket(new PacketPlayOutBed(entityhuman, new BlockPosition(this.tracker))); 
-                         }
-                     }
- 
-@@ -418,7 +509,7 @@ public class EntityTrackerEntry {
-                            the packet again in a method that is already called for each player. This would create a very serious performance issue
-                            with high player and entity counts (each sendPacket call involves waking up the event loop and flushing the network stream).
-                            this.broadcast(new PacketPlayOutEntityHeadRotation(this.tracker, (byte) i));*/
--                        entityplayer.playerConnection.sendPacket(new PacketPlayOutEntityHeadRotation(this.tracker, (byte) i));
-+                        entityplayer.playerConnection.sendPacket(new PacketPlayOutEntityHeadRotation(this.tracker, (byte) i)); 
-                         // CraftBukkit end
-                     }
-                     // CraftBukkit end
-@@ -430,11 +521,11 @@ public class EntityTrackerEntry {
-                         while (iterator.hasNext()) {
-                             MobEffect mobeffect = (MobEffect) iterator.next();
- 
--                            entityplayer.playerConnection.sendPacket(new PacketPlayOutEntityEffect(this.tracker.getId(), mobeffect));
-+                            entityplayer.playerConnection.sendPacket(new PacketPlayOutEntityEffect(this.tracker.getId(), mobeffect)); 
+@@ -434,7 +525,7 @@ public class EntityTrackerEntry {
                          }
                      }
                  }
 -            } else if (this.trackedPlayers.contains(entityplayer)) {
-+            } else if (isPlayerEntityTracked) {
++            } else if (isPlayerEntityTracked) { // Nacho - Micro optimization
                  this.trackedPlayers.remove(entityplayer);
                  entityplayer.d(this.tracker);
              }
@@ -963,7 +865,7 @@ index cf1ac2c43fe5f7bf4baf539d88e7a0f8b8397a2a..0b2b02fd4b8a79f916e95699d2f96344
          }
  
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 7476ece1e4fa58e94132fd8627cd2eef13e3845e..13ac82adf72f02dfcd2b425a2012c00093780587 100644
+index 7476ece1e4fa58e94132fd8627cd2eef13e3845e..55b1cb38e3b670f01c984b95756d792bc3cd1c48 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -10,6 +10,7 @@ import com.mojang.authlib.GameProfile;
@@ -982,24 +884,7 @@ index 7476ece1e4fa58e94132fd8627cd2eef13e3845e..13ac82adf72f02dfcd2b425a2012c000
  import org.apache.commons.lang3.Validate;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
-@@ -616,7 +618,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
-     }
-     private static final java.math.BigDecimal TPS_BASE = new java.math.BigDecimal(1E9).multiply(new java.math.BigDecimal(SAMPLE_INTERVAL));
-     // PaperSpigot End
-- 
-+
-     public void run() {
-         try {
-             serverStartTime = getNanos(); // Paper
-@@ -1027,7 +1029,6 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
-                     worldserver.a(crashreport);
-                     throw new ReportedException(crashreport);
-                 }
--
-                 this.methodProfiler.b();
-                 this.methodProfiler.a("tracker");
-                 worldserver.timings.tracker.startTiming(); // Spigot
-@@ -1043,7 +1044,13 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+@@ -1043,7 +1045,13 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
                  }
                  try {
                      // Tuinity end
@@ -1015,14 +900,14 @@ index 7476ece1e4fa58e94132fd8627cd2eef13e3845e..13ac82adf72f02dfcd2b425a2012c000
                  } finally {
                      for (NetworkManager networkManager : disabledFlushes) {
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index b8daeda95f0f7029da9cc62be90959a924c3d7a1..37703b8301117a87ff4f60ea5bf8d5b5358e04b1 100644
+index b8daeda95f0f7029da9cc62be90959a924c3d7a1..e818a34433dde6682a00a478b7d79f2443d23366 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
 @@ -355,6 +355,7 @@ public abstract class PlayerList {
  
      public void d(EntityPlayer entityplayer) {
          entityplayer.u().getPlayerChunkMap().movePlayer(entityplayer);
-+        entityplayer.world.playerMap.move(entityplayer);
++        entityplayer.world.playerMap.move(entityplayer); // Nacho - Async entity tracker
      }
  
      public String disconnect(EntityPlayer entityplayer) { // CraftBukkit - return string
@@ -1189,26 +1074,10 @@ index ff8ac6c5270ce40a21c4d9519a09c5ede68b1072..b504a01f9ada3104604e79a661b6d562
          this.worldProvider.a(this);
          this.chunkProvider = this.k();
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 6f41c04483bda78fc8df2a10f6622511fcb10ab0..1b461c79a1334c8e2fec89b32c3b1c0f654be83e 100644
+index 8947d16f030a0a578299491e8940e82db8250bc7..1b461c79a1334c8e2fec89b32c3b1c0f654be83e 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
-@@ -144,6 +144,7 @@ TitaniumConfig extends TitaniumConfigSection {
-         public IO io = new IO();
- 
-         public static class IO extends TitaniumConfigSection {
-+
-             @Comment("The amount of threads to use for chunk loading (start value).")
-             public int baseThreads = 2; // PaperSpigot - Bumped value
- 
-@@ -151,6 +152,7 @@ TitaniumConfig extends TitaniumConfigSection {
-             @Comment("This values represents how many players are needed to create a new thread.")
-             @Comment("For eg. base-threads is 2, on server is 100 players, when one more joins server new thread will be created and so on.")
-             public int playersPerThread = 50;
-+
-         }
- 
-     }
-@@ -174,6 +176,26 @@ TitaniumConfig extends TitaniumConfigSection {
+@@ -176,6 +176,26 @@ TitaniumConfig extends TitaniumConfigSection {
  
      }
  
@@ -1387,7 +1256,7 @@ index edad1260e98c95c36c33ea97c4e087539414197b..58846a42b2f71c4777d050d668ef6bb3
      private double health = 20;
      private boolean scaledHealth = false;
 diff --git a/src/main/java/org/spigotmc/TrackingRange.java b/src/main/java/org/spigotmc/TrackingRange.java
-index f5e38264a91b265b347082b9c462309b3c69b644..bfe635e0b162bb1aa70ba0fe1e30edec87988d41 100644
+index f5e38264a91b265b347082b9c462309b3c69b644..5b145de30db728142f085a799fdb23bb1c65b02b 100644
 --- a/src/main/java/org/spigotmc/TrackingRange.java
 +++ b/src/main/java/org/spigotmc/TrackingRange.java
 @@ -1,12 +1,15 @@
@@ -1411,7 +1280,7 @@ index f5e38264a91b265b347082b9c462309b3c69b644..bfe635e0b162bb1aa70ba0fe1e30edec
          SpigotWorldConfig config = entity.world.spigotConfigTitanium;
          SpigotWorldConfig.EntityTrackingRange trackingConfig = config.entityTrackingRange;
 -        if ( entity instanceof EntityPlayer )
-+        if ( entity instanceof EntityPlayer || entity instanceof EntityArrow || entity instanceof EntityProjectile || entity instanceof EntityFishingHook) // Nacho - Async entity tracker
++        if ( entity instanceof EntityPlayer || entity instanceof EntityArrow || entity instanceof EntityProjectile || entity instanceof EntityFishingHook ) // Nacho - Async entity tracker
          {
              return trackingConfig.players;
          }  else if ( entity.activationType == 1 )

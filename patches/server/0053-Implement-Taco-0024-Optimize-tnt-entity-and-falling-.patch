@@ -154,7 +154,7 @@ index 0000000000000000000000000000000000000000..8c401271e67be769b197a3f46357852c
 +
 +}
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 4b57e6691233ddc210536ccb9bbc4ed3acdd2ee5..f363e1398c02dd90736fc61b02be89e8e446496f 100644
+index 9d4927923deb4d6cf7a8c85f12a4ca972471ebe1..5d689bc03763a1627c17597b70d533899f0da714 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -47,6 +47,9 @@ public class TitaniumConfig extends TitaniumConfigSection {
@@ -167,7 +167,7 @@ index 4b57e6691233ddc210536ccb9bbc4ed3acdd2ee5..f363e1398c02dd90736fc61b02be89e8
      @Comment("Configuration from ion.yml")
      public IonConfig ion = new IonConfig();
  
-@@ -135,6 +138,11 @@ public class TitaniumConfig extends TitaniumConfigSection {
+@@ -137,6 +140,11 @@ public class TitaniumConfig extends TitaniumConfigSection {
              }
              this.paperConfigHelper.saveSectionToFile();
  
@@ -179,7 +179,7 @@ index 4b57e6691233ddc210536ccb9bbc4ed3acdd2ee5..f363e1398c02dd90736fc61b02be89e8
              if (this.ionConfigHelper == null) {
                  this.ionConfigHelper = new LegacyConfigHelper(this.ion, "ion", 1);
              }
-@@ -208,6 +216,13 @@ public class TitaniumConfig extends TitaniumConfigSection {
+@@ -210,6 +218,13 @@ public class TitaniumConfig extends TitaniumConfigSection {
          return this.paperConfigHelper;
      }
  

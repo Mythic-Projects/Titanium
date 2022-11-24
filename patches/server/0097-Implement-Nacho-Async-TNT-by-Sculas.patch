@@ -141,7 +141,7 @@ index 741697e2f6410fb891c16e95ad8769f97a238914..5d0790c13641a17989de2e7eef5aa832
          private final World world;
          private final double posX, posY, posZ;
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index e6536401ec51e6b306da62d5402ba2e14037f309..78fb4eca6bf804a168ea8b483aab4f6006a24545 100644
+index ccbb68fb13348ff5e8294e388cd2a5815111e492..7476ece1e4fa58e94132fd8627cd2eef13e3845e 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -537,6 +537,10 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
@@ -156,10 +156,10 @@ index e6536401ec51e6b306da62d5402ba2e14037f309..78fb4eca6bf804a168ea8b483aab4f60
      }
  
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 18d6d367eb1958a8b131e2051cf5ce70f88b4c63..c39115e4909a66926417fe183e5974ea21844f54 100644
+index 78b3804c6f6b0ece5e9226407fe3fd2ac183f8d6..e393ccd107701f4661eac820367d58fa188ead8d 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
-@@ -135,6 +135,25 @@ public class TitaniumConfig extends TitaniumConfigSection {
+@@ -137,6 +137,25 @@ public class TitaniumConfig extends TitaniumConfigSection {
  
      }
  
