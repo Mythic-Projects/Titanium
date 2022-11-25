@@ -1,0 +1,67 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Thu, 19 May 2022 19:32:31 +0200
+Subject: [PATCH] Implement [Nacho-0024] Do not create new BlockPosition when
+ loading chunk
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
+index cd242e320b3fcb05b79980dd274d5644dc57cd03..960ff5d9858741e492d28b6abf0139fdc673416e 100644
+--- a/src/main/java/net/minecraft/server/EntityPlayer.java
++++ b/src/main/java/net/minecraft/server/EntityPlayer.java
+@@ -226,9 +226,9 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+         }
+ 
+         if (!this.chunkCoordIntPairQueue.isEmpty()) {
+-            ArrayList arraylist = Lists.newArrayList();
++            ArrayList<Chunk> arraylist = Lists.newArrayList(); // Nacho - Add generics
+             Iterator iterator1 = this.chunkCoordIntPairQueue.iterator();
+-            ArrayList arraylist1 = Lists.newArrayList();
++            ArrayList<TileEntity> arraylist1 = Lists.newArrayList(); // Nacho - Add generics
+ 
+             Chunk chunk;
+ 
+@@ -236,7 +236,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+                 ChunkCoordIntPair chunkcoordintpair = (ChunkCoordIntPair) iterator1.next();
+ 
+                 if (chunkcoordintpair != null) {
+-                    if (this.world.isLoaded(new BlockPosition(chunkcoordintpair.x << 4, 0, chunkcoordintpair.z << 4))) {
++                    if (this.world.isLoaded(chunkcoordintpair.x << 4, 0, chunkcoordintpair.z << 4)) {// Nacho - Do not create new BlockPosition when loading chunk
+                         chunk = this.world.getChunkAt(chunkcoordintpair.x, chunkcoordintpair.z);
+                         if (chunk.isReady()) {
+                             arraylist.add(chunk);
+@@ -251,23 +251,24 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+ 
+             if (!arraylist.isEmpty()) {
+                 if (arraylist.size() == 1) {
+-                    this.playerConnection.sendPacket(new PacketPlayOutMapChunk((Chunk) arraylist.get(0), true, '\uffff'));
++                    this.playerConnection.sendPacket(new PacketPlayOutMapChunk(arraylist.get(0), true, '\uffff')); // Nacho - Add generics
+                 } else {
+                     this.playerConnection.sendPacket(new PacketPlayOutMapChunkBulk(arraylist));
+                 }
+ 
+-                Iterator iterator2 = arraylist1.iterator();
+-
+-                while (iterator2.hasNext()) {
+-                    TileEntity tileentity = (TileEntity) iterator2.next();
+-
++                // Nacho - Add generics
++                Iterator<TileEntity> tileEntitiesIterator = arraylist1.iterator();
++                while (tileEntitiesIterator.hasNext()) {
++                    TileEntity tileentity = tileEntitiesIterator.next();
++                    // Nacho end
+                     this.a(tileentity);
+                 }
+ 
+-                iterator2 = arraylist.iterator();
+-
+-                while (iterator2.hasNext()) {
+-                    chunk = (Chunk) iterator2.next();
++                // Nacho start - Add generics
++                Iterator<Chunk> chunkIterator = arraylist.iterator();
++                while (chunkIterator.hasNext()) {
++                    chunk = chunkIterator.next();
++                    // Nacho end
+                     this.u().getTracker().a(this, chunk);
+                 }
+             }

@@ -1,0 +1,148 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Aikar <aikar@aikar.co>
+Date: Fri, 25 Nov 2022 22:48:44 +0100
+Subject: [PATCH] Implement [Paper-0077] Add World Util Methods by Aikar
+
+
+diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
+index ce7f9a4c1d6b9043a77255a13012db77dfe73622..f48c8d2f6d26bc64ca0a1405d3017b3bba32fcf2 100644
+--- a/src/main/java/net/minecraft/server/Chunk.java
++++ b/src/main/java/net/minecraft/server/Chunk.java
+@@ -499,10 +499,13 @@ public class Chunk {
+ 
+     // PaperSpigot start - Optimize getBlockData
+     public IBlockData getBlockData(final BlockPosition blockposition) {
+-        if (blockposition.getY() >= 0 && blockposition.getY() >> 4 < this.sections.length) {
+-            ChunkSection chunksection = this.sections[blockposition.getY() >> 4];
++        return this.getBlockData(blockposition.getX(), blockposition.getY(), blockposition.getZ());
++    }
++    public IBlockData getBlockData(final int x, final int y, final int z) {
++        if (y >= 0 && y >> 4 < this.sections.length) {
++            ChunkSection chunksection = this.sections[y >> 4];
+             if (chunksection != null) {
+-                return chunksection.getType(blockposition.getX() & 15, blockposition.getY() & 15, blockposition.getZ() & 15);
++                return chunksection.getType(x & 15, y & 15, z & 15);
+             }
+         }
+         return Blocks.AIR.getBlockData();
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index fc1efbf33e8877d267c7992282150bca023825ef..63891d58e74b71fe3bf8766e951fd38387c6a53e 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -73,7 +73,7 @@ public abstract class World implements IBlockAccess {
+     public final List<Entity> k = Lists.newArrayList();
+     protected final IntHashMap<Entity> entitiesById = new IntHashMap();
+     private long d = 16777215L;
+-    private int I;
++    private int I; private int getSkylightSubtracted() { return this.I; } // Paper - OBFHELPER
+     protected int m = (new Random()).nextInt();
+     protected final int n = 1013904223;
+     protected float o;
+@@ -182,6 +182,12 @@ public abstract class World implements IBlockAccess {
+         return (CraftServer) Bukkit.getServer();
+     }
+ 
++    // Paper start
++    public Chunk getChunkIfLoaded(BlockPosition blockposition) {
++        return ((ChunkProviderServer) this.chunkProvider).getChunkIfLoaded(blockposition.getX() >> 4, blockposition.getZ() >> 4);
++    }
++    // Paper end
++
+     public Chunk getChunkIfLoaded(int x, int z) {
+         return ((ChunkProviderServer) this.chunkProvider).getChunkIfLoaded(x, z);
+     }
+@@ -303,9 +309,15 @@ public abstract class World implements IBlockAccess {
+     }
+ 
+     private boolean isValidLocation(BlockPosition blockposition) {
+-        return blockposition.getX() >= -30000000 && blockposition.getZ() >= -30000000 && blockposition.getX() < 30000000 && blockposition.getZ() < 30000000 && blockposition.getY() >= 0 && blockposition.getY() < 256;
++        return this.isValidLocation(blockposition.getX(), blockposition.getY(), blockposition.getZ()); // Titanium
+     }
+ 
++    // Titanium start
++    private boolean isValidLocation(int x, int y, int z) {
++        return x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000 && y >= 0 && y < 256;
++    }
++    // Titanium end
++
+     public boolean isEmpty(BlockPosition blockposition) {
+         return this.getType(blockposition).getBlock().getMaterial() == Material.AIR;
+     }
+@@ -669,6 +681,7 @@ public abstract class World implements IBlockAccess {
+         return this.c(blockposition, true);
+     }
+ 
++    public final int getLight(BlockPosition blockposition, boolean checkNeighbors) { return this.c(blockposition, checkNeighbors); } // Paper - OBFHELPER
+     public int c(BlockPosition blockposition, boolean flag) {
+         if (blockposition.getX() >= -30000000 && blockposition.getZ() >= -30000000 && blockposition.getX() < 30000000 && blockposition.getZ() < 30000000) {
+             if (flag && this.getType(blockposition).getBlock().s()) {
+@@ -779,6 +792,36 @@ public abstract class World implements IBlockAccess {
+         return this.worldProvider.p()[this.getLightLevel(blockposition)];
+     }
+ 
++    // Paper start - reduces need to do isLoaded before getType
++    private IBlockData getCapturedBlockType(int x, int y, int z) {
++        Iterator<BlockState> it = this.capturedBlockStates.iterator();
++        while (it.hasNext()) {
++            BlockState previous = it.next();
++            if (previous.getX() == x && previous.getY() == y && previous.getZ() == z) {
++                return CraftMagicNumbers.getBlock(previous.getTypeId()).fromLegacyData(previous.getRawData());
++            }
++        }
++        return null;
++    }
++
++    public IBlockData getTypeIfLoaded(BlockPosition blockposition) {
++        // CraftBukkit start - tree generation
++        final int x = blockposition.getX();
++        final int y = blockposition.getY();
++        final int z = blockposition.getZ();
++        if (captureTreeGeneration) {
++            IBlockData previous = this.getCapturedBlockType(x, y, z);
++            if (previous != null) return previous;
++        }
++        // CraftBukkit end
++        Chunk chunk = this.getChunkIfLoaded(x >> 4, z >> 4);
++        if (chunk != null) {
++            return this.isValidLocation(x, y, z) ? chunk.getBlockData(x, y, z) : Blocks.AIR.getBlockData();
++        }
++        return null;
++    }
++    // Paper end
++
+     // Spigot start
+     public IBlockData getType(BlockPosition blockposition)
+     {
+@@ -787,23 +830,23 @@ public abstract class World implements IBlockAccess {
+     
+     public IBlockData getType(BlockPosition blockposition, boolean useCaptured) {
+         // CraftBukkit start - tree generation
++        final int x = blockposition.getX();
++        final int y = blockposition.getY();
++        final int z = blockposition.getZ();
+         if (captureTreeGeneration && useCaptured) {
+     // Spigot end
+-            Iterator<BlockState> it = capturedBlockStates.iterator();
+-            while (it.hasNext()) {
+-                BlockState previous = it.next();
+-                if (previous.getX() == blockposition.getX() && previous.getY() == blockposition.getY() && previous.getZ() == blockposition.getZ()) {
+-                    return CraftMagicNumbers.getBlock(previous.getTypeId()).fromLegacyData(previous.getRawData());
+-                }
+-            }
++            // Paper start
++            IBlockData previous = this.getCapturedBlockType(x, y, z);
++            if (previous != null) return previous;
++            // Paper end
+         }
+         // CraftBukkit end
+-        if (!this.isValidLocation(blockposition)) {
++        if (!this.isValidLocation(x, y, z)) { // Titanium - blockposition -> x, y, z
+             return Blocks.AIR.getBlockData();
+         } else {
+             Chunk chunk = this.getChunkAtWorldCoords(blockposition);
+ 
+-            return chunk.getBlockData(blockposition);
++            return chunk.getBlockData(x, y, z); // Paper - blockposition -> x, y, z
+         }
+     }
+ 

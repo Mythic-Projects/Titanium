@@ -75,6 +75,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0072] Fix Furnace cook time bug when lagging by Aikar
 [Paper-0072] Only process BlockPhysicsEvent if a plugin has a listener by Aikar
 [Paper-0076] Optimized light level comaprsions by Aikar
+[Paper-0077] Add World Util Methods by Aikar
 [Paper-0085] Use a Shared Random for Entities
 [Paper-0090] Improve Maps (in item frames) performance and bug fixes by Aikar
 [Paper-0101] Do not load chunks for light check by Aikar
