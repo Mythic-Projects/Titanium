@@ -74,7 +74,7 @@ index 7b814c1f001626a2c84239544e7c0f33ae4b3b51..dfce6b03a0a16f71a328b44165148e78
  
                          if (entity instanceof EntityPlayer && entity.velocityChanged) {
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index e9531e84784312965bcf371e7e85fb1f2f62e73e..a1122f1f11646a8b55af401060585fc6bfd9c44c 100644
+index e9531e84784312965bcf371e7e85fb1f2f62e73e..54175d403b296ea7aca26931e11ec9b212845c15 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
 @@ -15,6 +15,8 @@ import java.util.UUID;
@@ -116,7 +116,7 @@ index e9531e84784312965bcf371e7e85fb1f2f62e73e..a1122f1f11646a8b55af401060585fc6
      public void a(Entity entity, float f, double d0, double d1) {
          if (this.random.nextDouble() >= this.getAttributeInstance(GenericAttributes.c).getValue()) {
              this.ai = true;
-@@ -913,6 +918,62 @@ public abstract class EntityLiving extends Entity {
+@@ -913,6 +918,60 @@ public abstract class EntityLiving extends Entity {
  
          }
      }
@@ -163,13 +163,11 @@ index e9531e84784312965bcf371e7e85fb1f2f62e73e..a1122f1f11646a8b55af401060585fc6
 +            this.motY += vertical;
 +            this.motZ -= z / magnitude * horizontal;
 +
-+            /*
 +            if (this.motX > kb.getHorizontalMax()) this.motX = kb.getHorizontalMax();
 +            if (this.motX < kb.getHorizontalMin()) this.motX = kb.getHorizontalMin();
 +
 +            if (this.motZ > kb.getHorizontalMax()) this.motZ = kb.getHorizontalMax();
 +            if (this.motZ < kb.getHorizontalMin()) this.motZ = kb.getHorizontalMin();
-+             */
 +
 +            if (this.motY > kb.getVerticalMax()) this.motY = kb.getVerticalMax();
 +            if (this.motY < kb.getVerticalMin()) this.motY = kb.getVerticalMin();
@@ -179,7 +177,7 @@ index e9531e84784312965bcf371e7e85fb1f2f62e73e..a1122f1f11646a8b55af401060585fc6
  
      protected String bo() {
          return "game.neutral.hurt";
-@@ -1843,4 +1904,16 @@ public abstract class EntityLiving extends Entity {
+@@ -1843,4 +1902,16 @@ public abstract class EntityLiving extends Entity {
      protected void bP() {
          this.updateEffects = true;
      }
@@ -350,7 +348,7 @@ index 1a9b512953871eec474b24762d373e4efbec32aa..9305d9f5d3b677bef695d15006cb124e
      }
 diff --git a/src/main/java/net/titanium/config/knockback/KnockbackConfig.java b/src/main/java/net/titanium/config/knockback/KnockbackConfig.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..28513f872af18c76b6cce96b163ae45b2ccc9e02
+index 0000000000000000000000000000000000000000..dd457a7901952cd8a126b1cf4e3c06eccc326d5f
 --- /dev/null
 +++ b/src/main/java/net/titanium/config/knockback/KnockbackConfig.java
 @@ -0,0 +1,211 @@
@@ -438,8 +436,8 @@ index 0000000000000000000000000000000000000000..28513f872af18c76b6cce96b163ae45b
 +        String path = "profiles." + profile.getName();
 +
 +        profile.setHorizontal(getDouble(path + ".horizontal", 0.4D));
-+        profile.setHorizontalMin(getDouble(path + ".horizontal-min", -0.4D));
-+        profile.setHorizontalMax(getDouble(path + ".horizontal-max", 0.4D));
++        profile.setHorizontalMin(getDouble(path + ".horizontal-min", -100D));
++        profile.setHorizontalMax(getDouble(path + ".horizontal-max", 100D));
 +        profile.setVertical(getDouble(path + ".vertical", 0.4D));
 +        profile.setVerticalMin(getDouble(path + ".vertical-min", -1.0D));
 +        profile.setVerticalMax(getDouble(path + ".vertical-max", 0.4D));
@@ -567,7 +565,7 @@ index 0000000000000000000000000000000000000000..28513f872af18c76b6cce96b163ae45b
 +}
 diff --git a/src/main/java/net/titanium/knockback/TitaniumKnockbackProfile.java b/src/main/java/net/titanium/knockback/TitaniumKnockbackProfile.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..93397a940ecb9ab7112e1d38daa7620d059b23c6
+index 0000000000000000000000000000000000000000..f2ad9afcc031e939e123f28aa508de79666056d4
 --- /dev/null
 +++ b/src/main/java/net/titanium/knockback/TitaniumKnockbackProfile.java
 @@ -0,0 +1,386 @@
@@ -581,8 +579,8 @@ index 0000000000000000000000000000000000000000..93397a940ecb9ab7112e1d38daa7620d
 +    private String name;
 +
 +    public double horizontal = 0.4D;
-+    public double horizontalMin = -0.4D;
-+    public double horizontalMax = 0.4D;
++    public double horizontalMin = -100D;
++    public double horizontalMax = 100D;
 +
 +    public double vertical = 0.4D;
 +    public double verticalMin = -1.0D;
