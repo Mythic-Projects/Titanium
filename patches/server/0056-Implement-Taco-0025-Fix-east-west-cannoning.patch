@@ -1,0 +1,66 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 22 May 2022 23:06:55 +0200
+Subject: [PATCH] Implement [Taco-0025] Fix east/west cannoning
+
+
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index dbaeee4c1979f39a0dd391b05ff781aaba573554..ed8aa80a2e5c777bcefb5896e574f45421efeef2 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -583,11 +583,29 @@ public abstract class Entity implements ICommandListener {
+             this.a(this.getBoundingBox().c(0.0D, d1, 0.0D));
+             boolean flag1 = this.onGround || d7 != d1 && d7 < 0.0D;
+ 
+-            if(axisScan) list = this.world.getCubes(this, this.getBoundingBox().a(d0, 0, 0)); // TacoSpigot - get x axis blocks
+-
+             AxisAlignedBB axisalignedbb2;
+             Iterator iterator1;
+ 
++            if(this.world.tacoConfigTitanium.fixEastWestCannoning && Math.abs(d0) > Math.abs(d2)) { //TacoSpigot - fix east/west cannoning by calculating the z movement before x if the x velocity is greater
++            if(axisScan) list = this.world.getCubes(this, this.getBoundingBox().a(0, 0, d2)); // TacoSpigot - get z axis blocks
++
++            for (iterator1 = list.iterator(); iterator1.hasNext(); d2 = axisalignedbb2.c(this.getBoundingBox(), d2)) {
++                axisalignedbb2 = (AxisAlignedBB) iterator1.next();
++            }
++
++                this.a(this.getBoundingBox().c(0.0D, 0.0D, d2));
++
++                if(axisScan) list = this.world.getCubes(this, this.getBoundingBox().a(d0, 0, 0)); // TacoSpigot - get x axis blocks
++
++                for (iterator1 = list.iterator(); iterator1.hasNext(); d0 = axisalignedbb2.a(this.getBoundingBox(), d0)) {
++                    axisalignedbb2 = (AxisAlignedBB) iterator1.next();
++                }
++
++                this.a(this.getBoundingBox().c(d0, 0.0D, 0.0D));
++
++            } else {
++            if(axisScan) list = this.world.getCubes(this, this.getBoundingBox().a(d0, 0, 0)); // TacoSpigot - get x axis blocks
++
+             for (iterator1 = list.iterator(); iterator1.hasNext(); d0 = axisalignedbb2.a(this.getBoundingBox(), d0)) {
+                 axisalignedbb2 = (AxisAlignedBB) iterator1.next();
+             }
+@@ -601,6 +619,8 @@ public abstract class Entity implements ICommandListener {
+             }
+ 
+             this.a(this.getBoundingBox().c(0.0D, 0.0D, d2));
++            }
++
+             if (this.S > 0.0F && flag1 && (d6 != d0 || d8 != d2)) {
+                 double d10 = d0;
+                 double d11 = d1;
+diff --git a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
+index 8c401271e67be769b197a3f46357852ce0e38a7f..dd3187db8d5db21178dba2d8823cd550c5d89ec5 100644
+--- a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
++++ b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
+@@ -8,6 +8,10 @@ import eu.okaeri.configs.annotation.Names;
+ @Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
+ public class TacoSpigotWorldConfig extends TitaniumConfigSection {
+ 
++    @Comment("Cannoning on east and west normally is not calculated properly.")
++    @Comment("Enabling this option resolve this issue, but it's not vanilla behavior.")
++    public boolean fixEastWestCannoning = false;
++
+     public Tnt tnt = new Tnt();
+ 
+     public static class Tnt extends TitaniumConfigSection {

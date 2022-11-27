@@ -75,6 +75,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0072] Fix Furnace cook time bug when lagging by Aikar
 [Paper-0072] Only process BlockPhysicsEvent if a plugin has a listener by Aikar
 [Paper-0076] Optimized light level comaprsions by Aikar
+[Paper-0077] Add World Util Methods by Aikar
 [Paper-0085] Use a Shared Random for Entities
 [Paper-0090] Improve Maps (in item frames) performance and bug fixes by Aikar
 [Paper-0101] Do not load chunks for light check by Aikar
@@ -82,18 +83,21 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0118] Prevent Fire from loading chunks by Aikar
 [Paper-0121] Reduce IO ops opening a new region
 [Paper-0127] Do not load chunks for pathfinding by Aikar
+[Paper-0135] Avoid blocking on Network Manager creation by Aikar
+[Paper-0137] Faster redstone torch rapid clock removal by Martin Panzer
 [Paper-0144] Improve Minecraft Hopper Performance
 [Paper-0156] Auto Save Improvements by Aikar
 [Paper-0161] Disable Vanilla Chunk GC by Aikar
 [Paper-0168] Disable ticking of snow blocks
 [Paper-0168] Cache user authenticator threads by vemacs
 [Paper-0173] Optimize World.isLoaded(BlockPosition)
+[Paper-0175] Don't let fishinghooks use portals by Zach Brown
 [Paper-0180] Server Tick Events
 [Paper-0186] Prevent Pathfinding out of World Border by Aikar
 [Paper-0192] Make legacy ping handler more reliable by Minecrell
-[Paper-0196] Fix block break desync by Michael Himing
 [Paper-0201] Remove CraftScheduler Async Task Debugger by Aikar
 [Paper-0202] Shame on you Mojang moves chunk loading off https thread
+[Paper-0210] Use TerminalConsoleAppender for console improvements by Minecrell
 [Paper-0232] Fix MC-117075: TE Unload Lag Spike by mezz
 [Paper-0276] Improved Async Task Scheduler by Aikar
 [Paper-0088/0277] Ability to change PlayerProfile in AsyncPreLoginEvent by Aikar
@@ -101,6 +105,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0302] Don't load chunks for villager door check by Aikar
 [Paper-0313] Optimized world time updates by Aikar
 [Paper-0321] Cleanup allocated favicon ByteBuf
+[Paper-0328] Optimize Network Manager and add advanced packet support by Aikar
 [Paper-0332] Add More information to Entity.toString() by Aikar
 [Paper-0342] Always process chunk removal in removeEntity by Aikar 2018
 [Paper-0344] [MC-111480] Start Entity ID's at 1
@@ -119,6 +124,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0206/0432] Add Raw Byte ItemStack Serialization by Mariell Hoversholm
 [Paper-0451] Load Chunks for Login Asynchronously by Aikar
 [Paper-0242/0614] Player Chunk Load/Unload Events by ysl3000
+[Paper-0740] Add Unix domain socket support by Andrew Steinborn
 [Paper-0797] Use Velocity compression and cipher natives by Elier
 
 [Taco-0006] Fix hopper lag by making entities look for hoppers by Techcable
@@ -172,24 +178,15 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [PandaSpigot-0005] Add internal setMaxStackSize method for materials by hpfxd
 [PandaSpigot-0004/0005] Backport PlayerHandshakeEvent from Paper by hpfxd
 [PandaSpigot-0006] Update to Netty 4.1.x by hpfxd 
-[PandaSpigot-0007] Add Unix domain socket support by hpfxd
 [PandaSpigot-0008] Remove hacky stackable buckets code by hpfxd
 [PandaSpigot-0009] Improved plugins command by hpfxd
-[PandaSpigot-0010] Optimize Network Manager and add advanced packet support by hpfxd
-[PandaSpigot-0011] Allow controlled flushing for network manager by hpfxd
-[PandaSpigot-0012] Consolidate flush calls for entity tracker packets by hpfxd
-[PandaSpigot-0013] Optimise non-flush packet sending by hpfxd
-[PandaSpigot-0028] Avoid blocking on Network Manager creation by hpfxd
 [PandaSpigot-0033] Configurable arrow trajectory by hpfxd
-[PandaSpigot-0034] Prevent fishing hooks from using portals by hpfxd
 [PandaSpigot-0010/0037] Backport PlayerProfile API by hpfxd
 [PandaSpigot-0039] Optimize VarInt reading and writing by hpfxd
 [PandaSpigot-0040] Various micro-optimizations for PacketDataSerializer by hpfxd
-[PandaSpigot-0041] Use TerminalConsoleAppender for console improvements by hpfxd
 [PandaSpigpt-0049] Add setting for proxy online mode status by hpfxd
 [PandaSpigot-0050] Metrics by hpfxd
 [PandaSpigot-0054] Disconnect for payload errors by uRyanxD
-[PandaSpigot-0056] Faster redstone torch rapid clock removal by uRyanxD
 [PandaSpigot-0060] Optimise removeQueue by hpfxd
 
 [IonSpigot-0003] Explosion Improvements by SuicidalKids
@@ -220,6 +217,10 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Purpur-0046/0280] Spark Profiler by BillyGalbreath
 [Purpur-0049/0290] Remove Timings by BillyGalbreath
 [Purpur-0291] Remove Mojang Profiler by BillyGalbreath
+
+[Tuinity-0008] Allow controlled flushing for network manager by Spottedleaf
+[Tuinity-0046] Consolidate flush calls for entity tracker packets by Spottedleaf
+[Tuinity-0051] Optimise non-flush packet sending by Spottedleaf
 
 [Yatopia-0030] Don't save Fireworks and Arrows by tr7zw
 [Yatopia-0047] Smarter statistics ticking

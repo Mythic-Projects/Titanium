@@ -320,10 +320,10 @@ index ed464832567b67660553459621240b99a83bcc45..7b814c1f001626a2c84239544e7c0f33
      public EntityFishingHook hookedFish;
      public boolean affectsSpawning = true; // PaperSpigot
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index d671d2e20de2aed97c92486310915ae5a6ab352c..68cff09ef0bb91f8c5569222f7dc83247df05932 100644
+index 7f6711249d7e5264b2969fb2a18404f3d7ea2ff9..cd0a5b00a44bde6738f8c22c00f954bdb3c03772 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -1554,6 +1554,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+@@ -1562,6 +1562,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
          return true;
      }
  
@@ -365,10 +365,10 @@ index 581899291851d9449392c313cdbf0ee9fe54db61..277268a4fda9a8c02793f174d5282f9a
          UserCache.UserCacheEntry usercache_usercacheentry = (UserCache.UserCacheEntry) this.d.get(uuid);
  
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 9173676baac7e387849a84831f8138c9f78a89b0..235b8f8bbd0ebe4fd9b4f2e8fa48b60c9faff3ad 100644
+index 9659fa4cd9ce23942bb76caca3c1212ea5305c6e..c49804bdac396cce79c4d81756ecca95f70346a1 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-@@ -1833,6 +1833,27 @@ public final class CraftServer implements Server {
+@@ -1842,6 +1842,27 @@ public final class CraftServer implements Server {
          return CraftMagicNumbers.INSTANCE;
      }
  
@@ -396,14 +396,6 @@ index 9173676baac7e387849a84831f8138c9f78a89b0..235b8f8bbd0ebe4fd9b4f2e8fa48b60c
      private final Spigot spigot = new Spigot()
      {
  
-@@ -1945,6 +1966,7 @@ public final class CraftServer implements Server {
-         public Instant getStartTime() {
-             return startTime;
-         }
-+
-     };
- 
-     public Titanium titanium() {
 diff --git a/src/main/java/org/bukkit/craftbukkit/block/CraftSkull.java b/src/main/java/org/bukkit/craftbukkit/block/CraftSkull.java
 index 77f5dcc67f716a517c0dec6c5308469a91bbbe23..02e4866cccf1a3a8e3d68f3973014ef9becd30f8 100644
 --- a/src/main/java/org/bukkit/craftbukkit/block/CraftSkull.java

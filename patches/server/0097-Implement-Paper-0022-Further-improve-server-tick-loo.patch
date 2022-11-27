@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0022] Further improve server tick loop by
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 1c3aa0d400eb6445177768cf235c82510f4239e3..8e0cb4242afdc23e191d5241eac101672d44a148 100644
+index 3a7e991c44ab7e2b06f2fb0ac4a9c87897fddf28..e5421303e6be8aff17c8e3eff10a65b1925387b0 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -18,6 +18,7 @@ import java.awt.GraphicsEnvironment;

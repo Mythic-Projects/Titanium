@@ -319,7 +319,7 @@ index 0000000000000000000000000000000000000000..c7007dced6b2a2f7e23e90a3f4dbb2e3
 +
 +}
 diff --git a/src/main/java/net/minecraft/server/HandshakeListener.java b/src/main/java/net/minecraft/server/HandshakeListener.java
-index 051f4e62036e1682fb40265cb77d97bd2a768f0b..10ae9e1e4a6f97919b4bcee70786398059e0dc47 100644
+index 1565eb45d96daa1dd2b5b831ba27bf771e2f225a..0955c06fa3f4b41e382afc8e0726d2699d82095a 100644
 --- a/src/main/java/net/minecraft/server/HandshakeListener.java
 +++ b/src/main/java/net/minecraft/server/HandshakeListener.java
 @@ -111,6 +111,10 @@ public class HandshakeListener implements PacketHandshakingInListener {
@@ -405,10 +405,10 @@ index 48acf63644761ed2a5ae5a1cbdc7705bc6afe75f..69398687cbcc73f307f41bd8d3ae2d71
      }
  
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 68cff09ef0bb91f8c5569222f7dc83247df05932..1c3aa0d400eb6445177768cf235c82510f4239e3 100644
+index cd0a5b00a44bde6738f8c22c00f954bdb3c03772..3a7e991c44ab7e2b06f2fb0ac4a9c87897fddf28 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -61,7 +61,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+@@ -60,7 +60,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
      protected final ICommandHandler b;
      public final MethodProfiler methodProfiler = new MethodProfiler();
      private ServerConnection q; // Spigot
@@ -418,10 +418,10 @@ index 68cff09ef0bb91f8c5569222f7dc83247df05932..1c3aa0d400eb6445177768cf235c8251
      private String serverIp;
      private int u = -1;
 diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
-index effff01a1ef8f5f32844430264ff1a27d374c0b6..5b92d78975dbb1755bc2177836f350d4de205eeb 100644
+index b07d71febd5dcd1290d57980fd180a5395bc318f..e9a884cd81640f2c39cc2b465b6d2bb456431a51 100644
 --- a/src/main/java/net/minecraft/server/NetworkManager.java
 +++ b/src/main/java/net/minecraft/server/NetworkManager.java
-@@ -73,6 +73,10 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+@@ -74,6 +74,10 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
      private IChatBaseComponent n;
      private boolean o;
      private boolean p;
@@ -429,8 +429,8 @@ index effff01a1ef8f5f32844430264ff1a27d374c0b6..5b92d78975dbb1755bc2177836f350d4
 +    public int protocolVersion;
 +    public java.net.InetSocketAddress virtualHost;
 +    // Paper end
-     private static boolean enableExplicitFlush = Boolean.getBoolean("paper.explicit-flush"); // PandaSpigot - Disable explicit flushing
-     // PandaSpigot start - Optimize network
+     private static boolean enableExplicitFlush = Boolean.getBoolean("paper.explicit-flush"); // Paper - Disable explicit flushing
+     // Paper start - Optimize network
      public boolean isPending = true;
 diff --git a/src/main/java/net/minecraft/server/PacketStatusListener.java b/src/main/java/net/minecraft/server/PacketStatusListener.java
 index 98083820a6cf081f6271c60149678ebee1283909..8107eeeee6b9a8a67fc9c730032a5d233ed5e9a6 100644
@@ -467,10 +467,10 @@ index 98083820a6cf081f6271c60149678ebee1283909..8107eeeee6b9a8a67fc9c730032a5d23
  
      public void a(PacketStatusInPing packetstatusinping) {
 diff --git a/src/main/java/net/minecraft/server/ServerPing.java b/src/main/java/net/minecraft/server/ServerPing.java
-index eeb81004490293619fdbd966c423bb9b8c74a061..8f20df13a7eeef89f7329ba962f6277bd70fd9c0 100644
+index b0d0773d603dc042ea69139ac309dc8a134950bc..ff45b54e9a45a163f0070fd4ecd24e714191c579 100644
 --- a/src/main/java/net/minecraft/server/ServerPing.java
 +++ b/src/main/java/net/minecraft/server/ServerPing.java
-@@ -29,6 +29,7 @@ public class ServerPing {
+@@ -30,6 +30,7 @@ public class ServerPing {
          this.a = ichatbasecomponent;
      }
  
@@ -478,7 +478,7 @@ index eeb81004490293619fdbd966c423bb9b8c74a061..8f20df13a7eeef89f7329ba962f6277b
      public ServerPing.ServerPingPlayerSample b() {
          return this.b;
      }
-@@ -37,6 +38,7 @@ public class ServerPing {
+@@ -38,6 +39,7 @@ public class ServerPing {
          this.b = serverping_serverpingplayersample;
      }
  
@@ -486,7 +486,7 @@ index eeb81004490293619fdbd966c423bb9b8c74a061..8f20df13a7eeef89f7329ba962f6277b
      public ServerPing.ServerData c() {
          return this.c;
      }
-@@ -125,6 +127,7 @@ public class ServerPing {
+@@ -126,6 +128,7 @@ public class ServerPing {
              return this.a;
          }
  
@@ -494,7 +494,7 @@ index eeb81004490293619fdbd966c423bb9b8c74a061..8f20df13a7eeef89f7329ba962f6277b
          public int b() {
              return this.b;
          }
-@@ -180,6 +183,7 @@ public class ServerPing {
+@@ -181,6 +184,7 @@ public class ServerPing {
              return this.c;
          }
  

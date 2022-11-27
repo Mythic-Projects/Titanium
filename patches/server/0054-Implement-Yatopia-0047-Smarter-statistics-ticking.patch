@@ -1,0 +1,46 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 22 May 2022 22:47:33 +0200
+Subject: [PATCH] Implement [Yatopia-0047] Smarter statistics ticking
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
+index 318477b307c5b634be908b89caa910db4f810a7c..ed464832567b67660553459621240b99a83bcc45 100644
+--- a/src/main/java/net/minecraft/server/EntityHuman.java
++++ b/src/main/java/net/minecraft/server/EntityHuman.java
+@@ -9,6 +9,7 @@ import java.util.List;
+ import java.util.UUID;
+ 
+ // CraftBukkit start
++import net.titanium.config.TitaniumConfig;
+ import org.bukkit.craftbukkit.entity.CraftHumanEntity;
+ import org.bukkit.craftbukkit.entity.CraftItem;
+ import org.bukkit.craftbukkit.inventory.CraftItemStack;
+@@ -1330,8 +1331,10 @@ public abstract class EntityHuman extends EntityLiving {
+ 
+     }
+ 
++    private final int interval = TitaniumConfig.get().playerTimeStatisticsInterval;
++
+     public void b(Statistic statistic) {
+-        this.a(statistic, 1);
++        this.a(statistic, interval);
+     }
+ 
+     public void a(Statistic statistic, int i) {}
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index 96f01538b9b57d0bf899ad89475c38cd8041479d..9d4927923deb4d6cf7a8c85f12a4ca972471ebe1 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -68,6 +68,11 @@ public class TitaniumConfig extends TitaniumConfigSection {
+ 
+     }
+ 
++    @Comment("How often player statistics (ESC -> Statistics) should be ticked.")
++    @Comment("Default vanilla value is every 1 tick, but every 1 second (20 ticks) is enough in most cases.")
++    @Comment("Making this value even bigger could be good idea and have good impact on performance.")
++    public int playerTimeStatisticsInterval = 20;
++
+     public Chunk chunk = new Chunk();
+ 
+     public static class Chunk extends TitaniumConfigSection {

@@ -1,0 +1,52 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 22 May 2022 23:13:48 +0200
+Subject: [PATCH] Implement [FlamePaper-0030] Adaptive chunk GC
+
+
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index 56f81724ff8127d525558ed7d1dd5f8ef227e50f..2549cddb57e1446ab05edde3478f713a7ac5a227 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -80,6 +80,11 @@ public class TitaniumConfig extends TitaniumConfigSection {
+ 
+     public static class Chunk extends TitaniumConfigSection {
+ 
++        @Comment("Normally we use bukkit.chunk-gc.load-threshold - it's define how many chunks should be loaded before running GC on them.")
++        @Comment("This option make that value more flexible and depends it on view distance and player count (playerCount * viewDistance^2).")
++        @Comment("We don't want to have a lots chunks loaded if we have empty server, but having to few on full server is not good idea too (especially if some chunks would be unloaded and almost again loaded).")
++        public boolean adaptiveChunkGC = false;
++
+         @Comment("Enabling this option prevents entities from moving in unloaded chunk (and for eg. falling down in \"slow-motion\")")
+         public boolean disableUnloadedChunksMovement = false;
+ 
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+index 2aadafeae6c35347b1e092bab720a8264f535809..46fcbc0196900ec42aa9b7d837d1ef8ece11d8e6 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+@@ -14,6 +14,7 @@ import java.util.UUID;
+ 
+ import net.minecraft.server.*;
+ 
++import net.titanium.config.TitaniumConfig;
+ import org.apache.commons.lang.Validate;
+ import org.bukkit.BlockChangeDelegate;
+ import org.bukkit.Bukkit;
+@@ -1395,9 +1396,14 @@ public class CraftWorld implements World {
+     }
+ 
+     public void processChunkGC() {
+-        chunkGCTickCount++;
+-
+-        if (chunkLoadCount >= server.chunkGCLoadThresh && server.chunkGCLoadThresh > 0) {
++        // FlamePaper start - Adaptative chunk GC
++        int playerCount = getPlayers().size();
++        int viewDistance = getHandle().getServer().getViewDistance();
++        int viewChunks = ((viewDistance * 2) + 1);
++        int chunkGCLoadThreshold = TitaniumConfig.get().chunk.adaptiveChunkGC ? (world.keepSpawnInMemory ? 256 : 0) + playerCount * (viewChunks * viewChunks) : server.chunkGCLoadThresh;
++
++        if (chunkLoadCount > chunkGCLoadThreshold && chunkGCLoadThreshold > 0) {
++            // FlamePaper end - Adaptative chunk GC
+             chunkLoadCount = 0;
+         } else if (chunkGCTickCount >= server.chunkGCPeriod && server.chunkGCPeriod > 0) {
+             chunkGCTickCount = 0;

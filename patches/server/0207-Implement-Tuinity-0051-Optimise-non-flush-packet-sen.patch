@@ -1,0 +1,37 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Spottedleaf <spottedleaf@spottedleaf.dev>
+Date: Thu, 24 Nov 2022 23:41:58 +0100
+Subject: [PATCH] Implement [Tuinity-0051] Optimise non-flush packet sending by
+ Spottedleaf
+
+
+diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
+index a451f90c933765c31d39242ac994e1fbc267afd2..28d2de6440b021979dfa11cd3c43bb3c7679a688 100644
+--- a/src/main/java/net/minecraft/server/NetworkManager.java
++++ b/src/main/java/net/minecraft/server/NetworkManager.java
+@@ -335,7 +335,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+             }
+             // Paper end
+         } else {
+-            this.channel.eventLoop().execute(() -> {
++            Runnable command = () -> { // Tuinity - optimise packets that are not flushed
+                 if (enumprotocol != enumprotocol1) {
+                     NetworkManager.this.a(enumprotocol);
+                 }
+@@ -366,7 +366,15 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
+                     packet.onPacketDispatchFinish(player, null);
+                 }
+                 // Paper end
+-            });
++            };
++            // Tuinity start - optimise packets that are not flushed
++            if (!flush) {
++                io.netty.util.concurrent.AbstractEventExecutor.LazyRunnable run = command::run;
++                this.channel.eventLoop().execute(run);
++            } else {
++                this.channel.eventLoop().execute(command);
++            }
++            // Tuinity end
+         }
+ 
+     }

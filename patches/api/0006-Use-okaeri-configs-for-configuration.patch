@@ -4,6 +4,21 @@ Date: Sun, 22 May 2022 22:11:28 +0200
 Subject: [PATCH] Use okaeri-configs for configuration
 
 
+diff --git a/build.gradle b/build.gradle
+index ce7732115bf7fc3822540780614a6cfeaff69e3a..e9145e4f149aac808df6fe7dc992db9eb20dab72 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -14,6 +14,10 @@ dependencies {
+     // Minecraft libraries end
+ 
+     // Titanium libraries start
++    // Titanium start - use okaeri-configs for configurations
++    api 'eu.okaeri:okaeri-configs-yaml-bukkit:4.0.7'
++    api 'eu.okaeri:okaeri-configs-serdes-commons:4.0.7'
++    // Titanium end
+     api 'org.apache.commons:commons-lang3:3.12.0' // Titanium - updated commons-lang3 to 3.12.0 // Titanium - Add commons-lang3 to API
+     // Titanium libraries end
+ 
 diff --git a/src/main/java/co/aikar/timings/TimingsCommand.java b/src/main/java/co/aikar/timings/TimingsCommand.java
 index 3dba3aa17314d2d1977278c55974093c9c46148f..cfb99253f55fa5809dd0690708c9816b96192fc1 100644
 --- a/src/main/java/co/aikar/timings/TimingsCommand.java

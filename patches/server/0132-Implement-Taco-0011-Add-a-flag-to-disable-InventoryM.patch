@@ -1,0 +1,131 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Techcable <techcable@outlook.com>
+Date: Wed, 3 Feb 2016 11:27:34 -0700
+Subject: [PATCH] Implement [Taco-0011] Add a flag to disable
+ InventoryMoveItemEvent by Techcable
+
+Even with no listeners, InventoryMoveItemEvent hurts performance.
+This patch prevents the event from firing if there are no listeners
+Some plugins offer no way to disable their IMIE listeners. (See WorldGuard-3520)
+This patch adds flag to disable InventoryMoveItemEvent for hoppers.
+
+diff --git a/src/main/java/net/minecraft/server/TileEntityHopper.java b/src/main/java/net/minecraft/server/TileEntityHopper.java
+index 2f03ff0c5284a018f7d8985cc631a26afb899de7..22ee98aafe8efb92ddef662ec470166a8d98d5d4 100644
+--- a/src/main/java/net/minecraft/server/TileEntityHopper.java
++++ b/src/main/java/net/minecraft/server/TileEntityHopper.java
+@@ -267,6 +267,10 @@ public class TileEntityHopper extends TileEntityContainer implements IHopper, IU
+ 
+                         // CraftBukkit start - Call event when pushing items into other inventories
+                         CraftItemStack oitemstack = CraftItemStack.asCraftMirror(this.splitStack(i, world.spigotConfigTitanium.hopperAmount)); // Spigot
++                        // TacoSpigot start - add an option to turn of InventoryMoveItemEvent
++                        final org.bukkit.inventory.ItemStack stack;
++                        if (HopperHelper.isFireInventoryMoveItemEvent(this)) {
++                        // TacoSpigot end
+ 
+                         Inventory destinationInventory;
+                         // Have to special case large chests as they work oddly
+@@ -283,11 +287,18 @@ public class TileEntityHopper extends TileEntityContainer implements IHopper, IU
+                             this.d(world.spigotConfigTitanium.ticksPer.hopperTransfer); // Spigot
+                             return false;
+                         }
+-                        int origCount = event.getItem().getAmount(); // Spigot
+-                        ItemStack itemstack1 = addItem(iinventory, CraftItemStack.asNMSCopy(event.getItem()), enumdirection);
++                        // TacoSpigot start
++                        stack = event.getItem();
++                        // handle cases where the event is not fired
++                        } else {
++                            stack = oitemstack;
++                        }
++                        int origCount = stack.getAmount(); // Spigot
++                        ItemStack itemstack1 = addItem(iinventory, CraftItemStack.asNMSCopy(stack), enumdirection);
++                        // TacoSpigot end
+ 
+                         if (itemstack1 == null || itemstack1.count == 0) {
+-                            if (event.getItem().equals(oitemstack)) {
++                            if (stack.equals(oitemstack)) { // TacoSpigot - event.getItem() -> stack
+                                 iinventory.update();
+                             } else {
+                                 this.setItem(i, itemstack);
+@@ -418,6 +429,10 @@ public class TileEntityHopper extends TileEntityContainer implements IHopper, IU
+             // ItemStack itemstack2 = addItem(ihopper, iinventory.splitStack(i, 1), (EnumDirection) null);
+             // CraftBukkit start - Call event on collection of items from inventories into the hopper
+             CraftItemStack oitemstack = CraftItemStack.asCraftMirror(iinventory.splitStack(i, ihopper.getWorld().spigotConfigTitanium.hopperAmount)); // Spigot
++            // TacoSpigot start - add an option to turn of InventoryMoveItemEvent
++            final org.bukkit.inventory.ItemStack stack;
++            if (HopperHelper.isFireInventoryMoveItemEvent(ihopper)) {
++            // TacoSpigot end
+ 
+             Inventory sourceInventory;
+             // Have to special case large chests as they work oddly
+@@ -440,11 +455,18 @@ public class TileEntityHopper extends TileEntityContainer implements IHopper, IU
+                 }
+                 return false;
+             }
+-            int origCount = event.getItem().getAmount(); // Spigot
+-            ItemStack itemstack2 = addItem(ihopper, CraftItemStack.asNMSCopy(event.getItem()), null);
++            // TacoSpigot start
++            stack = event.getItem();
++            // handle cases where the event is not fired
++            } else {
++                stack = oitemstack;
++            }
++            int origCount = stack.getAmount(); // Spigot
++            ItemStack itemstack2 = addItem(ihopper, CraftItemStack.asNMSCopy(stack), null);
++            // TacoSpigot end
+ 
+             if (itemstack2 == null || itemstack2.count == 0) {
+-                if (event.getItem().equals(oitemstack)) {
++                if (stack.equals(oitemstack)) {
+                     iinventory.update();
+                 } else {
+                     iinventory.setItem(i, itemstack1);
+diff --git a/src/main/java/net/techcable/tacospigot/HopperHelper.java b/src/main/java/net/techcable/tacospigot/HopperHelper.java
+index 58b3b7283b1249d3c565bf898a3ea0a9f2b99898..a8348435f2bbc23e48344513480c6d0dec7d40f1 100644
+--- a/src/main/java/net/techcable/tacospigot/HopperHelper.java
++++ b/src/main/java/net/techcable/tacospigot/HopperHelper.java
+@@ -4,10 +4,12 @@ import net.minecraft.server.Block;
+ import net.minecraft.server.BlockChest;
+ import net.minecraft.server.BlockPosition;
+ import net.minecraft.server.Blocks;
++import net.minecraft.server.IHopper;
+ import net.minecraft.server.IInventory;
+ import net.minecraft.server.TileEntity;
+ import net.minecraft.server.TileEntityHopper;
+ import net.minecraft.server.World;
++import org.bukkit.event.inventory.InventoryMoveItemEvent;
+ 
+ public class HopperHelper {
+ 
+@@ -32,4 +34,8 @@ public class HopperHelper {
+         return null;
+     }
+ 
++    public static boolean isFireInventoryMoveItemEvent(IHopper hopper) {
++        return hopper.getWorld().tacoConfigTitanium.hopper.fireInventoryMoveItemEvent && InventoryMoveItemEvent.getHandlerList().getRegisteredListeners().length > 0;
++    }
++
+ }
+diff --git a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
+index b60d9824a8377142ce07c774652db97ff91aa40a..d2e2562210180427bb994d4bf7e318c6c8a47c56 100644
+--- a/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
++++ b/src/main/java/net/titanium/config/TacoSpigotWorldConfig.java
+@@ -1,6 +1,7 @@
+ package net.titanium.config;
+ 
+ import eu.okaeri.configs.annotation.Comment;
++import eu.okaeri.configs.annotation.CustomKey;
+ import eu.okaeri.configs.annotation.NameModifier;
+ import eu.okaeri.configs.annotation.NameStrategy;
+ import eu.okaeri.configs.annotation.Names;
+@@ -33,6 +34,11 @@ public class TacoSpigotWorldConfig extends TitaniumConfigSection {
+         @Comment("Disabled by default since it's not vanilla behavior and it could decrease performance of dropped items.")
+         public boolean pushBased = false;
+ 
++        @Comment("Whether to fire InventoryMoveEvent for hoppers.")
++        @Comment("Disabling this could increase performance, but also breaks some plugins (for eg. cuboids, region protection, etc.).")
++        @CustomKey("fire-InventoryMoveItemEvent")
++        public boolean fireInventoryMoveItemEvent = true;
++
+     }
+ 
+ }

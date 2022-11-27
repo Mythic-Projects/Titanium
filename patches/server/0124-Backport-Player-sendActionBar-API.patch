@@ -1,0 +1,27 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Wed, 22 Jun 2022 09:05:11 +0200
+Subject: [PATCH] Backport Player#sendActionBar API
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+index 58846a42b2f71c4777d050d668ef6bb34e51e923..5f2b9f1c7c295f2e07cc27c9016c0e6d9853f8d5 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+@@ -259,6 +259,16 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+     }
+     // Paper end
+ 
++    // Titanium start
++    @Override
++    public void sendActionBar(BaseComponent... message) {
++        if(getHandle().playerConnection == null) return;
++        PacketPlayOutChat packet = new PacketPlayOutChat(null, (byte) 2);
++        packet.components = message;
++        getHandle().playerConnection.sendPacket(packet);
++    }
++    // Titanium end
++
+     @Override
+     public String getDisplayName() {
+         return getHandle().displayName;

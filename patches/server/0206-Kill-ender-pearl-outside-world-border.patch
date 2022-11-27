@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 13 Nov 2022 20:06:12 +0100
+Subject: [PATCH] Kill ender pearl outside world border
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityEnderPearl.java b/src/main/java/net/minecraft/server/EntityEnderPearl.java
+index 2ed7f2790217b5596005b80a8ed5e6ff133bc413..5f315ce270188270e7917b1bfeab9c2344b97a2d 100644
+--- a/src/main/java/net/minecraft/server/EntityEnderPearl.java
++++ b/src/main/java/net/minecraft/server/EntityEnderPearl.java
+@@ -42,7 +42,14 @@ public class EntityEnderPearl extends EntityProjectile {
+         // FlamePaper start
+         BlockPosition blockPosition = movingobjectposition.a();
+ 
+-        if (blockPosition != null) {
++        // Titanium start
++        if (!world.getWorldBorder().isInBounds(blockPosition)) {
++            this.die();
++            return;
++        }
++        // Titanium end
++
++        if (!this.dead && blockPosition != null) { // Titanium - Skip if dead
+             IBlockData blockData = world.getType(blockPosition);
+             Block block = blockData.getBlock();
+             TitaniumConfig.PearlPassthrough pearlPassthrough = TitaniumConfig.get().pearlPassthrough;

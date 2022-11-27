@@ -1,0 +1,81 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 23 Sep 2022 23:17:20 +0200
+Subject: [PATCH] Option to disable head rotation handling
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
+index ed36f73ffe741d2418e9568fd8692f7f5967d1f9..8a8098842529e0b869a9365bba6e0a6a7edb2903 100644
+--- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
++++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
+@@ -199,6 +199,8 @@ public class EntityTrackerEntry {
+             int i;
+             int j;
+ 
++            boolean handleHeadRotation = this.handleHeadRotation(); // Titanium - Option to disable head rotation handling
++
+             if (this.tracker.vehicle == null) {
+                 ++this.v;
+                 i = MathHelper.floor(this.tracker.locX * 32.0D);
+@@ -235,7 +237,7 @@ public class EntityTrackerEntry {
+                         if ((!flag || !flag1) && !(this.tracker instanceof EntityArrow)) {
+                             if (flag) {
+                                 object = new PacketPlayOutEntity.PacketPlayOutRelEntityMove(this.tracker.getId(), (byte) j1, (byte) k1, (byte) l1, this.tracker.onGround);
+-                            } else if (flag1) {
++                            } else if (flag1 && handleHeadRotation) { // Titanium - Option to disable head rotation handling
+                                 object = new PacketPlayOutEntity.PacketPlayOutEntityLook(this.tracker.getId(), (byte) l, (byte) i1, this.tracker.onGround);
+                             }
+                         } else {
+@@ -308,7 +310,7 @@ public class EntityTrackerEntry {
+                 // CraftBukkit end */
+ 
+                 this.x = false;
+-            } else {
++            } else if (handleHeadRotation) { // Titanium - Option to disable head rotation handling){
+                 i = MathHelper.d(this.tracker.yaw * 256.0F / 360.0F);
+                 j = MathHelper.d(this.tracker.pitch * 256.0F / 360.0F);
+                 boolean flag2 = Math.abs(i - this.yRot) >= 4 || Math.abs(j - this.xRot) >= 4;
+@@ -327,7 +329,7 @@ public class EntityTrackerEntry {
+             }
+ 
+             i = MathHelper.d(this.tracker.getHeadRotation() * 256.0F / 360.0F);
+-            if (Math.abs(i - this.i) >= 4) {
++            if (handleHeadRotation && Math.abs(i - this.i) >= 4) {
+                 this.broadcast(new PacketPlayOutEntityHeadRotation(this.tracker, (byte) i));
+                 this.i = i;
+             }
+@@ -506,7 +508,7 @@ public class EntityTrackerEntry {
+                     }
+ 
+                     // CraftBukkit start - Fix for nonsensical head yaw
+-                    if (this.tracker instanceof EntityLiving) { // [SportPaper-0027] Fix head rotation packet spam
++                    if (this.tracker instanceof EntityLiving && this.handleHeadRotation()) { // [SportPaper-0027] Fix head rotation packet spam
+                         this.i = MathHelper.d(this.tracker.getHeadRotation() * 256.0F / 360.0F);
+                         // SportPaper start
+                         /* This was originally introduced by CraftBukkit, though the implementation is wrong since it's broadcasting
+@@ -687,4 +689,10 @@ public class EntityTrackerEntry {
+         }
+ 
+     }
++
++    // Titanium start - Option to disable entity head rotation handling
++    private boolean handleHeadRotation() {
++        return this.tracker instanceof EntityHuman || this.tracker instanceof EntityVillager || !TitaniumConfig.get().gameMechanics.disableHeadRotationHandling;
++    }
++    // Titanium end
+ }
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index 34e42730817b407b8a48d52ccbaa0b9d54d0ace8..531042d74e9232a72deaa954a36068f5493aaa44 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -115,6 +115,10 @@ public class TitaniumConfig extends TitaniumConfigSection {
+ 
+         @Comment("Whether to disable sync of position and velocity of TNT in water to client.")
+         public boolean disableTntInWaterSync = false;
++        
++        @Comment("Whether to disable head rotation handling (like animals).")
++        @Comment("Only head rotation for Players and Villagers would be still handled")
++        public boolean disableHeadRotationHandling = false;
+ 
+         public LightDetector lightDetector = new LightDetector();
+ 

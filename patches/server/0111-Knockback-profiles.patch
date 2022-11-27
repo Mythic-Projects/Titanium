@@ -1,0 +1,1156 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Mon, 13 Jun 2022 17:56:45 +0200
+Subject: [PATCH] Knockback profiles
+
+
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index 2455c5cb00dcd8ebee840dc1ffcf9f623f9af514..fd2c4e56827cd0366aee757d1ef0a6291e1a3241 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -1807,6 +1807,18 @@ public abstract class Entity implements ICommandListener {
+         this.b(1, flag);
+     }
+ 
++    // Nacho start
++    public boolean extraKnockback;
++
++    public void setExtraKnockback(boolean flag) {
++        this.extraKnockback = flag;
++    }
++
++    public boolean isExtraKnockback() {
++        return this.extraKnockback;
++    }
++    // Nacho end
++
+     public boolean isSprinting() {
+         return this.g(3);
+     }
+diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
+index 7b814c1f001626a2c84239544e7c0f33ae4b3b51..dfce6b03a0a16f71a328b44165148e7866067065 100644
+--- a/src/main/java/net/minecraft/server/EntityHuman.java
++++ b/src/main/java/net/minecraft/server/EntityHuman.java
+@@ -10,6 +10,7 @@ import java.util.UUID;
+ 
+ // CraftBukkit start
+ import net.titanium.config.TitaniumConfig;
++import net.titanium.knockback.KnockbackProfile;
+ import org.bukkit.craftbukkit.entity.CraftHumanEntity;
+ import org.bukkit.craftbukkit.entity.CraftItem;
+ import org.bukkit.craftbukkit.inventory.CraftItemStack;
+@@ -970,7 +971,7 @@ public abstract class EntityHuman extends EntityLiving {
+ 
+                 int i = b0 + EnchantmentManager.a((EntityLiving) this);
+ 
+-                if (this.isSprinting()) {
++                if (this.isExtraKnockback()) {
+                     ++i;
+                 }
+ 
+@@ -1004,10 +1005,22 @@ public abstract class EntityHuman extends EntityLiving {
+ 
+                     if (flag2) {
+                         if (i > 0) {
+-                            entity.g((double) (-MathHelper.sin(this.yaw * 3.1415927F / 180.0F) * (float) i * 0.5F), 0.1D, (double) (MathHelper.cos(this.yaw * 3.1415927F / 180.0F) * (float) i * 0.5F));
++                            // Titanium start - knockback profiles
++                            KnockbackProfile kb = (this.getKnockbackProfile() == null) ? world.getServer().titanium().getKnockbackProfile() : this.getKnockbackProfile();
++
++                            if (this.isExtraKnockback()) {
++                                entity.g(-MathHelper.sin(this.yaw * 3.1415927F / 180.0F) * (float) i * kb.getWTapExtraHorizontal(), kb.getWTapExtraVertical(), MathHelper.cos(this.yaw * 3.1415927F / 180.0F) * (float) i * kb.getWTapExtraHorizontal());
++                            } else {
++                                entity.g(-MathHelper.sin(this.yaw * 3.1415927F / 180.0F) * (float) i * kb.getExtraHorizontal(), kb.getExtraVertical(), MathHelper.cos(this.yaw * 3.1415927F / 180.0F) * (float) i * kb.getExtraHorizontal());
++                            }
+                             this.motX *= 0.6D;
+                             this.motZ *= 0.6D;
+-                            this.setSprinting(false);
++                            //this.setSprinting(false);
++                            if (kb.isStopSprint()) {
++                                this.setExtraKnockback(false); //Nacho - Prevent desync player sprinting
++                                this.setSprinting(false);
++                            }
++                            // Titanium end
+                         }
+ 
+                         if (entity instanceof EntityPlayer && entity.velocityChanged) {
+diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
+index e9531e84784312965bcf371e7e85fb1f2f62e73e..54175d403b296ea7aca26931e11ec9b212845c15 100644
+--- a/src/main/java/net/minecraft/server/EntityLiving.java
++++ b/src/main/java/net/minecraft/server/EntityLiving.java
+@@ -15,6 +15,8 @@ import java.util.UUID;
+ import java.util.ArrayList;
+ import com.google.common.base.Function;
+ import com.google.common.collect.Lists;
++import net.titanium.knockback.KnockbackProfile;
++import net.titanium.util.MathUtil;
+ import org.bukkit.craftbukkit.event.CraftEventFactory;
+ import org.bukkit.entity.LivingEntity;
+ import org.bukkit.entity.Vehicle;
+@@ -24,8 +26,6 @@ import org.bukkit.event.entity.EntityRegainHealthEvent;
+ import org.bukkit.event.vehicle.VehicleExitEvent;
+ // CraftBukkit end
+ 
+-import co.aikar.timings.SpigotTimings; // Spigot
+-
+ // PaperSpigot start
+ import org.bukkit.Bukkit;
+ import org.spigotmc.event.entity.EntityDismountEvent;
+@@ -804,7 +804,10 @@ public abstract class EntityLiving extends Entity {
+                         }
+ 
+                         this.aw = (float) (MathHelper.b(d1, d0) * 180.0D / 3.1415927410125732D - (double) this.yaw);
+-                        this.a(entity, f, d0, d1);
++                        // Titanium start - knockback profiles
++                        //this.a(entity, f, distanceX, distanceZ);
++                        this.a(d0, d1, damagesource);
++                        // Titanium end
+                     } else {
+                         this.aw = (float) ((int) (Math.random() * 2.0D) * 180);
+                     }
+@@ -895,6 +898,8 @@ public abstract class EntityLiving extends Entity {
+ 
+     protected void dropEquipment(boolean flag, int i) {}
+ 
++    // Titanium start - knockback profiles
++    /*
+     public void a(Entity entity, float f, double d0, double d1) {
+         if (this.random.nextDouble() >= this.getAttributeInstance(GenericAttributes.c).getValue()) {
+             this.ai = true;
+@@ -913,6 +918,60 @@ public abstract class EntityLiving extends Entity {
+ 
+         }
+     }
++     */
++
++    public void a(double x, double z, DamageSource source) {
++        if (this.random.nextDouble() >= this.getAttributeInstance(GenericAttributes.c).getValue()) {
++            this.ai = true;
++
++            KnockbackProfile kb = (this.getKnockbackProfile() == null) ? world.getServer().titanium().getKnockbackProfile(): this.getKnockbackProfile();
++
++            double magnitude = Math.sqrt(MathUtil.pow2(x) + MathUtil.pow2(z));
++            double horizontal = kb.getHorizontal();
++            double vertical = kb.getVertical();
++
++            if (source instanceof EntityDamageSourceIndirect) {
++                if (((EntityDamageSourceIndirect) source).getProximateDamageSource() instanceof EntityFishingHook) {
++                    horizontal = kb.getRodHorizontal();
++                    vertical = kb.getRodVertical();
++                }
++                if (((EntityDamageSourceIndirect) source).getProximateDamageSource() instanceof EntityArrow) {
++                    horizontal = kb.getArrowHorizontal();
++                    vertical = kb.getArrowVertical();
++                }
++                if (((EntityDamageSourceIndirect) source).getProximateDamageSource() instanceof EntitySnowball) {
++                    horizontal = kb.getSnowballHorizontal();
++                    vertical = kb.getSnowballVertical();
++                }
++                if (((EntityDamageSourceIndirect) source).getProximateDamageSource() instanceof EntityEgg) {
++                    horizontal = kb.getEggHorizontal();
++                    vertical = kb.getEggVertical();
++                }
++                if (((EntityDamageSourceIndirect) source).getProximateDamageSource() instanceof EntityEnderPearl) {
++                    horizontal = kb.getPearlHorizontal();
++                    vertical = kb.getPearlVertical();
++                }
++            }
++
++            this.motX /= kb.getFrictionHorizontal();
++            this.motY /= kb.getFrictionVertical();
++            this.motZ /= kb.getFrictionHorizontal();
++
++            this.motX -= x / magnitude * horizontal;
++            this.motY += vertical;
++            this.motZ -= z / magnitude * horizontal;
++
++            if (this.motX > kb.getHorizontalMax()) this.motX = kb.getHorizontalMax();
++            if (this.motX < kb.getHorizontalMin()) this.motX = kb.getHorizontalMin();
++
++            if (this.motZ > kb.getHorizontalMax()) this.motZ = kb.getHorizontalMax();
++            if (this.motZ < kb.getHorizontalMin()) this.motZ = kb.getHorizontalMin();
++
++            if (this.motY > kb.getVerticalMax()) this.motY = kb.getVerticalMax();
++            if (this.motY < kb.getVerticalMin()) this.motY = kb.getVerticalMin();
++        }
++    }
++    // Titanium end
+ 
+     protected String bo() {
+         return "game.neutral.hurt";
+@@ -1843,4 +1902,16 @@ public abstract class EntityLiving extends Entity {
+     protected void bP() {
+         this.updateEffects = true;
+     }
++
++    // Titanium start
++    private KnockbackProfile knockbackProfile;
++
++    public KnockbackProfile getKnockbackProfile() {
++        return knockbackProfile;
++    }
++
++    public void setKnockbackProfile(KnockbackProfile profile) {
++        this.knockbackProfile = profile;
++    }
++    // Titanium end
+ }
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index a6434e8a30e932204e8b26b07a7bd8d6c042aa4e..e070a093877a608ae853b653fff303848df50da8 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -1275,10 +1275,12 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+ 
+         case 3:
+             this.player.setSprinting(true);
++            this.player.setExtraKnockback(true); // Nacho
+             break;
+ 
+         case 4:
+             this.player.setSprinting(false);
++            this.player.setExtraKnockback(false); // Nacho
+             break;
+ 
+         case 5:
+diff --git a/src/main/java/net/titanium/Titanium.java b/src/main/java/net/titanium/Titanium.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..4e85f8b45d4c46f25477098be4a4955282e67b6b
+--- /dev/null
++++ b/src/main/java/net/titanium/Titanium.java
+@@ -0,0 +1,63 @@
++package net.titanium;
++
++import eu.okaeri.configs.ConfigManager;
++import eu.okaeri.configs.serdes.commons.SerdesCommons;
++import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
++import java.io.File;
++import net.minecraft.server.MinecraftServer;
++import net.titanium.config.TitaniumConfig;
++import net.titanium.config.knockback.KnockbackConfig;
++import net.titanium.config.serdes.DecolorTransformer;
++import net.titanium.config.serdes.RangeFormattingTransformer;
++import net.titanium.config.serdes.WarningStateTransformer;
++
++public class Titanium {
++
++    private static Titanium INSTANCE;
++
++    public final MinecraftServer server;
++
++    public TitaniumConfig serverConfig;
++    public KnockbackConfig knockbackConfig;
++
++    public Titanium(MinecraftServer server) {
++        INSTANCE = this;
++
++        this.server = server;
++
++        this.loadServerConfig();
++        this.loadKnockbackConfig();
++    }
++
++    public Titanium get() {
++        return INSTANCE;
++    }
++
++    public TitaniumConfig getServerConfig() {
++        return serverConfig;
++    }
++
++    public void loadServerConfig() {
++        serverConfig = ConfigManager.create(TitaniumConfig.class, (it) -> {
++            it.withConfigurer(new YamlBukkitConfigurer(), new SerdesCommons());
++            it.withSerdesPack(registry -> {
++                registry.register(new DecolorTransformer());
++                registry.register(new WarningStateTransformer());
++                registry.register(new RangeFormattingTransformer());
++            });
++            it.withBindFile((File) server.options.valueOf("titanium-settings"));
++            it.withRemoveOrphans(false);
++            it.saveDefaults();
++            it.load(true);
++        });
++    }
++
++    public KnockbackConfig getKnockbackConfig() {
++        return knockbackConfig;
++    }
++
++    public void loadKnockbackConfig() {
++        knockbackConfig = new KnockbackConfig((File) server.options.valueOf("knockback-settings"));
++    }
++
++}
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index 1a9b512953871eec474b24762d373e4efbec32aa..9305d9f5d3b677bef695d15006cb124e3c4dbc1e 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -28,7 +28,8 @@ import org.spigotmc.TicksPerSecondCommand;
+ @Header("It's collect all the settings from bukkit.yml, spigot.yml etc.")
+ @Header("Command aliases also go in this file, just put what you would normally put in commands.yml under a commands: tag")
+ @Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
+-public class TitaniumConfig extends TitaniumConfigSection {
++public class
++TitaniumConfig extends TitaniumConfigSection {
+ 
+     // For tests to work properly
+     @Exclude
+@@ -196,10 +197,13 @@ public class TitaniumConfig extends TitaniumConfigSection {
+ 
+     @Override
+     public OkaeriConfig load() throws OkaeriException {
+-        super.load();
+-
+         INSTANCE = this;
+ 
++        log(true, true, Level.INFO, "Loading Titanium server config from " + this.getBindFile().getFileName().toString());
++
++        super.load();
++        this.loadProperties();
++
+         if (enableLegacyConfigFiles) {
+             if (this.bukkitConfigHelper == null) {
+                 this.bukkitConfigHelper = new LegacyConfigHelper(this.bukkit, "bukkit");
+@@ -227,8 +231,6 @@ public class TitaniumConfig extends TitaniumConfigSection {
+             this.ionConfigHelper.saveSectionToFile();
+         }
+ 
+-        this.loadProperties();
+-
+         this.registerCommand("ping", new PingCommand("ping"));
+ 
+         return this;
+@@ -311,12 +313,12 @@ public class TitaniumConfig extends TitaniumConfigSection {
+         return ChatColor.translateAlternateColorCodes('&', input);
+     }
+ 
+-    static void log(boolean verbose, Level level, String log, Object... params) {
+-        if (IS_RELOAD) {
++    static void log(boolean verbose, boolean force, Level level, String log, Object... params) {
++        if (IS_RELOAD && !force) {
+             return;
+         }
+ 
+-        if (!verbose) {
++        if (!verbose && !force) {
+             return;
+         }
+ 
+@@ -327,6 +329,10 @@ public class TitaniumConfig extends TitaniumConfigSection {
+         Bukkit.getLogger().log(level, log, params);
+     }
+ 
++    static void log(boolean verbose, Level level, String log, Object... params) {
++        log(verbose, false, level, log, params);
++    }
++
+     static void log(boolean verbose, String log, Object... params) {
+         log(verbose, Level.INFO, log, params);
+     }
+diff --git a/src/main/java/net/titanium/config/knockback/KnockbackConfig.java b/src/main/java/net/titanium/config/knockback/KnockbackConfig.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..dd457a7901952cd8a126b1cf4e3c06eccc326d5f
+--- /dev/null
++++ b/src/main/java/net/titanium/config/knockback/KnockbackConfig.java
+@@ -0,0 +1,211 @@
++package net.titanium.config.knockback;
++
++import java.io.File;
++import java.io.IOException;
++import java.util.HashSet;
++import java.util.List;
++import java.util.Map;
++import java.util.Set;
++import java.util.logging.Level;
++import net.titanium.knockback.KnockbackProfile;
++import net.titanium.knockback.TitaniumKnockbackProfile;
++import org.bukkit.Bukkit;
++import org.bukkit.configuration.InvalidConfigurationException;
++import org.bukkit.configuration.file.YamlConfiguration;
++import org.spigotmc.CaseInsensitiveMap;
++
++public class KnockbackConfig {
++
++    private static final String HEADER = "This is the knockback configuration file for Titanium.\n";
++
++    private static KnockbackConfig INSTANCE;
++
++    private final File configFile;
++    private YamlConfiguration config;
++
++    private final Map<String, KnockbackProfile> profiles = new CaseInsensitiveMap<>();
++
++    public KnockbackConfig(File configFile) {
++        INSTANCE = this;
++        this.configFile = configFile;
++        this.load();
++    }
++
++    public void load() {
++        config = new YamlConfiguration();
++        try {
++            log("Loading Titanium knockback config from " + configFile.getName());
++            config.load(this.configFile);
++        } catch (IOException ignored) {
++        } catch (InvalidConfigurationException ex) {
++            log(Level.SEVERE, "Could not load knockback.yml, please correct your syntax errors", ex);
++        }
++
++        config.options().header(HEADER);
++        config.options().copyDefaults(true);
++
++        save();
++
++        this.profiles.clear();
++
++        this.getKeys("profiles")
++                .stream()
++                .map(key -> profiles.computeIfAbsent(key, TitaniumKnockbackProfile::new))
++                .forEach(this::loadProfile);
++
++        KnockbackProfile defaultProfile = profiles.computeIfAbsent("vanilla", key -> {
++            KnockbackProfile profile = new TitaniumKnockbackProfile("vanilla");
++            this.saveProfile(profile, true);
++            log(Level.WARNING, "No vanilla knockback profile found, created new one");
++            return profile;
++        });
++        Bukkit.titanium().setKnockbackProfile(defaultProfile);
++    }
++
++    public void save() {
++        try {
++            config.save(configFile);
++        } catch (IOException ex) {
++            log(Level.SEVERE, "Could not save " + configFile, ex);
++        }
++    }
++
++    public Set<KnockbackProfile> getProfiles() {
++        return new HashSet<>(profiles.values());
++    }
++
++    public KnockbackProfile findProfileByName(String name) {
++        return profiles.get(name);
++    }
++
++    public void loadProfile(KnockbackProfile profile) {
++        String path = "profiles." + profile.getName();
++
++        profile.setHorizontal(getDouble(path + ".horizontal", 0.4D));
++        profile.setHorizontalMin(getDouble(path + ".horizontal-min", -100D));
++        profile.setHorizontalMax(getDouble(path + ".horizontal-max", 100D));
++        profile.setVertical(getDouble(path + ".vertical", 0.4D));
++        profile.setVerticalMin(getDouble(path + ".vertical-min", -1.0D));
++        profile.setVerticalMax(getDouble(path + ".vertical-max", 0.4D));
++        profile.setExtraHorizontal(getDouble(path + ".extra-horizontal", 0.5D));
++        profile.setExtraVertical(getDouble(path + ".extra-vertical", 0.1D));
++        profile.setFrictionHorizontal(getDouble(path + ".friction-horizontal", 2.0D));
++        profile.setFrictionVertical(getDouble(path + ".friction-vertical", 2.0D));
++
++        profile.setWTapExtraHorizontal(getDouble(path + ".w-tap-extra-horizontal", 0.5D));
++        profile.setWTapExtraVertical(getDouble(path + ".w-tap-extra-vertical", 0.1D));
++
++        profile.setStopSprint(getBoolean(path + ".stop-sprint", true));
++
++        profile.setRodHorizontal(getDouble(path + ".projectiles.rod.horizontal", 0.4D));
++        profile.setRodVertical(getDouble(path + ".projectiles.rod.vertical", 0.4D));
++        profile.setArrowHorizontal(getDouble(path + ".projectiles.arrow.horizontal", 0.4D));
++        profile.setArrowVertical(getDouble(path + ".projectiles.arrow.vertical", 0.4D));
++        profile.setPearlHorizontal(getDouble(path + ".projectiles.pearl.horizontal", 0.4D));
++        profile.setPearlVertical(getDouble(path + ".projectiles.pearl.vertical", 0.4D));
++        profile.setSnowballHorizontal(getDouble(path + ".projectiles.snowball.horizontal", 0.4D));
++        profile.setSnowballVertical(getDouble(path + ".projectiles.snowball.vertical", 0.4D));
++        profile.setEggHorizontal(getDouble(path + ".projectiles.egg.horizontal", 0.4D));
++        profile.setEggHorizontal(getDouble(path + ".projectiles.egg.vertical", 0.4D));
++    }
++
++    public void saveProfile(KnockbackProfile profile, boolean saveProjectiles) {
++        profiles.put(profile.getName(), profile);
++
++        String path = "profiles." + profile.getName();
++
++        config.set(path + ".horizontal", profile.getHorizontal());
++        config.set(path + ".horizontal-min", profile.getHorizontalMin());
++        config.set(path + ".horizontal-max", profile.getHorizontalMax());
++        config.set(path + ".vertical", profile.getVertical());
++        config.set(path + ".vertical-min", profile.getVerticalMin());
++        config.set(path + ".vertical-max", profile.getVerticalMax());
++        config.set(path + ".extra-horizontal", profile.getExtraHorizontal());
++        config.set(path + ".extra-vertical", profile.getExtraVertical());
++        config.set(path + ".friction-horizontal", profile.getFrictionHorizontal());
++        config.set(path + ".friction-vertical", profile.getFrictionVertical());
++
++        config.set(path + ".w-tap-extra-horizontal", profile.getWTapExtraHorizontal());
++        config.set(path + ".w-tap-extra-vertical", profile.getWTapExtraVertical());
++
++        config.set(path + ".stop-sprint", profile.isStopSprint());
++
++        if (saveProjectiles) {
++            config.set(path + ".projectiles.rod.horizontal", profile.getRodHorizontal());
++            config.set(path + ".projectiles.rod.vertical", profile.getRodVertical());
++            config.set(path + ".projectiles.arrow.horizontal", profile.getArrowHorizontal());
++            config.set(path + ".projectiles.arrow.vertical", profile.getArrowVertical());
++            config.set(path + ".projectiles.pearl.horizontal", profile.getPearlHorizontal());
++            config.set(path + ".projectiles.pearl.vertical", profile.getPearlVertical());
++            config.set(path + ".projectiles.snowball.horizontal", profile.getSnowballHorizontal());
++            config.set(path + ".projectiles.snowball.vertical", profile.getSnowballVertical());
++            config.set(path + ".projectiles.egg.horizontal", profile.getEggHorizontal());
++            config.set(path + ".projectiles.egg.vertical", profile.getEggVertical());
++        }
++
++        this.save();
++    }
++
++    public void set(String path, Object value) {
++        config.set(path, value);
++    }
++
++    public Set<String> getKeys(String path) {
++        if (!config.isConfigurationSection(path)) {
++            config.createSection(path);
++            return new HashSet<>();
++        }
++
++        return config.getConfigurationSection(path).getKeys(false);
++    }
++
++    private boolean getBoolean(String path, boolean def) {
++        config.addDefault(path, def);
++        return config.getBoolean(path, config.getBoolean(path));
++    }
++
++    private int getInt(String path, int def) {
++        config.addDefault(path, def);
++        return config.getInt(path, config.getInt(path));
++    }
++
++    private double getDouble(String path, double def) {
++        config.addDefault(path, def);
++        return config.getDouble(path, config.getDouble(path));
++    }
++
++    private String getString(String path, String def) {
++        config.addDefault(path, def);
++        return config.getString(path, config.getString(path));
++    }
++
++    private <T> List getList(String path, T def) {
++        config.addDefault(path, def);
++        return config.getList(path, config.getList(path));
++    }
++
++    public static KnockbackConfig get() {
++        return INSTANCE;
++    }
++
++    private static void log(Level level, String log, Throwable thrown) {
++        if (Bukkit.getLogger() == null) {
++            return;
++        }
++
++        Bukkit.getLogger().log(level, log, thrown);
++    }
++
++    private static void log(Level level, String log, Object... params) {
++        if (Bukkit.getLogger() == null) {
++            return;
++        }
++
++        Bukkit.getLogger().log(level, log, params);
++    }
++
++    private static void log(String log, Object... params) {
++        log(Level.INFO, log, params);
++    }
++
++}
+diff --git a/src/main/java/net/titanium/knockback/TitaniumKnockbackProfile.java b/src/main/java/net/titanium/knockback/TitaniumKnockbackProfile.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..f2ad9afcc031e939e123f28aa508de79666056d4
+--- /dev/null
++++ b/src/main/java/net/titanium/knockback/TitaniumKnockbackProfile.java
+@@ -0,0 +1,386 @@
++package net.titanium.knockback;
++
++import net.titanium.config.knockback.KnockbackConfig;
++import org.bukkit.ChatColor;
++
++public class TitaniumKnockbackProfile implements KnockbackProfile, Cloneable {
++
++    private String name;
++
++    public double horizontal = 0.4D;
++    public double horizontalMin = -100D;
++    public double horizontalMax = 100D;
++
++    public double vertical = 0.4D;
++    public double verticalMin = -1.0D;
++    public double verticalMax = 0.4D;
++
++    public double extraHorizontal = 0.5D;
++    public double extraVertical = 0.1D;
++
++    public double frictionHorizontal = 2.0D;
++    public double frictionVertical = 2.0D;
++
++    private double wTapExtraHorizontal = 0.5D;
++    private double wTapExtraVertical = 0.1D;
++
++    public boolean stopSprint = true;
++
++    public final Projectiles projectiles = new Projectiles();
++
++    public static class Projectiles implements Cloneable {
++
++        public Projectile rod = new Projectile();
++        public Projectile arrow = new Projectile();
++        public Projectile pearl = new Projectile();
++        public Projectile snowball = new Projectile();
++        public Projectile egg = new Projectile();
++
++        @Override
++        public Projectiles clone() {
++            try {
++                return (Projectiles) super.clone();
++            } catch (CloneNotSupportedException e) {
++                throw new AssertionError();
++            }
++        }
++
++        public static class Projectile implements Cloneable {
++
++            public double horizontal;
++            public double vertical;
++
++            public Projectile(double horizontal, double vertical) {
++                this.horizontal = horizontal;
++                this.vertical = vertical;
++            }
++
++            public Projectile() {
++                this(0.4D, 0.4D);
++            }
++
++            @Override
++            public Projectile clone() {
++                try {
++                    return (Projectile) super.clone();
++                } catch (CloneNotSupportedException e) {
++                    throw new AssertionError();
++                }
++            }
++
++        }
++
++    }
++
++    public TitaniumKnockbackProfile(String name) {
++        this.name = name;
++    }
++
++    @Override
++    public void save() {
++        this.save(false);
++    }
++
++    @Override
++    public void save(boolean projectiles) {
++        KnockbackConfig.get().saveProfile(this, projectiles);
++    }
++
++    @Override
++    public String getName() {
++        return this.name;
++    }
++
++    @Override
++    public void setName(String name) {
++        this.name = name;
++    }
++
++    @Override
++    public double getHorizontal() {
++        return this.horizontal;
++    }
++
++    @Override
++    public void setHorizontal(double horizontal) {
++        this.horizontal = horizontal;
++    }
++
++    @Override
++    public double getHorizontalMin() {
++        return this.horizontalMin;
++    }
++
++    @Override
++    public void setHorizontalMin(double horizontalMin) {
++        this.horizontalMin = horizontalMin;
++    }
++
++    @Override
++    public double getHorizontalMax() {
++        return this.horizontalMax;
++    }
++
++    @Override
++    public void setHorizontalMax(double horizontalMax) {
++        this.horizontalMax = horizontalMax;
++    }
++
++    @Override
++    public double getVertical() {
++        return this.vertical;
++    }
++
++    @Override
++    public void setVertical(double vertical) {
++        this.vertical = vertical;
++    }
++
++    @Override
++    public double getVerticalMin() {
++        return this.verticalMin;
++    }
++
++    @Override
++    public void setVerticalMin(double verticalMin) {
++        this.verticalMin = verticalMin;
++    }
++
++    @Override
++    public double getVerticalMax() {
++        return this.verticalMax;
++    }
++
++    @Override
++    public void setVerticalMax(double verticalMax) {
++        this.verticalMax = verticalMax;
++    }
++
++    @Override
++    public double getExtraHorizontal() {
++        return this.extraHorizontal;
++    }
++
++    @Override
++    public void setExtraHorizontal(double extraHorizontal) {
++        this.extraHorizontal = extraHorizontal;
++    }
++
++    @Override
++    public double getExtraVertical() {
++        return this.extraVertical;
++    }
++
++    @Override
++    public void setExtraVertical(double extraVertical) {
++        this.extraVertical = extraVertical;
++    }
++
++    @Override
++    public double getFrictionHorizontal() {
++        return this.frictionHorizontal;
++    }
++
++    @Override
++    public void setFrictionHorizontal(double frictionHorizontal) {
++        this.frictionHorizontal = frictionHorizontal;
++    }
++
++    @Override
++    public double getFrictionVertical() {
++        return this.frictionVertical;
++    }
++
++    @Override
++    public void setFrictionVertical(double frictionVertical) {
++        this.frictionVertical = frictionVertical;
++    }
++
++    @Override
++    public double getWTapExtraHorizontal() {
++        return this.wTapExtraHorizontal;
++    }
++
++    @Override
++    public void setWTapExtraHorizontal(double wTapHorizontal) {
++        this.wTapExtraHorizontal = wTapHorizontal;
++    }
++
++    @Override
++    public double getWTapExtraVertical() {
++        return this.wTapExtraVertical;
++    }
++
++    @Override
++    public void setWTapExtraVertical(double wTapVertical) {
++        this.wTapExtraVertical = wTapVertical;
++    }
++
++    @Override
++    public boolean isStopSprint() {
++        return this.stopSprint;
++    }
++
++    @Override
++    public void setStopSprint(boolean stopSprint) {
++        this.stopSprint = stopSprint;
++    }
++
++    private Projectiles getProjectiles() {
++        return this.projectiles;
++    }
++
++    @Override
++    public double getRodHorizontal() {
++        return this.getProjectiles().rod.horizontal;
++    }
++
++    @Override
++    public void setRodHorizontal(double rodHorizontal) {
++        this.getProjectiles().rod.horizontal = rodHorizontal;
++    }
++
++    @Override
++    public double getRodVertical() {
++        return this.getProjectiles().rod.vertical;
++    }
++
++    @Override
++    public void setRodVertical(double rodVertical) {
++        this.getProjectiles().rod.vertical = rodVertical;
++    }
++
++    @Override
++    public double getArrowHorizontal() {
++        return this.getProjectiles().arrow.horizontal;
++    }
++
++    @Override
++    public void setArrowHorizontal(double arrowHorizontal) {
++        this.getProjectiles().arrow.horizontal = arrowHorizontal;
++    }
++
++    @Override
++    public double getArrowVertical() {
++        return this.getProjectiles().arrow.vertical;
++    }
++
++    @Override
++    public void setArrowVertical(double arrowVertical) {
++        this.getProjectiles().arrow.vertical = arrowVertical;
++    }
++
++    @Override
++    public double getPearlHorizontal() {
++        return this.getProjectiles().pearl.horizontal;
++    }
++
++    @Override
++    public void setPearlHorizontal(double pearlHorizontal) {
++        this.getProjectiles().pearl.horizontal = pearlHorizontal;
++    }
++
++    @Override
++    public double getPearlVertical() {
++        return this.getProjectiles().pearl.vertical;
++    }
++
++    @Override
++    public void setPearlVertical(double pearlVertical) {
++        this.getProjectiles().pearl.vertical = pearlVertical;
++    }
++
++    @Override
++    public double getSnowballHorizontal() {
++        return this.getProjectiles().snowball.horizontal;
++    }
++
++    @Override
++    public void setSnowballHorizontal(double snowballHorizontal) {
++        this.getProjectiles().snowball.horizontal = snowballHorizontal;
++    }
++
++    @Override
++    public double getSnowballVertical() {
++        return this.getProjectiles().snowball.vertical;
++    }
++
++    @Override
++    public void setSnowballVertical(double snowballVertical) {
++        this.getProjectiles().snowball.vertical = snowballVertical;
++    }
++
++    @Override
++    public double getEggHorizontal() {
++        return this.getProjectiles().egg.horizontal;
++    }
++
++    @Override
++    public void setEggHorizontal(double eggHorizontal) {
++        this.getProjectiles().egg.horizontal = eggHorizontal;
++    }
++
++    @Override
++    public double getEggVertical() {
++        return this.getProjectiles().egg.vertical;
++    }
++
++    @Override
++    public void setEggVertical(double eggVertical) {
++        this.getProjectiles().egg.vertical = eggVertical;
++    }
++
++    /**
++     * @deprecated this method is left only for backwards compatibility with NachoSpigot
++     */
++    @Override
++    @Deprecated
++    public String[] getKnockbackValues() {
++        return new String[] {
++                "Horizontal" + ChatColor.GRAY + ":  " + this.getHorizontal(),
++                "Horizontal-Max" + ChatColor.GRAY + ":  " + this.getHorizontalMax(),
++                "Horizontal-Min" + ChatColor.GRAY + ":  " + this.getHorizontalMin(),
++                "Vertical" + ChatColor.GRAY + ":  " + this.getVertical(),
++                "Vertical-Max" + ChatColor.GRAY + ":  " + this.getVerticalMax(),
++                "Vertical-Min" + ChatColor.GRAY + ":  " + this.getVerticalMin(),
++                "Extra-Horizontal" + ChatColor.GRAY + ":  " + this.getExtraHorizontal(),
++                "Extra-Vertical" + ChatColor.GRAY + ":  " + this.getExtraVertical(),
++                "Friction-Horizontal" + ChatColor.GRAY + ":  " + this. getFrictionHorizontal(),
++                "Friction-Vertical" + ChatColor.GRAY + ":  " + this.getFrictionVertical(),
++                "WTap-Extra-Horizontal" + ChatColor.GRAY + ":  " + this.getWTapExtraHorizontal(),
++                "WTap-Extra-Vertical" + ChatColor.GRAY + ":  " + this.getWTapExtraVertical(),
++                "Stop-Sprint" + ChatColor.GRAY + ":  " + this.isStopSprint()
++        };
++    }
++
++    /**
++     * @deprecated this method is left only for backwards compatibility with NachoSpigot
++     */
++    @Override
++    @Deprecated
++    public String[] getProjectilesValues() {
++        return new String[] {
++                "Rod-Horizontal" + ChatColor.GRAY + ":  " + this.getRodHorizontal(),
++                "Rod-Vertical" + ChatColor.GRAY + ":  " + this.getRodVertical(),
++                "Arrow-Horizontal" + ChatColor.GRAY + ":  " + this.getArrowHorizontal(),
++                "Arrow-Vertical" + ChatColor.GRAY + ":  " + this.getArrowVertical(),
++                "Pearl-Horizontal" + ChatColor.GRAY + ":  " + this.getPearlHorizontal(),
++                "Pearl-Vertical" + ChatColor.GRAY + ":  " + this.getPearlVertical(),
++                "Snowball-Horizontal" + ChatColor.GRAY + ":  " + this.getSnowballHorizontal(),
++                "Snowball-Vertical" + ChatColor.GRAY + ":  " + this.getSnowballVertical(),
++                "Egg-Horizontal" + ChatColor.GRAY + ":  " + this.getEggHorizontal(),
++                "Egg-Vertical" + ChatColor.GRAY + ":  " + this.getEggVertical()
++        };
++    }
++    // Nacho end
++
++    @Override
++    public TitaniumKnockbackProfile clone() {
++        try {
++            return (TitaniumKnockbackProfile) super.clone();
++        } catch (CloneNotSupportedException e) {
++            throw new AssertionError(e);
++        }
++    }
++
++}
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 7c50e00b03ebc943625611b6062d1f688bc27fda..633a829de847e5517f0719955d8cbe3350735660 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -1,10 +1,12 @@
+ package org.bukkit.craftbukkit;
+ 
+ import com.eatthepath.uuid.FastUUID;
+-import eu.okaeri.configs.ConfigManager;
++import com.google.common.base.Charsets;
++import com.google.common.collect.ImmutableList;
++import com.google.common.collect.Lists;
++import com.google.common.collect.MapMaker;
++import com.mojang.authlib.GameProfile;
+ import eu.okaeri.configs.OkaeriConfig;
+-import eu.okaeri.configs.serdes.commons.SerdesCommons;
+-import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
+ import java.awt.image.BufferedImage;
+ import java.io.File;
+ import java.io.FileInputStream;
+@@ -34,12 +36,12 @@ import net.minecraft.server.*;
+ import net.titanium.config.BukkitConfig;
+ import net.titanium.config.LegacyConfigHelper;
+ import net.titanium.config.TitaniumConfig;
+-import net.titanium.config.serdes.DecolorTransformer;
+-import net.titanium.config.serdes.RangeFormattingTransformer;
+-import net.titanium.config.serdes.WarningStateTransformer;
++import net.titanium.config.knockback.KnockbackConfig;
++import net.titanium.knockback.KnockbackProfile;
++import net.titanium.knockback.TitaniumKnockbackProfile;
++import org.apache.commons.lang.Validate;
+ import org.bukkit.BanList;
+ import org.bukkit.Bukkit;
+-import org.bukkit.ChatColor;
+ import org.bukkit.GameMode;
+ import org.bukkit.Location;
+ import org.bukkit.OfflinePlayer;
+@@ -114,6 +116,7 @@ import org.bukkit.plugin.messaging.StandardMessenger;
+ import org.bukkit.scheduler.BukkitWorker;
+ import org.bukkit.util.StringUtil;
+ import org.bukkit.util.permissions.DefaultPermissions;
++import org.jetbrains.annotations.Nullable;
+ import org.yaml.snakeyaml.Yaml;
+ import org.yaml.snakeyaml.constructor.SafeConstructor;
+ import org.yaml.snakeyaml.error.MarkedYAMLException;
+@@ -158,7 +161,13 @@ public final class CraftServer implements Server {
+     private final EntityMetadataStore entityMetadata = new EntityMetadataStore();
+     private final PlayerMetadataStore playerMetadata = new PlayerMetadataStore();
+     private final WorldMetadataStore worldMetadata = new WorldMetadataStore();
+-    public final TitaniumConfig serverConfig; // Titanium
++    // Titanium start
++    public final net.titanium.Titanium titaniumServer;
++    public final TitaniumConfig serverConfig;
++    public final KnockbackConfig knockbackConfig;
++
++    public KnockbackProfile knockbackProfile;
++    // Titanium end;
+     private int monsterSpawn = -1;
+     private int animalSpawn = -1;
+     private int waterAnimalSpawn = -1;
+@@ -217,18 +226,10 @@ public final class CraftServer implements Server {
+         }
+ 
+         // Titanium start
+-        serverConfig = ConfigManager.create(TitaniumConfig.class, (it) -> {
+-            it.withConfigurer(new YamlBukkitConfigurer(), new SerdesCommons());
+-            it.withSerdesPack(registry -> {
+-                registry.register(new DecolorTransformer());
+-                registry.register(new WarningStateTransformer());
+-                registry.register(new RangeFormattingTransformer());
+-            });
+-            it.withBindFile((File) console.options.valueOf("titanium-settings"));
+-            it.withRemoveOrphans(false);
+-            it.saveDefaults();
+-            it.load(true);
+-        });
++        titaniumServer = new net.titanium.Titanium(console);
++
++        serverConfig = titaniumServer.getServerConfig();
++        knockbackConfig = titaniumServer.getKnockbackConfig();
+ 
+         // Titanium - we don't need them since we have a custom configuration system
+         /*
+@@ -735,9 +736,12 @@ public final class CraftServer implements Server {
+         console.setAllowFlight(config.getBoolean("allow-flight", console.getAllowFlight()));
+         console.setMotd(config.getString("motd", console.getMotd()));
+ 
+-        serverConfig.reload(); // Titanium
++        // Titanium start
++        serverConfig.reload();
++        knockbackConfig.load();
++        // Titanium end
+ 
+-        // Titanium start - we don't need them
++        // Titanium start - use okaeri-configs
+         /*
+         monsterSpawn = configuration.getInt("spawn-limits.monsters");
+         animalSpawn = configuration.getInt("spawn-limits.animals");
+@@ -749,7 +753,6 @@ public final class CraftServer implements Server {
+         chunkGCPeriod = configuration.getInt("chunk-gc.period-in-ticks");
+         chunkGCLoadThresh = configuration.getInt("chunk-gc.load-threshold");
+          */
+-        // Titanium end
+ 
+         BukkitConfig bukkit = serverConfig.bukkit;
+         monsterSpawn = bukkit.spawnLimits.monsters;
+@@ -761,6 +764,7 @@ public final class CraftServer implements Server {
+         printSaveWarning = false;
+         chunkGCPeriod = bukkit.chunkGC.periodInTicks;
+         chunkGCLoadThresh = bukkit.chunkGC.loadThreshold;
++        // Titanium end
+ 
+         loadIcon();
+ 
+@@ -1979,6 +1983,37 @@ public final class CraftServer implements Server {
+         public Instant getStartTime() {
+             return startTime;
+         }
++
++        @Override
++        public KnockbackProfile getKnockbackProfile() {
++            return knockbackProfile;
++        }
++
++        @Override
++        public void setKnockbackProfile(KnockbackProfile profile) {
++            knockbackProfile = profile;
++        }
++
++        @Override
++        public Set<KnockbackProfile> getKnockbackProfiles() {
++            return knockbackConfig.getProfiles();
++        }
++
++        @Nullable
++        @Override
++        public KnockbackProfile findKnockbackProfile(String name) {
++            return knockbackConfig.findProfileByName(name);
++        }
++
++        @Override
++        public KnockbackProfile createKnockbackProfile(String name, boolean save) {
++            KnockbackProfile profile = new TitaniumKnockbackProfile(name);
++            if (save) {
++                profile.save(true);
++            }
++            return profile;
++        }
++
+     };
+ 
+     public Titanium titanium() {
+diff --git a/src/main/java/org/bukkit/craftbukkit/Main.java b/src/main/java/org/bukkit/craftbukkit/Main.java
+index 78494dabe939e9f49185b94afd37d56afc5e25e4..c4e675f67dba95b2d23861a1e1b0120b9455ea19 100644
+--- a/src/main/java/org/bukkit/craftbukkit/Main.java
++++ b/src/main/java/org/bukkit/craftbukkit/Main.java
+@@ -147,6 +147,12 @@ public class Main {
+                         .ofType(File.class)
+                         .defaultsTo(new File("titanium.yml"))
+                         .describedAs("Yml file");
++
++                acceptsAll(asList("KS", "knockback-settings"), "File for titanium knockback settings")
++                        .withRequiredArg()
++                        .ofType(File.class)
++                        .defaultsTo(new File("knockback.yml"))
++                        .describedAs("Yml file");
+                 // Titanium end
+             }
+         };
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
+index 3e3a04808196e722fd1dcdae638bfcf45a79f4d9..cb0a5b90f6d4bb19a9d110f007dcaf1860f84dba 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
+@@ -30,6 +30,7 @@ import net.minecraft.server.GenericAttributes;
+ import net.minecraft.server.MobEffect;
+ import net.minecraft.server.MobEffectList;
+ 
++import net.titanium.knockback.KnockbackProfile;
+ import org.apache.commons.lang.Validate;
+ import org.bukkit.Location;
+ import org.bukkit.Material;
+@@ -502,4 +503,17 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
+     public void _INVALID_setMaxHealth(int health) {
+         setMaxHealth(health);
+     }
++
++    // Titanium start
++    @Override
++    public KnockbackProfile getKnockbackProfile() {
++        return getHandle().getKnockbackProfile();
++    }
++
++    @Override
++    public void setKnockbackProfile(KnockbackProfile knockbackProfile) {
++        getHandle().setKnockbackProfile(knockbackProfile);
++    }
++    // Titanium end
++
+ }
