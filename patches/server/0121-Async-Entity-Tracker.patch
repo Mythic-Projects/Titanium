@@ -647,7 +647,7 @@ index addf86937c1fbd0e8ead1e64637faa890ba7967f..c9bb63fb84bdbe4391c1eda2013f0a13
 +    // Nacho end
  }
 diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-index cf1ac2c43fe5f7bf4baf539d88e7a0f8b8397a2a..33072edfccb68a1f977977da74acebfdb40618e8 100644
+index cf1ac2c43fe5f7bf4baf539d88e7a0f8b8397a2a..45455c612782137f7f53c58d9352b6731d291091 100644
 --- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 +++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 @@ -1,10 +1,14 @@
@@ -680,27 +680,31 @@ index cf1ac2c43fe5f7bf4baf539d88e7a0f8b8397a2a..33072edfccb68a1f977977da74acebfd
          this.tracker = entity;
          this.b = i;
          this.c = j;
-@@ -58,6 +69,19 @@ public class EntityTrackerEntry {
+@@ -58,6 +69,23 @@ public class EntityTrackerEntry {
          this.xRot = MathHelper.d(entity.pitch * 256.0F / 360.0F);
          this.i = MathHelper.d(entity.getHeadRotation() * 256.0F / 360.0F);
          this.y = entity.onGround;
 +
 +        // Nacho start - Async entity tracker
-+        if (!TitaniumConfig.get().entityTracker.async.enabled) {
-+            this.addRemoveRate = 100;
++        TitaniumConfig.EntityTracker config = TitaniumConfig.get().entityTracker;
++        TitaniumConfig.EntityTracker.AddRemoveRate addRemoveRateConfig = config.async.enabled ? config.async.addRemoveRate : config.addRemoveRate;
++        if (this.tracker instanceof EntityPlayer) {
++            this.addRemoveRate = 5; // players
 +        } else if (this.tracker instanceof EntityArrow || this.tracker instanceof EntityProjectile) {
 +            this.addRemoveRate = 5; // projectile things
-+        } else if (this.tracker instanceof EntityPlayer) {
-+            this.addRemoveRate = 5; // players
++        } else if (this.tracker.activationType == 2) { // animals
++            this.addRemoveRate = addRemoveRateConfig.animals;
++        } else if (this.tracker.activationType == 1) { // monsters
++            this.addRemoveRate = addRemoveRateConfig.monsters;
 +        } else {
-+            this.addRemoveRate = 10; // default
++            this.addRemoveRate = addRemoveRateConfig.other;
 +        }
-+        this.addRemoveCooldown = this.tracker.getId() % addRemoveRate;
++        this.addRemoveCooldown = this.tracker.getId() % this.addRemoveRate;
 +        // Nacho end
      }
  
      public boolean equals(Object object) {
-@@ -68,6 +92,69 @@ public class EntityTrackerEntry {
+@@ -68,6 +96,69 @@ public class EntityTrackerEntry {
          return this.tracker.getId();
      }
  
@@ -770,7 +774,7 @@ index cf1ac2c43fe5f7bf4baf539d88e7a0f8b8397a2a..33072edfccb68a1f977977da74acebfd
      public void track(List<EntityHuman> list) {
          this.n = false;
          if (!this.isMoving || this.tracker.e(this.q, this.r, this.s) > 16.0D) {
-@@ -76,7 +163,7 @@ public class EntityTrackerEntry {
+@@ -76,7 +167,7 @@ public class EntityTrackerEntry {
              this.s = this.tracker.locZ;
              this.isMoving = true;
              this.n = true;
@@ -779,7 +783,7 @@ index cf1ac2c43fe5f7bf4baf539d88e7a0f8b8397a2a..33072edfccb68a1f977977da74acebfd
          }
  
          if (this.w != this.tracker.vehicle || this.tracker.vehicle != null && this.m % 60 == 0) {
-@@ -154,9 +241,11 @@ public class EntityTrackerEntry {
+@@ -154,9 +245,11 @@ public class EntityTrackerEntry {
                          this.y = this.tracker.onGround;
                          this.v = 0;
                          // CraftBukkit start - Refresh list of who can see a player before sending teleport packet
@@ -793,7 +797,7 @@ index cf1ac2c43fe5f7bf4baf539d88e7a0f8b8397a2a..33072edfccb68a1f977977da74acebfd
                          // CraftBukkit end
                          object = new PacketPlayOutEntityTeleport(this.tracker.getId(), i, j, k, (byte) l, (byte) i1, this.tracker.onGround);
                      }
-@@ -334,10 +423,12 @@ public class EntityTrackerEntry {
+@@ -334,10 +427,12 @@ public class EntityTrackerEntry {
      }
  
      public void updatePlayer(EntityPlayer entityplayer) {
@@ -808,7 +812,7 @@ index cf1ac2c43fe5f7bf4baf539d88e7a0f8b8397a2a..33072edfccb68a1f977977da74acebfd
                      // CraftBukkit start - respect vanish API
                      if (this.tracker instanceof EntityPlayer) {
                          Player player = ((EntityPlayer) this.tracker).getBukkitEntity();
-@@ -346,7 +437,7 @@ public class EntityTrackerEntry {
+@@ -346,7 +441,7 @@ public class EntityTrackerEntry {
                          }
                      }
  
@@ -817,7 +821,7 @@ index cf1ac2c43fe5f7bf4baf539d88e7a0f8b8397a2a..33072edfccb68a1f977977da74acebfd
                      // CraftBukkit end
                      this.trackedPlayerMap.put(entityplayer, true); // PaperBukkit
                      Packet packet = this.c();
-@@ -434,7 +525,7 @@ public class EntityTrackerEntry {
+@@ -434,7 +529,7 @@ public class EntityTrackerEntry {
                          }
                      }
                  }
@@ -826,7 +830,7 @@ index cf1ac2c43fe5f7bf4baf539d88e7a0f8b8397a2a..33072edfccb68a1f977977da74acebfd
                  this.trackedPlayers.remove(entityplayer);
                  entityplayer.d(this.tracker);
              }
-@@ -455,12 +546,14 @@ public class EntityTrackerEntry {
+@@ -455,12 +550,14 @@ public class EntityTrackerEntry {
          return entityplayer.u().getPlayerChunkMap().a(entityplayer, this.tracker.ae, this.tracker.ag);
      }
  
@@ -843,7 +847,7 @@ index cf1ac2c43fe5f7bf4baf539d88e7a0f8b8397a2a..33072edfccb68a1f977977da74acebfd
  
      protected Packet createPacket() { return this.c(); } // IonSpigot - OBFHELPER
  
-@@ -574,10 +667,18 @@ public class EntityTrackerEntry {
+@@ -574,10 +671,18 @@ public class EntityTrackerEntry {
          }
      }
  
@@ -1074,10 +1078,10 @@ index ff8ac6c5270ce40a21c4d9519a09c5ede68b1072..b504a01f9ada3104604e79a661b6d562
          this.worldProvider.a(this);
          this.chunkProvider = this.k();
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index ea88bd80553d7e3dbee5306fb0c6e1b0f299cc2d..240b34d4991270e44123ea83f0ca9dc98833fba5 100644
+index ea88bd80553d7e3dbee5306fb0c6e1b0f299cc2d..ccb5649652df753e4daf969d2d266278880dca6c 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
-@@ -177,6 +177,26 @@ TitaniumConfig extends TitaniumConfigSection {
+@@ -177,6 +177,58 @@ TitaniumConfig extends TitaniumConfigSection {
  
      }
  
@@ -1085,14 +1089,46 @@ index ea88bd80553d7e3dbee5306fb0c6e1b0f299cc2d..240b34d4991270e44123ea83f0ca9dc9
 +
 +    public static class EntityTracker extends TitaniumConfigSection {
 +
++        @Comment("How often (in ticks) should entity tracker update if entity is visible/hidden for players.")
++        @Comment("Bigger values can have good impact on performance, but it can take longer for entity to show/hide.")
++        public AddRemoveRate addRemoveRate = new AddRemoveRate(40);
++
++        public static class AddRemoveRate extends TitaniumConfigSection {
++
++            public int players;
++            @Comment("Projectiles -> Arrows, Snowballs, Eggs, etc.")
++            public int projectiles;
++            public int animals;
++            public int monsters;
++            public int other;
++
++            public AddRemoveRate(int players, int projectiles, int animals, int monsters, int other) {
++                this.players = players;
++                this.projectiles = projectiles;
++                this.animals = animals;
++                this.monsters = monsters;
++                this.other = other;
++            }
++
++            public AddRemoveRate(int all) {
++                this(all, all, all, all, all);
++            }
++
++        }
++
 +        public Async async = new Async();
 +
 +        public static class Async extends TitaniumConfigSection {
 +
 +            @Comment("Whether to use asynchronous entity tracking.")
 +            @Comment("Enabling this could be good idea since it can have good impact on performance.")
-+            @Comment("Disable it if something doesn't work properly (for eg. anticheat plugin).")
++            @Comment("Disable it if something doesn't work properly (for eg. anti-cheat plugin).")
 +            public boolean enabled = false;
++
++            @Comment("How often (in ticks) should entity tracker update if entity is visible/hidden for players.")
++            @Comment("Bigger values can have good impact on performance, but it can take longer for entity to show/hide.")
++            @Comment("These values can be much lower with async entity tracker enabled.")
++            public AddRemoveRate addRemoveRate = new AddRemoveRate(5, 5, 10, 10, 10);
 +
 +            @Comment("How many threads to use for entity tracking.")
 +            public int threads = 4;

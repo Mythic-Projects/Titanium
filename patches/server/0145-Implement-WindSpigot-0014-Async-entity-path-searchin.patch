@@ -647,7 +647,7 @@ index da69cb6eca6c822e5ca56f164b9cba3cf28a4c7a..fdf5e2a00aa630c52b07bd1d4c8ccbcc
          return hitDetectionThread;
      }
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 723ceaaca8828019256e2259d2b0b7db2ad541b2..0a649005b0c0859582e4c4bc31141286ccbb8cbe 100644
+index 927def851182a702dee714d85cab843759893c53..3c19e67135c627af0a75e6d4831e9913290de061 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -2,6 +2,7 @@ package net.titanium.config;
@@ -674,7 +674,7 @@ index 723ceaaca8828019256e2259d2b0b7db2ad541b2..0a649005b0c0859582e4c4bc31141286
  
  @Header("This is the main configuration file for Titanium.")
  @Header("It's collect all the settings from bukkit.yml, spigot.yml etc.")
-@@ -229,6 +232,68 @@ public class TitaniumConfig extends TitaniumConfigSection {
+@@ -261,6 +264,68 @@ public class TitaniumConfig extends TitaniumConfigSection {
  
      }
  

@@ -5,10 +5,10 @@ Subject: [PATCH] Option to disable head rotation handling
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-index ed36f73ffe741d2418e9568fd8692f7f5967d1f9..8a8098842529e0b869a9365bba6e0a6a7edb2903 100644
+index 818f07dac2488ca882356e7f96983e8d8e84f71e..646732d2f5d613c38a1369d75a2338a9e88d9bcf 100644
 --- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 +++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-@@ -199,6 +199,8 @@ public class EntityTrackerEntry {
+@@ -203,6 +203,8 @@ public class EntityTrackerEntry {
              int i;
              int j;
  
@@ -17,7 +17,7 @@ index ed36f73ffe741d2418e9568fd8692f7f5967d1f9..8a8098842529e0b869a9365bba6e0a6a
              if (this.tracker.vehicle == null) {
                  ++this.v;
                  i = MathHelper.floor(this.tracker.locX * 32.0D);
-@@ -235,7 +237,7 @@ public class EntityTrackerEntry {
+@@ -239,7 +241,7 @@ public class EntityTrackerEntry {
                          if ((!flag || !flag1) && !(this.tracker instanceof EntityArrow)) {
                              if (flag) {
                                  object = new PacketPlayOutEntity.PacketPlayOutRelEntityMove(this.tracker.getId(), (byte) j1, (byte) k1, (byte) l1, this.tracker.onGround);
@@ -26,7 +26,7 @@ index ed36f73ffe741d2418e9568fd8692f7f5967d1f9..8a8098842529e0b869a9365bba6e0a6a
                                  object = new PacketPlayOutEntity.PacketPlayOutEntityLook(this.tracker.getId(), (byte) l, (byte) i1, this.tracker.onGround);
                              }
                          } else {
-@@ -308,7 +310,7 @@ public class EntityTrackerEntry {
+@@ -312,7 +314,7 @@ public class EntityTrackerEntry {
                  // CraftBukkit end */
  
                  this.x = false;
@@ -35,7 +35,7 @@ index ed36f73ffe741d2418e9568fd8692f7f5967d1f9..8a8098842529e0b869a9365bba6e0a6a
                  i = MathHelper.d(this.tracker.yaw * 256.0F / 360.0F);
                  j = MathHelper.d(this.tracker.pitch * 256.0F / 360.0F);
                  boolean flag2 = Math.abs(i - this.yRot) >= 4 || Math.abs(j - this.xRot) >= 4;
-@@ -327,7 +329,7 @@ public class EntityTrackerEntry {
+@@ -331,7 +333,7 @@ public class EntityTrackerEntry {
              }
  
              i = MathHelper.d(this.tracker.getHeadRotation() * 256.0F / 360.0F);
@@ -44,7 +44,7 @@ index ed36f73ffe741d2418e9568fd8692f7f5967d1f9..8a8098842529e0b869a9365bba6e0a6a
                  this.broadcast(new PacketPlayOutEntityHeadRotation(this.tracker, (byte) i));
                  this.i = i;
              }
-@@ -506,7 +508,7 @@ public class EntityTrackerEntry {
+@@ -510,7 +512,7 @@ public class EntityTrackerEntry {
                      }
  
                      // CraftBukkit start - Fix for nonsensical head yaw
@@ -53,7 +53,7 @@ index ed36f73ffe741d2418e9568fd8692f7f5967d1f9..8a8098842529e0b869a9365bba6e0a6a
                          this.i = MathHelper.d(this.tracker.getHeadRotation() * 256.0F / 360.0F);
                          // SportPaper start
                          /* This was originally introduced by CraftBukkit, though the implementation is wrong since it's broadcasting
-@@ -687,4 +689,10 @@ public class EntityTrackerEntry {
+@@ -691,4 +693,10 @@ public class EntityTrackerEntry {
          }
  
      }
@@ -65,7 +65,7 @@ index ed36f73ffe741d2418e9568fd8692f7f5967d1f9..8a8098842529e0b869a9365bba6e0a6a
 +    // Titanium end
  }
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 34e42730817b407b8a48d52ccbaa0b9d54d0ace8..531042d74e9232a72deaa954a36068f5493aaa44 100644
+index 0cc3a807b323e4f26033ed61f3d34c449b2eb42f..de985e47e13214f268f9de8633ea9bd44a142193 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -115,6 +115,10 @@ public class TitaniumConfig extends TitaniumConfigSection {

@@ -202,7 +202,7 @@ index 0000000000000000000000000000000000000000..047d6fbf48e59587596fb6bd1b3de38a
 +
 +}
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 240b34d4991270e44123ea83f0ca9dc98833fba5..ed8ab222383511163a2b4b3cd360e4f44015ae5f 100644
+index ccb5649652df753e4daf969d2d266278880dca6c..dbc1e95ea3788ec92cda461347d4f5a0209f87f4 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -9,7 +9,10 @@ import eu.okaeri.configs.annotation.Header;
@@ -225,7 +225,7 @@ index 240b34d4991270e44123ea83f0ca9dc98833fba5..ed8ab222383511163a2b4b3cd360e4f4
  
  @Header("This is the main configuration file for Titanium.")
  @Header("It's collect all the settings from bukkit.yml, spigot.yml etc.")
-@@ -197,6 +198,12 @@ TitaniumConfig extends TitaniumConfigSection {
+@@ -229,6 +230,12 @@ TitaniumConfig extends TitaniumConfigSection {
  
      }
  
@@ -238,7 +238,7 @@ index 240b34d4991270e44123ea83f0ca9dc98833fba5..ed8ab222383511163a2b4b3cd360e4f4
      @Comment("When this option is enabled, the server will create a directory `legacy_configs` with files like bukkit.yml, spigot.yml etc.")
      @Comment("Changing option there will not affect the server, it's only mirror of this file.")
      @Comment("Enable this option only if some of your plugins are not compatible with the new configs.")
-@@ -216,15 +223,49 @@ TitaniumConfig extends TitaniumConfigSection {
+@@ -248,15 +255,49 @@ TitaniumConfig extends TitaniumConfigSection {
  
      }
  
@@ -289,7 +289,7 @@ index 240b34d4991270e44123ea83f0ca9dc98833fba5..ed8ab222383511163a2b4b3cd360e4f4
          if (enableLegacyConfigFiles) {
              if (this.bukkitConfigHelper == null) {
                  this.bukkitConfigHelper = new LegacyConfigHelper(this.bukkit, "bukkit");
-@@ -367,4 +408,8 @@ TitaniumConfig extends TitaniumConfigSection {
+@@ -399,4 +440,8 @@ TitaniumConfig extends TitaniumConfigSection {
          log(Level.INFO, log, params);
      }
  

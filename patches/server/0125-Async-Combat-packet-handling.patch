@@ -250,10 +250,10 @@ index 96e10acf31d95211a7815494891a19972c68cb78..da69cb6eca6c822e5ca56f164b9cba3c
 +
  }
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index c3f914d5ae59b210d309858e846b0cb55ac190b3..09628bbf1bbf57289fd8c7240c965864bfba4f78 100644
+index b9429111f68250ab150bc4ed435f9b6024cd4abe..fd69b7edafaf89119398ad3ac95e18080a66e912 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
-@@ -197,6 +197,28 @@ public class TitaniumConfig extends TitaniumConfigSection {
+@@ -229,6 +229,28 @@ public class TitaniumConfig extends TitaniumConfigSection {
  
      }
  

@@ -25,10 +25,10 @@ index dfce6b03a0a16f71a328b44165148e7866067065..12ebdacb674b5ae79d49ce324e580657
          }
      }
 diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-index 33072edfccb68a1f977977da74acebfdb40618e8..3f880f44bcd6d0d9782f2ea121ebb9acb3639588 100644
+index 45455c612782137f7f53c58d9352b6731d291091..9dfd6bb1c3db28402775c59b6074fb6c20e17756 100644
 --- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 +++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-@@ -171,11 +171,11 @@ public class EntityTrackerEntry {
+@@ -175,11 +175,11 @@ public class EntityTrackerEntry {
              this.broadcast(new PacketPlayOutAttachEntity(0, this.tracker, this.tracker.vehicle));
          }
  

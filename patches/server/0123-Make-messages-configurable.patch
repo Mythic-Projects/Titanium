@@ -360,7 +360,7 @@ index d25c9541cc50cc1ffa74067a208df15ddf342355..dd47b50c567b8dd12938623b8fb9d719
  
      public static class Commands extends TitaniumConfigSection {
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index ed8ab222383511163a2b4b3cd360e4f44015ae5f..c3f914d5ae59b210d309858e846b0cb55ac190b3 100644
+index dbc1e95ea3788ec92cda461347d4f5a0209f87f4..b9429111f68250ab150bc4ed435f9b6024cd4abe 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -30,8 +30,7 @@ import org.bukkit.command.Command;
@@ -373,7 +373,7 @@ index ed8ab222383511163a2b4b3cd360e4f44015ae5f..c3f914d5ae59b210d309858e846b0cb5
  
      // For tests to work properly
      @Exclude
-@@ -293,8 +292,8 @@ TitaniumConfig extends TitaniumConfigSection {
+@@ -325,8 +324,8 @@ TitaniumConfig extends TitaniumConfigSection {
              this.ionConfigHelper.saveSectionToFile();
          }
  

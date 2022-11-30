@@ -5,10 +5,10 @@ Subject: [PATCH] Small EntityTracker optimization
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-index 3f880f44bcd6d0d9782f2ea121ebb9acb3639588..ed36f73ffe741d2418e9568fd8692f7f5967d1f9 100644
+index 9dfd6bb1c3db28402775c59b6074fb6c20e17756..818f07dac2488ca882356e7f96983e8d8e84f71e 100644
 --- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 +++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-@@ -210,10 +210,13 @@ public class EntityTrackerEntry {
+@@ -214,10 +214,13 @@ public class EntityTrackerEntry {
                  int k1 = j - this.yLoc;
                  int l1 = k - this.zLoc;
                  Object object = null;
@@ -24,7 +24,7 @@ index 3f880f44bcd6d0d9782f2ea121ebb9acb3639588..ed36f73ffe741d2418e9568fd8692f7f
                      // CraftBukkit start - Code moved from below
                      if (flag) {
                          this.xLoc = i;
-@@ -221,6 +224,7 @@ public class EntityTrackerEntry {
+@@ -225,6 +228,7 @@ public class EntityTrackerEntry {
                          this.zLoc = k;
                      }
  
