@@ -1,0 +1,47 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: RoccoDev <roccodev.business@gmail.com>
+Date: Sun, 6 Sep 2020 13:41:03 +0200
+Subject: [PATCH] Implement [KigPaper-0110] Backport from Spigot: Enforce
+ cooldowns on book edits by RoccoDev
+
+
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index 6ad480d42f4bdfde9c716cd8ddbf78b30554ee8a..adddfa0d523d281149dd7cbd03627521e6a7b975 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -108,6 +108,7 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+     private final org.bukkit.craftbukkit.CraftServer server;
+     private int lastTick = MinecraftServer.currentTick;
+     private int lastDropTick = MinecraftServer.currentTick;
++    private int lastBookTick = MinecraftServer.currentTick;
+     private int dropCount = 0;
+     private static final int SURVIVAL_PLACE_DISTANCE_SQUARED = 6 * 6;
+     private static final int CREATIVE_PLACE_DISTANCE_SQUARED = 7 * 7;
+@@ -2027,6 +2028,13 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+ 
+         try { // CraftBukkit
+         if ("MC|BEdit".equals(packetplayincustompayload.a())) {
++            // KigPaper start
++            if (this.lastBookTick + 20 > MinecraftServer.currentTick) {
++                this.disconnect("Book edited too quickly! (Attempted server crash?)");
++                return;
++            }
++            this.lastBookTick = MinecraftServer.currentTick;
++            // KigPaper end
+             packetdataserializer = new PacketDataSerializer(Unpooled.wrappedBuffer(packetplayincustompayload.b()));
+ 
+             try {
+@@ -2059,6 +2067,13 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+ 
+             return;
+         } else if ("MC|BSign".equals(packetplayincustompayload.a())) {
++            // KigPaper start
++            if (this.lastBookTick + 20 > MinecraftServer.currentTick) {
++                this.disconnect("Book edited too quickly! (Attempted server crash?)");
++                return;
++            }
++            this.lastBookTick = MinecraftServer.currentTick;
++            // KigPaper end
+             packetdataserializer = new PacketDataSerializer(Unpooled.wrappedBuffer(packetplayincustompayload.b()));
+ 
+             try {

@@ -193,7 +193,6 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [IonSpigot-0006] Fix Chunk Loading by SuicidalKids
 [IonSpigot-0008] Reduce Chunk Hashing by SuicidalKids 
 [IonSpigot-0009] Reduce Unload Queue Complexity by SuicidalKids
-[IonSpigot-0012] Movement Cache by SuicidalKids
 [IonSpigot-0013] Implement PandaWire by SuicidalKids
 [IonSpigot-0014] Faster Chunk Entity List by SuicidalKids
 [IonSpigot-0020] Faster EntityTracker Collections by SuicidalKids

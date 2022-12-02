@@ -1,0 +1,543 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Minecrell <minecrell@minecrell.net>
+Date: Wed, 16 Nov 2022 13:39:43 +0100
+Subject: [PATCH] Implement [Paper-0210] Use TerminalConsoleAppender for
+ console improvements by Minecrell
+
+
+diff --git a/build.gradle b/build.gradle
+index 66736edd2ea73dbb576420d9feabfeeff619e1b8..74bc341545277626477454e3571334f1d96babcc 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -21,7 +21,13 @@ dependencies {
+     implementation 'com.mojang:authlib:1.5.21'
+     // Minecraft libraries end
+ 
++    // Titanium libraries start
++    // Paper start - Use TerminalConsoleAppender
++    implementation 'net.minecrell:terminalconsoleappender:1.3.0'
++    implementation 'org.jline:jline-terminal-jansi:3.21.0'
++    // Paper end
+     implementation 'com.eatthepath:fast-uuid:0.2.0' // Nacho - Use jchambers' FAST UUID methods
++    // Titanium libraries end
+ 
+     testImplementation 'junit:junit:4.13.2' // Titanium - Updated junit to 4.13.2
+     testImplementation 'org.hamcrest:hamcrest-library:1.3'
+@@ -32,6 +38,7 @@ shadowJar {
+ 
+     mergeServiceFiles()
+     append("META-INF/io.netty.versions.properties")
++    transform(new Log4j2PluginsCacheFileTransformer()) // Paper - Use TerminalConsoleAppender
+ 
+     def cbLibsPkg = "org.bukkit.craftbukkit.libs"
+ 
+diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
+index c6b8a9d8ce755aa94c0ab6283936938eb7381924..ed27343f889934673b9cc2e0939a4ff8a6720e31 100644
+--- a/src/main/java/net/minecraft/server/DedicatedServer.java
++++ b/src/main/java/net/minecraft/server/DedicatedServer.java
+@@ -70,6 +70,9 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+                 }
+                 // CraftBukkit end
+ 
++                // Paper start - Use TerminalConsoleAppender
++                new net.titanium.console.TitaniumConsole(DedicatedServer.this).start();
++                /*
+                 jline.console.ConsoleReader bufferedreader = reader; // CraftBukkit
+                 String s;
+ 
+@@ -89,7 +92,8 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+                 } catch (IOException ioexception) {
+                     DedicatedServer.LOGGER.error("Exception handling console input", ioexception);
+                 }
+-
++                */
++                // Paper end
+             }
+         };
+ 
+@@ -101,6 +105,9 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+         }
+         global.addHandler(new org.bukkit.craftbukkit.util.ForwardLogHandler());
+ 
++        // Paper start - Not needed with TerminalConsoleAppender
++        final org.apache.logging.log4j.Logger logger = LogManager.getRootLogger();
++        /*
+         final org.apache.logging.log4j.core.Logger logger = ((org.apache.logging.log4j.core.Logger) LogManager.getRootLogger());
+         for (org.apache.logging.log4j.core.Appender appender : logger.getAppenders().values()) {
+             if (appender instanceof org.apache.logging.log4j.core.appender.ConsoleAppender) {
+@@ -109,6 +116,8 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+         }
+ 
+         new Thread(new org.bukkit.craftbukkit.util.TerminalConsoleWriterThread(System.out, this.reader)).start();
++        */
++        // Paper end
+ 
+         System.setOut(new PrintStream(new LoggerOutputStream(logger, Level.INFO), true));
+         System.setErr(new PrintStream(new LoggerOutputStream(logger, Level.WARN), true));
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 337aefc030b74d786c00ae3caa260108528af134..8af1a6ee2f8fd5562192198d5407b598e6da2cb9 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -42,7 +42,6 @@ import org.apache.logging.log4j.Logger;
+ // CraftBukkit start
+ import java.io.IOException;
+ 
+-import jline.console.ConsoleReader;
+ import joptsimple.OptionSet;
+ 
+ import org.bukkit.craftbukkit.Main;
+@@ -111,7 +110,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+     public OptionSet options;
+     public org.bukkit.command.ConsoleCommandSender console;
+     public org.bukkit.command.RemoteConsoleCommandSender remoteConsole;
+-    public ConsoleReader reader;
++    //public ConsoleReader reader; // Paper
+     public static int currentTick = 0; // PaperSpigot - Further improve tick loop
+     public final Thread primaryThread;
+     public java.util.Queue<Runnable> processQueue = new java.util.concurrent.ConcurrentLinkedQueue<Runnable>();
+@@ -133,6 +132,8 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+         this.Y = this.V.createProfileRepository();
+         // CraftBukkit start
+         this.options = options;
++        // Paper start - Handled by TerminalConsoleAppender
++        /*
+         // Try to see if we're actually running in a terminal, disable jline if not
+         if (System.console() == null && System.getProperty("jline.terminal") == null) {
+             System.setProperty("jline.terminal", "jline.UnsupportedTerminal");
+@@ -154,6 +155,8 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+                 LOGGER.warn((String) null, ex);
+             }
+         }
++        */
++        // Paper end
+         Runtime.getRuntime().addShutdownHook(new org.bukkit.craftbukkit.util.ServerShutdownThread(this));
+ 
+         this.serverThread = primaryThread = new Thread(this, "Server thread"); // Moved from main
+@@ -663,7 +666,7 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+             } finally {
+                 // CraftBukkit start - Restore terminal to original settings
+                 try {
+-                    reader.getTerminal().restore();
++                    net.minecrell.terminalconsole.TerminalConsoleAppender.close(); // Paper - Use TerminalConsoleAppender
+                 } catch (Exception ignored) {
+                 }
+                 // CraftBukkit end
+@@ -1224,7 +1227,8 @@ public abstract class MinecraftServer implements Runnable, ICommandListener, IAs
+     }
+ 
+     public void sendMessage(IChatBaseComponent ichatbasecomponent) {
+-        MinecraftServer.LOGGER.info(ichatbasecomponent.c());
++        // Paper - Log message with colors
++        MinecraftServer.LOGGER.info(org.bukkit.craftbukkit.util.CraftChatMessage.fromComponent(ichatbasecomponent, net.minecraft.server.EnumChatFormat.WHITE));
+     }
+ 
+     public boolean a(int i, String s) {
+diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
+index 3329b6bc1054b48fc1ebdfb74114dad04e21611f..644a6e6af7805df56de96cdf0d148bbb92221911 100644
+--- a/src/main/java/net/minecraft/server/PlayerList.java
++++ b/src/main/java/net/minecraft/server/PlayerList.java
+@@ -72,8 +72,7 @@ public abstract class PlayerList {
+ 
+     public PlayerList(MinecraftServer minecraftserver) {
+         this.cserver = minecraftserver.server = new CraftServer(minecraftserver, this);
+-        minecraftserver.console = org.bukkit.craftbukkit.command.ColouredConsoleSender.getInstance();
+-        minecraftserver.reader.addCompleter(new org.bukkit.craftbukkit.command.ConsoleCommandCompleter(minecraftserver.server));
++        minecraftserver.console = new net.titanium.console.TerminalConsoleCommandSender(); // Paper
+         // CraftBukkit end
+         
+         this.k = new GameProfileBanList(PlayerList.a);
+diff --git a/src/main/java/net/titanium/console/TerminalConsoleCommandSender.java b/src/main/java/net/titanium/console/TerminalConsoleCommandSender.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..6fd78c44932988a0846f5d4095a6291d961f51e6
+--- /dev/null
++++ b/src/main/java/net/titanium/console/TerminalConsoleCommandSender.java
+@@ -0,0 +1,17 @@
++package net.titanium.console;
++
++import org.apache.logging.log4j.LogManager;
++import org.apache.logging.log4j.Logger;
++import org.bukkit.craftbukkit.command.CraftConsoleCommandSender;
++
++public class TerminalConsoleCommandSender extends CraftConsoleCommandSender {
++
++    private static final Logger LOGGER = LogManager.getRootLogger();
++
++    @Override
++    public void sendRawMessage(String message) {
++        // TerminalConsoleAppender supports color codes directly in log messages
++        LOGGER.info(message);
++    }
++
++}
+diff --git a/src/main/java/net/titanium/console/TitaniumConsole.java b/src/main/java/net/titanium/console/TitaniumConsole.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..6ce6dfa3e8824dd3d239f70fd374e57c31b14ef9
+--- /dev/null
++++ b/src/main/java/net/titanium/console/TitaniumConsole.java
+@@ -0,0 +1,42 @@
++package net.titanium.console;
++
++import java.nio.file.Paths;
++import net.minecraft.server.DedicatedServer;
++import net.minecrell.terminalconsole.SimpleTerminalConsole;
++import org.bukkit.craftbukkit.command.ConsoleCommandCompleter;
++import org.jline.reader.LineReader;
++import org.jline.reader.LineReaderBuilder;
++
++public final class TitaniumConsole extends SimpleTerminalConsole {
++
++    private final DedicatedServer server;
++
++    public TitaniumConsole(DedicatedServer server) {
++        this.server = server;
++    }
++
++    @Override
++    protected LineReader buildReader(LineReaderBuilder builder) {
++        return super.buildReader(builder
++                .appName("Titanium")
++                .variable(LineReader.HISTORY_FILE, Paths.get(".console_history"))
++                .completer(new TitaniumConsoleCommandCompleter(this.server))
++        );
++    }
++
++    @Override
++    protected boolean isRunning() {
++        return !this.server.isStopped() && this.server.isRunning();
++    }
++
++    @Override
++    protected void runCommand(String command) {
++        this.server.issueCommand(command, this.server);
++    }
++
++    @Override
++    protected void shutdown() {
++        this.server.safeShutdown();
++    }
++
++}
+diff --git a/src/main/java/net/titanium/console/TitaniumConsoleCommandCompleter.java b/src/main/java/net/titanium/console/TitaniumConsoleCommandCompleter.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..689a6e577e1a980a2ef48d81ab4ff0dedf52dd3e
+--- /dev/null
++++ b/src/main/java/net/titanium/console/TitaniumConsoleCommandCompleter.java
+@@ -0,0 +1,53 @@
++package net.titanium.console;
++
++import java.util.List;
++import java.util.concurrent.ExecutionException;
++import java.util.logging.Level;
++import net.minecraft.server.DedicatedServer;
++import org.bukkit.craftbukkit.CraftServer;
++import org.bukkit.craftbukkit.util.Waitable;
++import org.jline.reader.Candidate;
++import org.jline.reader.Completer;
++import org.jline.reader.LineReader;
++import org.jline.reader.ParsedLine;
++
++public class TitaniumConsoleCommandCompleter implements Completer {
++
++    private final DedicatedServer server;
++
++    public TitaniumConsoleCommandCompleter(DedicatedServer server) {
++        this.server = server;
++    }
++
++    public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
++        CraftServer server = this.server.server;
++        String buffer = line.line();
++
++        Waitable<List<String>> waitable = new Waitable<List<String>>() {
++            @Override
++            protected List<String> evaluate() {
++                return server.getCommandMap().tabComplete(server.getConsoleSender(), buffer);
++            }
++        };
++        server.getServer().processQueue.add(waitable);
++
++        try {
++            List<String> offers = waitable.get();
++            if (offers == null) {
++                return;
++            }
++
++            for (String completion : offers) {
++                if (completion.isEmpty()) {
++                    continue;
++                }
++                candidates.add(new Candidate(completion));
++            }
++        } catch (ExecutionException e) {
++            server.getLogger().log(Level.WARNING, "Unhandled exception when tab completing", e);
++        } catch (InterruptedException e) {
++            Thread.currentThread().interrupt();
++        }
++    }
++
++}
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index bacc487910cd3ba8dd336342a569168783332518..b733e544609d79912c9004c46a0a0d3dbe174cac 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -132,7 +132,6 @@ import io.netty.buffer.ByteBuf;
+ import io.netty.buffer.ByteBufOutputStream;
+ import io.netty.buffer.Unpooled;
+ import io.netty.handler.codec.base64.Base64;
+-import jline.console.ConsoleReader;
+ import net.md_5.bungee.api.chat.BaseComponent;
+ 
+ public final class CraftServer implements Server {
+@@ -1145,9 +1144,13 @@ public final class CraftServer implements Server {
+         return logger;
+     }
+ 
++    // Paper start - JLine update
++    /*
+     public ConsoleReader getReader() {
+         return console.reader;
+     }
++     */
++    // Paper end
+ 
+     @Override
+     public PluginCommand getPluginCommand(String name) {
+diff --git a/src/main/java/org/bukkit/craftbukkit/Main.java b/src/main/java/org/bukkit/craftbukkit/Main.java
+index 43a1c498529bb3fda1fd2179a411a7f3d9b0cb4e..3da7f5006baa5d2768efe88c7254cde90a9a106f 100644
+--- a/src/main/java/org/bukkit/craftbukkit/Main.java
++++ b/src/main/java/org/bukkit/craftbukkit/Main.java
+@@ -10,7 +10,7 @@ import java.util.logging.Logger;
+ import joptsimple.OptionParser;
+ import joptsimple.OptionSet;
+ import net.minecraft.server.MinecraftServer;
+-import org.fusesource.jansi.AnsiConsole;
++import net.minecrell.terminalconsole.TerminalConsoleAppender; // Paper
+ 
+ public class Main {
+     public static boolean useJline = true;
+@@ -174,6 +174,8 @@ public class Main {
+             }
+ 
+             try {
++                // Paper start - Handled by TerminalConsoleAppender
++                /*
+                 // This trick bypasses Maven Shade's clever rewriting of our getProperty call when using String literals
+                 String jline_UnsupportedTerminal = new String(new char[] {'j','l','i','n','e','.','U','n','s','u','p','p','o','r','t','e','d','T','e','r','m','i','n','a','l'});
+                 String jline_terminal = new String(new char[] {'j','l','i','n','e','.','t','e','r','m','i','n','a','l'});
+@@ -191,10 +193,17 @@ public class Main {
+                     // This ensures the terminal literal will always match the jline implementation
+                     System.setProperty(jline.TerminalFactory.JLINE_TERMINAL, jline.UnsupportedTerminal.class.getName());
+                 }
+-
++                */
++                if (options.has("nojline")) {
++                    System.setProperty(TerminalConsoleAppender.JLINE_OVERRIDE_PROPERTY, "false");
++                    useJline = false;
++                }
++                // Paper end
+ 
+                 if (options.has("noconsole")) {
+                     useConsole = false;
++                    useJline = false; // Paper
++                    System.setProperty(TerminalConsoleAppender.JLINE_OVERRIDE_PROPERTY, "false"); // Paper
+                 }
+ 
+                 // Spigot Start
+diff --git a/src/main/java/org/bukkit/craftbukkit/command/ColouredConsoleSender.java b/src/main/java/org/bukkit/craftbukkit/command/ColouredConsoleSender.java
+deleted file mode 100644
+index 26a2fb89425677d94a1d8a375337b70a00e4c5eb..0000000000000000000000000000000000000000
+--- a/src/main/java/org/bukkit/craftbukkit/command/ColouredConsoleSender.java
++++ /dev/null
+@@ -1,74 +0,0 @@
+-package org.bukkit.craftbukkit.command;
+-
+-import java.util.EnumMap;
+-import java.util.Map;
+-
+-import org.fusesource.jansi.Ansi;
+-import org.fusesource.jansi.Ansi.Attribute;
+-import jline.Terminal;
+-
+-import org.bukkit.Bukkit;
+-import org.bukkit.ChatColor;
+-import org.bukkit.command.ConsoleCommandSender;
+-import org.bukkit.craftbukkit.CraftServer;
+-
+-public class ColouredConsoleSender extends CraftConsoleCommandSender {
+-    private final Terminal terminal;
+-    private final Map<ChatColor, String> replacements = new EnumMap<ChatColor, String>(ChatColor.class);
+-    private final ChatColor[] colors = ChatColor.values();
+-
+-    protected ColouredConsoleSender() {
+-        super();
+-        this.terminal = ((CraftServer) getServer()).getReader().getTerminal();
+-
+-        replacements.put(ChatColor.BLACK, Ansi.ansi().a(Attribute.RESET).fg(Ansi.Color.BLACK).boldOff().toString());
+-        replacements.put(ChatColor.DARK_BLUE, Ansi.ansi().a(Attribute.RESET).fg(Ansi.Color.BLUE).boldOff().toString());
+-        replacements.put(ChatColor.DARK_GREEN, Ansi.ansi().a(Attribute.RESET).fg(Ansi.Color.GREEN).boldOff().toString());
+-        replacements.put(ChatColor.DARK_AQUA, Ansi.ansi().a(Attribute.RESET).fg(Ansi.Color.CYAN).boldOff().toString());
+-        replacements.put(ChatColor.DARK_RED, Ansi.ansi().a(Attribute.RESET).fg(Ansi.Color.RED).boldOff().toString());
+-        replacements.put(ChatColor.DARK_PURPLE, Ansi.ansi().a(Attribute.RESET).fg(Ansi.Color.MAGENTA).boldOff().toString());
+-        replacements.put(ChatColor.GOLD, Ansi.ansi().a(Attribute.RESET).fg(Ansi.Color.YELLOW).boldOff().toString());
+-        replacements.put(ChatColor.GRAY, Ansi.ansi().a(Attribute.RESET).fg(Ansi.Color.WHITE).boldOff().toString());
+-        replacements.put(ChatColor.DARK_GRAY, Ansi.ansi().a(Attribute.RESET).fg(Ansi.Color.BLACK).bold().toString());
+-        replacements.put(ChatColor.BLUE, Ansi.ansi().a(Attribute.RESET).fg(Ansi.Color.BLUE).bold().toString());
+-        replacements.put(ChatColor.GREEN, Ansi.ansi().a(Attribute.RESET).fg(Ansi.Color.GREEN).bold().toString());
+-        replacements.put(ChatColor.AQUA, Ansi.ansi().a(Attribute.RESET).fg(Ansi.Color.CYAN).bold().toString());
+-        replacements.put(ChatColor.RED, Ansi.ansi().a(Attribute.RESET).fg(Ansi.Color.RED).bold().toString());
+-        replacements.put(ChatColor.LIGHT_PURPLE, Ansi.ansi().a(Attribute.RESET).fg(Ansi.Color.MAGENTA).bold().toString());
+-        replacements.put(ChatColor.YELLOW, Ansi.ansi().a(Attribute.RESET).fg(Ansi.Color.YELLOW).bold().toString());
+-        replacements.put(ChatColor.WHITE, Ansi.ansi().a(Attribute.RESET).fg(Ansi.Color.WHITE).bold().toString());
+-        replacements.put(ChatColor.MAGIC, Ansi.ansi().a(Attribute.BLINK_SLOW).toString());
+-        replacements.put(ChatColor.BOLD, Ansi.ansi().a(Attribute.UNDERLINE_DOUBLE).toString());
+-        replacements.put(ChatColor.STRIKETHROUGH, Ansi.ansi().a(Attribute.STRIKETHROUGH_ON).toString());
+-        replacements.put(ChatColor.UNDERLINE, Ansi.ansi().a(Attribute.UNDERLINE).toString());
+-        replacements.put(ChatColor.ITALIC, Ansi.ansi().a(Attribute.ITALIC).toString());
+-        replacements.put(ChatColor.RESET, Ansi.ansi().a(Attribute.RESET).toString());
+-    }
+-
+-    @Override
+-    public void sendMessage(String message) {
+-        if (terminal.isAnsiSupported()) {
+-            if (!conversationTracker.isConversingModaly()) {
+-                String result = message;
+-                for (ChatColor color : colors) {
+-                    if (replacements.containsKey(color)) {
+-                        result = result.replaceAll("(?i)" + color.toString(), replacements.get(color));
+-                    } else {
+-                        result = result.replaceAll("(?i)" + color.toString(), "");
+-                    }
+-                }
+-                System.out.println(result + Ansi.ansi().reset().toString());
+-            }
+-        } else {
+-            super.sendMessage(message);
+-        }
+-    }
+-
+-    public static ConsoleCommandSender getInstance() {
+-        if (Bukkit.getConsoleSender() != null) {
+-            return Bukkit.getConsoleSender();
+-        } else {
+-            return new ColouredConsoleSender();
+-        }
+-    }
+-}
+diff --git a/src/main/java/org/bukkit/craftbukkit/command/ConsoleCommandCompleter.java b/src/main/java/org/bukkit/craftbukkit/command/ConsoleCommandCompleter.java
+index 7ef577271902f858f5b59953049511a481dde8b8..7679016f2de5f84802d302f8009ff78af1a072d2 100644
+--- a/src/main/java/org/bukkit/craftbukkit/command/ConsoleCommandCompleter.java
++++ b/src/main/java/org/bukkit/craftbukkit/command/ConsoleCommandCompleter.java
+@@ -7,9 +7,11 @@ import java.util.logging.Level;
+ import org.bukkit.craftbukkit.CraftServer;
+ import org.bukkit.craftbukkit.util.Waitable;
+ 
+-import jline.console.completer.Completer;
++// Titanium start - Remove jline2 import
++//import jline.console.completer.Completer;
+ 
+-public class ConsoleCommandCompleter implements Completer {
++public class ConsoleCommandCompleter /*implements Completer*/ {
++// Titanium end
+     private final CraftServer server;
+ 
+     public ConsoleCommandCompleter(CraftServer server) {
+diff --git a/src/main/java/org/bukkit/craftbukkit/util/ServerShutdownThread.java b/src/main/java/org/bukkit/craftbukkit/util/ServerShutdownThread.java
+index ae3481ba88253081851d465900e5b98e7874eabc..6a38025e68514f50b18455ba8cbb37b68d88ad44 100644
+--- a/src/main/java/org/bukkit/craftbukkit/util/ServerShutdownThread.java
++++ b/src/main/java/org/bukkit/craftbukkit/util/ServerShutdownThread.java
+@@ -18,7 +18,7 @@ public class ServerShutdownThread extends Thread {
+             ex.printStackTrace();
+         } finally {
+             try {
+-                server.reader.getTerminal().restore();
++                net.minecrell.terminalconsole.TerminalConsoleAppender.close(); // Paper - Use TerminalConsoleAppender
+             } catch (Exception e) {
+             }
+         }
+diff --git a/src/main/java/org/bukkit/craftbukkit/util/TerminalConsoleWriterThread.java b/src/main/java/org/bukkit/craftbukkit/util/TerminalConsoleWriterThread.java
+deleted file mode 100644
+index 772f730ffb32643d5bd5708e972bd026e5699833..0000000000000000000000000000000000000000
+--- a/src/main/java/org/bukkit/craftbukkit/util/TerminalConsoleWriterThread.java
++++ /dev/null
+@@ -1,52 +0,0 @@
+-package org.bukkit.craftbukkit.util;
+-
+-import java.io.IOException;
+-import java.io.OutputStream;
+-import java.util.logging.Level;
+-import java.util.logging.Logger;
+-import jline.console.ConsoleReader;
+-import com.mojang.util.QueueLogAppender;
+-import org.bukkit.craftbukkit.Main;
+-
+-public class TerminalConsoleWriterThread implements Runnable {
+-    final private ConsoleReader reader;
+-    final private OutputStream output;
+-
+-    public TerminalConsoleWriterThread(OutputStream output, ConsoleReader reader) {
+-        this.output = output;
+-        this.reader = reader;
+-    }
+-
+-    public void run() {
+-        String message;
+-
+-        // Using name from log4j config in vanilla jar
+-        while (true) {
+-            message = QueueLogAppender.getNextLogEvent("TerminalConsole");
+-            if (message == null) {
+-                continue;
+-            }
+-
+-            try {
+-                if (Main.useJline) {
+-                    reader.print(ConsoleReader.RESET_LINE + "");
+-                    reader.flush();
+-                    output.write(message.getBytes());
+-                    output.flush();
+-
+-                    try {
+-                        reader.drawLine();
+-                    } catch (Throwable ex) {
+-                        reader.getCursorBuffer().clear();
+-                    }
+-                    reader.flush();
+-                } else {
+-                    output.write(message.getBytes());
+-                    output.flush();
+-                }
+-            } catch (IOException ex) {
+-                Logger.getLogger(TerminalConsoleWriterThread.class.getName()).log(Level.SEVERE, null, ex);
+-            }
+-        }
+-    }
+-}
+diff --git a/src/main/resources/log4j2.xml b/src/main/resources/log4j2.xml
+index 63cb069fe9162397eb3ece9f5b7d583f1307f3da..9af4553cb02303ef3450e5c61ab26dafca64bbda 100644
+--- a/src/main/resources/log4j2.xml
++++ b/src/main/resources/log4j2.xml
+@@ -1,12 +1,11 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <Configuration status="WARN" packages="com.mojang.util">
+     <Appenders>
+-        <Console name="WINDOWS_COMPAT" target="SYSTEM_OUT"></Console>
+-        <Queue name="TerminalConsole">
+-            <PatternLayout pattern="[%d{HH:mm:ss} %level]: %msg%n" /> <!-- Paper - update log4j -->
+-        </Queue>
++        <TerminalConsole name="TerminalConsole">
++            <PatternLayout pattern="%highlightError{[%d{HH:mm:ss} %level]: %minecraftFormatting{%msg{nolookups}}%n%xEx}" />
++        </TerminalConsole>
+         <RollingRandomAccessFile name="File" fileName="logs/latest.log" filePattern="logs/%d{yyyy-MM-dd}-%i.log.gz">
+-            <PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level]: %msg%n" /> <!-- Paper - update log4j -->
++            <PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level]: %minecraftFormatting{%msg{nolookups}}{strip}%n" />
+             <Policies>
+                 <TimeBasedTriggeringPolicy />
+                 <OnStartupTriggeringPolicy />
+@@ -18,7 +17,6 @@
+             <filters>
+                 <MarkerFilter marker="NETWORK_PACKETS" onMatch="DENY" onMismatch="NEUTRAL" />
+             </filters>
+-            <AppenderRef ref="WINDOWS_COMPAT" level="info"/>
+             <AppenderRef ref="File"/>
+             <AppenderRef ref="TerminalConsole" level="info"/>
+         </Root>
