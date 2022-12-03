@@ -133,6 +133,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Taco-0013] Option to disable Scoreboard for non players by Aikar
 [Taco-0014] Add an option for grass to ignore light by Techcable
 [Taco-0017] Add option to stop redstone firing BlockPhysicsEvent by frash23
+[Taco-0006/0022] Implement SpawnerPreSpawnEvent by vemacs
 [Taco-0024] Optimize tnt entity and falling block movement
 [Taco-0025] Fix east west cannoning
 
