@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Taco-0022] Implement SpawnerPreSpawnEvent by
 
 
 diff --git a/src/main/java/net/minecraft/server/MobSpawnerAbstract.java b/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
-index 770222cea0996de1694b98c070d22d4f465a9514..1253b1ad98161f483174396a4a981add5be9c239 100644
+index 699681e9b26877759da954d66031b51c161524fc..917746df5d94491dae2ca358d33236accd332b0b 100644
 --- a/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
 +++ b/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
 @@ -103,6 +103,13 @@ public abstract class MobSpawnerAbstract {
@@ -14,7 +14,7 @@ index 770222cea0996de1694b98c070d22d4f465a9514..1253b1ad98161f483174396a4a981add
  
                  for (int i = 0; i < this.spawnCount; ++i) {
 +                    // TacoSpigot start
-+                    net.techcable.tacospigot.event.entity.SpawnerPreSpawnEvent event = new net.techcable.tacospigot.event.entity.SpawnerPreSpawnEvent(MCUtil.toLocation(this.a(), blockposition), EntityType.fromName(this.getMobName()));
++                    net.techcable.tacospigot.event.entity.SpawnerPreSpawnEvent event = new net.techcable.tacospigot.event.entity.SpawnerPreSpawnEvent(MCUtil.toLocation(this.a(), blockposition), mobType);
 +                    if (!event.callEvent()) {
 +                        flag = true;
 +                        break;
