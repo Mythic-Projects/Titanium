@@ -1,0 +1,99 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sat, 3 Dec 2022 15:46:55 +0100
+Subject: [PATCH] Backport ProjectileHitEvent methods - #getHitBlock &
+ #getHitEntity
+
+
+diff --git a/src/main/java/org/bukkit/event/entity/ProjectileHitEvent.java b/src/main/java/org/bukkit/event/entity/ProjectileHitEvent.java
+index 25ae8323a24b35105f780e85276a7a7a47ed7c61..f499609719fe474d9fb2e55d9550a5d6eeb00e7a 100644
+--- a/src/main/java/org/bukkit/event/entity/ProjectileHitEvent.java
++++ b/src/main/java/org/bukkit/event/entity/ProjectileHitEvent.java
+@@ -1,7 +1,12 @@
+ package org.bukkit.event.entity;
+ 
++import org.bukkit.block.Block;
++import org.bukkit.block.BlockFace;
++import org.bukkit.entity.Entity;
+ import org.bukkit.entity.Projectile;
+ import org.bukkit.event.HandlerList;
++import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
+ 
+ /**
+  * Called when a projectile hits an object
+@@ -9,15 +14,73 @@ import org.bukkit.event.HandlerList;
+ public class ProjectileHitEvent extends EntityEvent {
+     private static final HandlerList handlers = new HandlerList();
+ 
+-    public ProjectileHitEvent(final Projectile projectile) {
++    // Titanium start - Backport methods
++    private final Entity hitEntity;
++    private final Block hitBlock;
++    private final BlockFace hitFace;
++
++    public ProjectileHitEvent(@NotNull Projectile projectile) {
++        this(projectile, null, null);
++    }
++
++    public ProjectileHitEvent(@NotNull final Projectile projectile, @Nullable Entity hitEntity) {
++        this(projectile, hitEntity, null);
++    }
++
++    public ProjectileHitEvent(@NotNull final Projectile projectile, @Nullable Block hitBlock) {
++        this(projectile, null, hitBlock);
++    }
++
++    public ProjectileHitEvent(@NotNull final Projectile projectile, @Nullable Entity hitEntity, @Nullable Block hitBlock) {
++        this(projectile, hitEntity, hitBlock, null);
++    }
++
++    public ProjectileHitEvent(@NotNull final Projectile projectile, @Nullable Entity hitEntity, @Nullable Block hitBlock, @Nullable BlockFace hitFace) {
+         super(projectile);
++        this.hitEntity = hitEntity;
++        this.hitBlock = hitBlock;
++        this.hitFace = hitFace;
+     }
++    // Titanium end
+ 
+     @Override
+     public Projectile getEntity() {
+         return (Projectile) entity;
+     }
+ 
++    // Titanium start
++    /**
++     * Gets the block that was hit, if it was a block that was hit.
++     *
++     * @return hit block or else null
++     */
++    @Nullable
++    public Block getHitBlock() {
++        return hitBlock;
++    }
++
++    /**
++     * Gets the block face that was hit, if it was a block that was hit and the
++     * face was provided in the vent.
++     *
++     * @return hit face or else null
++     */
++    @Nullable
++    public BlockFace getHitBlockFace() {
++        return hitFace;
++    }
++
++    /**
++     * Gets the entity that was hit, if it was an entity that was hit.
++     *
++     * @return hit entity or else null
++     */
++    @Nullable
++    public Entity getHitEntity() {
++        return hitEntity;
++    }
++    // Titanium end
++
+     @Override
+     public HandlerList getHandlers() {
+         return handlers;
