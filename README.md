@@ -124,6 +124,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0206/0432] Add Raw Byte ItemStack Serialization by Mariell Hoversholm
 [Paper-0451] Load Chunks for Login Asynchronously by Aikar
 [Paper-0242/0614] Player Chunk Load/Unload Events by ysl3000
+[Paper-0268/0664] EntityMoveEvent by William Blake Galbreath
 [Paper-0740] Add Unix domain socket support by Andrew Steinborn
 [Paper-0797] Use Velocity compression and cipher natives by Elier
 
@@ -133,6 +134,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Taco-0013] Option to disable Scoreboard for non players by Aikar
 [Taco-0014] Add an option for grass to ignore light by Techcable
 [Taco-0017] Add option to stop redstone firing BlockPhysicsEvent by frash23
+[Taco-0006/0022] Implement SpawnerPreSpawnEvent by vemacs
 [Taco-0024] Optimize tnt entity and falling block movement
 [Taco-0025] Fix east west cannoning
 
@@ -181,7 +183,8 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [PandaSpigot-0008] Remove hacky stackable buckets code by hpfxd
 [PandaSpigot-0009] Improved plugins command by hpfxd
 [PandaSpigot-0033] Configurable arrow trajectory by hpfxd
-[PandaSpigot-0010/0037] Backport PlayerProfile API by hpfxd
+[PandaSpigot-0010/0036] Backport PlayerProfile API by hpfxd
+[PandaSpigot-0011/0037] Sound events by hpfxd
 [PandaSpigot-0039] Optimize VarInt reading and writing by hpfxd
 [PandaSpigot-0040] Various micro-optimizations for PacketDataSerializer by hpfxd
 [PandaSpigpt-0049] Add setting for proxy online mode status by hpfxd
