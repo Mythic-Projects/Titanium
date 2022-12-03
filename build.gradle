@@ -40,8 +40,9 @@ subprojects {
     javadoc {
         options {
             links 'https://guava.dev/releases/21.0/api/docs/'
-            links 'https://javadoc.io/doc/org.yaml/snakeyaml/1.30/'
-            links 'https://javadoc.io/doc/org.jetbrains/annotations-java5/21.0.1/'
+            links 'https://javadoc.io/doc/com.google.code.gson/gson/2.8.9'
+            links 'https://javadoc.io/doc/org.yaml/snakeyaml/1.15/'
+            links 'https://javadoc.io/doc/org.jetbrains/annotations/23.0.0'
             links 'https://javadoc.io/doc/net.md-5/bungeecord-chat/1.16-R0.4/'
         }
         options.addStringOption('Xdoclint:none', '-quiet')
