@@ -5,7 +5,7 @@ Subject: [PATCH] Use EntityType for spawner illegal entities patch
 
 
 diff --git a/src/main/java/net/minecraft/server/MobSpawnerAbstract.java b/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
-index a0f5c65b3b42e79c07017135ff9f7067dcf14cc0..770222cea0996de1694b98c070d22d4f465a9514 100644
+index a0f5c65b3b42e79c07017135ff9f7067dcf14cc0..699681e9b26877759da954d66031b51c161524fc 100644
 --- a/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
 +++ b/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
 @@ -3,9 +3,10 @@ package net.minecraft.server;
@@ -49,7 +49,7 @@ index a0f5c65b3b42e79c07017135ff9f7067dcf14cc0..770222cea0996de1694b98c070d22d4f
 +        EntityType type = EntityType.findType(s);
          TitaniumConfig.Exploits.Spawners spawnersConfig = TitaniumConfig.get().exploits.spawners;
 -        if (spawnersConfig.disableInvalid && !spawnersConfig.allowedMobs.contains(s)) {
-+        if (spawnersConfig.disableInvalid && (type == null || !spawnersConfig.allowedMobs.contains(type))) {
++        if (type == null || (spawnersConfig.disableInvalid && !spawnersConfig.allowedMobs.contains(type))) {
              s = "Pig";
 +            type = EntityType.PIG;
          }
