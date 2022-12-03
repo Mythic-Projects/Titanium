@@ -5,24 +5,23 @@ Subject: [PATCH] Make messages configurable
 
 
 diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
-index 1ee7292123246de64d052d50d8f94362f8866a37..7f5d714d48de47a281f2458f98a4934d6a0cb111 100644
+index 448d413f8c098ba5862e5511e589614aa6afdf2d..457677a2749db912dd905d419416c941b5e24964 100644
 --- a/src/main/java/org/bukkit/Server.java
 +++ b/src/main/java/org/bukkit/Server.java
-@@ -1083,10 +1083,23 @@ public interface Server extends PluginMessageRecipient {
- 
-     public class Titanium {
- 
-+        //TODO document it
-         public OkaeriConfig getServerConfig() {
+@@ -1090,6 +1090,22 @@ public interface Server extends PluginMessageRecipient {
              throw new UnsupportedOperationException("Not supported yet.");
          }
  
-+        //TODO document it
++        /**
++         * @return exposed part of internal messages configuration
++         */
 +        public Messages getMessages() {
 +            throw new UnsupportedOperationException("Not supported yet.");
 +        }
 +
-+        //TODO document it
++        /**
++         * Exposed part of internal messages configuration
++         */
 +        public interface Messages {
 +
 +            String getMissingPermissionCommand();

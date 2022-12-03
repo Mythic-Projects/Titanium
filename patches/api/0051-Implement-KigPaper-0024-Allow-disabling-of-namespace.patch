@@ -1,15 +1,15 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: RoccoDev <roccodev.business@gmail.com>
-Date: Tue, 15 Sep 2020 13:50:38 +0200
+From: Peridot <peridot491@protonmail.com>
+Date: Sat, 3 Dec 2022 23:21:19 +0100
 Subject: [PATCH] Implement [KigPaper-0024] Allow disabling of namespaced
  commands by RoccoDev
 
 
 diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
-index 8a0dcb6e3305fc333a5faaf6dc7c6663cee8683c..c3bd202efcf2d5c118a5a1b67abb152d4e88d711 100644
+index 41eb6f25f80e7fa605cc7bb1a4e6c839e4451b8f..56ae6b2ca5cf83e97d28c8b67d193d23a5432f34 100644
 --- a/src/main/java/org/bukkit/Server.java
 +++ b/src/main/java/org/bukkit/Server.java
-@@ -1138,6 +1138,22 @@ public interface Server extends PluginMessageRecipient {
+@@ -1140,6 +1140,22 @@ public interface Server extends PluginMessageRecipient {
              throw new UnsupportedOperationException("Not supported yet.");
          }
  
@@ -29,9 +29,9 @@ index 8a0dcb6e3305fc333a5faaf6dc7c6663cee8683c..c3bd202efcf2d5c118a5a1b67abb152d
 +
 +        }
 +
-         //TODO document it
-         public Messages getMessages() {
-             throw new UnsupportedOperationException("Not supported yet.");
+         /**
+          * @return exposed part of internal messages configuration
+          */
 diff --git a/src/main/java/org/bukkit/command/SimpleCommandMap.java b/src/main/java/org/bukkit/command/SimpleCommandMap.java
 index 6038c577afb9f7eed4912ceb66a0ab2652690633..a87c8e0ad3c5edbf2a60668b7c270ff5693f44c5 100644
 --- a/src/main/java/org/bukkit/command/SimpleCommandMap.java
