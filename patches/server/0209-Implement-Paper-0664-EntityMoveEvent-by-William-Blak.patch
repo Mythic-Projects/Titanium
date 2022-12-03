@@ -15,7 +15,7 @@ index 0f3790b423fb418b79daa3b887a318718315be2d..7c0bb631a652a486e3e2a030af684a4d
          //this.world.methodProfiler.b(); // Purpur
 +
 +        // Paper start
-+        if (((WorldServer) this.world).hasEntityMoveEvent) {
++        if (((WorldServer) this.world).hasEntityMoveEvent && !(this instanceof EntityPlayer)) {
 +            if (this.lastX != this.locX || this.lastY != this.locY || this.lastZ != this.locZ || this.lastYaw != this.yaw || this.lastPitch != this.pitch) {
 +                org.bukkit.Location from = new org.bukkit.Location(this.world.getWorld(), this.lastX, this.lastY, this.lastZ, this.lastYaw, this.lastPitch);
 +                org.bukkit.Location to = new org.bukkit.Location (this.world.getWorld(), this.locX, this.locY, this.locZ, this.yaw, this.pitch);
