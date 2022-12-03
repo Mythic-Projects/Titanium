@@ -1,0 +1,62 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: RoccoDev <roccodev.business@gmail.com>
+Date: Tue, 15 Sep 2020 13:50:38 +0200
+Subject: [PATCH] Implement [KigPaper-0024] Allow disabling of namespaced
+ commands by RoccoDev
+
+
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index 8a0dcb6e3305fc333a5faaf6dc7c6663cee8683c..c3bd202efcf2d5c118a5a1b67abb152d4e88d711 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -1138,6 +1138,22 @@ public interface Server extends PluginMessageRecipient {
+             throw new UnsupportedOperationException("Not supported yet.");
+         }
+ 
++        /**
++         * @return exposed part of internal server configuration
++         */
++        public Configuration getConfiguration() {
++            throw new UnsupportedOperationException("Not supported yet.");
++        }
++
++        /**
++         * Exposed part of internal server configuration
++         */
++        public interface Configuration {
++
++            boolean isNamespacedCommandsDisabled();
++
++        }
++
+         //TODO document it
+         public Messages getMessages() {
+             throw new UnsupportedOperationException("Not supported yet.");
+diff --git a/src/main/java/org/bukkit/command/SimpleCommandMap.java b/src/main/java/org/bukkit/command/SimpleCommandMap.java
+index 6038c577afb9f7eed4912ceb66a0ab2652690633..a87c8e0ad3c5edbf2a60668b7c270ff5693f44c5 100644
+--- a/src/main/java/org/bukkit/command/SimpleCommandMap.java
++++ b/src/main/java/org/bukkit/command/SimpleCommandMap.java
+@@ -12,6 +12,7 @@ import java.util.Map;
+ import java.util.regex.Pattern;
+ 
+ import org.apache.commons.lang.Validate;
++import org.bukkit.Bukkit;
+ import org.bukkit.Location;
+ import org.bukkit.Server;
+ import org.bukkit.command.defaults.*;
+@@ -134,6 +135,7 @@ public class SimpleCommandMap implements CommandMap {
+         }
+ 
+         String sentCommandLabel = args[0].toLowerCase();
++        if (Bukkit.titanium().getConfiguration().isNamespacedCommandsDisabled() && sentCommandLabel.contains(":") && !sender.hasPermission("titanium.namespaced")) return false;  // KigPaper - ignore namespaced commands if enabled and sender is unauthorized
+         Command target = getCommand(sentCommandLabel);
+ 
+         if (target == null) {
+@@ -193,6 +195,7 @@ public class SimpleCommandMap implements CommandMap {
+             final String prefix = (sender instanceof Player ? "/" : "");
+ 
+             for (Map.Entry<String, Command> commandEntry : knownCommands.entrySet()) {
++                if (Bukkit.titanium().getConfiguration().isNamespacedCommandsDisabled() && commandEntry.getKey().contains(":") && !sender.hasPermission("titanium.namespaced")) continue;  // KigPaper - ignore namespaced commands if enabled and sender is unauthorized
+                 Command command = commandEntry.getValue();
+ 
+                 if (!command.testPermissionSilent(sender)) {

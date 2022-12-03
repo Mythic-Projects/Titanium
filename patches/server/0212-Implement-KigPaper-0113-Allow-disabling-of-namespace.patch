@@ -1,0 +1,59 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: RoccoDev <roccodev.business@gmail.com>
+Date: Tue, 15 Sep 2020 13:50:38 +0200
+Subject: [PATCH] Implement [KigPaper-0113] Allow disabling of namespaced
+ commands by RoccoDev
+
+
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index 42d94dde23e0d4218efb6fcd3c51845a0eb84c3f..a7ffefc498e1faf8f03ebb0a17ec23eb6090598d 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -27,6 +27,7 @@ import net.titanium.command.SetSlotsCommand;
+ import net.titanium.util.Pair;
+ import org.bukkit.Bukkit;
+ import org.bukkit.ChatColor;
++import org.bukkit.Server;
+ import org.bukkit.command.Command;
+ import org.bukkit.entity.EntityType;
+ 
+@@ -34,7 +35,7 @@ import org.bukkit.entity.EntityType;
+ @Header("It's collect all the settings from bukkit.yml, spigot.yml etc.")
+ @Header("Command aliases also go in this file, just put what you would normally put in commands.yml under a commands: tag")
+ @Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
+-public class TitaniumConfig extends TitaniumConfigSection {
++public class TitaniumConfig extends TitaniumConfigSection implements Server.Titanium.Configuration {
+ 
+     // For tests to work properly
+     @Exclude
+@@ -68,6 +69,14 @@ public class TitaniumConfig extends TitaniumConfigSection {
+         return Bukkit.getOnlineMode() || (spigot.settings.bungeecord && this.proxyOnlineMode);
+     }
+ 
++    @Comment("Whether to disable namespaced commands (for eg. /minecraft:help) and only left normal commands (like /help).")
++    public boolean disableNamespacedCommands = false;
++
++    @Override
++    public boolean isNamespacedCommandsDisabled() {
++        return this.disableNamespacedCommands;
++    }
++
+     @Comment("Blocks through which enderpearls will pass through (AKA Taliban Pearls)")
+     public PearlPassthrough pearlPassthrough = new PearlPassthrough();
+ 
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index f253b2b7b4a9b23b68be025a00c4b63db69b89ea..b266751a124623c5b39ff1d1ac1850e96243feba 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -2176,6 +2176,11 @@ public final class CraftServer implements Server {
+             return serverConfig;
+         }
+ 
++        @Override
++        public Configuration getConfiguration() {
++            return serverConfig;
++        }
++
+         @Override
+         public Messages getMessages() {
+             return messageConfig;
