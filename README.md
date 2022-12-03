@@ -181,7 +181,8 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [PandaSpigot-0008] Remove hacky stackable buckets code by hpfxd
 [PandaSpigot-0009] Improved plugins command by hpfxd
 [PandaSpigot-0033] Configurable arrow trajectory by hpfxd
-[PandaSpigot-0010/0037] Backport PlayerProfile API by hpfxd
+[PandaSpigot-0010/0036] Backport PlayerProfile API by hpfxd
+[PandaSpigot-0011/0037] Sound events by hpfxd
 [PandaSpigot-0039] Optimize VarInt reading and writing by hpfxd
 [PandaSpigot-0040] Various micro-optimizations for PacketDataSerializer by hpfxd
 [PandaSpigpt-0049] Add setting for proxy online mode status by hpfxd
