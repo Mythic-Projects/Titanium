@@ -159,7 +159,7 @@ index 2ba2788e8348d0694b553758c04f8aefb42d9cb6..7696b6f70c90700def3ccb0af3a9b94f
 +
  }
 diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
-index 4d9d066fb18a9570e885103ab4b61f0723eefd41..0242faa47655bfee9985009284a30345bad0ec1f 100644
+index adaaff46253c118dae1d5e6a7c85ba749aee1648..5fda90794591c82a83427cfb95fbaa0f1d09c02c 100644
 --- a/src/main/java/org/bukkit/Server.java
 +++ b/src/main/java/org/bukkit/Server.java
 @@ -1,5 +1,7 @@
@@ -209,30 +209,10 @@ index 4d9d066fb18a9570e885103ab4b61f0723eefd41..0242faa47655bfee9985009284a30345
  
  /**
   * Represents a server implementation.
-@@ -1077,15 +1076,74 @@ public interface Server extends PluginMessageRecipient {
-     public class Titanium {
- 
-         public OkaeriConfig getServerConfig() {
--            throw new UnsupportedOperationException( "Not supported yet." );
-+            throw new UnsupportedOperationException("Not supported yet.");
+@@ -1097,6 +1096,59 @@ public interface Server extends PluginMessageRecipient {
+             return Duration.between(getStartTime(), Instant.now());
          }
  
-+        /**
-+         * @return time when the server was started
-+         */
-         public Instant getStartTime() {
--            throw new UnsupportedOperationException( "Not supported yet." );
-+            throw new UnsupportedOperationException("Not supported yet.");
-         }
- 
-+        /**
-+         * @return time which elapsed since the server was started
-+         */
-         public Duration getUptime() {
--            return Duration.between( getStartTime(), Instant.now() );
-+            return Duration.between(getStartTime(), Instant.now());
-+        }
-+
 +        /**
 +         * Gets the global knockback profile
 +         */
@@ -284,9 +264,11 @@ index 4d9d066fb18a9570e885103ab4b61f0723eefd41..0242faa47655bfee9985009284a30345
 +         */
 +        public KnockbackProfile createKnockbackProfile(String name) {
 +            return this.createKnockbackProfile(name, false);
-         }
- 
++        }
++
      }
+ 
+     Titanium titanium();
 diff --git a/src/main/java/org/bukkit/entity/LivingEntity.java b/src/main/java/org/bukkit/entity/LivingEntity.java
 index 48e2508941299ce55f672979ff85a2969fc1c64b..6ea3cbd87e67232cee41de41c73405523794f61b 100644
 --- a/src/main/java/org/bukkit/entity/LivingEntity.java
