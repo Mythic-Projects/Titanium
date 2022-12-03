@@ -1,0 +1,60 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sat, 3 Dec 2022 21:49:04 +0100
+Subject: [PATCH] Backport Server#getEntity
+
+
+diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
+index 5daf51962486195d8f30c5a5a9ba5b2fcb2429eb..1cc7d3d4bf673344bf0cd75409281a9ae28f4b6b 100644
+--- a/src/main/java/org/bukkit/Bukkit.java
++++ b/src/main/java/org/bukkit/Bukkit.java
+@@ -43,6 +43,7 @@ import org.bukkit.generator.ChunkGenerator;
+ import org.bukkit.inventory.ItemFactory;
+ import org.bukkit.inventory.meta.ItemMeta;
+ import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
+ 
+ /**
+  * Represents the Bukkit core, for version and Server singleton handling
+@@ -1169,6 +1170,19 @@ public final class Bukkit {
+         return server.createChunkData(world);
+     }
+ 
++    // Titanium start - Backport API
++    /**
++     * Gets an entity on the server by its UUID
++     *
++     * @param uuid the UUID of the entity
++     * @return the entity with the given UUID, or null if it isn't found
++     */
++    @Nullable
++    public static Entity getEntity(@NotNull UUID uuid) {
++        return server.getEntity(uuid);
++    }
++    // Titanium end
++
+     /**
+      * @see UnsafeValues
+      * @return the unsafe values instance
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index f745a42a7541b24c7921483e790b7af8aa8b42a1..8a0dcb6e3305fc333a5faaf6dc7c6663cee8683c 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -959,6 +959,17 @@ public interface Server extends PluginMessageRecipient {
+      */
+     public ChunkGenerator.ChunkData createChunkData(World world);
+ 
++    // Titanium start - Backport API
++    /**
++     * Gets an entity on the server by its UUID
++     *
++     * @param uuid the UUID of the entity
++     * @return the entity with the given UUID, or null if it isn't found
++     */
++    @Nullable
++    Entity getEntity(@NotNull UUID uuid);
++    // Titanium end
++
+     /**
+      * @see UnsafeValues
+      * @return the unsafe values instance
