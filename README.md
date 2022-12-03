@@ -124,6 +124,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0206/0432] Add Raw Byte ItemStack Serialization by Mariell Hoversholm
 [Paper-0451] Load Chunks for Login Asynchronously by Aikar
 [Paper-0242/0614] Player Chunk Load/Unload Events by ysl3000
+[Paper-0268/0664] EntityMoveEvent by William Blake Galbreath
 [Paper-0740] Add Unix domain socket support by Andrew Steinborn
 [Paper-0797] Use Velocity compression and cipher natives by Elier
 
