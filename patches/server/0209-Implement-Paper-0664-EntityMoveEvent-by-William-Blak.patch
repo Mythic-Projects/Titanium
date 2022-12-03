@@ -1,0 +1,58 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: William Blake Galbreath <Blake.Galbreath@GMail.com>
+Date: Tue, 11 Feb 2020 21:56:48 -0600
+Subject: [PATCH] Implement [Paper-0664] EntityMoveEvent by William Blake
+ Galbreath
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
+index 0f3790b423fb418b79daa3b887a318718315be2d..7c0bb631a652a486e3e2a030af684a4d0d485359 100644
+--- a/src/main/java/net/minecraft/server/EntityLiving.java
++++ b/src/main/java/net/minecraft/server/EntityLiving.java
+@@ -1767,6 +1767,22 @@ public abstract class EntityLiving extends Entity {
+         }
+ 
+         //this.world.methodProfiler.b(); // Purpur
++
++        // Paper start
++        if (((WorldServer) this.world).hasEntityMoveEvent) {
++            if (this.lastX != this.locX || this.lastY != this.locY || this.lastZ != this.locZ || this.lastYaw != this.yaw || this.lastPitch != this.pitch) {
++                org.bukkit.Location from = new org.bukkit.Location(this.world.getWorld(), this.lastX, this.lastY, this.lastZ, this.lastYaw, this.lastPitch);
++                org.bukkit.Location to = new org.bukkit.Location (this.world.getWorld(), this.locX, this.locY, this.locZ, this.yaw, this.pitch);
++                io.papermc.paper.event.entity.EntityMoveEvent event = new io.papermc.paper.event.entity.EntityMoveEvent((LivingEntity) this.getBukkitEntity(), from, to.clone());
++                if (!event.callEvent()) {
++                    // if cancelled, set back to previous position
++                    this.setLocation(from.getX(), from.getY(), from.getZ(), from.getYaw(), from.getPitch());
++                } else if (!to.equals(event.getTo())) {
++                    this.setLocation(event.getTo().getX(), event.getTo().getY(), event.getTo().getZ(), event.getTo().getYaw(), event.getTo().getPitch());
++                }
++            }
++        }
++        // Paper end
+     }
+ 
+     protected void doTick() {}
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 7a1387fa818c77b874df70aa0e587ec584a686e0..0b5320c20ff234414628f0355813a66b7ece30d4 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -1085,6 +1085,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+                 WorldServer worldserver = this.worlds.get(i);
+                 PaperAsyncChunkProvider.processMainThreadQueue(worldserver); // Paper
+                 worldserver.hasPhysicsEvent = org.bukkit.event.block.BlockPhysicsEvent.getHandlerList().getRegisteredListeners().length > 0; // Paper
++                worldserver.hasEntityMoveEvent = io.papermc.paper.event.entity.EntityMoveEvent.getHandlerList().getRegisteredListeners().length > 0; // Paper
+ 
+                 //this.methodProfiler.a(worldserver.getWorldData().getName()); // Purpur
+                 /* Drop global time updates
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index 00cc2be93e6110d0df55506c5c5daa6c6002f419..e191622572a305b5e17f2a79fee513702c657f1d 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -54,6 +54,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+     private static final List<StructurePieceTreasure> U = Lists.newArrayList(new StructurePieceTreasure[] { new StructurePieceTreasure(Items.STICK, 0, 1, 3, 10), new StructurePieceTreasure(Item.getItemOf(Blocks.PLANKS), 0, 1, 3, 10), new StructurePieceTreasure(Item.getItemOf(Blocks.LOG), 0, 1, 3, 10), new StructurePieceTreasure(Items.STONE_AXE, 0, 1, 1, 3), new StructurePieceTreasure(Items.WOODEN_AXE, 0, 1, 1, 5), new StructurePieceTreasure(Items.STONE_PICKAXE, 0, 1, 1, 3), new StructurePieceTreasure(Items.WOODEN_PICKAXE, 0, 1, 1, 5), new StructurePieceTreasure(Items.APPLE, 0, 2, 3, 5), new StructurePieceTreasure(Items.BREAD, 0, 2, 3, 3), new StructurePieceTreasure(Item.getItemOf(Blocks.LOG2), 0, 1, 3, 10)});
+     private List<NextTickListEntry> V = Lists.newArrayList();
+     public boolean hasPhysicsEvent = true; // Paper
++    public boolean hasEntityMoveEvent = false; // Paper
+     // Titanium start
+     public final boolean handleTrackerAsync = TitaniumConfig.get().entityTracker.async.enabled;
+     public final Runnable updateTracker = () -> this.tracker.updatePlayers();
