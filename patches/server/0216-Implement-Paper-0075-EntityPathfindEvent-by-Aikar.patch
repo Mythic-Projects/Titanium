@@ -5,7 +5,7 @@ Subject: [PATCH] Implement [Paper-0075] EntityPathfindEvent by Aikar
 
 
 diff --git a/src/main/java/ga/windpvp/windspigot/async/pathsearch/AsyncNavigation.java b/src/main/java/ga/windpvp/windspigot/async/pathsearch/AsyncNavigation.java
-index 18f4b62b2bb5e8347985ea3c8ab04358a6a25991..29d096f2fd0bedfc3f92f0945da26941aac69e5b 100644
+index 18f4b62b2bb5e8347985ea3c8ab04358a6a25991..5d9c9ec1b6d1925ed540a6ed5c69d94530336620 100644
 --- a/src/main/java/ga/windpvp/windspigot/async/pathsearch/AsyncNavigation.java
 +++ b/src/main/java/ga/windpvp/windspigot/async/pathsearch/AsyncNavigation.java
 @@ -121,6 +121,13 @@ public class AsyncNavigation extends Navigation {
@@ -15,7 +15,7 @@ index 18f4b62b2bb5e8347985ea3c8ab04358a6a25991..29d096f2fd0bedfc3f92f0945da26941
 +    // Titanium start
 +    @Override
 +    public PathEntity a(BlockPosition blockposition, Entity target) {
-+        return target != null ? this.a(target) : this.a(blockposition.getX(), blockposition.getY(), blockposition.getZ());
++        return target != null ? super.a(target) : super.a(blockposition.getX(), blockposition.getY(), blockposition.getZ());
 +    }
 +    // Titanium end
 +
