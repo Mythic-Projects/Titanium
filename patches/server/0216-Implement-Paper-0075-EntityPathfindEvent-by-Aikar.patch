@@ -14,8 +14,8 @@ index 18f4b62b2bb5e8347985ea3c8ab04358a6a25991..29d096f2fd0bedfc3f92f0945da26941
  
 +    // Titanium start
 +    @Override
-+    public PathEntity a(BlockPosition blockposition, Entity target, boolean entitySearch) {
-+        return target != null && entitySearch ? this.a(target) : this.a(blockposition.getX(), blockposition.getY(), blockposition.getZ());
++    public PathEntity a(BlockPosition blockposition, Entity target) {
++        return target != null ? this.a(target) : this.a(blockposition.getX(), blockposition.getY(), blockposition.getZ());
 +    }
 +    // Titanium end
 +
