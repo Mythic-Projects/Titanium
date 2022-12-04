@@ -232,6 +232,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Akarin-0007] Avoid double I/O operation on load player file
 
 [InsanePaper-269] Cache Chunk Coordinations
+[InsanePaper-390] Heavily optimize Tuinity controlled flush patch
 
 [Lithium-ai/pathing/ChunkCache] Micro optimization for ChunkCache
 
