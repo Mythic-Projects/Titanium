@@ -102,6 +102,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0232] Fix MC-117075: TE Unload Lag Spike by mezz
 [Paper-0276] Improved Async Task Scheduler by Aikar
 [Paper-0088/0277] Ability to change PlayerProfile in AsyncPreLoginEvent by Aikar
+[Paper-0146/0281] Mob Pathfinding API by Aikar
 [Paper-0287] MC-124833 by Zach Brown
 [Paper-0302] Don't load chunks for villager door check by Aikar
 [Paper-0313] Optimized world time updates by Aikar
