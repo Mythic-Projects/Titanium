@@ -1,0 +1,86 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 4 Dec 2022 15:42:27 +0100
+Subject: [PATCH] Backport Mob interface from newer CraftBukkit versions
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftCreature.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftCreature.java
+index 09d42141fb21a486a4752e8b80539b991bf61542..e5f3adc7ffba170e2cf21a90f9c585c4159bcd8a 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftCreature.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftCreature.java
+@@ -3,28 +3,12 @@ package org.bukkit.craftbukkit.entity;
+ import net.minecraft.server.EntityCreature;
+ import org.bukkit.craftbukkit.CraftServer;
+ import org.bukkit.entity.Creature;
+-import org.bukkit.entity.LivingEntity;
+ 
+-public class CraftCreature extends CraftLivingEntity implements Creature {
++public class CraftCreature extends CraftMob implements Creature { // Titanium - LivingEntity -> Mob
+     public CraftCreature(CraftServer server, EntityCreature entity) {
+         super(server, entity);
+     }
+ 
+-    public void setTarget(LivingEntity target) {
+-        EntityCreature entity = getHandle();
+-        if (target == null) {
+-            entity.setGoalTarget(null, null, false);
+-        } else if (target instanceof CraftLivingEntity) {
+-            entity.setGoalTarget(((CraftLivingEntity) target).getHandle(), null, false);
+-        }
+-    }
+-
+-    public CraftLivingEntity getTarget() {
+-        if (getHandle().getGoalTarget() == null) return null;
+-
+-        return (CraftLivingEntity) getHandle().getGoalTarget().getBukkitEntity();
+-    }
+-
+     @Override
+     public EntityCreature getHandle() {
+         return (EntityCreature) entity;
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftMob.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftMob.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..f45aea903ea7bae98952fa1a1b00368011a700d5
+--- /dev/null
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftMob.java
+@@ -0,0 +1,40 @@
++package org.bukkit.craftbukkit.entity;
++
++import net.minecraft.server.EntityInsentient;
++import org.bukkit.craftbukkit.CraftServer;
++import org.bukkit.entity.LivingEntity;
++import org.bukkit.entity.Mob;
++
++// Titanium - Backported from newer version onf CraftBukkit
++public abstract class CraftMob extends CraftLivingEntity implements Mob {
++
++    public CraftMob(CraftServer server, EntityInsentient entity) {
++        super(server, entity);
++    }
++
++    public void setTarget(LivingEntity target) {
++        EntityInsentient entity = getHandle();
++        if (target == null) {
++            entity.setGoalTarget(null, null, false);
++        } else if (target instanceof CraftLivingEntity) {
++            entity.setGoalTarget(((CraftLivingEntity) target).getHandle(), null, false);
++        }
++    }
++
++    public CraftLivingEntity getTarget() {
++        if (getHandle().getGoalTarget() == null) return null;
++
++        return (CraftLivingEntity) getHandle().getGoalTarget().getBukkitEntity();
++    }
++
++    @Override
++    public EntityInsentient getHandle() {
++        return (EntityInsentient) entity;
++    }
++
++    @Override
++    public String toString() {
++        return "CraftMob";
++    }
++
++}
