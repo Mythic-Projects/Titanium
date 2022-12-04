@@ -391,7 +391,7 @@ index 86f111df74e8f09265a56f2fe017d725a8c09db1..210ca95614b9fc9bd6383c9063161fc5
  
      public IBlockData updateState(IBlockData iblockdata, IBlockAccess iblockaccess, BlockPosition blockposition) {
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index fa54e06d8b85d3483bf5055ad59c89fba4aa5b88..1b4e1e8dbbec3b45fa3a3afdea6b3ea15811b48e 100644
+index c93c167318355ae777e3a79527165d7379aebae8..e9fad0194a027f74f619ae7ff2b0be55dc6a57d2 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
 @@ -19,7 +19,7 @@ import org.apache.logging.log4j.Logger;
@@ -406,7 +406,7 @@ index fa54e06d8b85d3483bf5055ad59c89fba4aa5b88..1b4e1e8dbbec3b45fa3a3afdea6b3ea1
 @@ -35,6 +35,7 @@ public class Chunk {
      public final int locX;
      public final int locZ;
-     private final ChunkCoordIntPair chunkCoords;
+     private final ChunkCoordIntPair chunkCoords; // InsanePaper
 +    public final long chunkKey; // Titanium
      private boolean k;
      public final Map<BlockPosition, TileEntity> tileEntities;
@@ -414,7 +414,7 @@ index fa54e06d8b85d3483bf5055ad59c89fba4aa5b88..1b4e1e8dbbec3b45fa3a3afdea6b3ea1
 @@ -156,6 +157,7 @@ public class Chunk {
              this.bukkitChunk = new org.bukkit.craftbukkit.CraftChunk(this);
          }
-         this.chunkCoords = new ChunkCoordIntPair(i, j);
+         this.chunkCoords = new ChunkCoordIntPair(i, j); // InsanePaper
 +        this.chunkKey = LongHash.toLong(i, j); // Titanium
      }
  

@@ -5,14 +5,14 @@ Subject: [PATCH] Implement [InsanePaper-269] Cache Chunk Coordinations
 
 
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index 6cc496b4850d0865e0818ddfeb9be99a789f0eab..99510abeb9c3320f015de74817672da79b7fe3f1 100644
+index 6cc496b4850d0865e0818ddfeb9be99a789f0eab..7d0aa864441060c0ba755d79462ccb0e6fb8d27f 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
 @@ -34,6 +34,7 @@ public class Chunk {
      public final int[] heightMap;
      public final int locX;
      public final int locZ;
-+    private final ChunkCoordIntPair chunkCoords;
++    private final ChunkCoordIntPair chunkCoords; // InsanePaper
      private boolean k;
      public final Map<BlockPosition, TileEntity> tileEntities;
      public final List<Entity>[] entitySlices; // Spigot
@@ -20,7 +20,7 @@ index 6cc496b4850d0865e0818ddfeb9be99a789f0eab..99510abeb9c3320f015de74817672da7
          if (!(this instanceof EmptyChunk)) {
              this.bukkitChunk = new org.bukkit.craftbukkit.CraftChunk(this);
          }
-+        this.chunkCoords = new ChunkCoordIntPair(i, j);
++        this.chunkCoords = new ChunkCoordIntPair(i, j); // InsanePaper
      }
  
      public org.bukkit.Chunk bukkitChunk;
@@ -29,7 +29,7 @@ index 6cc496b4850d0865e0818ddfeb9be99a789f0eab..99510abeb9c3320f015de74817672da7
  
      public ChunkCoordIntPair j() {
 -        return new ChunkCoordIntPair(this.locX, this.locZ);
-+        return this.chunkCoords;
++        return this.chunkCoords; // InsanePaper
      }
  
      public boolean c(int i, int j) {
