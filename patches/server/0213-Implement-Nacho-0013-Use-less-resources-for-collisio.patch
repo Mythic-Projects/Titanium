@@ -1,0 +1,70 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 4 Dec 2022 12:52:38 +0100
+Subject: [PATCH] Implement [Nacho-0013] Use less resources for collisions
+
+
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index 1808b7bc066d1d634a881cb1ce9760c43f9cfa35..839029aa619a6ed6beca4384fe937a6dab512201 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -883,7 +883,7 @@ public abstract class Entity implements ICommandListener {
+                 for (int j = blockposition.getY(); j <= blockposition1.getY(); ++j) {
+                     for (int k = blockposition.getZ(); k <= blockposition1.getZ(); ++k) {
+                         BlockPosition blockposition2 = new BlockPosition(i, j, k);
+-                        IBlockData iblockdata = this.world.getType(blockposition2);
++                        IBlockData iblockdata = this.world.getType(i, j, k); // Nacho
+ 
+                         try {
+                             iblockdata.getBlock().a(this.world, blockposition2, iblockdata, this);
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index 271f06752b2ceceed3f79506f077a3df5849f3ea..e8235f0d30e3073fcedd3227c81e5ba1d5cd6628 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -404,9 +404,15 @@ public abstract class World implements IBlockAccess {
+     }
+ 
+     public Chunk getChunkAtWorldCoords(BlockPosition blockposition) {
+-        return this.getChunkAt(blockposition.getX() >> 4, blockposition.getZ() >> 4);
++    // Nacho start
++        return this.getChunkAtWorldCoords(blockposition.getX(), blockposition.getY(), blockposition.getZ());
+     }
+ 
++    public Chunk getChunkAtWorldCoords(int x, int y, int z) {
++        return this.getChunkAt(x >> 4, z >> 4);
++    }
++    // Nacho end
++
+     public Chunk getChunkAt(int i, int j) {
+         return this.chunkProvider.getOrCreateChunk(i, j);
+     }
+@@ -962,10 +968,17 @@ public abstract class World implements IBlockAccess {
+     }
+     
+     public IBlockData getType(BlockPosition blockposition, boolean useCaptured) {
++    // Nacho start
++        return getType(blockposition.getX(), blockposition.getY(), blockposition.getZ(), useCaptured);
++    }
++
++    public IBlockData getType(int x, int y, int z) {
++        return getType(x, y, z, true);
++    }
++
++    public IBlockData getType(int x, int y, int z, boolean useCaptured) {
++    // Nacho end
+         // CraftBukkit start - tree generation
+-        final int x = blockposition.getX();
+-        final int y = blockposition.getY();
+-        final int z = blockposition.getZ();
+         if (captureTreeGeneration && useCaptured) {
+     // Spigot end
+             // Paper start
+@@ -977,7 +990,7 @@ public abstract class World implements IBlockAccess {
+         if (!this.isValidLocation(x, y, z)) { // Titanium - blockposition -> x, y, z
+             return Blocks.AIR.getBlockData();
+         } else {
+-            Chunk chunk = this.getChunkAtWorldCoords(blockposition);
++            Chunk chunk = this.getChunkAtWorldCoords(x, y, z); // Nacho
+ 
+             return chunk.getBlockData(x, y, z); // Paper - blockposition -> x, y, z
+         }
