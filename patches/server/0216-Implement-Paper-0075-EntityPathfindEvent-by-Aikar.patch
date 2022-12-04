@@ -1,0 +1,130 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Aikar <aikar@aikar.co>
+Date: Mon, 28 Mar 2016 21:22:26 -0400
+Subject: [PATCH] Implement [Paper-0075] EntityPathfindEvent by Aikar
+
+
+diff --git a/src/main/java/ga/windpvp/windspigot/async/pathsearch/AsyncNavigation.java b/src/main/java/ga/windpvp/windspigot/async/pathsearch/AsyncNavigation.java
+index 18f4b62b2bb5e8347985ea3c8ab04358a6a25991..29d096f2fd0bedfc3f92f0945da26941aac69e5b 100644
+--- a/src/main/java/ga/windpvp/windspigot/async/pathsearch/AsyncNavigation.java
++++ b/src/main/java/ga/windpvp/windspigot/async/pathsearch/AsyncNavigation.java
+@@ -121,6 +121,13 @@ public class AsyncNavigation extends Navigation {
+         return this.a(blockposition.getX(), blockposition.getY(), blockposition.getZ());
+     }
+ 
++    // Titanium start
++    @Override
++    public PathEntity a(BlockPosition blockposition, Entity target, boolean entitySearch) {
++        return target != null && entitySearch ? this.a(target) : this.a(blockposition.getX(), blockposition.getY(), blockposition.getZ());
++    }
++    // Titanium end
++
+     public void addEntry(SearchCacheEntry cacheEntry) {
+         if (cacheEntry instanceof SearchCacheEntryEntity) {
+             this.searchCache.add((SearchCacheEntryEntity) cacheEntry);
+diff --git a/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java b/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java
+index 3ac9239a7712e37e8db84aea4f230599e4b3138c..5c576e07530fb0fb1fad61e8ce08d5d30ab36a1e 100644
+--- a/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java
++++ b/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java
+@@ -11,6 +11,7 @@ import net.minecraft.server.Entity;
+ import net.minecraft.server.MathHelper;
+ import net.minecraft.server.PathEntity;
+ import net.titanium.config.TitaniumConfig;
++import org.bukkit.Location;
+ 
+ public class SearchHandler {
+ 
+@@ -36,6 +37,11 @@ public class SearchHandler {
+ 
+         Entity entity = navigation.getEntity(); // Paper
+         if (!entity.getWorld().getWorldBorder().isInBoundsCords(finalX, finalZ)) return; // Paper - don't path out of world border
++        // Paper start - Pathfind event
++        if (!new com.destroystokyo.paper.event.entity.EntityPathfindEvent(entity.getBukkitEntity(), new Location(entity.world.getWorld(), finalX, finalY, finalZ), targetEntity.getBukkitEntity()).callEvent()) {
++            return;
++        }
++        // Paper end
+ 
+         navigation.isSearching.set(true);
+ 
+@@ -57,6 +63,11 @@ public class SearchHandler {
+ 
+         Entity entity = navigation.getEntity(); // Paper
+         if (!entity.getWorld().getWorldBorder().isInBoundsCords(x, z)) return; // Paper - don't path out of world border
++        // Paper start - Pathfind event
++        if (!new com.destroystokyo.paper.event.entity.EntityPathfindEvent(entity.getBukkitEntity(), new Location(entity.world.getWorld(), x, y, z), null).callEvent()) {
++            return;
++        }
++        // Paper end
+ 
+         navigation.isSearching.set(true);
+ 
+diff --git a/src/main/java/net/minecraft/server/NavigationAbstract.java b/src/main/java/net/minecraft/server/NavigationAbstract.java
+index f439138a2cc6c17200bf12400af1696354cb9364..d61113a19f4f9fe5a4e1c39871bc9592ac218c97 100644
+--- a/src/main/java/net/minecraft/server/NavigationAbstract.java
++++ b/src/main/java/net/minecraft/server/NavigationAbstract.java
+@@ -85,21 +85,38 @@ public abstract class NavigationAbstract {
+     }
+ 
+     public PathEntity a(BlockPosition blockposition) {
+-        if (!getEntity().getWorld().getWorldBorder().isInBounds(blockposition)) return null; // Paper - don't path out of world border
+-        if (!this.b()) {
+-            return null;
+-        } else {
++    // Titanium start
++        return this.a(blockposition, null);
++    }
++    public PathEntity a(BlockPosition blockposition, Entity target) {
++        if (this.b()) {
++   // Titanium end
++            Entity entity = this.getEntity(); // Paper
++            if (!entity.getWorld().getWorldBorder().isInBounds(blockposition)) return null; // Paper - don't path out of world border
++            // Paper start - Pathfind event
++            if (!new com.destroystokyo.paper.event.entity.EntityPathfindEvent(entity.getBukkitEntity(), MCUtil.toLocation(entity.world, blockposition), target == null ? null : target.getBukkitEntity()).callEvent()) {
++                return null;
++            }
++            // Paper end
+             float f = this.i();
+ 
+             //this.c.methodProfiler.a("pathfind"); // Purpur
+             BlockPosition blockposition1 = new BlockPosition(this.b);
+             int i = (int) (f + 8.0F);
++            // Titanium start
++            boolean entitySearch = target != null;
++            if (entitySearch) {
++                blockposition1 = blockposition1.up(); // Titanium
++                i += 8F;
++            }
++            // Titanium end
+             ChunkCache chunkcache = new ChunkCache(this.c, blockposition1.a(-i, -i, -i), blockposition1.a(i, i, i), 0);
+-            PathEntity pathentity = this.j.a(chunkcache, this.b, blockposition, f);
++            PathEntity pathentity = entitySearch ? this.j.a(chunkcache, this.b, target, f) : this.j.a(chunkcache, this.b, blockposition, f); // Titanium
+ 
+             //this.c.methodProfiler.b(); // Purpur
+             return pathentity;
+         }
++        return null; // Titanium
+     }
+ 
+     public boolean a(double d0, double d1, double d2, double d3) {
+@@ -113,20 +130,7 @@ public abstract class NavigationAbstract {
+     }
+ 
+     public PathEntity a(Entity entity) {
+-        if (!this.b()) {
+-            return null;
+-        } else {
+-            float f = this.i();
+-
+-            //this.c.methodProfiler.a("pathfind"); // Purpur
+-            BlockPosition blockposition = (new BlockPosition(this.b)).up();
+-            int i = (int) (f + 16.0F);
+-            ChunkCache chunkcache = new ChunkCache(this.c, blockposition.a(-i, -i, -i), blockposition.a(i, i, i), 0);
+-            PathEntity pathentity = this.j.a((IBlockAccess) chunkcache, (Entity) this.b, entity, f);
+-
+-            //this.c.methodProfiler.b(); // Purpur
+-            return pathentity;
+-        }
++        return this.a(new BlockPosition(entity), entity); // Titanium
+     }
+ 
+     public boolean a(Entity entity, double d0) {

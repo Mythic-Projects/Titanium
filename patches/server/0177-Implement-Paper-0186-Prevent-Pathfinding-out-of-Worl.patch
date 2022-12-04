@@ -5,19 +5,43 @@ Subject: [PATCH] Implement [Paper-0186] Prevent Pathfinding out of World
  Border by Aikar
 
 
+diff --git a/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java b/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java
+index 8cae1fbde87b9bfd097f9849f3f694a5fd0bd6f8..3ac9239a7712e37e8db84aea4f230599e4b3138c 100644
+--- a/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java
++++ b/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java
+@@ -30,12 +30,15 @@ public class SearchHandler {
+             return;
+         }
+ 
+-        navigation.isSearching.set(true);
+-
+         final int finalX = MathHelper.floor(targetEntity.locX);
+         final int finalY = MathHelper.floor(targetEntity.locY) + 1;
+         final int finalZ = MathHelper.floor(targetEntity.locZ);
+ 
++        Entity entity = navigation.getEntity(); // Paper
++        if (!entity.getWorld().getWorldBorder().isInBoundsCords(finalX, finalZ)) return; // Paper - don't path out of world border
++
++        navigation.isSearching.set(true);
++
+         AsyncUtil.run(() -> {
+             PathEntity path = navigation.doPathSearch(chunkCache, finalX, finalY, finalZ);
+             SearchCacheEntryEntity cache = new SearchCacheEntryEntity(targetEntity, navigation.getEntity(), path);
+@@ -52,6 +55,9 @@ public class SearchHandler {
+             return;
+         }
+ 
++        Entity entity = navigation.getEntity(); // Paper
++        if (!entity.getWorld().getWorldBorder().isInBoundsCords(x, z)) return; // Paper - don't path out of world border
++
+         navigation.isSearching.set(true);
+ 
+         AsyncUtil.run(() -> {
 diff --git a/src/main/java/net/minecraft/server/NavigationAbstract.java b/src/main/java/net/minecraft/server/NavigationAbstract.java
-index 1ec5cedab50628df8a98e1ed595848a3670c304a..9c76587dc9b7074f672d1236d2006e3daff7716a 100644
+index 1ec5cedab50628df8a98e1ed595848a3670c304a..f439138a2cc6c17200bf12400af1696354cb9364 100644
 --- a/src/main/java/net/minecraft/server/NavigationAbstract.java
 +++ b/src/main/java/net/minecraft/server/NavigationAbstract.java
-@@ -38,6 +38,7 @@ public abstract class NavigationAbstract {
-     // WindSpigot start - reduce usage of blockposition
-     public ChunkCache createChunkCache(boolean forEntitySearch) {
-         if (this.b()) {
-+            if (!getEntity().getWorld().getWorldBorder().isInBoundsCords(MathHelper.floor(b.locX), MathHelper.floor(b.locZ))) return null; // Paper - don't path out of world border
-             float f = this.i();
-             //BlockPosition blockposition1 = new BlockPosition(this.b);
-             int i = (int) (f + (forEntitySearch ? 16.0F : 8.0F));
-@@ -85,6 +86,7 @@ public abstract class NavigationAbstract {
+@@ -85,6 +85,7 @@ public abstract class NavigationAbstract {
      }
  
      public PathEntity a(BlockPosition blockposition) {
