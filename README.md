@@ -172,6 +172,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Nacho-????] Async TNT by Sculas
 [Nacho-????] Async Entity Tracker by Rastrian
 [Nacho-????] Async knockback and hit detection packets by Rastrian
+[Nacho-????] Use fastutil in HandshakeListener
 
 [WindSpigot-0014] Async entity path searching by windcolor-dev
 [WindSpigot-0017] Async entity tracking by windcolor-dev
