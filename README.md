@@ -162,6 +162,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Nacho-0009] Remove an extra file io call within world credit bob7l
 [Nacho-0010] Use jchambers' FAST UUID methods
 [Nacho-0012] Don't load chunks for physics
+[Nacho-0013] Use less resources for collisions
 [Nacho-0023] Optimize EntityTracker for the chunk updater
 [Nacho-0024] Do not create new BlockPosition when loading chunk
 [Nacho-0025] Disable random tickSpeed being modified
