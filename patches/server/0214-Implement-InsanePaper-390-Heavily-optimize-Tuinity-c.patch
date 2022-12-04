@@ -1,0 +1,20 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Lew <skycubesv@gmail.com>
+Date: Sun, 4 Dec 2022 12:55:11 +0100
+Subject: [PATCH] Implement [InsanePaper-390] Heavily optimize Tuinity
+ controlled flush patch
+
+
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 0b5320c20ff234414628f0355813a66b7ece30d4..70db80aebd51ecbbea95a7e4cef4be138d88875e 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -1136,7 +1136,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+                 //this.methodProfiler.a("tracker"); // Purpur
+                 //worldserver.timings.tracker.startTiming(); // Spigot // Purpur
+                 // Tuinity start - controlled flush for entity tracker packets
+-                List<NetworkManager> disabledFlushes = new ArrayList<>(worldserver.players.size());
++                java.util.Set<NetworkManager> disabledFlushes = new java.util.HashSet<>(worldserver.players.size()); // InsanePaper - List -> Set
+                 for (EntityHuman player : worldserver.players) {
+                     if (!(player instanceof EntityPlayer)) continue; // skip non-player entities
+                     PlayerConnection connection = ((EntityPlayer) player).playerConnection;
