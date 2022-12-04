@@ -1,0 +1,152 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 4 Dec 2022 20:00:03 +0100
+Subject: [PATCH] Allow disabling entities intelligence
+
+
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index 839029aa619a6ed6beca4384fe937a6dab512201..525b68e1a2ef642bcdb14e1d198751c7750e6597 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -2382,4 +2382,22 @@ public abstract class Entity implements ICommandListener {
+ 
+         EnchantmentManager.b(entityliving, entity);
+     }
++    // Titanium start - Option to disable entities AI
++    private boolean intelligence = true;
++
++    public boolean handleEntityAI() {
++        if (!this.world.handleEntitiesAI()) {
++            return false;
++        }
++        return this.intelligence;
++    }
++
++    public boolean isIntelligence() {
++        return this.intelligence;
++    }
++
++    public void setIntelligence(boolean enabled) {
++        this.intelligence = enabled;
++    }
++    // Titanium end
+ }
+diff --git a/src/main/java/net/minecraft/server/EntityInsentient.java b/src/main/java/net/minecraft/server/EntityInsentient.java
+index 20cb77df57f838c653d13a19834f84533d196963..4c80574b5ae5c7ca6ec0a6b32062cab5a6ae5053 100644
+--- a/src/main/java/net/minecraft/server/EntityInsentient.java
++++ b/src/main/java/net/minecraft/server/EntityInsentient.java
+@@ -471,7 +471,7 @@ public abstract class EntityInsentient extends EntityLiving {
+         this.D();
+         //this.world.methodProfiler.b(); // Purpur
+         // Spigot Start
+-        if ( this.fromMobSpawner )
++        if ( this.fromMobSpawner || !this.handleEntityAI() ) // Titanium - Allow disabling entities AI
+         {
+             // PaperSpigot start - Allow nerfed mobs to jump
+             if (goalFloat != null) {
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index e8235f0d30e3073fcedd3227c81e5ba1d5cd6628..db24dbbbcd581cbb7f9cb3c331dcc816a2a95c6a 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -3540,4 +3540,6 @@ public abstract class World implements IBlockAccess {
+         return x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000;
+     }
+     // Titanium end
++
++    public abstract boolean handleEntitiesAI();
+ }
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index e191622572a305b5e17f2a79fee513702c657f1d..cc38c8336d29eee3a2c6ff01a0506921157ee6ef 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -1290,4 +1290,21 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+             this();
+         }
+     }
++
++    // Titanium start - Option to disable entities AI
++    private boolean entitiesIntelligence = true; // Titanium
++
++    public boolean handleEntitiesAI() {
++        return this.entitiesIntelligence && !this.titaniumConfig.entity.ai.disable;
++    }
++
++    public boolean isEntitiesIntelligence() {
++        return this.entitiesIntelligence;
++    }
++
++    public void setEntitiesIntelligence(boolean enabled) {
++        this.entitiesIntelligence = enabled;
++    }
++    // Titanium end
++
+ }
+diff --git a/src/main/java/net/titanium/config/TitaniumWorldConfig.java b/src/main/java/net/titanium/config/TitaniumWorldConfig.java
+index 026aeb4004e8a4113988c6294557238ecde97eec..90cb43ea0806cec3c0df33f44bf7e2759f1b95cb 100644
+--- a/src/main/java/net/titanium/config/TitaniumWorldConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumWorldConfig.java
+@@ -21,4 +21,20 @@ public class TitaniumWorldConfig extends TitaniumConfigSection {
+ 
+     }
+ 
++    public Entity entity = new Entity();
++
++    public static class Entity extends TitaniumConfigSection {
++
++        public AI ai = new AI();
++
++        public static class AI extends TitaniumConfigSection {
++
++            @Comment("Whether to disable AI for all entities.")
++            @Comment("This option works in the same way that Spigot's 'nerf-spawner-mobs', but for every entity.")
++            public boolean disable = false;
++
++        }
++
++    }
++
+ }
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+index fac98d03fc6942e407acfbcd4d69e1ff61436e4f..979cab0e082f17b5ce4b1ba4482ef2a63b8f1363 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+@@ -1532,6 +1532,16 @@ public class CraftWorld implements World {
+     // Spigot end
+ 
+     // Titanium start
++    @Override
++    public boolean isEntitiesIntelligence() {
++        return this.getHandle().isEntitiesIntelligence();
++    }
++
++    @Override
++    public void setEntitiesIntelligence(boolean enabled) {
++        this.getHandle().setEntitiesIntelligence(enabled);
++    }
++
+     private final Titanium titanium = new Titanium() {
+ 
+         @Override
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftEntity.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftEntity.java
+index fa16e4b9c767c38f78f9d58b4658e46e3f61f8fb..20d4e60f6b488a075c8b9038793d1302abf1c502 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftEntity.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftEntity.java
+@@ -558,6 +558,18 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
+         perm.setOp(value);
+     }
+ 
++    // Titanium start
++    @Override
++    public boolean isIntelligence() {
++        return this.getHandle().isIntelligence();
++    }
++
++    @Override
++    public void setIntelligence(boolean enabled) {
++        this.getHandle().setIntelligence(enabled);
++    }
++    // Titanium end
++
+     // Spigot start
+     private final Spigot spigot = new Spigot()
+     {

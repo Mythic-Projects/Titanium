@@ -1,0 +1,59 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 4 Dec 2022 20:00:10 +0100
+Subject: [PATCH] Allow disabling entities intelligence
+
+
+diff --git a/src/main/java/org/bukkit/World.java b/src/main/java/org/bukkit/World.java
+index 74a52dd1a0db263ee931855030c9ffbe2fb734a3..77f3076bbf8fe34af13fd09bab2a5384cfec3747 100644
+--- a/src/main/java/org/bukkit/World.java
++++ b/src/main/java/org/bukkit/World.java
+@@ -1990,6 +1990,20 @@ public interface World extends PluginMessageRecipient, Metadatable {
+     // Spigot end
+ 
+     // Titanium start
++    /**
++     * Gets whether or not entities AI is enabled in this world.
++     *
++     * @return if entities AI is enabled
++     */
++    public boolean isEntitiesIntelligence();
++
++    /**
++     * Sets whether or not entities AI is enabled in this world.
++     *
++     * @param enabled if entities AI should be enabled
++     */
++    public void setEntitiesIntelligence(boolean enabled);
++
+     public class Titanium {
+ 
+         /**
+diff --git a/src/main/java/org/bukkit/entity/Entity.java b/src/main/java/org/bukkit/entity/Entity.java
+index ecd9e79cc063f0be73c7fac7eda2c8360b5a6078..4cedc7604ecb31ab782193c003d5f28178bce2eb 100644
+--- a/src/main/java/org/bukkit/entity/Entity.java
++++ b/src/main/java/org/bukkit/entity/Entity.java
+@@ -375,6 +375,23 @@ public interface Entity extends Metadatable, CommandSender {
+      */
+     public boolean isCustomNameVisible();
+ 
++    // Titanium start
++    /**
++     * Gets whether or not the entity AI is enabled.
++     *
++     * @return if the entity AI is enabled
++     */
++    public boolean isIntelligence();
++
++    /**
++     * Sets whether or not the entity AI is enabled.
++     * Keep in mind if AI is disabled for whole World, this change will be ignored.
++     *
++     * @param enabled if the entity AI should be enabled
++     */
++    public void setIntelligence(boolean enabled);
++    // Titanium end
++
+     // Spigot Start
+     public class Spigot
+     {
