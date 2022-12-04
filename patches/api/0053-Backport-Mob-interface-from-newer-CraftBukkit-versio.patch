@@ -1,0 +1,68 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 4 Dec 2022 15:42:31 +0100
+Subject: [PATCH] Backport Mob interface from newer CraftBukkit versions
+
+
+diff --git a/src/main/java/org/bukkit/entity/Creature.java b/src/main/java/org/bukkit/entity/Creature.java
+index f223f55bd467d58b15e000bda86d462b37b9ab33..6c23a34e7abf73e8daf571cbed1c0750aac9ed68 100644
+--- a/src/main/java/org/bukkit/entity/Creature.java
++++ b/src/main/java/org/bukkit/entity/Creature.java
+@@ -4,23 +4,4 @@ package org.bukkit.entity;
+  * Represents a Creature. Creatures are non-intelligent monsters or animals
+  * which have very simple abilities.
+  */
+-public interface Creature extends LivingEntity {
+-
+-    /**
+-     * Instructs this Creature to set the specified LivingEntity as its
+-     * target.
+-     * <p>
+-     * Hostile creatures may attack their target, and friendly creatures may
+-     * follow their target.
+-     *
+-     * @param target New LivingEntity to target, or null to clear the target
+-     */
+-    public void setTarget(LivingEntity target);
+-
+-    /**
+-     * Gets the current target of this Creature
+-     *
+-     * @return Current target of this creature, or null if none exists
+-     */
+-    public LivingEntity getTarget();
+-}
++public interface Creature extends Mob { } // Titanium - LivingEntity -> Mob
+diff --git a/src/main/java/org/bukkit/entity/Mob.java b/src/main/java/org/bukkit/entity/Mob.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..fbe0c6e742dec7703e517807b6114cc4c1b30cc2
+--- /dev/null
++++ b/src/main/java/org/bukkit/entity/Mob.java
+@@ -0,0 +1,27 @@
++package org.bukkit.entity;
++
++/**
++ * Represents a Mob. Mobs are living entities with simple AI.
++ */
++// Titanium - Backported from newer version onf CraftBukkit
++public interface Mob extends LivingEntity {
++
++    /**
++     * Instructs this Creature to set the specified LivingEntity as its
++     * target.
++     * <p>
++     * Hostile creatures may attack their target, and friendly creatures may
++     * follow their target.
++     *
++     * @param target New LivingEntity to target, or null to clear the target
++     */
++    public void setTarget(LivingEntity target);
++
++    /**
++     * Gets the current target of this Creature
++     *
++     * @return Current target of this creature, or null if none exists
++     */
++    public LivingEntity getTarget();
++
++}
