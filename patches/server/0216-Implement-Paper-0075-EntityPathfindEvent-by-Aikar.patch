@@ -4,24 +4,6 @@ Date: Mon, 28 Mar 2016 21:22:26 -0400
 Subject: [PATCH] Implement [Paper-0075] EntityPathfindEvent by Aikar
 
 
-diff --git a/src/main/java/ga/windpvp/windspigot/async/pathsearch/AsyncNavigation.java b/src/main/java/ga/windpvp/windspigot/async/pathsearch/AsyncNavigation.java
-index 18f4b62b2bb5e8347985ea3c8ab04358a6a25991..5d9c9ec1b6d1925ed540a6ed5c69d94530336620 100644
---- a/src/main/java/ga/windpvp/windspigot/async/pathsearch/AsyncNavigation.java
-+++ b/src/main/java/ga/windpvp/windspigot/async/pathsearch/AsyncNavigation.java
-@@ -121,6 +121,13 @@ public class AsyncNavigation extends Navigation {
-         return this.a(blockposition.getX(), blockposition.getY(), blockposition.getZ());
-     }
- 
-+    // Titanium start
-+    @Override
-+    public PathEntity a(BlockPosition blockposition, Entity target) {
-+        return target != null ? super.a(target) : super.a(blockposition.getX(), blockposition.getY(), blockposition.getZ());
-+    }
-+    // Titanium end
-+
-     public void addEntry(SearchCacheEntry cacheEntry) {
-         if (cacheEntry instanceof SearchCacheEntryEntity) {
-             this.searchCache.add((SearchCacheEntryEntity) cacheEntry);
 diff --git a/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java b/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java
 index 3ac9239a7712e37e8db84aea4f230599e4b3138c..5c576e07530fb0fb1fad61e8ce08d5d30ab36a1e 100644
 --- a/src/main/java/ga/windpvp/windspigot/async/pathsearch/SearchHandler.java
@@ -73,7 +55,7 @@ index f439138a2cc6c17200bf12400af1696354cb9364..d61113a19f4f9fe5a4e1c39871bc9592
 +    // Titanium start
 +        return this.a(blockposition, null);
 +    }
-+    public PathEntity a(BlockPosition blockposition, Entity target) {
++    private PathEntity a(BlockPosition blockposition, Entity target) {
 +        if (this.b()) {
 +   // Titanium end
 +            Entity entity = this.getEntity(); // Paper
