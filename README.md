@@ -119,6 +119,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0353] Send nearby packets from world player list not server by Mystiflow
 [Paper-0361] Async Chunk Loading and Generation by Aikar
 [Paper-0362] Prevent mob spawning from loading/generating chunks by Shane Freeder
+[Paper-0363] Optimize Light Recalculations by Aikar
 [Paper-0369] Prevent rayTrace from loading chunks by Aikar
 [Paper-0374] Add Stricter Client Sign limits by Aikar
 [Paper-0378] Performance improvement for Chunk.getEntities by wea_ondara
