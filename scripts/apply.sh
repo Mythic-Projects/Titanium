@@ -11,6 +11,7 @@ initScript=$(dirname "$SOURCE")/init.sh
 PS1="$"
 
 paperVer=$(cat base/.upstream-state)
+gpgsign="$(git config commit.gpgsign || echo "false")"
 log_info "Applying Titanium patches"
 function applyPatch {
     what=$1
@@ -18,6 +19,8 @@ function applyPatch {
     target=$2
     branch=$3
     patch_folder=$4
+
+    log_info "Applying $target patches"
 
     cd "$basedir/$what"
     git fetch --all
@@ -31,6 +34,12 @@ function applyPatch {
         cd "$basedir"
     fi
     cd "$basedir/$target"
+
+    # Disable GPG signing before AM, slows things down and doesn't play nicely.
+    # There is also zero rational or logical reason to do so for these sub-repo AMs.
+    # Calm down kids, it's re-enabled (if needed) immediately after, pass or fail.
+    git config commit.gpgsign false
+
     echo "Resetting $target to $what_name..."
     git remote rm upstream > /dev/null 2>&1
     git remote add upstream "$basedir/$what" >/dev/null 2>&1
@@ -39,11 +48,7 @@ function applyPatch {
     git reset --hard upstream/upstream
     echo "  Applying patches to $target..."
     git am --abort >/dev/null 2>&1
-    for patchFile in "$basedir/patches/$patch_folder/"*.patch
-    do
-        git am --3way --ignore-whitespace "$patchFile"
-    done
-    #git am --3way --ignore-whitespace "$basedir/patches/$patch_folder/*.patch"
+    git am --3way --ignore-whitespace "$basedir/patches/$patch_folder/"*.patch
     if [ "$?" != "0" ]; then
         echo "  Something did not apply cleanly to $target."
         echo "  Please review above details and finish the apply then"
@@ -59,9 +64,19 @@ function applyPatch {
     fi
 }
 
-log_info "Applying Titanium API patches"
-applyPatch base/Paper/PaperSpigot-API Titanium-API HEAD api
-log_info "Applying Titanium server patches"
-applyPatch base/Paper/PaperSpigot-Server Titanium-Server HEAD server
+function enableCommitSigningIfNeeded {
+    if [[ "$gpgsign" == "true" ]]; then
+        git config commit.gpgsign true
+    fi
+}
 
-log_info "Patches successfully applied."
+(
+    (applyPatch base/Paper/PaperSpigot-API Titanium-API HEAD api &&
+    applyPatch base/Paper/PaperSpigot-Server Titanium-Server HEAD server &&
+    log_info "Patches successfully applied.") || exit 1
+    enableCommitSigningIfNeeded
+) || (
+    echo "Failed to apply patches"
+    enableCommitSigningIfNeeded
+    exit 1
+) || exit 1
