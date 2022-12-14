@@ -7,7 +7,7 @@ Co-authored-by: windcolor-dev <teaglehao@gmail.com>
 Co-authored-by: Peridot <peridot491@protonmail.com>
 
 diff --git a/build.gradle b/build.gradle
-index 52ba617ff349f16bc583da4fb38e4e4db91f76bd..0a21a6c06b02bf67514a685f3a329ddf244ab343 100644
+index bd233577647b8b2bbf0816e384917dd55bbb326d..6a65c7fc2108b63c7b80b37995199e7838b6804c 100644
 --- a/build.gradle
 +++ b/build.gradle
 @@ -32,6 +32,7 @@ dependencies {
@@ -164,7 +164,7 @@ index 0000000000000000000000000000000000000000..1c88d3789d6ab7c6db37e8c8516ce8fe
 +}
 diff --git a/src/main/java/me/rastrian/dev/PlayerMap.java b/src/main/java/me/rastrian/dev/PlayerMap.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..70d4abbd2b4e86a2fa60cb7e7a67e20b320b4d2e
+index 0000000000000000000000000000000000000000..19761e4337326f4cd2a6ab268ca306e7fa51f04e
 --- /dev/null
 +++ b/src/main/java/me/rastrian/dev/PlayerMap.java
 @@ -0,0 +1,209 @@
@@ -259,7 +259,7 @@ index 0000000000000000000000000000000000000000..70d4abbd2b4e86a2fa60cb7e7a67e20b
 +            for (int chunkZ = MathHelper.floor(z - distance) >> CHUNK_BITS; chunkZ <= chunkZMax; chunkZ++) {
 +                List<EntityPlayer> players = map.get(xzToKey(chunkX, chunkZ));
 +                if (players != null) {
-+                    for (EntityPlayer player : players) {
++                    for (EntityPlayer player : players.toArray(new EntityPlayer[0])) {
 +                        if (!useRadius || player.e(x, y, z) < distance * distance) {
 +                            function.accept(player);
 +                        }
@@ -280,7 +280,7 @@ index 0000000000000000000000000000000000000000..70d4abbd2b4e86a2fa60cb7e7a67e20b
 +            for (int chunkZ = MathHelper.floor(z - distance) >> CHUNK_BITS; chunkZ <= chunkZMax; chunkZ++) {
 +                List<EntityPlayer> players = map.get(xzToKey(chunkX, chunkZ));
 +                if (players != null) {
-+                    for (EntityPlayer player : players) {
++                    for (EntityPlayer player : players.toArray(new EntityPlayer[0])) {
 +                        double playerDistSqrd = player.e(x, y, z);
 +                        if (playerDistSqrd < distance * distance
 +                                && (bestDistanceSqrd == -1.0 || playerDistSqrd < bestDistanceSqrd)) {
@@ -302,7 +302,7 @@ index 0000000000000000000000000000000000000000..70d4abbd2b4e86a2fa60cb7e7a67e20b
 +            for (int chunkZ = MathHelper.floor(z - distance) >> CHUNK_BITS; chunkZ <= chunkZMax; chunkZ++) {
 +                List<EntityPlayer> players = map.get(xzToKey(chunkX, chunkZ));
 +                if (players != null) {
-+                    for (EntityPlayer player : players) {
++                    for (EntityPlayer player : players.toArray(new EntityPlayer[0])) {
 +                        if (player != null && !player.dead && (!respectSpawningApi || player.affectsSpawning)) {
 +                            double playerDistSqrd = player.e(x, y, z);
 +                            if (playerDistSqrd < distance * distance) {
@@ -327,7 +327,7 @@ index 0000000000000000000000000000000000000000..70d4abbd2b4e86a2fa60cb7e7a67e20b
 +            for (int chunkZ = MathHelper.floor(z - distance) >> CHUNK_BITS; chunkZ <= chunkZMax; chunkZ++) {
 +                List<EntityPlayer> players = map.get(xzToKey(chunkX, chunkZ));
 +                if (players != null) {
-+                    for (EntityPlayer player : players) {
++                    for (EntityPlayer player : players.toArray(new EntityPlayer[0])) {
 +                        if (player != null && !player.dead && (!respectSpawningApi || player.affectsSpawning)) {
 +                            double playerDistSqrd = player.e(x, y, z);
 +                            if (playerDistSqrd < distance * distance
@@ -353,7 +353,7 @@ index 0000000000000000000000000000000000000000..70d4abbd2b4e86a2fa60cb7e7a67e20b
 +            for (int chunkZ = MathHelper.floor(z - distance) >> CHUNK_BITS; chunkZ <= chunkZMax; chunkZ++) {
 +                List<EntityPlayer> players = map.get(xzToKey(chunkX, chunkZ));
 +                if (players != null) {
-+                    for (EntityPlayer player : players) {
++                    for (EntityPlayer player : players.toArray(new EntityPlayer[0])) {
 +                        // don't send self
 +                        if (!self) {
 +                            if (player == source) {
