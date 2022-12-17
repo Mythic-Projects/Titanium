@@ -689,9 +689,9 @@ index cf1ac2c43fe5f7bf4baf539d88e7a0f8b8397a2a..45455c612782137f7f53c58d9352b673
 +        TitaniumConfig.EntityTracker config = TitaniumConfig.get().entityTracker;
 +        TitaniumConfig.EntityTracker.AddRemoveRate addRemoveRateConfig = config.async.enabled ? config.async.addRemoveRate : config.addRemoveRate;
 +        if (this.tracker instanceof EntityPlayer) {
-+            this.addRemoveRate = 5; // players
++            this.addRemoveRate = addRemoveRateConfig.players; // players
 +        } else if (this.tracker instanceof EntityArrow || this.tracker instanceof EntityProjectile) {
-+            this.addRemoveRate = 5; // projectile things
++            this.addRemoveRate = addRemoveRateConfig.projectiles; // projectile things
 +        } else if (this.tracker.activationType == 2) { // animals
 +            this.addRemoveRate = addRemoveRateConfig.animals;
 +        } else if (this.tracker.activationType == 1) { // monsters
