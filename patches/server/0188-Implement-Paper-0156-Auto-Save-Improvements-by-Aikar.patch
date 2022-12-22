@@ -5,7 +5,7 @@ Subject: [PATCH] Implement [Paper-0156] Auto Save Improvements by Aikar
 
 
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index 1b4e1e8dbbec3b45fa3a3afdea6b3ea15811b48e..b00b02bebda0f7f325c989ea9891c01a0e95ec3f 100644
+index e9fad0194a027f74f619ae7ff2b0be55dc6a57d2..58e2694a5cc90a8cca4a8f78716a63d77513ece8 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
 @@ -1062,11 +1062,10 @@ public class Chunk {
@@ -48,7 +48,7 @@ index 0b471e678d95ae7fedb4b83026ffb574d42a7b41..5422981aa5ef112aca0e7d56e4e9454c
      public final MinecraftServer server;
      public final PlayerInteractManager playerInteractManager;
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index c5542b28103b6d8e305fbcad0942f1ceead6a40a..e93982c0338e861b71869160f6f617fbff41e50e 100644
+index c2e870ba57cdc105ee0c263d5f2e29069f25bafb..bea13934c14d884adaed4955be438f53c0893999 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -127,6 +127,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
@@ -136,10 +136,10 @@ index d745851c2aec87934ab79332cbdb9952d101e422..574ce61ad4cc63f19e3ca9c52355f1fa
      public void addWhitelist(GameProfile gameprofile) {
          this.whitelist.add(new WhiteListEntry(gameprofile));
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 4066301d423be0f1f423ef63b8258ac79d2a1920..00cc2be93e6110d0df55506c5c5daa6c6002f419 100644
+index ee35e70a5245e9963129ef987861344beef184d2..1bb55a635e7b45848b66b13026f8c21355314b07 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
-@@ -994,7 +994,8 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -991,7 +991,8 @@ public class WorldServer extends World implements IAsyncTaskHandler {
  
      public void save(boolean flag, IProgressUpdate iprogressupdate) throws ExceptionWorldConflict {
          if (this.chunkProvider.canSave()) {
@@ -149,7 +149,7 @@ index 4066301d423be0f1f423ef63b8258ac79d2a1920..00cc2be93e6110d0df55506c5c5daa6c
              if (iprogressupdate != null) {
                  iprogressupdate.a("Saving level");
              }
-@@ -1003,6 +1004,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -1000,6 +1001,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
              if (iprogressupdate != null) {
                  iprogressupdate.c("Saving chunks");
              }

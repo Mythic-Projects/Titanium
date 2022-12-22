@@ -68,10 +68,10 @@ index 0000000000000000000000000000000000000000..4e6a9435e3865d378962e88c1166973d
 +}
 diff --git a/src/main/java/ga/windpvp/windspigot/async/entitytracker/AsyncEntityTracker.java b/src/main/java/ga/windpvp/windspigot/async/entitytracker/AsyncEntityTracker.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..64706977a4a3ee84ee2b69f6428c026f43f1e2f3
+index 0000000000000000000000000000000000000000..4bf8395fe61c1125c5ddce6174ed785d70aa379c
 --- /dev/null
 +++ b/src/main/java/ga/windpvp/windspigot/async/entitytracker/AsyncEntityTracker.java
-@@ -0,0 +1,56 @@
+@@ -0,0 +1,50 @@
 +package ga.windpvp.windspigot.async.entitytracker;
 +
 +import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -87,9 +87,7 @@ index 0000000000000000000000000000000000000000..64706977a4a3ee84ee2b69f6428c026f
 +public class AsyncEntityTracker extends EntityTracker {
 +
 +    private static final int threadCount = TitaniumConfig.get().entityTracker.async.threads;
-+    private static final ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("Titanium - Entity Tracker Thread #%d").build();
-+    private static final ExecutorService trackingThreadExecutorDispatcher = Executors.newSingleThreadExecutor(threadFactory);
-+    private static final ExecutorService trackingThreadExecutor = Executors.newFixedThreadPool(threadCount, threadFactory);
++    private static final ExecutorService trackingThreadExecutor = Executors.newFixedThreadPool(threadCount, new ThreadFactoryBuilder().setNameFormat("Titanium - Entity Tracker Thread #%d").build());
 +
 +    private final ResettableLatch latch = new ResettableLatch(threadCount);
 +
@@ -117,10 +115,6 @@ index 0000000000000000000000000000000000000000..64706977a4a3ee84ee2b69f6428c026f
 +        } catch (InterruptedException e) {
 +            e.printStackTrace();
 +        }
-+    }
-+
-+    public static ExecutorService getDispatcher() {
-+        return trackingThreadExecutorDispatcher;
 +    }
 +
 +    public static ExecutorService getExecutor() {
@@ -647,7 +641,7 @@ index addf86937c1fbd0e8ead1e64637faa890ba7967f..c9bb63fb84bdbe4391c1eda2013f0a13
 +    // Nacho end
  }
 diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-index cf1ac2c43fe5f7bf4baf539d88e7a0f8b8397a2a..45455c612782137f7f53c58d9352b6731d291091 100644
+index cf1ac2c43fe5f7bf4baf539d88e7a0f8b8397a2a..3a25db3c3a5190011813d8d8eca4d02d8b323f91 100644
 --- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 +++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 @@ -1,10 +1,14 @@
@@ -869,7 +863,7 @@ index cf1ac2c43fe5f7bf4baf539d88e7a0f8b8397a2a..45455c612782137f7f53c58d9352b673
          }
  
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 78fb4eca6bf804a168ea8b483aab4f6006a24545..e831a8a80cb0a2bb8a0de81e78af3d7d273dc94a 100644
+index 78fb4eca6bf804a168ea8b483aab4f6006a24545..9e631218be5129c45edc5b295690842515c3b02f 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -10,6 +10,7 @@ import com.mojang.authlib.GameProfile;
@@ -888,21 +882,6 @@ index 78fb4eca6bf804a168ea8b483aab4f6006a24545..e831a8a80cb0a2bb8a0de81e78af3d7d
  import org.apache.commons.lang3.Validate;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
-@@ -1043,7 +1045,13 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
-                 }
-                 try {
-                     // Tuinity end
--                    worldserver.getTracker().updatePlayers();
-+                    // Titanium start
-+                    if (worldserver.handleTrackerAsync) {
-+                        AsyncUtil.run(worldserver.updateTracker, AsyncEntityTracker.getDispatcher());
-+                    } else {
-+                        worldserver.getTracker().updatePlayers();
-+                    }
-+                    // Titanium end
-                     // Tuinity start - controlled flush for entity tracker packets
-                 } finally {
-                     for (NetworkManager networkManager : disabledFlushes) {
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
 index b8daeda95f0f7029da9cc62be90959a924c3d7a1..e818a34433dde6682a00a478b7d79f2443d23366 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
@@ -1038,7 +1017,7 @@ index c3bda441dfa2f59a0570d578676a6d3e9765fdb6..e37a7ef874977b2fd85fee9bf5b61e4d
          }
  
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index ff8ac6c5270ce40a21c4d9519a09c5ede68b1072..b504a01f9ada3104604e79a661b6d56247485892 100644
+index ff8ac6c5270ce40a21c4d9519a09c5ede68b1072..4789182db4a9fd45c1bb928d557b28cd611c2128 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
 @@ -5,7 +5,9 @@ import com.google.common.collect.Lists;
@@ -1051,18 +1030,15 @@ index ff8ac6c5270ce40a21c4d9519a09c5ede68b1072..b504a01f9ada3104604e79a661b6d562
  import java.util.Iterator;
  import java.util.List;
  import java.util.Map;
-@@ -52,6 +54,10 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -52,6 +54,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
      private static final List<StructurePieceTreasure> U = Lists.newArrayList(new StructurePieceTreasure[] { new StructurePieceTreasure(Items.STICK, 0, 1, 3, 10), new StructurePieceTreasure(Item.getItemOf(Blocks.PLANKS), 0, 1, 3, 10), new StructurePieceTreasure(Item.getItemOf(Blocks.LOG), 0, 1, 3, 10), new StructurePieceTreasure(Items.STONE_AXE, 0, 1, 1, 3), new StructurePieceTreasure(Items.WOODEN_AXE, 0, 1, 1, 5), new StructurePieceTreasure(Items.STONE_PICKAXE, 0, 1, 1, 3), new StructurePieceTreasure(Items.WOODEN_PICKAXE, 0, 1, 1, 5), new StructurePieceTreasure(Items.APPLE, 0, 2, 3, 5), new StructurePieceTreasure(Items.BREAD, 0, 2, 3, 3), new StructurePieceTreasure(Item.getItemOf(Blocks.LOG2), 0, 1, 3, 10)});
      private List<NextTickListEntry> V = Lists.newArrayList();
      public boolean hasPhysicsEvent = true; // Paper
-+    // Titanium start
-+    public final boolean handleTrackerAsync = TitaniumConfig.get().entityTracker.async.enabled;
-+    public final Runnable updateTracker = () -> this.tracker.updatePlayers();
-+    // Titanium end
++    public final boolean handleTrackerAsync = TitaniumConfig.get().entityTracker.async.enabled; // Titanium
  
      // CraftBukkit start
      public final int dimension;
-@@ -64,7 +70,13 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -64,7 +67,13 @@ public class WorldServer extends World implements IAsyncTaskHandler {
          worlddata.world = this;
          // CraftBukkit end
          this.server = minecraftserver;

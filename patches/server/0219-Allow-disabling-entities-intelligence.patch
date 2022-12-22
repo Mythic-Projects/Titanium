@@ -56,10 +56,10 @@ index e8235f0d30e3073fcedd3227c81e5ba1d5cd6628..db24dbbbcd581cbb7f9cb3c331dcc816
 +    public abstract boolean handleEntitiesAI();
  }
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index e191622572a305b5e17f2a79fee513702c657f1d..cc38c8336d29eee3a2c6ff01a0506921157ee6ef 100644
+index 17be48846c911a23d6d06cf00cc87fb347c01827..44c09f5aa9c4ba1a8ea4b3ce7bfdb5269a5eb4cd 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
-@@ -1290,4 +1290,21 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -1287,4 +1287,21 @@ public class WorldServer extends World implements IAsyncTaskHandler {
              this();
          }
      }
