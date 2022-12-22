@@ -42,10 +42,10 @@ index d2290a02a88ffc661ea87686ef6d5d196b2d295b..876aea3ffcaa6c53eb3068b4e96c6b6c
          Iterator iterator;
          BlockPosition blockposition;
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 955088cd5f71dfc085e71b491c40c051f75b192e..5118cd64ef76005f8fe4234a1d0fb4b5eaf3c42a 100644
+index db06d8147a333c737c1be587da5eb08aadc14629..9ab04ff28d22770549e7362233236e57fab1c5ab 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
-@@ -1109,6 +1109,11 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -1106,6 +1106,11 @@ public class WorldServer extends World implements IAsyncTaskHandler {
              explosion.clearBlocks();
          }
  

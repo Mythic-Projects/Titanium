@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Paper-0664] EntityMoveEvent by William Blake
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index 0f3790b423fb418b79daa3b887a318718315be2d..7c0bb631a652a486e3e2a030af684a4d0d485359 100644
+index 0f3790b423fb418b79daa3b887a318718315be2d..3a30418b4d88d13c236bf7c418d894bc7f776239 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
 @@ -1767,6 +1767,22 @@ public abstract class EntityLiving extends Entity {
@@ -33,7 +33,7 @@ index 0f3790b423fb418b79daa3b887a318718315be2d..7c0bb631a652a486e3e2a030af684a4d
  
      protected void doTick() {}
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 7a1387fa818c77b874df70aa0e587ec584a686e0..0b5320c20ff234414628f0355813a66b7ece30d4 100644
+index 54e4761eb8556d00f723fcb86101c1b0a5262638..8529283cbf80e12681d0e05c2b25484478b9ed1d 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -1085,6 +1085,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
@@ -45,7 +45,7 @@ index 7a1387fa818c77b874df70aa0e587ec584a686e0..0b5320c20ff234414628f0355813a66b
                  //this.methodProfiler.a(worldserver.getWorldData().getName()); // Purpur
                  /* Drop global time updates
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 00cc2be93e6110d0df55506c5c5daa6c6002f419..e191622572a305b5e17f2a79fee513702c657f1d 100644
+index 1bb55a635e7b45848b66b13026f8c21355314b07..17be48846c911a23d6d06cf00cc87fb347c01827 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
 @@ -54,6 +54,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
@@ -53,6 +53,6 @@ index 00cc2be93e6110d0df55506c5c5daa6c6002f419..e191622572a305b5e17f2a79fee51370
      private List<NextTickListEntry> V = Lists.newArrayList();
      public boolean hasPhysicsEvent = true; // Paper
 +    public boolean hasEntityMoveEvent = false; // Paper
-     // Titanium start
-     public final boolean handleTrackerAsync = TitaniumConfig.get().entityTracker.async.enabled;
-     public final Runnable updateTracker = () -> this.tracker.updatePlayers();
+     public final boolean handleTrackerAsync = TitaniumConfig.get().entityTracker.async.enabled; // Titanium
+ 
+     // CraftBukkit start

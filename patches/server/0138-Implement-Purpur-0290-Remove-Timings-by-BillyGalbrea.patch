@@ -29,7 +29,7 @@ index 9ebc710fe7cebf71c130c84da2805c4314719b92..68da4638423baa981af677090fb5efd1
      public final Timing mobSpawn;
      public final Timing doChunkUnload;
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index bd1a6271f17f66bfe4b8b12d3b7b393b80591b6a..f9ed24fc05eec4d3dea571f52b3aad327d26a62c 100644
+index bb0af79e55d02a016eb27c00d2a1537ab85ab6e0..ee508c1298ffe3da74a0a93cdf1e0421ffc2e969 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
 @@ -1076,7 +1076,7 @@ public class Chunk {
@@ -163,7 +163,7 @@ index 7a44b757c34bb337812aeb7e9f6dd378d1a77486..45afb38bb7cd72014e6d50510feaf041
  
      public boolean ae() {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index e831a8a80cb0a2bb8a0de81e78af3d7d273dc94a..f4f874a0dcd8d06e975bf49acad8492dcc25cb94 100644
+index 9e631218be5129c45edc5b295690842515c3b02f..8d6a334ae6035f2af2ad9b2141023e2562670db5 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -832,7 +832,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
@@ -285,7 +285,7 @@ index e831a8a80cb0a2bb8a0de81e78af3d7d273dc94a..f4f874a0dcd8d06e975bf49acad8492d
                  // Tuinity start - controlled flush for entity tracker packets
                  List<NetworkManager> disabledFlushes = new ArrayList<>(worldserver.players.size());
                  for (EntityHuman player : worldserver.players) {
-@@ -1059,7 +1059,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+@@ -1053,7 +1053,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
                      }
                  }
                  // Tuinity end
@@ -294,7 +294,7 @@ index e831a8a80cb0a2bb8a0de81e78af3d7d273dc94a..f4f874a0dcd8d06e975bf49acad8492d
                  this.methodProfiler.b();
                  this.methodProfiler.b();
                  worldserver.explosionDensityCache.clear(); // PaperSpigot - Optimize explosions
-@@ -1075,20 +1075,20 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+@@ -1069,20 +1069,20 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
          // WindSpigot end
  
          this.methodProfiler.c("connection");
@@ -488,10 +488,10 @@ index 8f31328b66616821eeaa4bc0f90da1b46e251696..b702ba9cc83f205dda6b0a3e8dcf5c20
                      entity.ak();
                  } else {
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index b504a01f9ada3104604e79a661b6d56247485892..758ca7265ffafe5727091206305d51724de452cc 100644
+index 4789182db4a9fd45c1bb928d557b28cd611c2128..b96ebd904752680bbf90404e9c2bd29ebd2cfdba 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
-@@ -238,13 +238,13 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -235,13 +235,13 @@ public class WorldServer extends World implements IAsyncTaskHandler {
          // CraftBukkit start - Only call spawner if we have players online and the world allows for mobs or animals
          long time = this.worldData.getTime();
          if (this.getGameRules().getBoolean("doMobSpawning") && this.worldData.getType() != WorldType.DEBUG_ALL_BLOCK_STATES && (this.allowMonsters || this.allowAnimals) && (this instanceof WorldServer && this.players.size() > 0)) {
@@ -508,7 +508,7 @@ index b504a01f9ada3104604e79a661b6d56247485892..758ca7265ffafe5727091206305d5172
          this.methodProfiler.c("chunkSource");
  
          // Only unload if chunkProvider isn't null
-@@ -263,35 +263,35 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -260,35 +260,35 @@ public class WorldServer extends World implements IAsyncTaskHandler {
              this.worldData.setDayTime(this.worldData.getDayTime() + 1L);
          }
  
@@ -557,7 +557,7 @@ index b504a01f9ada3104604e79a661b6d56247485892..758ca7265ffafe5727091206305d5172
      }
  
      public BiomeBase.BiomeMeta a(EnumCreatureType enumcreaturetype, BlockPosition blockposition) {
-@@ -491,7 +491,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -488,7 +488,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
                  }
  
                  this.methodProfiler.c("tickBlocks");
@@ -566,7 +566,7 @@ index b504a01f9ada3104604e79a661b6d56247485892..758ca7265ffafe5727091206305d5172
                  i1 = titaniumConfig.disabledGamerules.randomTickSpeed ? 3 : this.getGameRules().c("randomTickSpeed");
                  if (i1 > 0) {
                      ChunkSection[] achunksection = chunk.getSections();
-@@ -520,7 +520,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -517,7 +517,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
                          }
                      }
                  }
@@ -575,7 +575,7 @@ index b504a01f9ada3104604e79a661b6d56247485892..758ca7265ffafe5727091206305d5172
              }
  
          }
-@@ -652,7 +652,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -649,7 +649,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
  
                  this.methodProfiler.a("cleaning");
  
@@ -584,7 +584,7 @@ index b504a01f9ada3104604e79a661b6d56247485892..758ca7265ffafe5727091206305d5172
                  NextTickListEntry nextticklistentry;
  
                  for (int j = 0; j < i; ++j) {
-@@ -665,7 +665,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -662,7 +662,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
                      this.M.remove(nextticklistentry);
                      this.V.add(nextticklistentry);
                  }
@@ -593,7 +593,7 @@ index b504a01f9ada3104604e79a661b6d56247485892..758ca7265ffafe5727091206305d5172
  
                  // PaperSpigot start - Allow redstone ticks to bypass the tickNextTickListCap
                  if (paperConfigTitanium.tickNextTickListCapIgnoresRedstone) {
-@@ -686,7 +686,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -683,7 +683,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
  
                  this.methodProfiler.b();
                  this.methodProfiler.a("ticking");
@@ -602,7 +602,7 @@ index b504a01f9ada3104604e79a661b6d56247485892..758ca7265ffafe5727091206305d5172
                  Iterator iterator = this.V.iterator();
  
                  while (iterator.hasNext()) {
-@@ -697,7 +697,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -694,7 +694,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
                      if (this.areChunksLoadedBetween(nextticklistentry.a.a(-b0, -b0, -b0), nextticklistentry.a.a(b0, b0, b0))) {
                          IBlockData iblockdata = this.getType(nextticklistentry.a);
                          co.aikar.timings.Timing timing = iblockdata.getBlock().getTiming(); // Spigot
@@ -611,7 +611,7 @@ index b504a01f9ada3104604e79a661b6d56247485892..758ca7265ffafe5727091206305d5172
  
                          if (iblockdata.getBlock().getMaterial() != Material.AIR && Block.a(iblockdata.getBlock(), nextticklistentry.a())) {
                              try {
-@@ -710,12 +710,12 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -707,12 +707,12 @@ public class WorldServer extends World implements IAsyncTaskHandler {
                                  throw new ReportedException(crashreport);
                              }
                          }

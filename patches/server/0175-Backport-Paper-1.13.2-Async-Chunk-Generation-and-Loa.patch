@@ -1003,7 +1003,7 @@ index 49e064626367174b6a00b5d02e77ce5a8aadb062..005b4f1d42aac5809092672cc9e3c4db
          f %= 360.0F;
          if (f >= 180.0F) {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 380944fdc4be8b4cb4fc8acc00e9a9a2cf52197e..c5542b28103b6d8e305fbcad0942f1ceead6a40a 100644
+index 3c5e7ba8a98cdced91b0b2557a2cefd8df6419ab..c2e870ba57cdc105ee0c263d5f2e29069f25bafb 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -42,6 +42,8 @@ import java.util.concurrent.locks.LockSupport;
@@ -2169,10 +2169,10 @@ index 2307c87b6c08e785be438515727821cffdd63ad8..ae22fb53fde4c42d109510b30df3b92f
                                  }
                              }
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 5118cd64ef76005f8fe4234a1d0fb4b5eaf3c42a..166f85fedfa181d3a8d70971c512ed8b839c1dff 100644
+index 9ab04ff28d22770549e7362233236e57fab1c5ab..5399e5bb437a69a68a6e678e60eb65d07658cefd 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
-@@ -828,7 +828,11 @@ public class WorldServer extends World implements IAsyncTaskHandler {
+@@ -825,7 +825,11 @@ public class WorldServer extends World implements IAsyncTaskHandler {
              gen = new org.bukkit.craftbukkit.generator.NormalChunkGenerator(this, this.getSeed());
          }
  
