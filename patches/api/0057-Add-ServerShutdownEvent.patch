@@ -1,0 +1,46 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 25 Dec 2022 17:30:48 +0100
+Subject: [PATCH] Add ServerShutdownEvent
+
+
+diff --git a/src/main/java/org/bukkit/event/server/ServerShutdownEvent.java b/src/main/java/org/bukkit/event/server/ServerShutdownEvent.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..fd56bfe60236b04b5c6a35e6b1501d84d8b8a5c0
+--- /dev/null
++++ b/src/main/java/org/bukkit/event/server/ServerShutdownEvent.java
+@@ -0,0 +1,33 @@
++package org.bukkit.event.server;
++
++import org.bukkit.Server;
++import org.bukkit.event.HandlerList;
++
++public class ServerShutdownEvent extends ServerEvent {
++
++    private static final HandlerList handlers = new HandlerList();
++    private final Server server;
++
++    public ServerShutdownEvent(final Server server) {
++        this.server = server;
++    }
++
++    /**
++     * Gets the server that is shutting down.
++     *
++     * @return Server that is shutting down
++     */
++    public Server getServer() {
++        return this.server;
++    }
++
++    @Override
++    public HandlerList getHandlers() {
++        return handlers;
++    }
++
++    public static HandlerList getHandlerList() {
++        return handlers;
++    }
++
++}
+\ No newline at end of file

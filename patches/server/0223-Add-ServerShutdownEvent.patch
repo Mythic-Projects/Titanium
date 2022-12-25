@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 25 Dec 2022 17:30:48 +0100
+Subject: [PATCH] Add ServerShutdownEvent
+
+
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 1aa2537434ad5144c50c7f406addfd087053171d..c4e5f94894f9b3bf1ff4af8cbcd044a49af8a690 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -583,6 +583,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+         // CraftBukkit start - prevent double stopping on multiple threads
+         synchronized(stopLock) {
+             if (hasStopped) return;
++            new org.bukkit.event.server.ServerShutdownEvent(server).callEvent(); // Titanium
+             hasStopped = true;
+         }
+         PaperAsyncChunkProvider.stop(this); // Paper
