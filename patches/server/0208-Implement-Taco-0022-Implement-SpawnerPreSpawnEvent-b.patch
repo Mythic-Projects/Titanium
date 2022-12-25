@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [Taco-0022] Implement SpawnerPreSpawnEvent by
 
 
 diff --git a/src/main/java/net/minecraft/server/MobSpawnerAbstract.java b/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
-index 699681e9b26877759da954d66031b51c161524fc..917746df5d94491dae2ca358d33236accd332b0b 100644
+index 699681e9b26877759da954d66031b51c161524fc..50f75c59e66022493f64e435d1e40aa51bb43497 100644
 --- a/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
 +++ b/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
 @@ -103,6 +103,13 @@ public abstract class MobSpawnerAbstract {
@@ -14,8 +14,8 @@ index 699681e9b26877759da954d66031b51c161524fc..917746df5d94491dae2ca358d33236ac
  
                  for (int i = 0; i < this.spawnCount; ++i) {
 +                    // TacoSpigot start
-+                    net.techcable.tacospigot.event.entity.SpawnerPreSpawnEvent event = new net.techcable.tacospigot.event.entity.SpawnerPreSpawnEvent(MCUtil.toLocation(this.a(), blockposition), mobType);
-+                    if (!event.callEvent()) {
++                    if (net.techcable.tacospigot.event.entity.SpawnerPreSpawnEvent.getHandlerList().getRegisteredListeners().length > 0 // Titanium - Don't call event if no one is listening
++                       && !new net.techcable.tacospigot.event.entity.SpawnerPreSpawnEvent(MCUtil.toLocation(this.a(), blockposition), mobType).callEvent()) {
 +                        flag = true;
 +                        break;
 +                    }
