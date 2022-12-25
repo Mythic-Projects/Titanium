@@ -1,0 +1,156 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 25 Dec 2022 17:14:34 +0100
+Subject: [PATCH] Add EquipmentSetEvent API
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
+index ea4cea70f93e02c2963ebb1bd8ea1157a80dec70..d87159710e65a0f97fd2a593a99ab0d903bbb8b3 100644
+--- a/src/main/java/net/minecraft/server/EntityHuman.java
++++ b/src/main/java/net/minecraft/server/EntityHuman.java
+@@ -1682,7 +1682,7 @@ public abstract class EntityHuman extends EntityLiving {
+     }
+ 
+     public void setEquipment(int i, ItemStack itemstack) {
+-        this.inventory.armor[i] = itemstack;
++        this.inventory.setEquipment(i, itemstack); // Titanium
+     }
+ 
+     public abstract boolean isSpectator();
+diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
+index 850cb9f8fc461eb4b130fb131aa5d3fd400b4012..1026866727416faeb85059c9505cdc7bed76c1bc 100644
+--- a/src/main/java/net/minecraft/server/EntityPlayer.java
++++ b/src/main/java/net/minecraft/server/EntityPlayer.java
+@@ -489,7 +489,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+             }
+ 
+             for (int i = 0; i < this.inventory.armor.length; ++i) {
+-                this.inventory.armor[i] = null;
++                this.setEquipment(i, null); // Titanium
+             }
+         }
+ 
+diff --git a/src/main/java/net/minecraft/server/PlayerInventory.java b/src/main/java/net/minecraft/server/PlayerInventory.java
+index 76fa51d97e9a938d4198bbe657d77900f6327744..09e0bdaeb8b05e5df908c6eb172deed8b78b3cdf 100644
+--- a/src/main/java/net/minecraft/server/PlayerInventory.java
++++ b/src/main/java/net/minecraft/server/PlayerInventory.java
+@@ -6,6 +6,7 @@ import java.util.concurrent.Callable;
+ import java.util.List;
+ 
+ import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++import org.bukkit.craftbukkit.inventory.CraftItemStack;
+ import org.bukkit.entity.HumanEntity;
+ // CraftBukkit end
+ 
+@@ -142,7 +143,7 @@ public class PlayerInventory implements IInventory {
+                 if (j != 0) {
+                     this.armor[l].count -= i1;
+                     if (this.armor[l].count == 0) {
+-                        this.armor[l] = null;
++                        this.setEquipment(l, null); // Titanium
+                     }
+ 
+                     if (j > 0 && k >= j) {
+@@ -307,7 +308,10 @@ public class PlayerInventory implements IInventory {
+     public ItemStack splitStack(int i, int j) {
+         ItemStack[] aitemstack = this.items;
+ 
+-        if (i >= this.items.length) {
++        // Titanium start
++        boolean settingArmour = i >= this.items.length;
++        if (settingArmour) {
++        // Titanium end
+             aitemstack = this.armor;
+             i -= this.items.length;
+         }
+@@ -317,12 +321,24 @@ public class PlayerInventory implements IInventory {
+ 
+             if (aitemstack[i].count <= j) {
+                 itemstack = aitemstack[i];
+-                aitemstack[i] = null;
++                // Titanium start
++                if (settingArmour) {
++                    this.setEquipment(i, null);
++                } else {
++                    aitemstack[i] = null;
++                }
++                // Titanium end
+                 return itemstack;
+             } else {
+                 itemstack = aitemstack[i].cloneAndSubtract(j);
+                 if (aitemstack[i].count == 0) {
+-                    aitemstack[i] = null;
++                    // Titanium start
++                    if (settingArmour) {
++                        this.setEquipment(i, null);
++                    } else {
++                        aitemstack[i] = null;
++                    }
++                    // Titanium end
+                 }
+ 
+                 return itemstack;
+@@ -361,6 +377,18 @@ public class PlayerInventory implements IInventory {
+         aitemstack[i] = itemstack;
+     }
+ 
++    // Titanium start
++    public void setEquipment(int i, ItemStack itemstack) {
++        ItemStack previous = this.armor[i];
++        if (previous != null
++                && org.bukkit.event.inventory.EquipmentSetEvent.getHandlerList().getRegisteredListeners().length > 0
++                && !new org.bukkit.event.inventory.EquipmentSetEvent(this.player.getBukkitEntity(), i, CraftItemStack.asBukkitCopy(itemstack), CraftItemStack.asBukkitCopy(previous.cloneItemStack())).callEvent()) {
++            return;
++        }
++        this.armor[i] = itemstack;
++    }
++    // Titanium end
++
+     public float a(Block block) {
+         float f = 1.0F;
+ 
+@@ -411,7 +439,7 @@ public class PlayerInventory implements IInventory {
+                 }
+ 
+                 if (j >= 100 && j < this.armor.length + 100) {
+-                    this.armor[j - 100] = itemstack;
++                    this.setEquipment(j - 100, itemstack); // Titanium
+                 }
+             }
+         }
+@@ -487,7 +515,7 @@ public class PlayerInventory implements IInventory {
+             if (this.armor[i] != null && this.armor[i].getItem() instanceof ItemArmor) {
+                 this.armor[i].damage((int) f, this.player);
+                 if (this.armor[i].count == 0) {
+-                    this.armor[i] = null;
++                    this.setEquipment(i, null); // Titanium
+                 }
+             }
+         }
+@@ -507,7 +535,7 @@ public class PlayerInventory implements IInventory {
+         for (i = 0; i < this.armor.length; ++i) {
+             if (this.armor[i] != null) {
+                 this.player.a(this.armor[i], true, false);
+-                this.armor[i] = null;
++                this.setEquipment(i, null); // Titanium
+             }
+         }
+ 
+@@ -568,7 +596,7 @@ public class PlayerInventory implements IInventory {
+         }
+ 
+         for (i = 0; i < this.armor.length; ++i) {
+-            this.armor[i] = ItemStack.b(playerinventory.armor[i]);
++            this.setEquipment(i, ItemStack.b(playerinventory.armor[i])); // Titanium
+         }
+ 
+         this.itemInHandIndex = playerinventory.itemInHandIndex;
+@@ -592,7 +620,7 @@ public class PlayerInventory implements IInventory {
+         }
+ 
+         for (i = 0; i < this.armor.length; ++i) {
+-            this.armor[i] = null;
++            this.setEquipment(i, null); // Titanium
+         }
+ 
+     }
