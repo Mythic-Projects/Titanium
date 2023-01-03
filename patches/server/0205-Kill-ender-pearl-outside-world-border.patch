@@ -14,7 +14,7 @@ index 2ed7f2790217b5596005b80a8ed5e6ff133bc413..5f315ce270188270e7917b1bfeab9c23
  
 -        if (blockPosition != null) {
 +        // Titanium start
-+        if (!world.getWorldBorder().isInBounds(blockPosition)) {
++        if (blockPosition != null && !world.getWorldBorder().isInBounds(blockPosition)) {
 +            this.die();
 +            return;
 +        }
