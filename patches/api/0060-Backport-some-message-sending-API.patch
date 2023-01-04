@@ -1,0 +1,166 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Wed, 4 Jan 2023 17:32:32 +0100
+Subject: [PATCH] Backport some message sending API
+
+
+diff --git a/src/main/java/org/bukkit/command/CommandSender.java b/src/main/java/org/bukkit/command/CommandSender.java
+index 148756b9ca60beeb7643ab584dbfcb6defec8d54..013e6c5699629a65f5a3a146deebc04a136fb171 100644
+--- a/src/main/java/org/bukkit/command/CommandSender.java
++++ b/src/main/java/org/bukkit/command/CommandSender.java
+@@ -2,6 +2,7 @@ package org.bukkit.command;
+ 
+ import org.bukkit.Server;
+ import org.bukkit.permissions.Permissible;
++import org.jetbrains.annotations.NotNull;
+ 
+ public interface CommandSender extends Permissible {
+ 
+@@ -32,4 +33,30 @@ public interface CommandSender extends Permissible {
+      * @return Name of the sender
+      */
+     public String getName();
++
++    // Paper start
++    /**
++     * Sends the component to the sender
++     *
++     * <p>If this sender does not support sending full components then
++     * the component will be sent as legacy text.</p>
++     *
++     * @param component the component to send
++     */
++    default void sendMessage(@NotNull net.md_5.bungee.api.chat.BaseComponent component) {
++        this.sendMessage(component.toLegacyText());
++    }
++
++    /**
++     * Sends an array of components as a single message to the sender
++     *
++     * <p>If this sender does not support sending full components then
++     * the components will be sent as legacy text.</p>
++     *
++     * @param components the components to send
++     */
++    default void sendMessage(@NotNull net.md_5.bungee.api.chat.BaseComponent... components) {
++        this.sendMessage(new net.md_5.bungee.api.chat.TextComponent(components).toLegacyText());
++    }
++    // Paper end
+ }
+diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/bukkit/entity/Player.java
+index 07cfd8566bbf2997aa66313acb5263940f07879a..a0b68537fca6183bdca64c7bbcb6e220485e8930 100644
+--- a/src/main/java/org/bukkit/entity/Player.java
++++ b/src/main/java/org/bukkit/entity/Player.java
+@@ -23,6 +23,7 @@ import org.bukkit.plugin.messaging.PluginMessageRecipient;
+ import org.bukkit.scoreboard.Scoreboard;
+ // PaperSpigot start
+ import org.github.paperspigot.Title;
++import org.jetbrains.annotations.NotNull;
+ // PaperSpigot end
+ 
+ /**
+@@ -341,14 +342,32 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
+      *
+      * @param component the components to send
+      */
+-    public void sendMessage(net.md_5.bungee.api.chat.BaseComponent component);
++    @Override
++    public default void sendMessage(@NotNull net.md_5.bungee.api.chat.BaseComponent component) {
++        spigot().sendMessage(component);
++    }
+ 
+     /**
+      * Sends an array of components as a single message to the player
+      *
+      * @param components the components to send
+      */
+-    public void sendMessage(net.md_5.bungee.api.chat.BaseComponent... components);
++    @Override
++    public default void sendMessage(@NotNull net.md_5.bungee.api.chat.BaseComponent... components) {
++        spigot().sendMessage(components);
++    }
++
++    /**
++     * Sends an array of components as a single message to the specified screen position of this player
++     *
++     * @deprecated This is unlikely the API you want to use. See {@link #sendActionBar(String)} for a more proper Action Bar API. This deprecated API may send unsafe items to the client.
++     * @param position the screen position
++     * @param components the components to send
++     */
++    @Deprecated
++    public default void sendMessage(net.md_5.bungee.api.ChatMessageType position, net.md_5.bungee.api.chat.BaseComponent... components) {
++        spigot().sendMessage(position, components);
++    }
+ 
+     /**
+      * Set the text displayed in the player list header and footer for this player
+@@ -497,24 +516,24 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
+     /**
+      * Sends an Action Bar message to the client.
+      *
+-     * @param message message to display
++     * Use Section symbols for legacy color codes to send formatting.
++     *
++     * @param message The message to send
+      */
+-    default void sendActionBar(String... message) {
+-        BaseComponent[] messageComponents = new BaseComponent[message.length];
+-        int i = 0;
+-        for (String messageLine : message) {
+-            messageComponents[i] = new TextComponent(messageLine);
+-            i++;
+-        }
+-        sendActionBar(messageComponents);
+-    }
++    public void sendActionBar(@NotNull String message);
+ 
+     /**
+      * Sends an Action Bar message to the client.
+      *
+-     * @param message message to display
++     * Use supplied alternative character to the section symbol to represent legacy color codes.
++     *
++     * @param alternateChar Alternate symbol such as '&amp;'
++     * @param message The message to send
+      */
+-    void sendActionBar(BaseComponent... message);
++    default void sendActionBar(char alternateChar, @NotNull String message) {
++        if (message == null || message.isEmpty()) return;
++        sendActionBar(org.bukkit.ChatColor.translateAlternateColorCodes(alternateChar, message));
++    }
+     // Titanium end
+ 
+     /**
+@@ -1363,6 +1382,32 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
+             throw new UnsupportedOperationException("Not supported yet.");
+         }
+ 
++        // Titanium start
++        /**
++         * Sends the component to the specified screen position of this player
++         *
++         * @deprecated This is unlikely the API you want to use. See {@link #sendActionBar(String)} for a more proper Action Bar API. This deprecated API may send unsafe items to the client.
++         * @param position the screen position
++         * @param component the components to send
++         */
++        @Deprecated
++        public void sendMessage(@NotNull net.md_5.bungee.api.ChatMessageType position, @NotNull net.md_5.bungee.api.chat.BaseComponent component) {
++            throw new UnsupportedOperationException("Not supported yet.");
++        }
++
++        /**
++         * Sends an array of components as a single message to the specified screen position of this player
++         *
++         * @deprecated This is unlikely the API you want to use. See {@link #sendActionBar(String)} for a more proper Action Bar API. This deprecated API may send unsafe items to the client.
++         * @param position the screen position
++         * @param components the components to send
++         */
++        @Deprecated
++        public void sendMessage(@NotNull net.md_5.bungee.api.ChatMessageType position, @NotNull net.md_5.bungee.api.chat.BaseComponent... components) {
++            throw new UnsupportedOperationException("Not supported yet.");
++        }
++        // Titanium end
++
+         /**
+          * Get whether the player affects mob spawning
+          *

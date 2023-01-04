@@ -1,0 +1,22 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Wed, 4 Jan 2023 17:39:34 +0100
+Subject: [PATCH] Add Server.Titanium#getReloadCount
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index b266751a124623c5b39ff1d1ac1850e96243feba..f5747c1152aeb32c0e8d471cac8c30acc85b714e 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -2191,6 +2191,11 @@ public final class CraftServer implements Server {
+             return startTime;
+         }
+ 
++        @Override
++        public int getReloadCount() {
++            return reloadCount;
++        }
++
+         @Override
+         public KnockbackProfile getKnockbackProfile() {
+             return knockbackProfile;

@@ -1,0 +1,27 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Wed, 4 Jan 2023 16:53:26 +0100
+Subject: [PATCH] Backport Server.Spigot#getPaperConfig
+
+
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index 56ae6b2ca5cf83e97d28c8b67d193d23a5432f34..e82263af945ea43b9c05f0e08f02396b6d919f48 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -1052,6 +1052,16 @@ public interface Server extends PluginMessageRecipient {
+             throw new UnsupportedOperationException("Not supported yet.");
+         }
+ 
++        // Titanium start
++        /**
++         * @deprecated Use {@link Titanium#getServerConfig()}
++         */
++        @Deprecated
++        public org.bukkit.configuration.file.YamlConfiguration getPaperConfig() {
++            return this.getPaperSpigotConfig();
++        }
++        // Titanium end
++
+         /**
+          * @deprecated Use {@link Titanium#getServerConfig()}
+          */

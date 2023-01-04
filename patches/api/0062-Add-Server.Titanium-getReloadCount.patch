@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Wed, 4 Jan 2023 17:39:35 +0100
+Subject: [PATCH] Add Server.Titanium#getReloadCount
+
+
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index e82263af945ea43b9c05f0e08f02396b6d919f48..c04bb95c05074c5a00f8b32da4ccfe10f4a8d6a1 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -1196,6 +1196,13 @@ public interface Server extends PluginMessageRecipient {
+             return Duration.between(getStartTime(), Instant.now());
+         }
+ 
++        /**
++         * @return number of times the server was reloaded using /reload command
++         */
++        public int getReloadCount() {
++            throw new UnsupportedOperationException("Not supported yet.");
++        }
++
+         /**
+          * Gets the global knockback profile
+          */
