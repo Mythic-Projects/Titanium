@@ -5,7 +5,7 @@ Subject: [PATCH] Implement [PandaSpigot-0006] Update to Netty 4.1.x
 
 
 diff --git a/build.gradle b/build.gradle
-index 9118425c0183de8c21aadca66643a55956e8baef..d8e917b3952376e22f6e69e617883cf22e76c818 100644
+index a6dfe4860a0a38b167416f1746ffa78045670cdc..d505eee2f6658fe13e2bb157b79db75644556abc 100644
 --- a/build.gradle
 +++ b/build.gradle
 @@ -6,7 +6,7 @@ dependencies {
@@ -14,7 +14,7 @@ index 9118425c0183de8c21aadca66643a55956e8baef..d8e917b3952376e22f6e69e617883cf2
      // Minecraft libraries start
 -    implementation 'com.mojang:netty:1.7.7'
 +    implementation 'io.netty:netty-all:4.1.85.Final' // PandaSpigot - Updated netty to 4.1.x
-     implementation 'it.unimi.dsi:fastutil:8.5.9' // Titanium - updated fastutil to 8.5.9
+     implementation 'it.unimi.dsi:fastutil:8.5.11' // Titanium - updated fastutil to 8.5.11
      implementation 'net.sf.trove4j:trove4j:3.0.3'
      // Titanium start - updated log4j to 2.19.0
 diff --git a/src/main/java/net/minecraft/server/PacketDataSerializer.java b/src/main/java/net/minecraft/server/PacketDataSerializer.java
