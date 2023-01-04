@@ -1,0 +1,36 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Wed, 4 Jan 2023 17:35:49 +0100
+Subject: [PATCH] Add Player#getPing
+
+
+diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/bukkit/entity/Player.java
+index a0b68537fca6183bdca64c7bbcb6e220485e8930..b6ced8b3698b6696fdaac7b74925556d394cf8f5 100644
+--- a/src/main/java/org/bukkit/entity/Player.java
++++ b/src/main/java/org/bukkit/entity/Player.java
+@@ -1295,6 +1295,25 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
+     void setPlayerProfile(com.destroystokyo.paper.profile.PlayerProfile profile);
+     // PandaSpigot end
+ 
++    // Titanium start
++    /**
++     * Gets the player's estimated ping in milliseconds.
++     *
++     * In Vanilla this value represents the average of the response time to the
++     * last four application layer ping packets sent. This value does not
++     * represent the network round trip time and as such may have less
++     * granularity and be impacted by other sources. For these reasons it
++     * <b>should not</b> be used for anti-cheat purposes. Its recommended use is
++     * only as a <b>qualitative</b> indicator of connection quality (Vanilla
++     * uses it for this purpose in the tab list).
++     *
++     * @return player ping
++     */
++    default public int getPing() {
++        return this.spigot().getPing();
++    }
++    // Titanium end
++
+     // Spigot start
+     public class Spigot extends Entity.Spigot
+     {
