@@ -1,0 +1,46 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Tue, 10 Jan 2023 23:43:15 +0100
+Subject: [PATCH] Backport ServerLoadEvent
+
+
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index c4e5f94894f9b3bf1ff4af8cbcd044a49af8a690..8bcd42f4c269b793f116dc1d6fc1fbe178d4a646 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -57,6 +57,7 @@ import joptsimple.OptionSet;
+ 
+ import org.bukkit.craftbukkit.Main;
+ import co.aikar.timings.SpigotTimings; // Spigot
++import org.bukkit.event.server.ServerLoadEvent;
+ // CraftBukkit end
+ 
+ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTick> implements Runnable, ICommandListener, IAsyncTaskHandler, IMojangStatistics {
+@@ -509,6 +510,7 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic
+         }
+         // CraftBukkit end
+         this.s();
++        this.server.getPluginManager().callEvent(new ServerLoadEvent(ServerLoadEvent.LoadType.STARTUP)); // Titanium
+     }
+ 
+     protected void a(String s, IDataManager idatamanager) {
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index f5747c1152aeb32c0e8d471cac8c30acc85b714e..ad6833ac1b017e1f0d6602f94e5e6efe72bdf65a 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -94,6 +94,7 @@ import org.bukkit.entity.Entity;
+ import org.bukkit.entity.Player;
+ import org.bukkit.event.inventory.InventoryType;
+ import org.bukkit.event.player.PlayerChatTabCompleteEvent;
++import org.bukkit.event.server.ServerLoadEvent;
+ import org.bukkit.event.server.TabCompleteEvent;
+ import org.bukkit.event.world.WorldInitEvent;
+ import org.bukkit.event.world.WorldLoadEvent;
+@@ -923,6 +924,7 @@ public final class CraftServer implements Server {
+         loadPlugins();
+         enablePlugins(PluginLoadOrder.STARTUP);
+         enablePlugins(PluginLoadOrder.POSTWORLD);
++        getPluginManager().callEvent(new ServerLoadEvent(ServerLoadEvent.LoadType.RELOAD)); // Titanium
+     }
+ 
+     private void loadIcon() {
