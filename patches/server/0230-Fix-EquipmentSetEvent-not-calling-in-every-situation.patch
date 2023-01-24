@@ -1,0 +1,49 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Tue, 24 Jan 2023 20:07:58 +0100
+Subject: [PATCH] Fix EquipmentSetEvent not calling in every situation
+
+
+diff --git a/src/main/java/net/minecraft/server/PlayerInventory.java b/src/main/java/net/minecraft/server/PlayerInventory.java
+index 09e0bdaeb8b05e5df908c6eb172deed8b78b3cdf..92acf2ae6510baf528168385a1350a905036de2d 100644
+--- a/src/main/java/net/minecraft/server/PlayerInventory.java
++++ b/src/main/java/net/minecraft/server/PlayerInventory.java
+@@ -351,15 +351,23 @@ public class PlayerInventory implements IInventory {
+     public ItemStack splitWithoutUpdate(int i) {
+         ItemStack[] aitemstack = this.items;
+ 
+-        if (i >= this.items.length) {
++        // Titanium start
++        boolean settingArmour = i >= this.items.length;
++        if (settingArmour) {
++        // Titanium end
+             aitemstack = this.armor;
+             i -= this.items.length;
+         }
+ 
+         if (aitemstack[i] != null) {
+             ItemStack itemstack = aitemstack[i];
+-
+-            aitemstack[i] = null;
++            // Titanium start
++            if (settingArmour) {
++                this.setEquipment(i, null);
++            } else {
++                aitemstack[i] = null;
++            }
++            // Titanium end
+             return itemstack;
+         } else {
+             return null;
+@@ -371,7 +379,10 @@ public class PlayerInventory implements IInventory {
+ 
+         if (i >= aitemstack.length) {
+             i -= aitemstack.length;
+-            aitemstack = this.armor;
++            // Titanium start
++            //aitemstack = this.armor;
++            this.setEquipment(i, itemstack);
++            // Titanium end
+         }
+ 
+         aitemstack[i] = itemstack;
