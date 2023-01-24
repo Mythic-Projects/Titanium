@@ -1,0 +1,28 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Tue, 24 Jan 2023 18:22:39 +0100
+Subject: [PATCH] Backport PlayerJumpEvent
+
+
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index b8b48689591204a3dbbf70ddb6e117535876c2a8..2f3fec382a1acf49759d6d2d0aa2a9340a1f5d08 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -424,7 +424,16 @@ public class PlayerConnection implements PacketListenerPlayIn, IUpdatePlayerList
+                     boolean flag = worldserver.getCubes(this.player, this.player.getBoundingBox().shrink((double) f4, (double) f4, (double) f4)).isEmpty();
+ 
+                     if (this.player.onGround && !packetplayinflying.f() && d12 > 0.0D) {
+-                        this.player.bF();
++                        // Titanium start - Backport PlayerJumpEvent
++                        com.destroystokyo.paper.event.player.PlayerJumpEvent event = new com.destroystokyo.paper.event.player.PlayerJumpEvent(player, from, to);
++                        if (event.callEvent()) {
++                            this.player.bF();
++                        } else {
++                            from = event.getFrom();
++                            this.a(from.getX(), from.getY(), from.getZ(), from.getYaw(), from.getPitch(), Collections.emptySet());
++                            return;
++                        }
++                        // Titanium end
+                     }
+ 
+                     this.player.move(d11, d12, d13);
