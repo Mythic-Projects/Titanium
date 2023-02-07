@@ -5,7 +5,7 @@ Subject: [PATCH] Backport PlayerArmorChangeEvent
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index 3a30418b4d88d13c236bf7c418d894bc7f776239..f74b8d5a2b761d8e84da25c306c40ff8378ced0b 100644
+index 3a30418b4d88d13c236bf7c418d894bc7f776239..8afa025fff7c652e38738d4bbc725b96db11cdf0 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
 @@ -1581,6 +1581,11 @@ public abstract class EntityLiving extends Entity {
@@ -13,7 +13,7 @@ index 3a30418b4d88d13c236bf7c418d894bc7f776239..f74b8d5a2b761d8e84da25c306c40ff8
  
                  if (!ItemStack.matches(itemstack1, itemstack)) {
 +                    // Titanium start - Backport PlayerArmorChangeEvent
-+                    if (this instanceof EntityPlayer && com.destroystokyo.paper.event.player.PlayerArmorChangeEvent.getHandlerList().getRegisteredListeners().length > 0) {
++                    if (j > 0 && this instanceof EntityPlayer && com.destroystokyo.paper.event.player.PlayerArmorChangeEvent.getHandlerList().getRegisteredListeners().length > 0) {
 +                        CraftEventFactory.callPlayerArmorChangeEvent((EntityPlayer) this, j, itemstack, itemstack1);
 +                    }
 +                    // Titanium end
