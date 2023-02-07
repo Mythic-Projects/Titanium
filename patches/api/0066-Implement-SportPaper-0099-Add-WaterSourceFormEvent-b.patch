@@ -1,0 +1,50 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: ShinyDialga <shinydialga45@gmail.com>
+Date: Sun, 7 Jun 2020 17:42:40 -0500
+Subject: [PATCH] Implement [SportPaper-0099] Add WaterSourceFormEvent by
+ ShinyDialga
+
+
+diff --git a/src/main/java/org/bukkit/event/block/WaterSourceFormEvent.java b/src/main/java/org/bukkit/event/block/WaterSourceFormEvent.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..175abe4c8dafe6e625b6b2ed7d8ac0f6e0b2e63a
+--- /dev/null
++++ b/src/main/java/org/bukkit/event/block/WaterSourceFormEvent.java
+@@ -0,0 +1,36 @@
++package org.bukkit.event.block;
++
++import org.bukkit.block.Block;
++import org.bukkit.event.Cancellable;
++import org.bukkit.event.HandlerList;
++
++/**
++ * Represents events where a water source block is formed from two adjacent sources
++ * <p>
++ * If this event is cancelled, the water source will not form.
++ */
++public class WaterSourceFormEvent extends BlockEvent implements Cancellable {
++    private static final HandlerList handlers = new HandlerList();
++    protected boolean cancel;
++
++    public WaterSourceFormEvent(final Block block) {
++        super(block);
++    }
++
++    public boolean isCancelled() {
++        return cancel;
++    }
++
++    public void setCancelled(boolean cancel) {
++        this.cancel = cancel;
++    }
++
++    @Override
++    public HandlerList getHandlers() {
++        return handlers;
++    }
++
++    public static HandlerList getHandlerList() {
++        return handlers;
++    }
++}
+\ No newline at end of file

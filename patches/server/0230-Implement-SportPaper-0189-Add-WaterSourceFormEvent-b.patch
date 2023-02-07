@@ -1,0 +1,38 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: ShinyDialga <shinydialga45@gmail.com>
+Date: Sun, 7 Jun 2020 17:42:40 -0500
+Subject: [PATCH] Implement [SportPaper-0189] Add WaterSourceFormEvent by
+ ShinyDialga
+
+
+diff --git a/src/main/java/net/minecraft/server/BlockFlowing.java b/src/main/java/net/minecraft/server/BlockFlowing.java
+index fc454d3d4f6f0d4dece4847a8de9db4c5789ddd1..954e360263ae7c4d39ad2f8eac6090560991b703 100644
+--- a/src/main/java/net/minecraft/server/BlockFlowing.java
++++ b/src/main/java/net/minecraft/server/BlockFlowing.java
+@@ -69,11 +69,22 @@ public class BlockFlowing extends BlockFluids {
+             if (this.a >= 2 && this.material == Material.WATER) {
+                 IBlockData iblockdata1 = world.getType(blockposition.down());
+ 
+-                if (iblockdata1.getBlock().getMaterial().isBuildable()) {
+-                    i1 = 0;
+-                } else if (iblockdata1.getBlock().getMaterial() == this.material && ((Integer) iblockdata1.get(BlockFlowing.LEVEL)).intValue() == 0) {
+-                    i1 = 0;
++                // SportPaper start - Add water source form event
++                if (iblockdata1.getBlock().getMaterial().isBuildable() ||
++                        (iblockdata1.getBlock().getMaterial() == this.material && ((Integer) iblockdata1.get(BlockFlowing.LEVEL)).intValue() == 0)) {
++                    if (org.bukkit.event.block.WaterSourceFormEvent.getHandlerList().getRegisteredListeners().length > 0) {
++                        org.bukkit.event.block.WaterSourceFormEvent event = new org.bukkit.event.block.WaterSourceFormEvent(source);
++                        if (server != null) {
++                            server.getPluginManager().callEvent(event);
++                        }
++                        if (!event.isCancelled()) {
++                            i1 = 0;
++                        }
++                    } else {
++                        i1 = 0;
++                    }
+                 }
++                // SportPaper end
+             }
+ 
+             if (!world.paperConfigTitanium.fastDrain.lava && this.material == Material.LAVA && i < 8 && i1 < 8 && i1 > i && random.nextInt(4) != 0) { // PaperSpigot
