@@ -87,6 +87,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0135] Avoid blocking on Network Manager creation by Aikar
 [Paper-0137] Faster redstone torch rapid clock removal by Martin Panzer
 [Paper-0144] Improve Minecraft Hopper Performance
+[Paper-0153] Fix AIOOBE in inventory handling by Brokkonaut
 [Paper-0156] Auto Save Improvements by Aikar
 [Paper-0161] Disable Vanilla Chunk GC by Aikar
 [Paper-0168] Disable ticking of snow blocks
