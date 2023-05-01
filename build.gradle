@@ -53,7 +53,11 @@ subprojects {
     publishing {
         publications {
             libraries(MavenPublication) {
-                from components.java
+                artifact shadowJar {
+                    classifier = ''
+                }
+                artifact sourcesJar
+                artifact javadocJar
 
                 versionMapping {
                     usage('java-runtime'){
