@@ -202,6 +202,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [PandaSpigot-0054] Disconnect for payload errors by uRyanxD
 [PandaSpigot-0060] Optimise removeQueue by hpfxd
 [PandaSpigot-0087] Fix Entity Tracker Rounding by necrozma
+[PandaSpigot-0092] Backport ArrowDMG fix by Aviana Cruz"
 
 [IonSpigot-0003] Explosion Improvements by SuicidalKids
 [IonSpigot-0006] Fix Chunk Loading by SuicidalKids
