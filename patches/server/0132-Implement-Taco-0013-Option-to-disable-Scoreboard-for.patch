@@ -18,10 +18,10 @@ index 27d08a7de54de062041a107490a9d4684872ec8b..fdbf259a79954dab90938c16404df493
  
                          if (scoreboard.addPlayerToTeam(s2, s)) {
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index 54175d403b296ea7aca26931e11ec9b212845c15..81ef1f3d11161b0a3994e76a2a0e2118753e88c8 100644
+index ee98ee17310e9d1c7b0030b0328894b81e1ee706..4df864dd2e0f2b758b4e51ce6d2d42cc5ec7ff20 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
-@@ -1884,6 +1884,7 @@ public abstract class EntityLiving extends Entity {
+@@ -1886,6 +1886,7 @@ public abstract class EntityLiving extends Entity {
      }
  
      public ScoreboardTeamBase getScoreboardTeam() {

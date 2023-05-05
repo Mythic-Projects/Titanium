@@ -5,10 +5,10 @@ Subject: [PATCH] Backport PlayerArmorChangeEvent
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index 3a30418b4d88d13c236bf7c418d894bc7f776239..8afa025fff7c652e38738d4bbc725b96db11cdf0 100644
+index 9f9da19e8fa510af0769b951f7bf013a70ee680a..cf33363b7b4e3e80ec13e34e649a0ec3d686860c 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
-@@ -1581,6 +1581,11 @@ public abstract class EntityLiving extends Entity {
+@@ -1583,6 +1583,11 @@ public abstract class EntityLiving extends Entity {
                  ItemStack itemstack1 = this.getEquipment(j);
  
                  if (!ItemStack.matches(itemstack1, itemstack)) {

@@ -268,7 +268,7 @@ index 027f700ec5dcb4a5ab2cc0e4355b55deb308295c..920790d1238be71f7af06c8d74c28a1b
  
      protected void E() {}
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index 81ef1f3d11161b0a3994e76a2a0e2118753e88c8..aea48e47afb6f727134bb5e447ab9f4555b524cd 100644
+index 4df864dd2e0f2b758b4e51ce6d2d42cc5ec7ff20..2b004b623505505e25ccb65ab8658ca0e7958293 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
 @@ -173,7 +173,7 @@ public abstract class EntityLiving extends Entity {
@@ -289,7 +289,7 @@ index 81ef1f3d11161b0a3994e76a2a0e2118753e88c8..aea48e47afb6f727134bb5e447ab9f45
      }
  
      // CraftBukkit start
-@@ -1578,10 +1578,10 @@ public abstract class EntityLiving extends Entity {
+@@ -1580,10 +1580,10 @@ public abstract class EntityLiving extends Entity {
          }
  
          this.aS += (f3 - this.aS) * 0.3F;
@@ -303,7 +303,7 @@ index 81ef1f3d11161b0a3994e76a2a0e2118753e88c8..aea48e47afb6f727134bb5e447ab9f45
  
          while (this.yaw - this.lastYaw < -180.0F) {
              this.lastYaw -= 360.0F;
-@@ -1615,7 +1615,7 @@ public abstract class EntityLiving extends Entity {
+@@ -1617,7 +1617,7 @@ public abstract class EntityLiving extends Entity {
              this.aL += 360.0F;
          }
  
@@ -312,7 +312,7 @@ index 81ef1f3d11161b0a3994e76a2a0e2118753e88c8..aea48e47afb6f727134bb5e447ab9f45
          this.aT += f2;
      }
  
-@@ -1680,20 +1680,20 @@ public abstract class EntityLiving extends Entity {
+@@ -1682,20 +1682,20 @@ public abstract class EntityLiving extends Entity {
              this.motZ = 0.0D;
          }
  
@@ -338,7 +338,7 @@ index 81ef1f3d11161b0a3994e76a2a0e2118753e88c8..aea48e47afb6f727134bb5e447ab9f45
          if (this.aY) {
              if (this.V()) {
                  this.bG();
-@@ -1707,19 +1707,19 @@ public abstract class EntityLiving extends Entity {
+@@ -1709,19 +1709,19 @@ public abstract class EntityLiving extends Entity {
              this.bn = 0;
          }
  

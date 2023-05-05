@@ -6,10 +6,10 @@ Subject: [PATCH] Implement [Paper-0664] EntityMoveEvent by William Blake
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index 0f3790b423fb418b79daa3b887a318718315be2d..3a30418b4d88d13c236bf7c418d894bc7f776239 100644
+index 09c223241210ca126094c579ffc99004f729d854..9f9da19e8fa510af0769b951f7bf013a70ee680a 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
-@@ -1767,6 +1767,22 @@ public abstract class EntityLiving extends Entity {
+@@ -1769,6 +1769,22 @@ public abstract class EntityLiving extends Entity {
          }
  
          //this.world.methodProfiler.b(); // Purpur

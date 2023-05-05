@@ -123,13 +123,20 @@ index 0000000000000000000000000000000000000000..8c1506db5da8a3da2a196c5abf6f8ce4
 \ No newline at end of file
 diff --git a/src/main/java/net/titanium/knockback/KnockbackProfile.java b/src/main/java/net/titanium/knockback/KnockbackProfile.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..507f8b423064cca35e3a67ca702243253639a24a
+index 0000000000000000000000000000000000000000..2c84d7991273f9a4998ab947e73584c3071f901e
 --- /dev/null
 +++ b/src/main/java/net/titanium/knockback/KnockbackProfile.java
-@@ -0,0 +1,21 @@
+@@ -0,0 +1,28 @@
 +package net.titanium.knockback;
 +
 +public interface KnockbackProfile extends dev.cobblesword.nachospigot.knockback.KnockbackProfile { // We extend nacho KnockbackProfile to not modify their KnockbackProfile if we'd like to add our custom functionality
++
++    default boolean useHorizontalMinMax() {
++        return false;
++    }
++
++    default void setUseHorizontalMinMax(boolean useHorizontalMinMax) {
++    }
 +
 +    double getHorizontalMin();
 +

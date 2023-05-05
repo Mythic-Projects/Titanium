@@ -6,12 +6,11 @@ Subject: [PATCH] Implement [PandaSpigot-0092] Backport ArrowDMG fix by Aviana
 
 Upstream commit: PaperMC/Paper@bb397ba74c034ffe5ae164d774a043cb7bca0472
 
-
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
-index 8afa025fff7c652e38738d4bbc725b96db11cdf0..790e9ff2a10229ff450c191ef20af80cde5e5359 100644
+index cf33363b7b4e3e80ec13e34e649a0ec3d686860c..22d78ec0d45306fecb12243ad4a8ebd7cfee9cac 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
 +++ b/src/main/java/net/minecraft/server/EntityLiving.java
-@@ -1402,13 +1402,26 @@ public abstract class EntityLiving extends Entity {
+@@ -1404,13 +1404,26 @@ public abstract class EntityLiving extends Entity {
          return 0.42F;
      }
  
