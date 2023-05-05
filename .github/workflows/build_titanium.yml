@@ -51,3 +51,14 @@ jobs:
         run: ./titanium apply
       - name: Build Titanium JAR
         run: ./gradlew build --no-daemon
+      - name: Paperclip
+        run: ./titanium paperclip
+      - name: Copy Paperclip jar
+        run: |
+          cp -v "./Titanium-Server/build/libs/titanium.jar" "./titanium-$GITHUB_RUN_NUMBER.jar"
+      - name: Upload Titanium artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Server JAR
+          path: titanium-${{ github.run_number }}.jar
+          if-no-files-found: error
