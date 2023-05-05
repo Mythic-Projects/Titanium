@@ -43,7 +43,7 @@ index 0000000000000000000000000000000000000000..ae9a71fbbb579509d6ffcc2b4d18cf6a
 +    implementation 'commons-codec:commons-codec:1.9'
 +    implementation 'net.sf.jopt-simple:jopt-simple:5.0' // Titanium - updated jopt-simple to 5.0
 +    implementation 'org.xerial:sqlite-jdbc:3.7.2'
-+    implementation 'mysql:mysql-connector-java:8.0.22' // Titanium - updated mysql connector to 8.0.22
++    implementation 'mysql:mysql-connector-java:5.1.14'
 +    implementation 'com.mojang:authlib:1.5.21'
 +    // Minecraft libraries end
 +
