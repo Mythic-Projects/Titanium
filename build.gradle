@@ -32,6 +32,10 @@ subprojects {
     compileJava.options.encoding = "UTF-8"
     compileTestJava.options.encoding = "UTF-8"
 
+    shadowJar {
+        archiveClassifier = ''
+    }
+
     java {
         withSourcesJar()
         withJavadocJar()
@@ -53,9 +57,7 @@ subprojects {
     publishing {
         publications {
             libraries(MavenPublication) {
-                artifact shadowJar {
-                    classifier = ''
-                }
+                from project.shadow.component(it)
                 artifact sourcesJar
                 artifact javadocJar
 
