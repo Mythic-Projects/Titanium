@@ -1,0 +1,20 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Fri, 5 May 2023 15:48:26 +0200
+Subject: [PATCH] Fix Paper hopper patch by Aikar
+
+Upstream commit: PaperMC/Paper@9dffc43aec635a6b44cf43cb07b118044d768cd1
+
+diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
+index e8065cddb6feb93852ae008e763b67116237d338..e028a54728b74ba6aef0ef45fb421d22d29a9445 100644
+--- a/src/main/java/net/minecraft/server/Chunk.java
++++ b/src/main/java/net/minecraft/server/Chunk.java
+@@ -1034,7 +1034,7 @@ public class Chunk {
+ 
+         // PaperSpigot start
+         int[] counts;
+-        if (ItemStack.class.isAssignableFrom(oclass)) {
++        if (EntityItem.class.isAssignableFrom(oclass)) { // Paper
+             counts = itemCounts;
+         } else if (IInventory.class.isAssignableFrom(oclass)) {
+             counts = inventoryEntityCounts;
