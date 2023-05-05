@@ -1,0 +1,63 @@
+name: Titanium CI
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup Maven cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: "Setup Gradle cache"
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Setup Java 8
+        uses: actions/setup-java@v3
+        with:
+          java-version: 8
+          distribution: 'temurin'
+          cache: 'gradle'
+      - name: Set Git identity
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git config --global init.defaultBranch master
+      - name: Grant execute permissions
+        run: |
+          chmod -R +x ./base/
+          chmod -R +x ./scripts/
+          chmod +x gradlew
+          chmod +x titanium
+      - name: Prepare Titanium upstream
+        run: ./titanium upstream
+      - name: Apply Titanium patches
+        run: ./titanium apply
+      - name: Build Titanium JAR
+        run: ./gradlew build --no-daemon
+      - name: Copy Paperclip jar
+        run: |
+          cp -v "./Titanium-Server/build/libs/titanium-1.8.8-R0.1-SNAPSHOT.jar" "./titanium-$GITHUB_RUN_NUMBER.jar"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Server JAR
+          path: titanium-${{ github.run_number }}.jar
+          if-no-files-found: error
