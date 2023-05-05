@@ -150,6 +150,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [SportPaper-0176] Use fast util collections
 [SportPaper-0185] Speed up chunk unloading
 [SportPaper-0099/0189] Add WaterSourceFormEvent by ShinyDialga
+[SportPaper-0190] Add option to remove randomness in arrow damage by Indicado
 [SportPaper-0198] Optimize head rotation patch
 [SportPaper-0204] Fix Teleport Invisibility
 [SportPaper-0207] Optimize toLegacyData removing sanity checks by Pablete1234

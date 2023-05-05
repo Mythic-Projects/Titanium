@@ -5,7 +5,7 @@ Subject: [PATCH] Backport some message sending API
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-index 0341d5cfba4cf6251fcd82090174226d75a91fde..48b26669081ee3d6e29a1b64d0f3f62c107db480 100644
+index 958b2ffa201fef7a479cc66830cd9b624fea9302..f15989be18d6bee7fe88ce2316fd81277d4fd3e5 100644
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
 @@ -261,11 +261,9 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
@@ -23,7 +23,7 @@ index 0341d5cfba4cf6251fcd82090174226d75a91fde..48b26669081ee3d6e29a1b64d0f3f62c
      }
      // Titanium end
  
-@@ -1636,6 +1634,24 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+@@ -1642,6 +1640,24 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
              getHandle().playerConnection.sendPacket(packet);
          }
  
