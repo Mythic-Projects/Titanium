@@ -1,0 +1,256 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sat, 6 May 2023 01:24:02 +0200
+Subject: [PATCH] Very simple /knockback command
+
+
+diff --git a/src/main/java/net/titanium/command/KnockbackCommand.java b/src/main/java/net/titanium/command/KnockbackCommand.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..7ec79cb2bc6af5fa6132b69942d80159301cfe12
+--- /dev/null
++++ b/src/main/java/net/titanium/command/KnockbackCommand.java
+@@ -0,0 +1,125 @@
++package net.titanium.command;
++
++import net.titanium.Titanium;
++import net.titanium.config.knockback.KnockbackConfig;
++import net.titanium.config.message.MessageConfig;
++import net.titanium.knockback.KnockbackProfile;
++import org.bukkit.Bukkit;
++import org.bukkit.command.Command;
++import org.bukkit.command.CommandSender;
++import org.bukkit.entity.Player;
++
++public class KnockbackCommand extends Command {
++
++    public KnockbackCommand(String name) {
++        super(name);
++        this.description = "Knockback profiles command";
++        this.setPermission("titanium.command.knockback");
++    }
++
++    @Override
++    public boolean execute(CommandSender sender, String commandLabel, String[] args) {
++        if (!testPermission(sender)) {
++            return true;
++        }
++
++        MessageConfig messages = MessageConfig.get();
++
++        if (args.length < 1) {
++            sendHelp(sender, messages);
++            return true;
++        }
++
++        KnockbackConfig knockbackConfig = Titanium.get().getKnockbackConfig();
++        switch (args[0].toLowerCase()) {
++            case "reload":
++                knockbackConfig.load();
++                sender.sendMessage(messages.knockback.reload);
++                break;
++            case "profile":
++                if (args.length < 2) {
++                    sendHelp(sender, messages);
++                    return true;
++                }
++
++                String profileName = args[1];
++                KnockbackProfile profileInfo = knockbackConfig.findProfileByName(profileName);
++                if (profileInfo == null) {
++                    sender.sendMessage(messages.knockback.unknownProfile
++                            .replace("{PROFILE}", profileName));
++                    return true;
++                }
++
++                sender.sendMessage(messages.knockback.valuesHeader.replace("{PROFILE}", profileInfo.getName()));
++                sender.sendMessage(messages.knockback.valuesKnockback);
++                for (String knockbackValue : profileInfo.getKnockbackValues()) {
++                    sender.sendMessage(knockbackValue);
++                }
++
++                sender.sendMessage(messages.knockback.valuesProjectiles);
++                for (String knockbackValue : profileInfo.getProjectilesValues()) {
++                    sender.sendMessage(knockbackValue);
++                }
++                break;
++            case "player":
++                if (args.length < 2 || (!args[1].equalsIgnoreCase("get") && !args[1].equalsIgnoreCase("set"))) {
++                    sendHelp(sender, messages);
++                    return true;
++                }
++
++                if (args.length < 3) {
++                    sender.sendMessage(messages.errors.missingPlayer);
++                    return true;
++                }
++
++                String playerName = args[2];
++                Player player = Bukkit.getPlayer(playerName);
++                if (player == null) {
++                    sender.sendMessage(messages.errors.unknownPlayer.replace("{PLAYER}", playerName));
++                    return true;
++                }
++
++                switch (args[1].toLowerCase()) {
++                    case "get":
++                        KnockbackProfile profileGet = player.getKnockbackProfile();
++                        if (profileGet == null) {
++                            profileGet = Bukkit.titanium().getKnockbackProfile();
++                        }
++                        sender.sendMessage(messages.knockback.playerGetProfile
++                                .replace("{PLAYER}", player.getName())
++                                .replace("{PROFILE}", profileGet.getName()));
++                        break;
++                    case "set":
++                        if (args.length < 4) {
++                            sender.sendMessage(messages.knockback.missingProfile);
++                            return true;
++                        }
++
++                        String profileName2 = args[3];
++                        KnockbackProfile profileSet = knockbackConfig.findProfileByName(profileName2);
++                        if (profileSet == null) {
++                            sender.sendMessage(messages.knockback.unknownProfile
++                                    .replace("{PROFILE}", profileName2));
++                            return true;
++                        }
++
++                        player.setKnockbackProfile(profileSet);
++                        sender.sendMessage(messages.knockback.playerSetProfile
++                                .replace("{PLAYER}", player.getName())
++                                .replace("{PROFILE}", profileSet.getName()));
++                        break;
++                }
++                break;
++            default:
++                sendHelp(sender, messages);
++                break;
++        }
++
++        return true;
++    }
++
++    private static void sendHelp(CommandSender sender, MessageConfig messages) {
++        messages.knockback.help.forEach(sender::sendMessage);
++    }
++
++}
+diff --git a/src/main/java/net/titanium/command/SetSlotsCommand.java b/src/main/java/net/titanium/command/SetSlotsCommand.java
+index 7db3b64f77003076ce87bf99120587348fc24553..e67ce0fe53ef4f4974e526914c8680ddd051a92f 100644
+--- a/src/main/java/net/titanium/command/SetSlotsCommand.java
++++ b/src/main/java/net/titanium/command/SetSlotsCommand.java
+@@ -28,7 +28,7 @@ public class SetSlotsCommand extends Command {
+ 
+         if (args.length < 1) {
+             sender.sendMessage(messages.errors.correctUsage.replace("{USAGE}", usageMessage));
+-            return false;
++            return true;
+         }
+ 
+         int slots = -1;
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index a3552384f1a9012c9b7d2041861a2a17fc356760..bdbcf841e519b020df4a21b5fff1e4f8b34a12ef 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -22,6 +22,7 @@ import java.util.Map;
+ import java.util.Set;
+ import java.util.logging.Level;
+ import net.minecraft.server.MinecraftServer;
++import net.titanium.command.KnockbackCommand;
+ import net.titanium.command.PingCommand;
+ import net.titanium.command.SetSlotsCommand;
+ import net.titanium.util.Pair;
+@@ -561,7 +562,8 @@ public class TitaniumConfig extends TitaniumConfigSection implements Server.Tita
+         }
+ 
+         this.registerCommand("ping", new PingCommand("ping"));
+-        this.registerCommand("setslots", new SetSlotsCommand( "setslots"));
++        this.registerCommand("setslots", new SetSlotsCommand("setslots"));
++        this.registerCommand("knockback", new KnockbackCommand("knockback"));
+ 
+         return this;
+     }
+diff --git a/src/main/java/net/titanium/config/knockback/KnockbackConfig.java b/src/main/java/net/titanium/config/knockback/KnockbackConfig.java
+index aeb6e5e76776f74c8c1b2b454fad09b65e89a314..da97d7c77ef14e4f3223759b2866da7acc913607 100644
+--- a/src/main/java/net/titanium/config/knockback/KnockbackConfig.java
++++ b/src/main/java/net/titanium/config/knockback/KnockbackConfig.java
+@@ -2,6 +2,7 @@ package net.titanium.config.knockback;
+ 
+ import java.io.File;
+ import java.io.IOException;
++import java.util.Collection;
+ import java.util.HashSet;
+ import java.util.List;
+ import java.util.Map;
+@@ -46,12 +47,18 @@ public class KnockbackConfig {
+ 
+         save();
+ 
+-        this.profiles.clear();
+-
++        Collection<String> oldProfiles = new HashSet<>(this.profiles.keySet());
+         this.getKeys("profiles")
+                 .stream()
+-                .map(key -> profiles.computeIfAbsent(key, TitaniumKnockbackProfile::new))
++                .map(profileName -> profiles.compute(profileName, (key, value) -> {
++                    if (value != null) {
++                        oldProfiles.remove(profileName);
++                        return value;
++                    }
++                    return new TitaniumKnockbackProfile(profileName);
++                }))
+                 .forEach(this::loadProfile);
++        oldProfiles.forEach(profiles::remove);
+ 
+         KnockbackProfile defaultProfile = profiles.computeIfAbsent("vanilla", key -> {
+             KnockbackProfile profile = new TitaniumKnockbackProfile("vanilla");
+diff --git a/src/main/java/net/titanium/config/message/MessageConfig.java b/src/main/java/net/titanium/config/message/MessageConfig.java
+index b77b36be2696fddceccc4c61f35349a8bf173253..3d3b41f1b2ecdfee5d4a3ba023b57f0267b0b59b 100644
+--- a/src/main/java/net/titanium/config/message/MessageConfig.java
++++ b/src/main/java/net/titanium/config/message/MessageConfig.java
+@@ -10,12 +10,9 @@ import eu.okaeri.configs.annotation.Names;
+ import eu.okaeri.configs.exception.OkaeriException;
+ import java.util.Arrays;
+ import java.util.List;
+-import net.titanium.Titanium;
+-import net.titanium.config.TitaniumConfig;
+ import net.titanium.config.TitaniumConfigSection;
+ import net.titanium.util.range.RangeFormatting;
+ import org.bukkit.Server;
+-import org.spigotmc.TicksPerSecondCommand;
+ 
+ @Header("Various messages sent to clients.")
+ @Names(strategy = NameStrategy.HYPHEN_CASE, modifier = NameModifier.TO_LOWER_CASE)
+@@ -108,6 +105,32 @@ public class MessageConfig extends TitaniumConfigSection implements Server.Titan
+ 
+     }
+ 
++    public Knockback knockback = new Knockback();
++
++    public static class Knockback extends TitaniumConfigSection {
++
++    	public List<String> help = Arrays.asList(
++                "&6Knocbkack help:",
++                "&7- &6/knockback reload &8- &7Reloads the config of all knockback settings",
++                "&7- &6/knockback profile [profile] &8- &7Shows the values of a profile",
++                "&7- &6/knockback player get [player] &8- &7Gets the knockback profile of a player",
++                "&7- &6/knockback player set [player] [profile] &8- &7Sets the knockback profile of a player"
++        );
++
++        public String reload = "&6Knockback config reloaded!";
++
++        public String missingProfile = "&cYou must specify which profile you wish to perform this action on.";
++        public String unknownProfile = "&cUnknown profile: &f{PROFILE}";
++
++        public String valuesHeader = "&6Knockback profile &f{PROFILE}&6:";
++        public String valuesKnockback = "&6Knockback:";
++        public String valuesProjectiles = "&6Projectiles:";
++
++        public String playerGetProfile = "&6Knockback profile of &f{PLAYER}&6 is &f{PROFILE}";
++        public String playerSetProfile = "&6Knockback profile of &f{PLAYER}&6 set to &f{PROFILE}";
++
++    }
++
+     @Override
+     public OkaeriConfig load() throws OkaeriException {
+         INSTANCE = this;
