@@ -454,7 +454,7 @@ index 96e216539642695deebc7b0492af87970bacd30f..edad1260e98c95c36c33ea97c4e08753
  
          getHandle().playerConnection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, other));
  
-@@ -1003,6 +1013,52 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+@@ -1003,6 +1013,58 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
              entry.updatePlayer(getHandle());
          }
      }
@@ -497,6 +497,12 @@ index 96e216539642695deebc7b0492af87970bacd30f..edad1260e98c95c36c33ea97c4e08753
 +        handle.updateAbilities();
 +        connection.sendPacket(new net.minecraft.server.PacketPlayOutPosition(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch(), new HashSet<>()));
 +        net.minecraft.server.MinecraftServer.getServer().getPlayerList().updateClient(handle);
++
++        // Resend their XP and effects because the respawn packet resets it
++        connection.sendPacket(new net.minecraft.server.PacketPlayOutExperience(handle.exp, handle.expTotal, handle.expLevel));
++        for (MobEffect mobEffect : handle.getEffects()) {
++            connection.sendPacket(new net.minecraft.server.PacketPlayOutEntityEffect(handle.getId(), mobEffect));
++        }
 +
 +        if (this.isOp()) {
 +            this.setOp(false);
