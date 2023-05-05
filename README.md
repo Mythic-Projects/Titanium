@@ -132,6 +132,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0268/0664] EntityMoveEvent by William Blake Galbreath
 [Paper-0740] Add Unix domain socket support by Andrew Steinborn
 [Paper-0797] Use Velocity compression and cipher natives by Elier
+[Paper-0957] Use single player info update packet on join by Jake Potrebic
 
 [Taco-0006] Fix hopper lag by making entities look for hoppers by Techcable
 [Taco-0010] Optimize armor stands by Techcable

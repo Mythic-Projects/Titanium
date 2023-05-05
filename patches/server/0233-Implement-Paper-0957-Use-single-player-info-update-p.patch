@@ -1,0 +1,40 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Jake Potrebic <jake.m.potrebic@gmail.com>
+Date: Sun, 8 Jan 2023 17:38:28 -0800
+Subject: [PATCH] Implement [Paper-0957] Use single player info update packet
+ on join by Jake Potrebic
+
+
+diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
+index 516d981d972a3ce103987f690898f38852f33594..ad051b7137ebb27521bd03552c3db17dc5525be2 100644
+--- a/src/main/java/net/minecraft/server/PlayerList.java
++++ b/src/main/java/net/minecraft/server/PlayerList.java
+@@ -376,10 +376,11 @@ public abstract class PlayerList {
+         // CraftBukkit start - sendAll above replaced with this loop
+         PacketPlayOutPlayerInfo packet = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, entityplayer);
+ 
++        final List<EntityPlayer> onlinePlayers = Lists.newArrayListWithExpectedSize(this.players.size() - 1); // Paper - use single player info update packet
+         for (int i = 0; i < this.players.size(); ++i) {
+             EntityPlayer entityplayer1 = (EntityPlayer) this.players.get(i);
+ 
+-            if (entityplayer1.getBukkitEntity().canSee(entityplayer.getBukkitEntity())) {
++            if (entityplayer1 == entityplayer || !entityplayer.getBukkitEntity().canSee(entityplayer1.getBukkitEntity())) { // Paper - don't include joining player
+                 entityplayer1.playerConnection.sendPacket(packet);
+             }
+ 
+@@ -387,9 +388,14 @@ public abstract class PlayerList {
+                 continue;
+             }
+ 
+-            entityplayer.playerConnection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new EntityPlayer[] { entityplayer1}));
++            onlinePlayers.add(entityplayer1); // Paper - use single player info update packet
+         }
+         // CraftBukkit end
++        // Paper start - use single player info update packet
++        if (!onlinePlayers.isEmpty()) {
++             entityplayer.playerConnection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, onlinePlayers.toArray(new EntityPlayer[0])));
++        }
++        // Paper end
+ 
+         // CraftBukkit start - Only add if the player wasn't moved in the event
+         if (entityplayer.world == worldserver && !worldserver.players.contains(entityplayer)) {
