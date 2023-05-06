@@ -6,28 +6,35 @@ Subject: [PATCH] Implement [Paper-0957] Use single player info update packet
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index 516d981d972a3ce103987f690898f38852f33594..ad051b7137ebb27521bd03552c3db17dc5525be2 100644
+index 516d981d972a3ce103987f690898f38852f33594..c2398385dc3df0cbb20383694765604cc6829399 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
-@@ -376,10 +376,11 @@ public abstract class PlayerList {
+@@ -376,10 +377,12 @@ public abstract class PlayerList {
          // CraftBukkit start - sendAll above replaced with this loop
          PacketPlayOutPlayerInfo packet = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, entityplayer);
  
 +        final List<EntityPlayer> onlinePlayers = Lists.newArrayListWithExpectedSize(this.players.size() - 1); // Paper - use single player info update packet
++        boolean useSinglePlayerInfoPacketOnJoin = !net.techcable.tacospigot.CompatHacks.hasProtocolSupport(); // Titanium - Don't use single player info packet on join on 1.7.x clients
          for (int i = 0; i < this.players.size(); ++i) {
              EntityPlayer entityplayer1 = (EntityPlayer) this.players.get(i);
  
 -            if (entityplayer1.getBukkitEntity().canSee(entityplayer.getBukkitEntity())) {
-+            if (entityplayer1 == entityplayer || !entityplayer.getBukkitEntity().canSee(entityplayer1.getBukkitEntity())) { // Paper - don't include joining player
++            if ((useSinglePlayerInfoPacketOnJoin && entityplayer1 == entityplayer) || !entityplayer.getBukkitEntity().canSee(entityplayer1.getBukkitEntity())) { // Paper - don't include joining player // Titanium - Don't use single player info packet on join on 1.7.x clients
                  entityplayer1.playerConnection.sendPacket(packet);
              }
  
-@@ -387,9 +388,14 @@ public abstract class PlayerList {
+@@ -387,9 +390,20 @@ public abstract class PlayerList {
                  continue;
              }
  
 -            entityplayer.playerConnection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new EntityPlayer[] { entityplayer1}));
-+            onlinePlayers.add(entityplayer1); // Paper - use single player info update packet
++            // Titanium start - Don't use single player info packet on join on 1.7.x clients
++            if (useSinglePlayerInfoPacketOnJoin) {
++                onlinePlayers.add(entityplayer1); // Paper - use single player info update packet
++            } else {
++                entityplayer.playerConnection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, entityplayer1));
++            }
++            // Titanium end
          }
          // CraftBukkit end
 +        // Paper start - use single player info update packet
