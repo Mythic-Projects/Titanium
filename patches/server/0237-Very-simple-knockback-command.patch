@@ -151,7 +151,7 @@ index 7db3b64f77003076ce87bf99120587348fc24553..e67ce0fe53ef4f4974e526914c8680dd
  
          int slots = -1;
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index a3552384f1a9012c9b7d2041861a2a17fc356760..bdbcf841e519b020df4a21b5fff1e4f8b34a12ef 100644
+index 40e93c02e3853cce99fe76d8ca055cc03ff3b494..05cda2de3e28e618abee5d99e1e254b374d8c9d2 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -22,6 +22,7 @@ import java.util.Map;

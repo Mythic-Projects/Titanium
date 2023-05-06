@@ -6,7 +6,7 @@ Subject: [PATCH] Implement [SportPaper-0190] Add option to remove randomness
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityArrow.java b/src/main/java/net/minecraft/server/EntityArrow.java
-index 7dda11fec4d256fceb452c4a9f8ccde8ee996eb0..6b6291c778f34ac92b580efad44fb4e51d842c75 100644
+index 7dda11fec4d256fceb452c4a9f8ccde8ee996eb0..24629835586753155230a02b6382fe5f885d6251 100644
 --- a/src/main/java/net/minecraft/server/EntityArrow.java
 +++ b/src/main/java/net/minecraft/server/EntityArrow.java
 @@ -237,7 +237,7 @@ public class EntityArrow extends Entity implements IProjectile {
@@ -14,12 +14,12 @@ index 7dda11fec4d256fceb452c4a9f8ccde8ee996eb0..6b6291c778f34ac92b580efad44fb4e5
                      int k = MathHelper.f((double) f2 * this.damage);
  
 -                    if (this.isCritical()) {
-+                    if (this.isCritical() && TitaniumConfig.get().gameMechanics.includeRandomnessInArrowTrajectory) {
++                    if (this.isCritical() && TitaniumConfig.get().gameMechanics.includeRandomnessInArrowDamage) {
                          k += this.random.nextInt(k / 2 + 2);
                      }
  
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index a7ffefc498e1faf8f03ebb0a17ec23eb6090598d..a3552384f1a9012c9b7d2041861a2a17fc356760 100644
+index a7ffefc498e1faf8f03ebb0a17ec23eb6090598d..40e93c02e3853cce99fe76d8ca055cc03ff3b494 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -151,6 +151,9 @@ public class TitaniumConfig extends TitaniumConfigSection implements Server.Tita
@@ -27,7 +27,7 @@ index a7ffefc498e1faf8f03ebb0a17ec23eb6090598d..a3552384f1a9012c9b7d2041861a2a17
          }
  
 +        @Comment("Whether arrow projectiles should have chance to deal extra damage on critical hit.")
-+        public boolean includeRandomnessInArrowTrajectory = true;
++        public boolean includeRandomnessInArrowDamage = true;
 +
      }
  
