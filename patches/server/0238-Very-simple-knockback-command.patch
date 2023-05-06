@@ -6,12 +6,13 @@ Subject: [PATCH] Very simple /knockback command
 
 diff --git a/src/main/java/net/titanium/command/KnockbackCommand.java b/src/main/java/net/titanium/command/KnockbackCommand.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..7ec79cb2bc6af5fa6132b69942d80159301cfe12
+index 0000000000000000000000000000000000000000..e410f32865db25f5d8460e3317f2a8f73fb7300c
 --- /dev/null
 +++ b/src/main/java/net/titanium/command/KnockbackCommand.java
-@@ -0,0 +1,125 @@
+@@ -0,0 +1,127 @@
 +package net.titanium.command;
 +
++import java.util.Arrays;
 +import net.titanium.Titanium;
 +import net.titanium.config.knockback.KnockbackConfig;
 +import net.titanium.config.message.MessageConfig;
@@ -27,6 +28,7 @@ index 0000000000000000000000000000000000000000..7ec79cb2bc6af5fa6132b69942d80159
 +        super(name);
 +        this.description = "Knockback profiles command";
 +        this.setPermission("titanium.command.knockback");
++        this.setAliases(Arrays.asList("kb"));
 +    }
 +
 +    @Override

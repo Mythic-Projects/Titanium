@@ -6,10 +6,10 @@ Subject: [PATCH] Implement [Paper-0957] Use single player info update packet
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index 516d981d972a3ce103987f690898f38852f33594..c2398385dc3df0cbb20383694765604cc6829399 100644
+index 516d981d972a3ce103987f690898f38852f33594..b3c2633fd3010ece9dea6529c80a84c0c75f7c5f 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
-@@ -376,10 +377,12 @@ public abstract class PlayerList {
+@@ -376,10 +376,12 @@ public abstract class PlayerList {
          // CraftBukkit start - sendAll above replaced with this loop
          PacketPlayOutPlayerInfo packet = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, entityplayer);
  
@@ -23,7 +23,7 @@ index 516d981d972a3ce103987f690898f38852f33594..c2398385dc3df0cbb20383694765604c
                  entityplayer1.playerConnection.sendPacket(packet);
              }
  
-@@ -387,9 +390,20 @@ public abstract class PlayerList {
+@@ -387,9 +389,20 @@ public abstract class PlayerList {
                  continue;
              }
  
