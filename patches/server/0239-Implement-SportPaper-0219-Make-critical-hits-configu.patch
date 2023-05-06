@@ -1,0 +1,34 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: halfmaster1 <ohpointfive@gmail.com>
+Date: Tue, 18 May 2021 04:28:46 -0400
+Subject: [PATCH] Implement [SportPaper-0219] Make critical hits configurable
+ by halfmaster1
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
+index d87159710e65a0f97fd2a593a99ab0d903bbb8b3..9b6926d5868c1d9bd0da5c17d8c3b86aaf69a4bd 100644
+--- a/src/main/java/net/minecraft/server/EntityHuman.java
++++ b/src/main/java/net/minecraft/server/EntityHuman.java
+@@ -992,7 +992,7 @@ public abstract class EntityHuman extends EntityLiving {
+                     boolean flag = !world.paperConfigTitanium.gameMechanics.disablePlayerCrits && this.fallDistance > 0.0F && !this.onGround && !this.k_() && !this.V() && !this.hasEffect(MobEffectList.BLINDNESS) && this.vehicle == null && entity instanceof EntityLiving; // PaperSpigot
+ 
+                     if (flag && f > 0.0F) {
+-                        f *= 1.5F;
++                        f *= TitaniumConfig.get().gameMechanics.criticalHitMultiplier; // SportPaper - Configurable critical hit multiplier
+                     }
+ 
+                     f += f1;
+diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
+index bdbcf841e519b020df4a21b5fff1e4f8b34a12ef..0c4b1eea3289a12201196980c2362440e5aa79c6 100644
+--- a/src/main/java/net/titanium/config/TitaniumConfig.java
++++ b/src/main/java/net/titanium/config/TitaniumConfig.java
+@@ -152,6 +152,9 @@ public class TitaniumConfig extends TitaniumConfigSection implements Server.Tita
+ 
+         }
+ 
++        @Comment("Multiplier for critical hit damage.")
++        public float criticalHitMultiplier = 1.5F;
++
+         @Comment("Whether arrow projectiles should have chance to deal extra damage on critical hit.")
+         public boolean includeRandomnessInArrowTrajectory = true;
+ 

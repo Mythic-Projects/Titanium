@@ -154,6 +154,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [SportPaper-0198] Optimize head rotation patch
 [SportPaper-0204] Fix Teleport Invisibility
 [SportPaper-0207] Optimize toLegacyData removing sanity checks by Pablete1234
+[SportPaper-0219] Make critical hits configurable by halfmaster1"
 
 [FlamePaper-0003] Fix chunk memory leak
 [FlamePaper-0005] Fix multiple memory leaks
@@ -202,7 +203,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [PandaSpigot-0054] Disconnect for payload errors by uRyanxD
 [PandaSpigot-0060] Optimise removeQueue by hpfxd
 [PandaSpigot-0087] Fix Entity Tracker Rounding by necrozma
-[PandaSpigot-0092] Backport ArrowDMG fix by Aviana Cruz"
+[PandaSpigot-0092] Backport ArrowDMG fix by Aviana Cruz
 
 [IonSpigot-0003] Explosion Improvements by SuicidalKids
 [IonSpigot-0006] Fix Chunk Loading by SuicidalKids
