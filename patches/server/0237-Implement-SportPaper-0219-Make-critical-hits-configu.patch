@@ -19,7 +19,7 @@ index d87159710e65a0f97fd2a593a99ab0d903bbb8b3..9b6926d5868c1d9bd0da5c17d8c3b86a
  
                      f += f1;
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 05cda2de3e28e618abee5d99e1e254b374d8c9d2..1438c4423430fe6c540db0dd4e467ef673678073 100644
+index 2ef6700cb3941d9fbbb1c840618829042bcaa2b3..6a0dc15ae31a3bf85aae68b16d9931068d240115 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -152,6 +152,9 @@ public class TitaniumConfig extends TitaniumConfigSection implements Server.Tita
