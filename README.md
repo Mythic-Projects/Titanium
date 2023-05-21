@@ -115,6 +115,7 @@ Titanium implements patches from other engines as well. **All credits go to the 
 [Paper-0346] [MC-135506] Experience should save as Integers
 [Paper-0347] Don't go below 0 for pickupDelay, breaks picking up items by Aikar
 [Paper-0348] Prevent chunk loading from Fluid Flowing by Aikar
+[Paper-0349] Use ConcurrentHashMap in JsonList by egg82
 [Paper-0350] Use a Queue for Queueing Commands
 [Paper-0352] Optimize BlockPosition helper methods by Spottedleaf
 [Paper-0353] Send nearby packets from world player list not server by Mystiflow
