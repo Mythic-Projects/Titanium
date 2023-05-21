@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 21 May 2023 23:38:31 +0200
+Subject: [PATCH] Don't load chunks for grass growing
+
+
+diff --git a/src/main/java/net/minecraft/server/BlockGrass.java b/src/main/java/net/minecraft/server/BlockGrass.java
+index e46f9877936adb6de8a693ec20a06d5d45c22a9b..aa26876836ea6de57351e57c0a637ff6b7c850d4 100644
+--- a/src/main/java/net/minecraft/server/BlockGrass.java
++++ b/src/main/java/net/minecraft/server/BlockGrass.java
+@@ -55,7 +55,12 @@ public class BlockGrass extends Block implements IBlockFragilePlantElement {
+                     for (int i = 0; i < Math.min(4, Math.max(20, (int) (4 * 100F / world.growthOdds))); ++i) { // Spigot
+                         BlockPosition blockposition1 = blockposition.a(random.nextInt(3) - 1, random.nextInt(5) - 3, random.nextInt(3) - 1);
+                         Block block = world.getType(blockposition1.up()).getBlock();
+-                        IBlockData iblockdata1 = world.getType(blockposition1);
++                        // Titanium start
++                        IBlockData iblockdata1 = world.getTypeIfLoaded(blockposition1);
++                        if (iblockdata1 == null) {
++                            continue;
++                        }
++                        // Titanium end
+ 
+                         if (iblockdata1.getBlock() == Blocks.DIRT && iblockdata1.get(BlockDirt.VARIANT) == BlockDirt.EnumDirtVariant.DIRT && world.isLightLevel(blockposition1.up(),4) && block.p() <= 2) {
+                             // CraftBukkit start
