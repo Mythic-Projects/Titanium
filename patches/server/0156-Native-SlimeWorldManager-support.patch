@@ -5,10 +5,10 @@ Subject: [PATCH] Native SlimeWorldManager support
 
 
 diff --git a/build.gradle b/build.gradle
-index cfc172e4cdd27631f2f57f5f6803aa66fd6278c8..9c2f6984221fca32e1d124d4dca90ccf7c8701d4 100644
+index aa9f369fee8868ea6aee2d3fc9c314dc602b7407..ac2515326bd125e78805681f8dd7c414299b07b6 100644
 --- a/build.gradle
 +++ b/build.gradle
-@@ -34,6 +34,10 @@ dependencies {
+@@ -30,6 +30,10 @@ dependencies {
      implementation 'com.eatthepath:fast-uuid:0.2.0' // Nacho - Use jchambers' FAST UUID methods
      implementation 'com.github.matejtymes:javafixes:1.3.7.1' // WindSpigot
      implementation 'com.github.ben-manes.caffeine:caffeine:2.9.3' // Titanium - use caffeine instead of guava cache
@@ -115,7 +115,7 @@ index 0000000000000000000000000000000000000000..bd1b78cc465c5e60ef85d338d33696c1
 +In unmodified version was added to Titanium. **All credits go to the original authors**
 \ No newline at end of file
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 2cf82f8b8f9769a95a36462fbd4c07500ef798b1..380944fdc4be8b4cb4fc8acc00e9a9a2cf52197e 100644
+index dc993f1c04726e876e25a800a7527fd7579b9951..3c5e7ba8a98cdced91b0b2557a2cefd8df6419ab 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -243,6 +243,93 @@ public abstract class MinecraftServer extends ReentrantIAsyncHandler<TasksPerTic

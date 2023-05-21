@@ -5,10 +5,10 @@ Subject: [PATCH] Replace Guava with Caffeine
 
 
 diff --git a/build.gradle b/build.gradle
-index 0a21a6c06b02bf67514a685f3a329ddf244ab343..cfc172e4cdd27631f2f57f5f6803aa66fd6278c8 100644
+index 3a47245d7f77d519d67280e73f61746b81555944..aa9f369fee8868ea6aee2d3fc9c314dc602b7407 100644
 --- a/build.gradle
 +++ b/build.gradle
-@@ -33,6 +33,7 @@ dependencies {
+@@ -29,6 +29,7 @@ dependencies {
      implementation 'com.velocitypowered:velocity-native:1.1.9' // Nacho - Use Velocity natives & compression
      implementation 'com.eatthepath:fast-uuid:0.2.0' // Nacho - Use jchambers' FAST UUID methods
      implementation 'com.github.matejtymes:javafixes:1.3.7.1' // WindSpigot

@@ -6,17 +6,13 @@ Subject: [PATCH] Implement [Paper-0797] Use Velocity compression and cipher
 
 
 diff --git a/build.gradle b/build.gradle
-index 74bc341545277626477454e3571334f1d96babcc..52ba617ff349f16bc583da4fb38e4e4db91f76bd 100644
+index 8fb9b073ed52abf7f459c602563387d7171a6462..ae71808001f2372ce51034bcba4ebbf826279c47 100644
 --- a/build.gradle
 +++ b/build.gradle
-@@ -26,6 +26,11 @@ dependencies {
+@@ -26,6 +26,7 @@ dependencies {
      implementation 'net.minecrell:terminalconsoleappender:1.3.0'
      implementation 'org.jline:jline-terminal-jansi:3.21.0'
      // Paper end
-+    // PandaSpigot start - Use TerminalConsoleAppender
-+    implementation 'net.minecrell:terminalconsoleappender:1.3.0'
-+    implementation 'org.jline:jline-terminal-jansi:3.20.0'
-+    // PandaSpigot end
 +    implementation 'com.velocitypowered:velocity-native:1.1.9' // Nacho - Use Velocity natives & compression
      implementation 'com.eatthepath:fast-uuid:0.2.0' // Nacho - Use jchambers' FAST UUID methods
      // Titanium libraries end
