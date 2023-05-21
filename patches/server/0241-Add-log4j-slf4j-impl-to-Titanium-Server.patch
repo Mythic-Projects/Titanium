@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peridot <peridot491@protonmail.com>
+Date: Sun, 21 May 2023 23:25:20 +0200
+Subject: [PATCH] Add log4j-slf4j-impl to Titanium-Server
+
+
+diff --git a/build.gradle b/build.gradle
+index ac2515326bd125e78805681f8dd7c414299b07b6..e55ebaa65b5b22bc9ab3e1c0efb39399e61807b4 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -13,6 +13,7 @@ dependencies {
+     implementation 'org.apache.logging.log4j:log4j-api:2.19.0'
+     implementation 'org.apache.logging.log4j:log4j-core:2.19.0'
+     // Titanium end
++    implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.19.0' // Titanium - Add SLF4J logger
+     implementation 'commons-io:commons-io:2.4'
+     implementation 'commons-codec:commons-codec:1.9'
+     implementation 'net.sf.jopt-simple:jopt-simple:5.0' // Titanium - updated jopt-simple to 5.0
