@@ -126,10 +126,10 @@ index 0000000000000000000000000000000000000000..35a11277ec475dbcf6bc9a197c80e0a9
 \ No newline at end of file
 diff --git a/src/main/java/ga/windpvp/windspigot/async/thread/CombatThread.java b/src/main/java/ga/windpvp/windspigot/async/thread/CombatThread.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..a9f4ab47ae26cc4e3cd484ce337919948b72f25f
+index 0000000000000000000000000000000000000000..b36c8785187de0a8c2ccc7a2c1c2370cb5e9c2fa
 --- /dev/null
 +++ b/src/main/java/ga/windpvp/windspigot/async/thread/CombatThread.java
-@@ -0,0 +1,20 @@
+@@ -0,0 +1,25 @@
 +package ga.windpvp.windspigot.async.thread;
 +
 +import net.titanium.config.TitaniumConfig;
@@ -146,6 +146,11 @@ index 0000000000000000000000000000000000000000..a9f4ab47ae26cc4e3cd484ce33791994
 +        while (this.packets.size() > 0) {
 +            this.packets.poll().run();
 +        }
++    }
++
++    @Override
++    public boolean calculateTPS() {
++        return TitaniumConfig.get().combat.async.calculateTps;
 +    }
 +
 +}
@@ -250,10 +255,10 @@ index 96e10acf31d95211a7815494891a19972c68cb78..da69cb6eca6c822e5ca56f164b9cba3c
 +
  }
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index b9429111f68250ab150bc4ed435f9b6024cd4abe..fd69b7edafaf89119398ad3ac95e18080a66e912 100644
+index b9429111f68250ab150bc4ed435f9b6024cd4abe..5aaa53c1e197ae8f8bafa22472375070f8703fb5 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
-@@ -229,6 +229,28 @@ public class TitaniumConfig extends TitaniumConfigSection {
+@@ -229,6 +229,32 @@ public class TitaniumConfig extends TitaniumConfigSection {
  
      }
  
@@ -274,6 +279,10 @@ index b9429111f68250ab150bc4ed435f9b6024cd4abe..fd69b7edafaf89119398ad3ac95e1808
 +
 +            @Comment("Whether to handle knockback packets on separate thread.")
 +            public boolean knockback = false;
++
++            @Comment("Whether to calculate TPS of combat threads to display under /tps command.")
++            @Comment("It's only visual, but disabled by default to don't waste resources.")
++            public boolean calculateTps = false;
 +
 +        }
 +
@@ -311,10 +320,10 @@ index c0c84785bfc5781a804d3c6b681c57615b45e094..ddc83deed6fe55aa736b2d0467fdb5c0
              "&6Uptime: &a{UPTIME}"
 diff --git a/src/main/java/net/titanium/util/async/AsyncPacketThread.java b/src/main/java/net/titanium/util/async/AsyncPacketThread.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..b42591f5a3aabd0d8e94fc25731dc8f82161cfc9
+index 0000000000000000000000000000000000000000..474c925ee152587e4d881a422be0cf11eb081585
 --- /dev/null
 +++ b/src/main/java/net/titanium/util/async/AsyncPacketThread.java
-@@ -0,0 +1,168 @@
+@@ -0,0 +1,165 @@
 +package net.titanium.util.async;
 +
 +import ga.windpvp.windspigot.async.netty.Spigot404Write;
@@ -338,8 +347,6 @@ index 0000000000000000000000000000000000000000..b42591f5a3aabd0d8e94fc25731dc8f8
 +    private final long tickTime;
 +    private final long maxCatchupBuffer;
 +
-+    private final Thread thread;
-+
 +    protected final Queue<Runnable> packets = new ConcurrentLinkedQueue<Runnable>();
 +
 +    private int currentTick = 0;
@@ -353,16 +360,15 @@ index 0000000000000000000000000000000000000000..b42591f5a3aabd0d8e94fc25731dc8f8
 +
 +        this.tps = tps;
 +        this.tickTime = SEC_IN_NANO / tps;
-+        this.maxCatchupBuffer = tickTime * tps * 60L;
++        this.maxCatchupBuffer = this.tickTime * tps * 60L;
 +
-+        this.thread = new Thread(AsyncPacketThread.this::loop, AsyncPacketThread.this.name);
-+        this.thread.start();
++        new Thread(AsyncPacketThread.this::loop, AsyncPacketThread.this.name).start();
 +
 +        this.tps1 = new RollingAverage(60);
 +        this.tps5 = new RollingAverage(60 * 5);
 +        this.tps15 = new RollingAverage(60 * 15);
 +
-+        this.tpsBase = new java.math.BigDecimal(1E9).multiply(new java.math.BigDecimal(tps));
++        this.tpsBase = new java.math.BigDecimal("1E9").multiply(new java.math.BigDecimal(tps));
 +    }
 +
 +    public void loop() {
@@ -372,10 +378,9 @@ index 0000000000000000000000000000000000000000..b42591f5a3aabd0d8e94fc25731dc8f8
 +        long wait;
 +        long tickSection = start;
 +
-+        boolean running = true;
-+        while (running) {
++        while (true) {
 +            long curTime = System.nanoTime();
-+            wait = tickTime - (curTime - start);
++            wait = this.tickTime - (curTime - start);
 +
 +            if (wait > 0) {
 +                if (catchupTime < 2E6) {
@@ -403,13 +408,14 @@ index 0000000000000000000000000000000000000000..b42591f5a3aabd0d8e94fc25731dc8f8
 +
 +            catchupTime = Math.min(this.maxCatchupBuffer, catchupTime - wait);
 +
-+            if ( ++this.currentTick % this.tps == 0 )
-+            {
-+                final long diff = curTime - tickSection;
-+                BigDecimal currentTps = this.tpsBase.divide(new java.math.BigDecimal(diff), 30, java.math.RoundingMode.HALF_UP);
-+                tps1.add(currentTps, diff);
-+                tps5.add(currentTps, diff);
-+                tps15.add(currentTps, diff);
++            if (++this.currentTick % this.tps == 0 ) {
++                if (this.calculateTPS()) {
++                    final long diff = curTime - tickSection;
++                    BigDecimal currentTps = this.tpsBase.divide(new java.math.BigDecimal(diff), 30, java.math.RoundingMode.HALF_UP);
++                    this.tps1.add(currentTps, diff);
++                    this.tps5.add(currentTps, diff);
++                    this.tps15.add(currentTps, diff);
++                }
 +                tickSection = curTime;
 +            }
 +            lastTick = curTime;
@@ -425,12 +431,12 @@ index 0000000000000000000000000000000000000000..b42591f5a3aabd0d8e94fc25731dc8f8
 +        this.packets.add(() -> Spigot404Write.writeThenFlush(manager.channel, packet, agenericfuturelistener));
 +    }
 +
-+    public Thread getThread() {
-+        return this.thread;
++    public boolean calculateTPS() {
++        return false;
 +    }
 +
 +    public int getTps() {
-+        return tps;
++        return this.tps;
 +    }
 +
 +    public double[] getTPS() {
@@ -452,11 +458,11 @@ index 0000000000000000000000000000000000000000..b42591f5a3aabd0d8e94fc25731dc8f8
 +        RollingAverage(int size) {
 +            this.size = size;
 +            this.time = size * SEC_IN_NANO;
-+            this.total = dec(AsyncPacketThread.this.tps).multiply(dec(SEC_IN_NANO)).multiply(dec(size));
++            this.total = this.dec(AsyncPacketThread.this.tps).multiply(this.dec(SEC_IN_NANO)).multiply(this.dec(size));
 +            this.samples = new java.math.BigDecimal[size];
 +            this.times = new long[size];
 +            for (int i = 0; i < size; i++) {
-+                this.samples[i] = dec(AsyncPacketThread.this.tps);
++                this.samples[i] = this.dec(AsyncPacketThread.this.tps);
 +                this.times[i] = SEC_IN_NANO;
 +            }
 +        }
@@ -466,78 +472,55 @@ index 0000000000000000000000000000000000000000..b42591f5a3aabd0d8e94fc25731dc8f8
 +        }
 +
 +        public void add(java.math.BigDecimal x, long t) {
-+            time -= times[index];
-+            total = total.subtract(samples[index].multiply(dec(times[index])));
-+            samples[index] = x;
-+            times[index] = t;
-+            time += t;
-+            total = total.add(x.multiply(dec(t)));
-+            if (++index == size) {
-+                index = 0;
++            this.time -= this.times[this.index];
++            this.total = this.total.subtract(this.samples[this.index].multiply(this.dec(this.times[this.index])));
++            this.samples[this.index] = x;
++            this.times[this.index] = t;
++            this.time += t;
++            this.total = this.total.add(x.multiply(this.dec(t)));
++            if (++this.index == this.size) {
++                this.index = 0;
 +            }
 +        }
 +
 +        public double getAverage() {
-+            return total.divide(dec(time), 30, java.math.RoundingMode.HALF_UP).doubleValue();
++            return this.total.divide(this.dec(this.time), 30, java.math.RoundingMode.HALF_UP).doubleValue();
 +        }
 +    }
 +
 +}
 \ No newline at end of file
 diff --git a/src/main/java/org/spigotmc/TicksPerSecondCommand.java b/src/main/java/org/spigotmc/TicksPerSecondCommand.java
-index f775f05f48878045a26113c4723e77cc023f6abb..83e1022db8ef7966be7d046cf4ae6b40005c075b 100644
+index f775f05f48878045a26113c4723e77cc023f6abb..2d1e316db35c1d91586aec0900ab535fc56414ac 100644
 --- a/src/main/java/org/spigotmc/TicksPerSecondCommand.java
 +++ b/src/main/java/org/spigotmc/TicksPerSecondCommand.java
-@@ -1,8 +1,10 @@
+@@ -1,10 +1,10 @@
  package org.spigotmc;
  
 +import ga.windpvp.windspigot.async.thread.CombatThread;
  import java.util.Arrays;
  import java.util.List;
- import java.util.stream.Collectors;
+-import java.util.stream.Collectors;
 +import net.titanium.Titanium;
  import net.titanium.config.message.MessageConfig;
- import org.apache.commons.lang3.time.DurationFormatUtils;
+-import org.apache.commons.lang3.time.DurationFormatUtils;
  import org.bukkit.Bukkit;
-@@ -37,6 +39,37 @@ public class TicksPerSecondCommand extends Command
+ import org.bukkit.ChatColor;
+ import org.bukkit.command.Command;
+@@ -37,6 +37,12 @@ public class TicksPerSecondCommand extends Command
          for (int i = 0; i < tps.length; i++) {
              tpsAvg[i] = formatTps(tps[i]);
          }
 +        // PaperSpigot end
 +
 +        // Titanium start - async combat
-+        CombatThread hitDetectionThread = Titanium.get().getHitDetectionThread();
-+
-+        String[] tpsHitDetectionAvg;
-+        if (hitDetectionThread != null) {
-+            double[] tpsHitDetection = hitDetectionThread.getTPS();
-+            tpsHitDetectionAvg = new String[tpsHitDetection.length];
-+
-+            for (int i = 0; i < tpsHitDetection.length; i++) {
-+                tpsHitDetectionAvg[i] = formatTps(tpsHitDetection[i], hitDetectionThread.getTps());
-+            }
-+        } else {
-+            tpsHitDetectionAvg = new String [] { "N/A", "N/A", "N/A" };
-+        }
-+
-+        CombatThread knockbackThread = Titanium.get().getKnockbackThread();
-+
-+        String[] tpsKnockbackAvg;
-+        if (knockbackThread != null) {
-+            double[] tpsKnockback = knockbackThread.getTPS();
-+            tpsKnockbackAvg = new String[tpsKnockback.length];
-+
-+            for (int i = 0; i < tpsKnockback.length; i++) {
-+                tpsKnockbackAvg[i] = formatTps(tpsKnockback[i], knockbackThread.getTps());
-+            }
-+        } else {
-+            tpsKnockbackAvg = new String [] { "N/A", "N/A", "N/A" };
-+        }
++        String[] tpsHitDetectionAvg = calculateCombatTps(Titanium.get().getHitDetectionThread());
++        String[] tpsKnockbackAvg = calculateCombatTps(Titanium.get().getKnockbackThread());
 +        // Titanium end
  
          // Titanium start - make messages configurable
          List<String> message = MessageConfig.get().ticksPerSeconds;
-@@ -50,6 +83,16 @@ public class TicksPerSecondCommand extends Command
+@@ -50,6 +56,16 @@ public class TicksPerSecondCommand extends Command
                      messageLine = messageLine.replace("{TPS_1M}", tpsAvg[0]);
                      messageLine = messageLine.replace("{TPS_5M}", tpsAvg[1]);
                      messageLine = messageLine.replace("{TPS_15M}", tpsAvg[2]);
@@ -554,8 +537,26 @@ index f775f05f48878045a26113c4723e77cc023f6abb..83e1022db8ef7966be7d046cf4ae6b40
                      // MEMORY
                      messageLine = messageLine.replace("{MEMORY_USED}", formatMemoryUsage(runtime.totalMemory() - runtime.freeMemory(), runtime.maxMemory()));
                      messageLine = messageLine.replace("{MEMORY_FREE}", formatFreeMemory(runtime.freeMemory(), runtime.maxMemory()));
-@@ -75,9 +118,27 @@ public class TicksPerSecondCommand extends Command
+@@ -73,12 +89,46 @@ public class TicksPerSecondCommand extends Command
+         return true;
+     }
  
++    // Titanium start - async combat
++    private static String[] calculateCombatTps(CombatThread hitDetectionThread) {
++        String[] tpsHitDetectionAvg = new String[]{"N/A", "N/A", "N/A"};
++        if (hitDetectionThread == null || !hitDetectionThread.calculateTPS()) {
++            return tpsHitDetectionAvg;
++        }
++
++        double[] tpsHitDetection = hitDetectionThread.getTPS();
++        tpsHitDetectionAvg = new String[tpsHitDetection.length];
++        for (int i = 0; i < tpsHitDetection.length; i++) {
++            tpsHitDetectionAvg[i] = formatTps(tpsHitDetection[i], hitDetectionThread.getTps());
++        }
++        return tpsHitDetectionAvg;
++    }
++    // Titanium end
++
      private static String formatTps(double tps) // PaperSpigot - made static
      {
 -        return ( ( tps > 18.0 ) ? ChatColor.GREEN : ( tps > 16.0 ) ? ChatColor.YELLOW : ChatColor.RED )
@@ -565,8 +566,8 @@ index f775f05f48878045a26113c4723e77cc023f6abb..83e1022db8ef7966be7d046cf4ae6b40
 +        */
 +        return formatTps(tps, 20);
 +        // Titanium end
-+    }
-+
+     }
+ 
 +    // Titanium start - support threads with custom TPS
 +    private static String formatTps(double tps, int maxTps)
 +    {
@@ -578,8 +579,9 @@ index f775f05f48878045a26113c4723e77cc023f6abb..83e1022db8ef7966be7d046cf4ae6b40
 +                : ChatColor.RED)
 +                + (tpsPercent >= 1.05 ? "*" : "")
 +                +  Math.min(Math.round(tps * 100.0) / 100.0, maxTps);
-     }
++    }
 +    // Titanium end
- 
++
      // Titanium start
      private static String formatMemoryUsage(long usage, long max) {
+         usage = usage / 1024 / 1024;

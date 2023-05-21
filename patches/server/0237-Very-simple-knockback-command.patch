@@ -151,7 +151,7 @@ index 7db3b64f77003076ce87bf99120587348fc24553..e67ce0fe53ef4f4974e526914c8680dd
  
          int slots = -1;
 diff --git a/src/main/java/net/titanium/config/TitaniumConfig.java b/src/main/java/net/titanium/config/TitaniumConfig.java
-index 40e93c02e3853cce99fe76d8ca055cc03ff3b494..05cda2de3e28e618abee5d99e1e254b374d8c9d2 100644
+index a1016b9853b5456e5114c0a20e7d3c019e2b39ae..2ef6700cb3941d9fbbb1c840618829042bcaa2b3 100644
 --- a/src/main/java/net/titanium/config/TitaniumConfig.java
 +++ b/src/main/java/net/titanium/config/TitaniumConfig.java
 @@ -22,6 +22,7 @@ import java.util.Map;
@@ -162,7 +162,7 @@ index 40e93c02e3853cce99fe76d8ca055cc03ff3b494..05cda2de3e28e618abee5d99e1e254b3
  import net.titanium.command.PingCommand;
  import net.titanium.command.SetSlotsCommand;
  import net.titanium.util.Pair;
-@@ -561,7 +562,8 @@ public class TitaniumConfig extends TitaniumConfigSection implements Server.Tita
+@@ -565,7 +566,8 @@ public class TitaniumConfig extends TitaniumConfigSection implements Server.Tita
          }
  
          this.registerCommand("ping", new PingCommand("ping"));
