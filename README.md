@@ -1,3 +1,5 @@
+![titanium](https://github.com/Mythic-Projects/Titanium/assets/28200355/5083c875-5010-4da2-9f4c-e936983cad70)
+
 # Titanium ![Titanium CI](https://github.com/TitanVale/Titanium/actions/workflows/build_titanium.yml/badge.svg) [![Discord Shield](https://discordapp.com/api/guilds/982930890780966922/widget.png?style=shield)](https://discord.gg/VYTTRFYJE7)
 
 Titanium is 1.8.8 [Paper](https://github.com/PaperMC/Paper) fork which aims to improve performance, fix exploits and bugs, improve API and provide better configuration for server administrators. 
